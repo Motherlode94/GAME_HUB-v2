@@ -1,0 +1,291 @@
+/* ── FreeForce 2D — Styles ── */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@700;900&display=swap');
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+    --orange:   #ff6a00;
+    --yellow:   #ffdd00;
+    --red:      #ff1a1a;
+    --dark:     #0a0508;
+    --scanline: rgba(0,0,0,0.18);
+}
+
+html, body {
+    width:100%; height:100%;
+    overflow:hidden;
+    background:var(--dark);
+    font-family:'Press Start 2P', monospace;
+}
+
+/* ══ CANVAS ══ */
+#canvas-wrap {
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+}
+#gameCanvas {
+    display:block; width:100%; height:100%;
+    image-rendering:pixelated; image-rendering:crisp-edges;
+    cursor:crosshair;
+    filter:contrast(1.08) saturate(1.15);
+}
+#canvas-wrap::after {
+    content:''; position:absolute; inset:0;
+    background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,var(--scanline) 3px,var(--scanline) 4px);
+    pointer-events:none; z-index:10; mix-blend-mode:multiply;
+}
+#canvas-wrap::before {
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 55%,rgba(0,0,0,0.75) 100%);
+    pointer-events:none; z-index:11;
+}
+
+/* ══ SCREENS (overlays) ══ */
+.screen {
+    position:fixed; inset:0;
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:100;
+    background:rgba(0,0,0,0.88);
+    backdrop-filter:blur(2px);
+}
+.screen.active { display:flex; }
+
+/* ══ PANEL ══ */
+.menu-panel {
+    position:relative;
+    background:linear-gradient(160deg, #1a0400 0%, #0e0200 100%);
+    border:2px solid #ff5500;
+    box-shadow:0 0 40px rgba(255,80,0,0.35), inset 0 0 30px rgba(0,0,0,0.5);
+    padding:36px 48px 32px;
+    min-width:360px; max-width:480px; width:90vw;
+    clip-path:polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.menu-panel.wide { max-width:600px; }
+/* Coins déco */
+.menu-panel::before, .menu-panel::after {
+    content:''; position:absolute;
+    width:16px; height:16px;
+    border:2px solid #ffaa00;
+}
+.menu-panel::before { top:8px; left:8px; border-right:none; border-bottom:none; }
+.menu-panel::after  { bottom:8px; right:8px; border-left:none; border-top:none; }
+
+/* ══ LOGO ══ */
+.menu-logo { text-align:center; margin-bottom:32px; }
+.logo-title {
+    font-size:clamp(20px, 4vw, 32px);
+    color:#ff6600;
+    text-shadow:0 0 30px #ff2200, 0 0 60px rgba(255,40,0,0.4);
+    letter-spacing:4px;
+    animation:logoPulse 2.5s ease-in-out infinite;
+}
+.logo-sub {
+    font-size:clamp(12px, 2vw, 16px);
+    color:#ffdd00;
+    text-shadow:0 0 14px #ff8800;
+    letter-spacing:12px;
+    margin-top:6px;
+}
+@keyframes logoPulse {
+    0%,100% { text-shadow:0 0 30px #ff2200, 0 0 60px rgba(255,40,0,0.4); }
+    50%      { text-shadow:0 0 50px #ff4400, 0 0 90px rgba(255,60,0,0.6); }
+}
+
+/* ══ MENU ITEMS ══ */
+.menu-items { display:flex; flex-direction:column; gap:10px; }
+
+.menu-btn {
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(8px, 1.4vw, 11px);
+    color:#aa6633;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,100,0,0.2);
+    padding:14px 20px;
+    text-align:left;
+    cursor:pointer;
+    transition:all 0.12s ease;
+    clip-path:polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    letter-spacing:1px;
+}
+.menu-btn .btn-icon { color:#ff4400; margin-right:10px; }
+.menu-btn:hover, .menu-btn.active {
+    color:#ffffff;
+    background:linear-gradient(90deg, rgba(255,80,0,0.3) 0%, rgba(255,140,0,0.15) 60%, rgba(255,80,0,0.3) 100%);
+    border-color:#ff6600;
+    box-shadow:0 0 16px rgba(255,80,0,0.3), inset 0 0 8px rgba(255,80,0,0.1);
+    padding-left:28px;
+}
+.menu-btn.active .btn-icon { color:#ffdd00; text-shadow:0 0 8px #ff8800; }
+.menu-btn.secondary {
+    background:rgba(255,255,255,0.02);
+    border-color:rgba(255,100,0,0.15);
+    color:#885533;
+}
+
+.menu-footer {
+    margin-top:24px;
+    font-size:7px;
+    color:rgba(255,150,80,0.4);
+    text-align:center;
+    letter-spacing:1px;
+}
+
+/* ══ SOUS-ÉCRANS titre ══ */
+.screen-title {
+    font-size:clamp(10px, 1.8vw, 14px);
+    color:#ff6600;
+    text-shadow:0 0 20px #ff2200;
+    text-align:center;
+    margin-bottom:24px;
+    padding-bottom:14px;
+    border-bottom:1px solid rgba(255,80,0,0.35);
+    letter-spacing:2px;
+}
+
+/* ══ RETOUR ══ */
+.back-btn {
+    font-family:'Press Start 2P', monospace;
+    font-size:8px;
+    color:#ff6600;
+    background:rgba(255,80,0,0.12);
+    border:1px solid rgba(255,100,0,0.4);
+    padding:12px 28px;
+    cursor:pointer;
+    display:block; margin:24px auto 0;
+    transition:all 0.12s;
+    letter-spacing:1px;
+}
+.back-btn:hover { background:rgba(255,80,0,0.25); color:#fff; box-shadow:0 0 12px rgba(255,80,0,0.3); }
+
+/* ══ SCORES ══ */
+.scores-list { display:flex; flex-direction:column; gap:6px; min-height:80px; }
+.no-scores { text-align:center; color:#443322; font-size:8px; padding:30px 0; line-height:2.5; }
+.score-row {
+    display:grid;
+    grid-template-columns:36px 1fr 90px 70px;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    font-size:8px;
+    background:rgba(255,255,255,0.03);
+    border-left:2px solid transparent;
+}
+.score-row.top {
+    background:rgba(255,180,0,0.1);
+    border-left-color:#ffaa00;
+    box-shadow:0 0 12px rgba(255,180,0,0.08);
+}
+.score-rank { color:#ff8800; font-size:10px; }
+.score-row.top .score-rank { color:#ffdd00; text-shadow:0 0 8px #ff8800; font-size:14px; }
+.score-num  { color:#ffffff; font-size:10px; }
+.score-row.top .score-num { font-size:13px; }
+.score-diff { font-size:7px; text-align:right; }
+.score-date { color:#443322; font-size:6px; text-align:right; }
+
+/* ══ OPTIONS ══ */
+.option-block {
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,100,0,0.2);
+    padding:16px 20px 14px;
+    margin-bottom:14px;
+}
+.option-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+.opt-label { font-size:8px; color:#ff8800; letter-spacing:1px; flex:1; }
+.opt-control { display:flex; align-items:center; gap:12px; }
+.opt-value { font-size:9px; color:#ffdd00; min-width:80px; text-align:center; }
+.opt-value.bar { font-size:10px; color:#ff8800; letter-spacing:1px; }
+.opt-desc { font-size:6px; color:#664422; margin-top:10px; letter-spacing:1px; }
+
+.arrow-btn {
+    font-family:'Press Start 2P', monospace;
+    font-size:11px;
+    color:#ff6600;
+    background:rgba(255,80,0,0.15);
+    border:1px solid #ff4400;
+    width:30px; height:30px;
+    cursor:pointer;
+    transition:all 0.1s;
+    display:flex; align-items:center; justify-content:center;
+}
+.arrow-btn:hover { background:rgba(255,80,0,0.35); color:#fff; }
+
+.diff-dots {
+    display:flex; justify-content:center; gap:10px;
+    margin-top:12px;
+}
+.dot {
+    width:8px; height:8px; border-radius:50%;
+    background:#332211;
+    border:1px solid #443322;
+    transition:all 0.2s;
+}
+.dot.active { background:#ffdd00; }
+
+/* ══ CONTRÔLES ══ */
+.controls-grid { display:flex; flex-direction:column; gap:4px; margin-bottom:20px; }
+.ctrl-row {
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:10px 14px;
+    border-bottom:1px solid rgba(255,80,0,0.1);
+}
+.ctrl-keys { display:flex; gap:6px; min-width:120px; }
+kbd {
+    font-family:'Press Start 2P', monospace;
+    font-size:7px;
+    color:#ffdd00;
+    background:rgba(255,180,0,0.15);
+    border:1px solid #ff8800;
+    border-bottom:3px solid #ff5500;
+    padding:5px 8px;
+    border-radius:2px;
+    box-shadow:0 0 6px rgba(255,140,0,0.2);
+}
+.ctrl-desc { font-size:7px; color:#cc8855; letter-spacing:1px; }
+
+.weapons-info {
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,100,0,0.2);
+    padding:14px 16px;
+    margin-top:8px;
+}
+.wi-title { font-size:7px; color:#885533; text-align:center; margin-bottom:14px; letter-spacing:1px; }
+.weapons-row { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+.wpn {
+    display:flex; flex-direction:column; align-items:center;
+    font-size:7px; color:var(--c); text-align:center; gap:4px;
+    padding:10px 6px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid color-mix(in srgb, var(--c) 30%, transparent);
+}
+.wpn span { font-size:14px; }
+.wpn small { font-size:5px; color:#664422; letter-spacing:0.5px; }
+
+/* ══ GAME OVER ══ */
+.gameover-panel {
+    text-align:center;
+    background:linear-gradient(160deg, #1e0400 0%, #0e0100 100%);
+    border:3px solid #ff3300;
+    box-shadow:0 0 60px rgba(255,40,0,0.4);
+    padding:48px 56px 40px;
+    max-width:480px; width:88vw;
+    clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+    display:flex; flex-direction:column; gap:16px; align-items:center;
+}
+.go-title {
+    font-size:clamp(18px, 3.5vw, 28px);
+    color:#ff1a00;
+    text-shadow:0 0 30px #ff4400;
+    animation:logoPulse 1.2s infinite;
+    margin-bottom:8px;
+}
+.go-score { font-size:clamp(10px, 2vw, 14px); color:#ffdd00; text-shadow:0 0 12px #ff8800; }
+.go-best  { font-size:9px; }
+#gameover-overlay .menu-btn { width:240px; margin-top:4px; text-align:center; justify-content:center; }

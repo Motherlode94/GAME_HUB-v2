@@ -1,0 +1,163 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    background: #020610;
+    overflow: hidden;
+    font-family: 'Orbitron', monospace;
+    cursor: crosshair;
+}
+canvas { display: block; }
+
+/* ── SHOP ──────────────────────────────────── */
+#shop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(2,6,16,0.93);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#shop.visible { display: flex; }
+#shop h1 {
+    color: #00ffff;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    letter-spacing: 0.25em;
+    text-shadow: 0 0 40px #00ffff, 0 0 80px rgba(0,255,255,0.4);
+    margin-bottom: 0.4rem;
+}
+#shop .subtitle {
+    color: #3a6880;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+}
+#shop-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+}
+#shop-stats .stat      { color: #4488aa; }
+#shop-stats .stat span { color: #00ffff; }
+#shop-stats .gold-stat      { color: #4488aa; }
+#shop-stats .gold-stat span { color: #ffd700; text-shadow: 0 0 12px #ffd700; }
+#shop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    max-width: 780px;
+    width: 92%;
+    margin-bottom: 1.5rem;
+}
+.shop-item {
+    background: rgba(0,255,255,0.03);
+    border: 1px solid rgba(0,255,255,0.15);
+    border-radius: 6px;
+    padding: 0.9rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.shop-item::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,255,255,0.05) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.18s;
+}
+.shop-item:hover::before { opacity: 1; }
+.shop-item:hover {
+    border-color: rgba(0,255,255,0.45);
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(0,255,255,0.15);
+}
+.shop-item.cant-afford { opacity:0.35; cursor:not-allowed; }
+.shop-item.cant-afford:hover { transform:none; box-shadow:none; }
+.item-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.item-name { color: #00ffff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 0.2rem; }
+.item-desc { color: #3a6880; font-size: 0.58rem; margin-bottom: 0.45rem; line-height: 1.4; }
+.item-cost { color: #ffd700; font-size: 0.7rem; font-weight: 700; }
+#next-wave-btn {
+    background: transparent;
+    border: 2px solid #00ffff;
+    color: #00ffff;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    padding: 0.75rem 3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+#next-wave-btn:hover {
+    background: #00ffff;
+    color: #020610;
+    box-shadow: 0 0 40px rgba(0,255,255,0.5);
+}
+
+/* ── GAME OVER ──────────────────────────────── */
+#gameover {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(2,6,16,0.96);
+    z-index: 200;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#gameover.visible { display: flex; }
+#gameover h1 {
+    color: #ff3355;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 60px #ff3355, 0 0 120px rgba(255,51,85,0.3);
+    margin-bottom: 1.5rem;
+    animation: pulse-red 2s infinite;
+}
+@keyframes pulse-red {
+    0%,100% { text-shadow: 0 0 60px #ff3355, 0 0 120px rgba(255,51,85,0.3); }
+    50%      { text-shadow: 0 0 80px #ff3355, 0 0 180px rgba(255,51,85,0.5); }
+}
+#gameover .stats {
+    color: #3a6880;
+    font-size: 0.85rem;
+    line-height: 2.4;
+    text-align: center;
+    margin-bottom: 2rem;
+    letter-spacing: 0.1em;
+}
+#gameover .stats span { color: #00ffff; font-size: 1.1em; }
+#restart-btn {
+    background: transparent;
+    border: 2px solid #ff3355;
+    color: #ff3355;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    padding: 0.75rem 3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+#restart-btn:hover {
+    background: #ff3355;
+    color: #020610;
+    box-shadow: 0 0 40px rgba(255,51,85,0.5);
+}
+
+/* ── CONTROLS HINT ──────────────────────────── */
+#controls {
+    position: fixed;
+    bottom: 72px;
+    right: 16px;
+    color: rgba(0,255,255,0.2);
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+    text-align: right;
+    pointer-events: none;
+}

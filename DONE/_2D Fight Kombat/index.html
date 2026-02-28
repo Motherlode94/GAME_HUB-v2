@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Combat 2D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="wrapper">
+        <h1 id="game-title">⚔ COMBAT ARENA ⚔</h1>
+        <div id="pre-match-panel">
+            <h2>Préparation du combat</h2>
+            <div class="pm-grid">
+                <div class="pm-col p1">
+                    <h3>Joueur 1</h3>
+                    <input id="p1-name" type="text" maxlength="16" placeholder="Nom du joueur 1" required>
+                    <select id="p1-character"></select>
+                    <p class="char-preview" id="p1-preview"></p>
+                </div>
+                <div class="pm-col p2">
+                    <h3>Joueur 2</h3>
+                    <input id="p2-name" type="text" maxlength="16" placeholder="Nom du joueur 2" required>
+                    <select id="p2-character"></select>
+                    <p class="char-preview" id="p2-preview"></p>
+                </div>
+            </div>
+            <button id="start-match-btn">Lancer le combat</button>
+            <p id="setup-error" aria-live="polite"></p>
+        </div>
+        <div id="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <div id="controls-hint">
+            <span class="p1-hint">🔴 J1 : <b>ZQSD</b> — Attaque : <b>S</b> — Dash : <b>A</b></span>
+            <span class="p2-hint">🔵 J2 : <b>←↑↓→</b> — Attaque : <b>↓</b> — Dash : <b>/</b></span>
+        </div>
+    </div>
+
+    <script src="js/sounds.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>

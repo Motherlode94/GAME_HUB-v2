@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Jeu de tir spatial 2D en temps rÃ©el â€“ DÃ©fendez la galaxie contre les envahisseurs ! ContrÃ´les clavier et tactile." />
+  
+  <!-- SEO & social meta -->
+  <meta name="theme-color" content="#0b0f1a" />
+  <meta property="og:title" content="Space Shooter - Jeu de tir 2D" />
+  <meta property="og:description" content="Jeu de tir spatial gratuit, en Canvas pur. Jouez dÃ¨s maintenant !" />
+  <meta property="og:type" content="game" />
+  
+  <title>ðŸš€ Space Shooter - Jeu de tir 2D</title>
+
+  <!-- Polices (optionnel, mais cohÃ©rent avec votre thÃ¨me) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Exemple avec Orbitron (futuriste), Ã  activer si vous le souhaitez -->
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet"> -->
+
+  <!-- Favicon SVG (dÃ©jÃ  excellent â¤ï¸) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>ðŸš€</text></svg>">
+
+  <!-- Feuille de style -->
+  <link rel="stylesheet" href="css/styles.css">
+
+</head>
+<body>
+  <!-- Bouton Retour au Catalogue -->
+  <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
+    <span class="back-icon">â†</span>
+    <span class="back-text">Retour</span>
+  </button>
+
+  <!-- Script d'activation des :active sur iOS (trÃ¨s utile) -->
+  <script>
+    // Active les Ã©tats :active sur iOS Safari
+    document.addEventListener('touchstart', () => {}, { passive: true });
+  </script>
+
+  <!-- Menus -->
+  <div id="mainMenu" class="menu">
+    <h1>ðŸš€ Space Shooter</h1>
+    <div class="high-score-display">ðŸ† Meilleur Score : <span id="menuHighScore">0</span></div>
+    <button class="menu-btn" id="btnPlay">â–¶ Jouer</button>
+    <button class="menu-btn" id="btnLevels">ðŸ•¹ï¸ SÃ©lection des niveaux</button>
+    <button class="menu-btn" id="btnToggleSound">ðŸ”Š Son : ON</button>
+  </div>
+
+  <div id="levelMenu" class="menu">
+    <h2>Choisissez un niveau</h2>
+    <button class="menu-btn lvl-btn" data-level="1" aria-label="Niveau 1 - Facile">ðŸŸ¢ Niveau 1 â€“ Facile</button>
+    <button class="menu-btn lvl-btn" data-level="2" aria-label="Niveau 2 - Moyen">ðŸŸ¡ Niveau 2 â€“ Moyen</button>
+    <button class="menu-btn lvl-btn" data-level="3" aria-label="Niveau 3 - Difficile">ðŸ”´ Niveau 3 â€“ Difficile</button>
+    <button class="menu-btn" id="btnBackToMenu">â† Retour au menu principal</button>
+  </div>
+  
+  <div id="gameOverMenu" class="menu">
+    <h2>ðŸ’¥ Game Over</h2>
+    <div class="game-over-stats">
+      <p>Score final : <strong id="finalScore">0</strong></p>
+      <p>Record : <strong id="finalHighScore">0</strong></p>
+      <p>Niveau : <span id="finalLevel">1</span></p>
+      <p>Ennemis dÃ©truits : <span id="finalKills">0</span></p>
+      <p>PrÃ©cision : <span id="finalAccuracy">0</span>%</p>
+    </div>
+    <div id="newRecordBadge" class="new-record" style="display:none;">ðŸ† Nouveau record !</div>
+    <button class="menu-btn" id="btnRestart">ðŸ”„ Recommencer</button>
+    <button class="menu-btn" id="btnBackToMain">ðŸ  Menu principal</button>
+  </div>
+
+  <!-- Interface de jeu (HUD) -->
+  <div class="hud" aria-live="polite" aria-atomic="true">
+    <div aria-label="Score actuel">ðŸ“Š Score : <span id="score">0</span></div>
+    <div aria-label="Vies restantes">â¤ï¸ Vies : <span id="lives">3</span></div>
+    <div aria-label="Meilleur score">ðŸ† Record : <span id="highScore">0</span></div>
+    <button id="btnStart" aria-label="Commencer ou mettre en pause le jeu">â–¶ Commencer</button>
+  </div>
+
+  <!-- Zone de jeu -->
+  <canvas
+    id="game"
+    width="560"
+    height="760"
+    tabindex="0"
+    aria-label="Zone de jeu interactive â€“ utilisez les flÃ¨ches et la barre d'espace pour jouer"
+    role="application"
+  ></canvas>
+
+  <!-- Aide -->
+  <div class="help" aria-hidden="true">
+    <p><strong>Clavier :</strong> â† â†’ pour se dÃ©placer â€¢ Espace pour tirer â€¢ P pour pause</p>
+    <p><strong>Mobile :</strong> Utilisez les boutons ci-dessous</p>
+    <p><strong>Power-ups :</strong> ðŸ›¡ï¸ Bouclier â€¢ âš¡ Tir rapide â€¢ â¤ï¸ Vie supplÃ©mentaire</p>
+  </div>
+
+  <!-- ContrÃ´les mobiles -->
+  <div class="mobile-pad" role="group" aria-label="ContrÃ´les tactiles pour mobile">
+    <button id="leftBtn" aria-label="DÃ©placer le vaisseau Ã  gauche">â—€</button>
+    <button id="fireBtn" aria-label="Tirer un projectile">ðŸŽ¯ Tir</button>
+    <button id="rightBtn" aria-label="DÃ©placer le vaisseau Ã  droite">â–¶</button>
+  </div>
+
+
+  <!-- Script principal -->
+  <script src="script.js" defer></script>
+
+  <!-- Script du bouton retour -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const backBtn = document.getElementById('back-to-catalog');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          window.location.href = '../index.html';
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
+

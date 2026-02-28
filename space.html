@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Joueur — Warlike Gaming Corps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/leaderboard.css">
+    <link rel="stylesheet" href="css/space.css">
+</head>
+<body class="space-page">
+
+    <header>
+        <div class="header-inner">
+            <p class="eyebrow">Warlike Gaming Corps</p>
+            <h1>🚀 ESPACE <span>JOUEUR</span></h1>
+            <p class="subtitle">Communauté — Discussion — Suggestions</p>
+        </div>
+        <div class="header-btns">
+            <a href="index.html" class="header-lb-btn">← Catalogue</a>
+            <a href="leaderboard.html" class="header-space-btn">🏆 Leaderboard</a>
+        </div>
+    </header>
+
+    <!-- ── LOGIN SCREEN ── -->
+    <div id="login-screen" class="sp-login-screen">
+        <div class="sp-login-box">
+            <div class="sp-login-icon">🔐</div>
+            <h2 class="sp-login-title">Accès Membres</h2>
+            <p class="sp-login-sub">Entre le code personnel qui t'a été donné par HardieBay pour accéder à l'espace communautaire.</p>
+            <div class="sp-login-field">
+                <input type="text" id="access-code-input" placeholder="Ton code d'accès..." maxlength="32" autocomplete="off" spellcheck="false">
+                <button id="access-code-btn">Entrer →</button>
+            </div>
+            <p class="sp-login-error hidden" id="login-error">❌ Code incorrect. Contacte HardieBay pour obtenir ton accès.</p>
+            <p class="sp-login-hint">Tu n'as pas encore de code ? Contacte le créateur.</p>
+        </div>
+    </div>
+
+    <!-- ── MAIN SPACE (hidden until logged in) ── -->
+    <div id="space-main" class="hidden">
+
+        <div class="sp-topbar container">
+            <div class="sp-welcome">
+                <span class="sp-avatar" id="sp-avatar">?</span>
+                <div>
+                    <p class="sp-welcome-label">Bienvenue,</p>
+                    <strong class="sp-username" id="sp-username">Joueur</strong>
+                </div>
+            </div>
+            <div class="sp-topbar-actions">
+                <button class="sp-tab-btn active" data-sptab="general">💬 Général</button>
+                <button class="sp-tab-btn" data-sptab="games">🎮 Par Jeu</button>
+                <button class="sp-tab-btn" data-sptab="suggestions">💡 Suggestions</button>
+                <button id="sp-logout-btn" class="sp-logout-btn">Déconnexion</button>
+            </div>
+        </div>
+
+        <main class="container sp-main">
+
+            <!-- GENERAL CHAT -->
+            <div class="sp-panel active" id="sptab-general">
+                <div class="sp-panel-header">
+                    <h2>💬 Discussion Générale</h2>
+                    <p>Parle de tout et de rien avec la communauté WGC</p>
+                </div>
+                <div class="sp-chat-box" id="chat-general"></div>
+                <div class="sp-composer">
+                    <textarea id="msg-general" placeholder="Écris un message..." rows="2" maxlength="500"></textarea>
+                    <button class="sp-send-btn" data-channel="general">Envoyer ↗</button>
+                </div>
+            </div>
+
+            <!-- GAME-SPECIFIC DISCUSSION -->
+            <div class="sp-panel" id="sptab-games">
+                <div class="sp-panel-header">
+                    <h2>🎮 Discussion par Jeu</h2>
+                    <p>Commente, critique, et propose des améliorations pour chaque jeu</p>
+                </div>
+                <div class="sp-game-selector-wrap">
+                    <label class="sp-select-label">Sélectionne un jeu :</label>
+                    <select id="sp-game-select" class="sp-game-select">
+                        <option value="">— Choisir un jeu —</option>
+                        <option value="1">Combat Arena</option>
+                    </select>
+                    <div class="sp-game-tags-wrap" id="sp-game-tags">
+                        <button class="sp-msg-tag active" data-tag="general">Général</button>
+                        <button class="sp-msg-tag" data-tag="bug">🐛 Bug</button>
+                        <button class="sp-msg-tag" data-tag="improvement">💡 Amélioration</button>
+                        <button class="sp-msg-tag" data-tag="appreciation">❤️ Coup de cœur</button>
+                    </div>
+                </div>
+                <div class="sp-game-placeholder" id="sp-game-placeholder">
+                    <span>🎮</span>
+                    <p>Sélectionne un jeu ci-dessus pour voir et participer à la discussion.</p>
+                </div>
+                <div class="sp-chat-box hidden" id="chat-game"></div>
+                <div class="sp-composer hidden" id="composer-game">
+                    <textarea id="msg-game" placeholder="Écris à propos de ce jeu..." rows="2" maxlength="500"></textarea>
+                    <button class="sp-send-btn" data-channel="game">Envoyer ↗</button>
+                </div>
+            </div>
+
+            <!-- SUGGESTIONS -->
+            <div class="sp-panel" id="sptab-suggestions">
+                <div class="sp-panel-header">
+                    <h2>💡 Suggestions & Idées</h2>
+                    <p>Propose de nouveaux jeux ou des fonctionnalités pour le catalogue</p>
+                </div>
+                <div class="sp-chat-box" id="chat-suggestions"></div>
+                <div class="sp-composer">
+                    <textarea id="msg-suggestions" placeholder="Propose une idée, un nouveau jeu, une amélioration..." rows="2" maxlength="500"></textarea>
+                    <button class="sp-send-btn" data-channel="suggestions">Envoyer ↗</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Warlike Gaming Corps. All rights reserved.</p>
+    </footer>
+
+    <script src="js/space.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Hack n Slash</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+
+    <button id='back-to-catalog' class='catalog-back' type='button' data-catalog-back='true' aria-label='Retour au catalogue'>
+        <span class='back-icon' aria-hidden='true'>&#8592;</span>
+        <span class='back-text'>Catalogue</span>
+    </button>
+
+<header>
+    <h1>Welcome to the 2D Hack n Slash Game</h1>
+</header>
+
+<main>
+    <div id="gameContainer">
+        <section>
+            <h2>Game Instructions</h2>
+            <p>
+                Move: ZQSD / WASD / Arrows<br>
+                Attack: Space / J<br>
+                Dash: Shift / L<br>
+                Special: E / K<br>
+                Weapons: 1 â†’ 8
+            </p>
+        </section>
+
+        <section>
+            <div id="score">Score: 0</div>
+            <div id="health">Health: â¤ï¸â¤ï¸â¤ï¸â¤ï¸â¤ï¸</div>
+            <div id="level">Level: 1</div>
+            <div id="combo">Combo: 0</div>
+        </section>
+
+        <section>
+            <canvas id="canvas" width="800" height="500"></canvas>
+        </section>
+
+        <section>
+            <button id="startButton">Start Game</button>
+            <button id="restartButton" style="display:none;">Restart</button>
+        </section>
+    </div>
+
+    <!-- Screens -->
+    <div id="gameOver" style="display:none;">
+        <h2>Game Over!</h2>
+        <p>Final Score: <span id="finalScore">0</span></p>
+        <button onclick="resetGame()">Play Again</button>
+    </div>
+
+    <div id="win" style="display:none;">
+        <h2>You Win!</h2>
+        <p>You reached level <span id="finalLevel">15</span></p>
+        <button onclick="resetGame()">Play Again</button>
+    </div>
+</main>
+
+<footer>
+    <p>Â© 2026 2D Hack n Slash Game</p>
+</footer>
+
+<!-- ===== SCRIPTS (ORDRE CRITIQUE) ===== -->
+
+<!-- Utils -->
+<script src="js/Vector.js"></script>
+
+<!-- Core gameplay -->
+<script src="js/Stats.js"></script>
+<script src="js/Progression.js"></script>
+<script src="js/DashSystem.js"></script>
+<script src="js/Movement.js"></script>
+<script src="js/WeaponSystem.js"></script>
+<script src="js/Rewards.js"></script>
+<script src="js/Renderer.js"></script>
+
+<!-- Entities -->
+<script src="js/Particle.js"></script>
+<script src="js/Projectile.js"></script>
+<script src="js/Pickup.js"></script>
+<script src="js/Enemy.js"></script>
+
+<!-- Player -->
+<script src="js/Player.js"></script>
+
+<!-- FX & Game -->
+<script src="js/Effects.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
+
+

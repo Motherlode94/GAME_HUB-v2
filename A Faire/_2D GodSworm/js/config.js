@@ -1,0 +1,8 @@
+// js/config.js
+const CONFIG = {
+  MAX_FAITH: 300,
+  SMITE_COST: 30,
+  CONVERT_BASE_COST: 20,
+  BLESSING_COST: 50,
+  MIRACLE_COST: 100
+};

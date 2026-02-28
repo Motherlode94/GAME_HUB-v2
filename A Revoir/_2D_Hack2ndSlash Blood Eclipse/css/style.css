@@ -1,0 +1,381 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: #1a1a2e;
+    overflow: hidden;
+    color: #fff;
+}
+
+/* ========================================
+   BOUTON RETOUR AU CATALOGUE
+   ======================================== */
+.btn-back {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(30, 30, 40, 0.9);
+    border: 2px solid rgba(138, 43, 226, 0.6);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: rgba(138, 43, 226, 0.8);
+    border-color: rgba(138, 43, 226, 1);
+    transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.5);
+}
+
+.btn-back:active {
+    transform: translateX(5px) scale(0.95);
+}
+
+.back-icon {
+    font-size: 20px;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.btn-back:hover .back-icon {
+    transform: translateX(-3px);
+}
+
+.back-text {
+    letter-spacing: 0.5px;
+}
+
+/* ========================================
+   GAME CONTAINER
+   ======================================== */
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+#gameCanvas {
+    border: 3px solid #0f3460;
+    box-shadow: 0 0 30px rgba(15, 52, 96, 0.8);
+    background: #0a0a0a;
+}
+
+#ui-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#health-bar-container,
+#exp-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 2px solid #0f3460;
+}
+
+.stat-label {
+    font-weight: bold;
+    font-size: 14px;
+    min-width: 25px;
+    color: #e94560;
+}
+
+.bar-wrapper {
+    width: 200px;
+    height: 20px;
+    background: #1a1a2e;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #0f3460;
+}
+
+.bar {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+#health-bar {
+    background: linear-gradient(90deg, #e94560 0%, #ff6b6b 100%);
+    width: 100%;
+}
+
+#exp-bar {
+    background: linear-gradient(90deg, #4ecdc4 0%, #44a08d 100%);
+    width: 0%;
+}
+
+#health-text,
+#level-text {
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 80px;
+    color: #fff;
+}
+
+#stats-panel {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid #0f3460;
+    font-size: 14px;
+}
+
+#stats-panel div {
+    margin: 5px 0;
+}
+
+#stats-panel span {
+    color: #4ecdc4;
+    font-weight: bold;
+}
+
+#controls-info {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid #0f3460;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   MODAL
+   ======================================== */
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    border: 3px solid #e94560;
+    box-shadow: 0 0 50px rgba(233, 69, 96, 0.5);
+    animation: modalAppear 0.3s ease;
+}
+
+@keyframes modalAppear {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #e94560;
+    text-shadow: 0 0 10px rgba(233, 69, 96, 0.8);
+}
+
+.modal-content p {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.modal-content button {
+    margin-top: 25px;
+    padding: 15px 40px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+}
+
+.modal-content button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(233, 69, 96, 0.6);
+}
+
+.modal-content button:active {
+    transform: translateY(0);
+}
+
+.modal-content span {
+    color: #4ecdc4;
+    font-weight: bold;
+}
+
+/* ========================================
+   ARME & WEAPON DISPLAY
+   ======================================== */
+#weapon-display {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 2px solid #ffd700;
+    font-size: 14px;
+}
+
+#weapon-display .weapon-label {
+    color: #ffd700;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#current-weapon {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* ========================================
+   NOTIFICATIONS
+   ======================================== */
+.notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #ffd700;
+    padding: 20px 40px;
+    border-radius: 10px;
+    border: 3px solid #ffd700;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 200;
+    animation: notificationPop 0.3s ease;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+}
+
+.notification.fade-out {
+    animation: notificationFade 0.5s ease forwards;
+}
+
+@keyframes notificationPop {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes notificationFade {
+    to {
+        opacity: 0;
+        transform: translate(-50%, -60%) scale(0.8);
+    }
+}
+
+/* ========================================
+   RARITY CLASSES
+   ======================================== */
+.rarity-common { 
+    color: #ffffff; 
+}
+
+.rarity-rare { 
+    color: #4ecdc4; 
+}
+
+.rarity-epic { 
+    color: #9370db; 
+}
+
+.rarity-legendary { 
+    color: #ffd700; 
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .btn-back {
+        padding: 10px 16px;
+        font-size: 14px;
+        bottom: 15px;
+        right: 15px;
+    }
+
+    .back-text {
+        display: none;
+    }
+
+    .back-icon {
+        font-size: 24px;
+    }
+
+    #ui-overlay {
+        top: 10px;
+        left: 10px;
+        gap: 10px;
+    }
+
+    .bar-wrapper {
+        width: 150px;
+    }
+
+    #stats-panel,
+    #weapon-display,
+    #controls-info {
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    .modal-content {
+        padding: 30px;
+        max-width: 90%;
+    }
+
+    .modal-content h2 {
+        font-size: 24px;
+    }
+}

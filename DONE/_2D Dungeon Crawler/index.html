@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dungeon Crawler 2D</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Menu Principal -->
+  <div id="main-menu">
+    <canvas id="menu-canvas"></canvas>
+    <div id="menu-content">
+      <div id="menu-logo">
+        <div id="menu-logo-sub">Les Chroniques des</div>
+        <h1 id="menu-title">⚔ DUNGEON<br/>CRAWLER</h1>
+        <div id="menu-logo-sub2">Descends. Combats. Survis.</div>
+      </div>
+      <div id="menu-buttons">
+        <button id="btn-play" class="menu-btn menu-btn-main">▶ &nbsp;Commencer l'aventure</button>
+        <button id="btn-how" class="menu-btn">📖 &nbsp;Comment jouer</button>
+      </div>
+      <div id="menu-footer">Un donjon procédural · Combats au tour par tour · Progression infinie</div>
+    </div>
+
+    <!-- Panel "Comment jouer" -->
+    <div id="howto-panel">
+      <h2>📖 Comment jouer</h2>
+      <div class="howto-grid">
+        <div class="howto-card">
+          <div class="howto-icon">🎮</div>
+          <div class="howto-title">Déplacement</div>
+          <div class="howto-desc">Utilise les touches <strong>ZQSD</strong> ou les <strong>flèches</strong> pour explorer le donjon.</div>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon">⚔️</div>
+          <div class="howto-title">Combat</div>
+          <div class="howto-desc">Marche sur un ennemi pour engager le combat. Attaque ou fuis à chaque tour.</div>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon">💰</div>
+          <div class="howto-title">Coffres</div>
+          <div class="howto-desc"><span style="color:#c9a84c">Communs</span> : soins · <span style="color:#aa66ff">Rares</span> : PV / ATK / DEF aléatoires.</div>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon">🏛️</div>
+          <div class="howto-title">Salles spéciales</div>
+          <div class="howto-desc"><span style="color:#c9a84c">⚔️ Armurerie</span> +3 ATK · <span style="color:#4488ff">📖 Bibliothèque</span> +10 PV max.</div>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon">⭐</div>
+          <div class="howto-title">Progression</div>
+          <div class="howto-desc">Gagne de l'XP, monte de niveau, débloque des passifs tous les 3 niveaux.</div>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon">💀</div>
+          <div class="howto-title">Boss</div>
+          <div class="howto-desc">Un Boss apparaît tous les 5 donjons. Très difficile à fuir, très riche en XP.</div>
+        </div>
+      </div>
+      <button id="btn-howto-close" class="menu-btn menu-btn-main" style="margin-top:24px;">⚔ &nbsp;Lancer la partie !</button>
+    </div>
+  </div>
+
+  <h1 id="game-title" style="display:none;">⚔ Dungeon Crawler</h1>
+
+  <div id="game-wrapper" style="display:none;">
+
+    <!-- Canvas principal -->
+    <div id="canvas-container">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Panneau latéral -->
+    <div id="side-panel">
+
+      <div class="panel-box">
+        <h3>Héros</h3>
+        <div class="stat-row">
+          <span class="stat-label">PV</span>
+          <span class="stat-val"><span id="ui-hp">30</span>/<span id="ui-maxhp">30</span></span>
+        </div>
+        <div class="bar-wrap"><div class="bar-fill hp-bar" id="hp-bar" style="width:100%"></div></div>
+        <div id="ui-poison"></div>
+
+        <div class="stat-row">
+          <span class="stat-label">Niveau</span>
+          <span class="stat-val" id="ui-level">1</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">XP</span>
+          <span class="stat-val"><span id="ui-xp">0</span>/<span id="ui-xpto">100</span></span>
+        </div>
+        <div class="bar-wrap"><div class="bar-fill xp-bar" id="xp-bar" style="width:0%"></div></div>
+
+        <div class="stat-row">
+          <span class="stat-label">Attaque</span>
+          <span class="stat-val" id="ui-atk">7</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Défense</span>
+          <span class="stat-val" id="ui-def">3</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Critique</span>
+          <span class="stat-val" id="ui-crit">5%</span>
+        </div>
+      </div>
+
+      <div class="panel-box" style="padding:8px 12px;">
+        <div class="stat-row">
+          <span class="stat-label">🗺 Donjon</span>
+          <span class="stat-val" id="ui-dungeon">1</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">💀 Ennemis</span>
+          <span class="stat-val" id="ui-kills">0</span>
+        </div>
+      </div>
+
+      <div id="message-box">🗡️ Prêt pour l'aventure !</div>
+
+      <div class="panel-box">
+        <h3>Carte</h3>
+        <canvas id="minimap-canvas" width="176" height="106"></canvas>
+        <div class="legend">
+          <span class="leg-item"><span style="color:#cc44ff">▪</span> Sortie</span>
+          <span class="leg-item"><span style="color:#c9a84c">▪</span> Coffre</span>
+          <span class="leg-item"><span style="color:#4488ff">▪</span> Biblio</span>
+          <span class="leg-item"><span style="color:#ff2244">▪</span> Boss</span>
+        </div>
+      </div>
+
+      <button id="btn-new-dungeon">🗺 Nouveau Donjon</button>
+
+      <div class="controls-hint">
+        ↑ ↓ ← → ou Z Q S D<br/>pour se déplacer<br/>Contact ennemi = combat<br/><br/>
+        <span style="color:#c9a84c">💰</span> Coffre commun · <span style="color:#aa66ff">💎</span> Rare<br/>
+        <span style="color:#c9a84c">⚔️</span> Armurerie · <span style="color:#4488ff">📖</span> Biblio
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Overlay Combat -->
+  <div id="combat-overlay">
+    <div id="combat-window">
+      <h2>⚔ COMBAT</h2>
+
+      <div class="fighters">
+        <div class="fighter-card">
+          <h4 class="player-name">👤 Toi</h4>
+          <div class="fighter-stat">Niv. <span id="c-plevel">1</span></div>
+          <div class="fighter-stat">PV <span id="c-php">30</span>/<span id="c-pmaxhp">30</span></div>
+          <div class="fighter-stat">ATK <span id="c-patk">7</span></div>
+          <div class="fighter-stat">DEF <span id="c-pdef">3</span></div>
+          <div class="bar-wrap" style="margin-top:8px">
+            <div class="bar-fill hp-bar" id="c-pbar" style="width:100%"></div>
+          </div>
+        </div>
+
+        <div class="vs-label">VS</div>
+
+        <div class="fighter-card">
+          <h4 class="enemy-name" id="c-ename">Gobelin</h4>
+          <div class="fighter-stat">PV <span id="c-ehp">14</span>/<span id="c-emaxhp">14</span></div>
+          <div class="fighter-stat">ATK <span id="c-eatk">5</span></div>
+          <div class="fighter-stat">DEF <span id="c-edef">1</span></div>
+          <div class="bar-wrap" style="margin-top:8px">
+            <div class="bar-fill enemy-bar" id="c-ebar" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="combat-log"></div>
+
+      <div class="combat-btns">
+        <button id="btn-attack">🗡 Attaquer</button>
+        <button id="btn-flee">🏃 Fuir</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

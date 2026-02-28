@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Tycoon</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <button id="back-to-catalog" class="catalog-back" type="button" data-catalog-back="true" aria-label="Retour au catalogue">
+        <span class="back-icon" aria-hidden="true">&#8592;</span>
+        <span class="back-text">Catalogue</span>
+    </button>
+
+    <main class="game-shell" aria-live="polite">
+        <header class="game-header">
+            <div class="title-block">
+                <h1>Gestion Tycoon</h1>
+                <p class="subtitle">Construis ton empire financier en temps reel.</p>
+            </div>
+
+            <div id="stats" class="stats-grid">
+                <p>Argent: <span id="money">0</span> EUR</p>
+                <p>Revenu: <span id="income">0</span> /sec</p>
+                <p>Score: <span id="scoreValue">0</span></p>
+                <p>Niveaux: <span id="totalLevelValue">0</span></p>
+                <p>Multiplicateur: <span id="multiplierValue">x1.00</span></p>
+                <p>Temps: <span id="playTimeValue">00:00</span></p>
+            </div>
+
+            <div class="control-bar">
+                <button id="pauseBtn" type="button" class="control-btn">Pause</button>
+                <button type="button" class="speed-btn is-active" data-speed="1">1x</button>
+                <button type="button" class="speed-btn" data-speed="2">2x</button>
+                <button type="button" class="speed-btn" data-speed="4">4x</button>
+                <button id="governorToggleBtn" type="button" class="control-btn">Auto: ON</button>
+                <button id="governorProfileBtn" type="button" class="control-btn">Profil: Neutre</button>
+                <button id="cashBoostBtn" type="button" class="boost-btn">Prime instantanee</button>
+                <button id="resetBtn" type="button" class="danger-btn">Reinitialiser</button>
+            </div>
+
+            <p id="statusText" class="status-text">Pret. Clique pour ameliorer. Ctrl+clic = rafale. G = profil, A = auto.</p>
+        </header>
+
+        <section class="play-area">
+            <div class="canvas-wrap">
+                <canvas id="gameCanvas" width="980" height="600" aria-label="Carte de la ville"></canvas>
+                <div class="canvas-hint">Astuce: clique sur un batiment pour investir, ou sur Prime pour un bonus temporaire.</div>
+            </div>
+
+            <aside class="side-column">
+                <section class="panel">
+                    <h2>Batiments</h2>
+                    <div id="buildings" class="list-panel" aria-label="Liste des batiments"></div>
+                </section>
+
+                <section class="panel">
+                    <h2>Milestones</h2>
+                    <div id="milestones" class="list-panel" aria-label="Progression"></div>
+                </section>
+
+                <section class="panel">
+                    <h2>Journal</h2>
+                    <div id="notifications" class="log-panel" aria-label="Journal des evenements"></div>
+                </section>
+            </aside>
+        </section>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

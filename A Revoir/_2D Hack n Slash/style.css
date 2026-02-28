@@ -1,0 +1,239 @@
+/* =========================
+   Variables globales
+========================= */
+:root {
+  --bg-main: linear-gradient(135deg, #0a0a1a, #1a1a3a);
+  --bg-canvas: linear-gradient(180deg, #001133 0%, #003366 50%, #001133 100%);
+  --neon-cyan: #00ffff;
+  --neon-green: #44ff44;
+  --neon-red: #ff4444;
+  --glass-bg: rgba(0, 0, 0, 0.55);
+  --blur: blur(6px);
+  --radius-sm: 10px;
+  --radius-md: 15px;
+  --radius-lg: 20px;
+  --transition: 0.3s ease;
+  --font-main: 'Arial', system-ui, sans-serif;
+}
+
+/* =========================
+   Global
+========================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-main);
+  font-family: var(--font-main);
+  color: #fff;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* =========================
+   Game Container
+========================= */
+#gameContainer {
+  position: relative;
+  box-shadow: 0 0 60px rgba(0, 255, 255, 0.45);
+  animation: glowFloat 6s ease-in-out infinite;
+}
+
+/* =========================
+   Canvas
+========================= */
+canvas {
+  display: block;
+  background: var(--bg-canvas);
+  border: 4px solid var(--neon-cyan);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 35px rgba(0, 255, 255, 0.35);
+  touch-action: none;
+}
+
+/* =========================
+   UI (Score / Vie / XP)
+========================= */
+#ui {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  font-size: 20px;
+  font-weight: bold;
+  background: var(--glass-bg);
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--blur);
+  box-shadow: inset 0 0 15px rgba(0, 255, 255, 0.15);
+  text-shadow: 0 0 10px var(--neon-cyan);
+  z-index: 20;
+}
+
+#ui > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* =========================
+   Health & XP
+========================= */
+#health {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#health .xp-bar {
+  width: 120px;
+  height: 6px;
+  background: #222;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#health .xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0088ff, var(--neon-cyan));
+  transition: width 0.4s ease;
+}
+
+/* =========================
+   Controls
+========================= */
+.controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 18px;
+  font-size: 14px;
+  background: var(--glass-bg);
+  border-radius: var(--radius-sm);
+  backdrop-filter: var(--blur);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+  z-index: 15;
+}
+
+.controls h3 {
+  margin: 0 0 8px;
+  color: var(--neon-cyan);
+  font-size: 16px;
+}
+
+.controls p {
+  margin: 4px 0;
+  opacity: 0.9;
+}
+
+/* =========================
+   End Screens
+========================= */
+#gameOver,
+#win {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  padding: 50px;
+  text-align: center;
+  display: none;
+  background: rgba(0, 0, 0, 0.95);
+  border-radius: var(--radius-lg);
+  z-index: 30;
+}
+
+#gameOver {
+  border: 2px solid var(--neon-red);
+  box-shadow: 0 0 45px rgba(255, 68, 68, 0.6);
+  animation: pulseRed 2s infinite;
+}
+
+#win {
+  border: 2px solid var(--neon-green);
+  box-shadow: 0 0 45px rgba(68, 255, 68, 0.6);
+  animation: pulseGreen 2s infinite;
+}
+
+#gameOver h1,
+#win h1 {
+  margin-bottom: 20px;
+  font-size: clamp(36px, 5vw, 48px);
+}
+
+#gameOver h1 {
+  color: #ff7777;
+  text-shadow: 0 0 20px var(--neon-red);
+}
+
+#win h1 {
+  color: #77ff77;
+  text-shadow: 0 0 20px var(--neon-green);
+}
+
+#gameOver p,
+#win p {
+  font-size: 22px;
+}
+
+/* =========================
+   Buttons
+========================= */
+button {
+  margin-top: 20px;
+  padding: 14px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  background: linear-gradient(45deg, #00ff88, #00cc66);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 6px 20px rgba(0, 255, 136, 0.45);
+}
+
+button:hover {
+  transform: scale(1.06);
+  box-shadow: 0 10px 30px rgba(0, 255, 136, 0.7);
+}
+
+/* =========================
+   Animations
+========================= */
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 40px rgba(255, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 65px rgba(255, 68, 68, 0.85); }
+}
+
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 40px rgba(68, 255, 68, 0.5); }
+  50% { box-shadow: 0 0 65px rgba(68, 255, 68, 0.85); }
+}
+
+@keyframes glowFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+  #ui {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .controls {
+    font-size: 12px;
+  }
+}

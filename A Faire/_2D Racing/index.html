@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu de course 2D</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <h1>🏎️ Jeu de course 2D</h1>
+
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <p>⬅️ ➡️ pour bouger &nbsp;|&nbsp; <kbd>S</kbd> pour changer de skin</p>
+
+    <!-- BUG FIX: assets.js manquait → la constante ASSETS était undefined dans script.js -->
+    <script src="js/assets.js"></script>
+    <script src="js/assetLoader.js"></script>
+    <script src="js/script.js"></script>
+
+</body>
+</html>

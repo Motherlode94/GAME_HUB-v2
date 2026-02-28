@@ -1,0 +1,61 @@
+/**
+ * ============================================
+ * STYLES RARETÉ - À AJOUTER À styles.css
+ * ============================================
+ * Copiez-collez ces styles à la fin de votre
+ * fichier styles.css existant
+ * ============================================
+ */
+
+/* Badges de rareté */
+.rarity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 2px solid currentColor;
+    background: rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+/* Couleurs par rareté */
+.rarity-basic { color: #95a5a6; border-color: #95a5a6; }
+.rarity-common { color: #bdc3c7; border-color: #bdc3c7; }
+.rarity-rare { color: #3498db; border-color: #3498db; }
+.rarity-epic { color: #9b59b6; border-color: #9b59b6; }
+.rarity-legendary { 
+    color: #f39c12; 
+    border-color: #f39c12;
+    animation: legendary-glow 2s ease-in-out infinite;
+}
+
+/* Animation pour légendaires */
+@keyframes legendary-glow {
+    0%, 100% { 
+        box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(243, 156, 18, 0.8);
+    }
+}
+
+/* Cartes de créatures avec bordure de rareté */
+.creature-card[data-rarity="basic"] { border-color: #95a5a6; }
+.creature-card[data-rarity="common"] { border-color: #bdc3c7; }
+.creature-card[data-rarity="rare"] { 
+    border-color: #3498db;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+}
+.creature-card[data-rarity="epic"] { 
+    border-color: #9b59b6;
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.4);
+}
+.creature-card[data-rarity="legendary"] { 
+    border-color: #f39c12;
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.5);
+}
+
+/* FIN DES STYLES */

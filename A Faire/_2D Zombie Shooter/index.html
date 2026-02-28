@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Zombie Survival</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- MENU -->
+<div id="menu" class="overlay active">
+  <div class="panel">
+    <h1>🧟 Zombie Survival</h1>
+    <p class="hint-text">ZQSD / Flèches pour bouger<br>Souris pour viser · Clic pour tirer</p>
+    <button id="startBtn">▶ Start Game</button>
+    <a href="../index.html" class="back-link">← Retour Hub</a>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameOver" class="overlay">
+  <div class="panel">
+    <h2>💀 GAME OVER</h2>
+    <p>Score final : <strong id="finalScore">0</strong></p>
+    <button id="restartBtn">↺ Recommencer</button>
+    <a href="../index.html" class="back-link">← Retour Hub</a>
+  </div>
+</div>
+
+<!-- HUD -->
+<div class="hud">
+  <div>❤️ <span id="hp">100</span></div>
+  <div>🏆 <span id="score">0</span></div>
+  <div>🌊 Vague <span id="wave">1</span></div>
+  <span class="hint">ZQSD / Flèches · Clic pour tirer</span>
+</div>
+
+<canvas id="game" width="900" height="500"></canvas>
+
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

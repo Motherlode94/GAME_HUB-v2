@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vampire Sim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ─── MENU ─────────────────────────────────────────── -->
+<div id="menu" class="overlay active">
+  <div class="panel">
+    <div class="bat-icon">🦇</div>
+    <h1>VAMPIRE<br><span>SIM</span></h1>
+    <p class="flavor">La nuit t'appartient.<br>Chasse. Cache-toi. Domine.</p>
+    <div class="legend">
+      <div class="leg-item"><span class="dot victim"></span> Victimes (E pour chasser)</div>
+      <div class="leg-item"><span class="dot hunter"></span> Chasseurs (évitez-les !)</div>
+      <div class="leg-item"><span class="dot alley"></span> Ruelle — se cacher</div>
+      <div class="leg-item"><span class="dot gym"></span> Gymnase — s'entraîner</div>
+      <div class="leg-item"><span class="dot shop"></span> Marché noir — soins</div>
+    </div>
+    <button id="startBtn">☽ Commencer la nuit</button>
+    <a href="../index.html" class="back-link">← Retour Hub</a>
+  </div>
+</div>
+
+<!-- ─── FIN DE PARTIE ────────────────────────────────── -->
+<div id="endScreen" class="overlay">
+  <div class="panel end-panel">
+    <div id="endIcon">💀</div>
+    <h2 id="endTitle">GAME OVER</h2>
+    <p id="endMsg"></p>
+    <div id="endStats"></div>
+    <button id="restartBtn">↺ Recommencer</button>
+  </div>
+</div>
+
+<!-- ─── HUD ──────────────────────────────────────────── -->
+<div id="hud">
+  <div class="hud-bar">
+    <div class="hud-title">🦇 VAMPIRE SIM</div>
+
+    <div class="stat-row">
+      <label>🩸 FAIM</label>
+      <div class="track">
+        <div id="barHunger" class="fill fill-hunger"></div>
+        <span id="valHunger">0</span>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <label>🔥 SUSPICION</label>
+      <div class="track">
+        <div id="barHeat" class="fill fill-heat"></div>
+        <span id="valHeat">0</span>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <label>⚡ POUVOIR</label>
+      <div class="track">
+        <div id="barPower" class="fill fill-power"></div>
+        <span id="valPower">0/50</span>
+      </div>
+    </div>
+
+    <div class="hud-coins">
+      <span id="valMoney">$50</span>
+      <small>Tour <span id="valTurn">1</span></small>
+    </div>
+  </div>
+
+  <div id="actionHint"></div>
+</div>
+
+<!-- ─── EVENTS ───────────────────────────────────────── -->
+<div id="eventBox"></div>
+
+<!-- ─── CANVAS ───────────────────────────────────────── -->
+<canvas id="gameCanvas"></canvas>
+
+<script src="js/map.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

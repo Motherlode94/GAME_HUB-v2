@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creature Battle Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Particules de fond -->
+        <div class="bg-particles" id="bg-particles"></div>
+        
+        <!-- Écran de démarrage -->
+        <section class="screen active" id="start-screen">
+            <div class="start-container">
+                <div class="logo-container">
+                    <h1 class="game-title">
+                        <span class="title-line">Creature</span>
+                        <span class="title-line accent">Battle Arena</span>
+                    </h1>
+                    <div class="title-decoration"></div>
+                </div>
+                
+                <div class="menu-buttons">
+                    <button class="btn btn-primary btn-glow" id="start-btn">
+                        <span class="btn-icon">⚔️</span>
+                        <span class="btn-text">Nouvelle Partie</span>
+                    </button>
+                    <button class="btn btn-secondary" id="tutorial-btn">
+                        <span class="btn-icon">📖</span>
+                        <span class="btn-text">Tutoriel</span>
+                    </button>
+                </div>
+                
+                <div class="best-scores" id="best-scores"></div>
+            </div>
+        </section>
+
+        <!-- Écran de sélection d'équipe -->
+        <section class="screen" id="team-selection-screen">
+            <div class="selection-header">
+                <h2 class="section-title">Compose ton équipe</h2>
+                <p class="section-subtitle">Sélectionne 3 créatures pour le combat</p>
+            </div>
+            
+            <div class="difficulty-selector" id="difficulty-selector"></div>
+            
+            <div class="creatures-grid" id="available-creatures"></div>
+            
+            <div class="selection-footer">
+                <div class="selected-team" id="selected-team">
+                    <div class="team-slot empty" data-slot="0"></div>
+                    <div class="team-slot empty" data-slot="1"></div>
+                    <div class="team-slot empty" data-slot="2"></div>
+                </div>
+                <button class="btn btn-primary btn-large" id="confirm-team-btn" disabled>
+                    <span class="btn-icon">⚔️</span>
+                    <span class="btn-text">Commencer le Combat</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Écran de combat -->
+        <section class="screen" id="battle-screen">
+            <div class="battle-header">
+                <div class="round-info">
+                    <span class="round-label">Round</span>
+                    <span class="round-number" id="round-counter">1</span>
+                </div>
+                <div class="turn-indicator" id="turn-indicator">Votre tour</div>
+                <div class="combo-display" id="combo-display"></div>
+            </div>
+            
+            <div class="battle-arena">
+                <div class="team-zone player-zone">
+                    <h3 class="zone-title">Votre Équipe</h3>
+                    <div class="creatures-row" id="player-creatures"></div>
+                </div>
+                
+                <div class="battle-center">
+                    <div class="vs-badge">VS</div>
+                </div>
+                
+                <div class="team-zone enemy-zone">
+                    <h3 class="zone-title">Ennemis</h3>
+                    <div class="creatures-row" id="enemy-creatures"></div>
+                </div>
+            </div>
+            
+            <div class="action-panel">
+                <div class="skills-container" id="skills-container"></div>
+            </div>
+            
+            <div class="battle-log">
+                <div class="log-header">
+                    <span class="log-icon">📜</span>
+                    <span>Journal de Combat</span>
+                </div>
+                <div class="log-content" id="log-content"></div>
+            </div>
+        </section>
+
+        <!-- Écran de résultat -->
+        <section class="screen" id="result-screen">
+            <div class="result-container">
+                <div class="result-badge" id="result-badge"></div>
+                <h2 class="result-title" id="result-title"></h2>
+                <div class="result-stats" id="result-stats"></div>
+                <div class="result-buttons">
+                    <button class="btn btn-primary" id="play-again-btn">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-text">Rejouer</span>
+                    </button>
+                    <button class="btn btn-secondary" id="change-team-btn">
+                        <span class="btn-icon">👥</span>
+                        <span class="btn-text">Changer d'équipe</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal Tutoriel -->
+        <div class="modal" id="tutorial-modal">
+            <div class="modal-content">
+                <button class="modal-close" id="modal-close">&times;</button>
+                <h2 class="modal-title">Comment Jouer</h2>
+                <div class="tutorial-sections">
+                    <div class="tutorial-section">
+                        <h3>🎯 Objectif</h3>
+                        <p>Vainquez l'équipe ennemie en réduisant les PV de toutes leurs créatures à zéro.</p>
+                    </div>
+                    <div class="tutorial-section">
+                        <h3>⚡ Énergie</h3>
+                        <p>Chaque compétence coûte de l'énergie. Vous regagnez 2 points d'énergie par tour.</p>
+                    </div>
+                    <div class="tutorial-section">
+                        <h3>🔥 Types & Efficacité</h3>
+                        <ul class="type-list">
+                            <li><span class="type-badge fire">Feu</span> → fort contre <span class="type-badge plant">Plante</span></li>
+                            <li><span class="type-badge water">Eau</span> → fort contre <span class="type-badge fire">Feu</span></li>
+                            <li><span class="type-badge plant">Plante</span> → fort contre <span class="type-badge water">Eau</span></li>
+                            <li><span class="type-badge electric">Électrique</span> → fort contre <span class="type-badge water">Eau</span></li>
+                            <li><span class="type-badge earth">Terre</span> → fort contre <span class="type-badge electric">Électrique</span></li>
+                        </ul>
+                    </div>
+                    <div class="tutorial-section">
+                        <h3>⭐ Ultimes</h3>
+                        <p>Chaque créature possède une attaque ultime dévastatrice qui coûte 6 points d'énergie.</p>
+                    </div>
+                    <div class="tutorial-section">
+                        <h3>💫 Effets de Statut</h3>
+                        <ul>
+                            <li><span class="status-icon">☠️</span> Poison - Dégâts sur la durée</li>
+                            <li><span class="status-icon">🔥</span> Brûlure - Dégâts sur la durée</li>
+                            <li><span class="status-icon">⚡</span> Paralysie - Chance de rater son tour</li>
+                            <li><span class="status-icon">❄️</span> Gel - Rate automatiquement le prochain tour</li>
+                        </ul>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="tutorial-close-btn">Compris !</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts du jeu -->
+    <script src="js/utils/eventEmitter.js"></script>
+    <script src="js/config/gameConfig.js"></script>
+    <script src="js/ui/uiController.js"></script>
+
+    <!-- Entities -->
+    <script src="js/entities/rarity.js"></script>
+    <script src="js/entities/typesystem.js"></script>
+    <script src="js/entities/creature.js"></script>
+    <script src="js/entities/creaturedatabase.js"></script>
+
+    <!-- Systems -->
+    <script src="js/systems/storageManager.js"></script>
+    <script src="js/systems/levelSystem.js"></script>
+    <script src="js/systems/evolutionSystem.js"></script>
+    <script src="js/systems/skillSystem.js"></script>
+    <script src="js/systems/healingSystem.js"></script>
+    <script src="js/systems/battleSystem.js"></script>
+
+    <!-- Core -->
+    <script src="js/core/gameManager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

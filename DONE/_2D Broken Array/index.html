@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Broken Array</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#060810; overflow:hidden; font-family:'Courier New',monospace; cursor:crosshair; }
+  #gameCanvas { display:block; }
+  #hud { position:fixed; inset:0; pointer-events:none; z-index:10; }
+
+  /* ── Top bar ── */
+  #topbar {
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    display:flex; gap:14px; align-items:center;
+    background:rgba(6,8,16,.92); border:1px solid rgba(255,255,255,.07);
+    border-radius:3px; padding:6px 16px; backdrop-filter:blur(6px);
+  }
+  .stat { display:flex; align-items:center; gap:6px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
+  .stat-dot { width:6px; height:6px; border-radius:50%; }
+  .stat-label { color:rgba(255,255,255,.3); }
+  .stat-value { color:#fff; font-weight:bold; min-width:18px; text-align:center; }
+  .divider { width:1px; height:16px; background:rgba(255,255,255,.07); }
+
+  /* ── Resources ── */
+  #resources {
+    position:absolute; top:12px; right:14px;
+    display:flex; gap:10px; align-items:center;
+    background:rgba(6,8,16,.92); border:1px solid rgba(255,255,255,.07);
+    border-radius:3px; padding:6px 12px; backdrop-filter:blur(6px);
+  }
+  .res { display:flex; align-items:center; gap:5px; font-size:11px; }
+  .res-lbl { font-weight:bold; font-size:10px; }
+  .res-val { color:#fff; font-weight:bold; min-width:32px; }
+
+  /* ── Controls ── */
+  #controls {
+    position:absolute; top:12px; left:12px;
+    font-size:9px; letter-spacing:.07em;
+    color:rgba(255,255,255,.16); line-height:2.2; text-transform:uppercase;
+  }
+
+  /* ── Build panel ── */
+  #buildPanel {
+    position:absolute; bottom:18px; left:18px;
+    background:rgba(6,8,16,.94); border:1px solid rgba(255,255,255,.07);
+    border-radius:3px; padding:10px 12px; pointer-events:all;
+    backdrop-filter:blur(6px); width:168px;
+  }
+  #buildPanel h3 { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-bottom:8px; }
+  .build-section { margin-bottom:6px; }
+  .build-section-label { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.2); margin-bottom:4px; }
+  .build-btn {
+    display:block; width:100%; margin-bottom:3px;
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.09);
+    color:rgba(255,255,255,.65); font-family:'Courier New',monospace;
+    font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+    padding:5px 8px; cursor:pointer; border-radius:2px; text-align:left; transition:all .15s;
+  }
+  .build-btn:hover { background:rgba(255,255,255,.08); color:#fff; border-color:rgba(255,255,255,.2); }
+  .build-btn span { float:right; color:rgba(255,210,50,.65); font-size:9px; }
+
+  /* ── Production panel ── */
+  #prodPanel {
+    position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+    background:rgba(6,8,16,.94); border:1px solid rgba(255,255,255,.07);
+    border-radius:3px; padding:10px 14px; pointer-events:all;
+    backdrop-filter:blur(6px); min-width:300px; text-align:center; transition:opacity .15s;
+  }
+  #prodPanel.hidden { opacity:0; pointer-events:none; }
+  #prodPanel h3 { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-bottom:6px; }
+  #prodQueue { font-size:10px; color:rgba(255,255,255,.35); margin-bottom:8px; min-height:14px; }
+  #prodBtns { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+  .prod-btn {
+    background:rgba(61,142,245,.1); border:1px solid rgba(61,142,245,.28);
+    color:rgba(255,255,255,.72); font-family:'Courier New',monospace;
+    font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+    padding:5px 10px; cursor:pointer; border-radius:2px; transition:all .15s;
+  }
+  .prod-btn:hover { background:rgba(61,142,245,.25); color:#fff; }
+  .prod-btn small { display:block; font-size:8px; color:rgba(255,210,50,.6); margin-top:2px; }
+
+  /* ── Selection panel ── */
+  #selPanel {
+    position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+    background:rgba(6,8,16,.94); border:1px solid rgba(255,255,255,.07);
+    border-radius:3px; padding:10px 16px; min-width:180px;
+    text-align:center; backdrop-filter:blur(6px); transition:opacity .15s;
+  }
+  #selPanel.hidden { opacity:0; pointer-events:none; }
+  #selPanel h3 { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.3); margin-bottom:6px; }
+  #selInfo { font-size:12px; color:#fff; }
+
+  /* ── Minimap ── */
+  #minimapWrap {
+    position:absolute; bottom:18px; right:18px;
+    background:rgba(6,8,16,.94); border:1px solid rgba(255,255,255,.07);
+    border-radius:3px; padding:7px; backdrop-filter:blur(6px);
+  }
+  #minimapLabel { font-size:8px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.22); margin-bottom:5px; text-align:center; }
+  #minimap { display:block; border-radius:2px; }
+
+  /* ── Notifs ── */
+  #placingHint, #buildError, #waveNotif {
+    position:absolute; top:66px; left:50%; transform:translateX(-50%);
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:rgba(255,255,255,.65); opacity:0; transition:opacity .3s; pointer-events:none;
+    white-space:nowrap;
+  }
+  #buildError { color:#e74c3c; top:86px; }
+  #waveNotif  { top:86px; color:#ffd232; }
+
+  /* ── Drag box ── */
+  #dragBox {
+    position:fixed; border:1px solid rgba(255,210,50,.6);
+    background:rgba(255,210,50,.04); pointer-events:none; display:none; z-index:20;
+  }
+
+  /* ── Banner (défaite / fin de niveau) ── */
+  #banner {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:rgba(6,8,16,.97); border:1px solid rgba(255,255,255,.1);
+    border-radius:4px; padding:36px 56px; text-align:center; display:none;
+    pointer-events:all; min-width:340px;
+  }
+  #banner h2 {
+    font-size:22px; letter-spacing:.22em; text-transform:uppercase;
+    color:#fff; margin-bottom:10px;
+  }
+  #banner p  { font-size:11px; color:rgba(255,255,255,.35); letter-spacing:.12em; margin-bottom:24px; }
+  .banner-btns { display:flex; gap:12px; justify-content:center; }
+  .banner-btn {
+    background:none; border:1px solid rgba(255,255,255,.22); color:rgba(255,255,255,.65);
+    padding:9px 24px; font-family:'Courier New',monospace; font-size:11px;
+    letter-spacing:.14em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all .2s;
+  }
+  .banner-btn:hover { background:rgba(255,255,255,.06); color:#fff; }
+  .banner-btn.primary {
+    border-color:rgba(61,142,245,.5); color:#3d8ef5;
+    background:rgba(61,142,245,.08);
+  }
+  .banner-btn.primary:hover { background:rgba(61,142,245,.18); color:#6db4ff; }
+
+  /* ═══════════════════════════════════════════════════════════
+     MAIN MENU OVERLAY
+  ══════════════════════════════════════════════════════════ */
+  #mainMenuOverlay {
+    position:fixed; inset:0; z-index:100;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    background:transparent;
+    transition:opacity .6s;
+  }
+
+  .menu-card {
+    background:rgba(6,8,16,.88);
+    border:1px solid rgba(61,142,245,.18);
+    border-radius:4px;
+    padding:52px 72px 44px;
+    text-align:center;
+    backdrop-filter:blur(12px);
+    box-shadow:0 0 80px rgba(61,142,245,.06);
+    min-width:380px;
+  }
+
+  /* Logo / titre */
+  .menu-logo {
+    font-size:11px; letter-spacing:.35em; text-transform:uppercase;
+    color:rgba(61,142,245,.55); margin-bottom:6px;
+  }
+  .menu-title {
+    font-size:38px; letter-spacing:.18em; text-transform:uppercase;
+    color:#fff; font-weight:bold; margin-bottom:4px;
+    text-shadow:0 0 30px rgba(61,142,245,.25);
+  }
+  .menu-subtitle {
+    font-size:10px; letter-spacing:.22em; text-transform:uppercase;
+    color:rgba(255,255,255,.18); margin-bottom:40px;
+  }
+
+  /* Boutons menu */
+  .menu-btn {
+    display:block; width:100%; margin-bottom:10px;
+    background:rgba(61,142,245,.06); border:1px solid rgba(61,142,245,.22);
+    color:rgba(255,255,255,.75); font-family:'Courier New',monospace;
+    font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    padding:13px 0; cursor:pointer; border-radius:2px; transition:all .2s;
+  }
+  .menu-btn:hover {
+    background:rgba(61,142,245,.18); color:#fff;
+    border-color:rgba(61,142,245,.55);
+    box-shadow:0 0 20px rgba(61,142,245,.1);
+  }
+  .menu-btn.play {
+    background:rgba(61,142,245,.14); border-color:rgba(61,142,245,.45);
+    color:#6db4ff; font-size:13px; margin-bottom:14px;
+  }
+  .menu-btn.play:hover {
+    background:rgba(61,142,245,.28); color:#fff;
+    box-shadow:0 0 30px rgba(61,142,245,.18);
+  }
+
+  /* Version */
+  .menu-version {
+    font-size:9px; letter-spacing:.12em; color:rgba(255,255,255,.12);
+    margin-top:28px; text-transform:uppercase;
+  }
+
+  /* Séparateur */
+  .menu-sep {
+    border:none; border-top:1px solid rgba(255,255,255,.06);
+    margin:18px 0;
+  }
+
+  /* ── Crédits modal ── */
+  #creditsModal {
+    position:fixed; inset:0; z-index:110; display:none;
+    align-items:center; justify-content:center;
+    background:rgba(0,0,0,.7);
+  }
+  #creditsModal .modal-card {
+    background:rgba(6,8,16,.97); border:1px solid rgba(255,255,255,.1);
+    border-radius:4px; padding:36px 48px; text-align:center; max-width:360px;
+  }
+  #creditsModal h3 {
+    font-size:13px; letter-spacing:.2em; text-transform:uppercase;
+    color:#fff; margin-bottom:16px;
+  }
+  #creditsModal p {
+    font-size:10px; color:rgba(255,255,255,.35); line-height:2;
+    letter-spacing:.06em; margin-bottom:20px;
+  }
+  #creditsModal .close-btn {
+    background:none; border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.5);
+    padding:7px 20px; font-family:'Courier New',monospace; font-size:10px;
+    letter-spacing:.14em; text-transform:uppercase; cursor:pointer; border-radius:2px;
+  }
+  #creditsModal .close-btn:hover { color:#fff; border-color:rgba(255,255,255,.35); }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN MENU
+═══════════════════════════════════════════════════════ -->
+<div id="mainMenuOverlay">
+  <div class="menu-card">
+    <div class="menu-logo">Tactical RTS</div>
+    <div class="menu-title">Broken Array</div>
+    <div class="menu-subtitle">Defend · Build · Survive</div>
+
+    <button class="menu-btn play" id="menuPlayBtn">▶ &nbsp; Jouer</button>
+
+    <hr class="menu-sep">
+
+    <button class="menu-btn" id="menuCreditsBtn">Crédits</button>
+
+    <div class="menu-version">Version 2.0 · Alpha</div>
+  </div>
+</div>
+
+<!-- Crédits modal -->
+<div id="creditsModal">
+  <div class="modal-card">
+    <h3>Crédits</h3>
+    <p>
+      Broken Array<br>
+      Jeu de stratégie tactique<br><br>
+      Développé avec HARDI VICTOR MBANVU<br>
+      Inspiré de Broken Arrow (Steel Balalaika)<br><br>
+      Toutes les unités, doctrines et mécaniques<br>
+      sont fictives à des fins de jeu.
+    </p>
+    <button class="close-btn" id="creditsCloseBtn">Fermer</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     HUD
+═══════════════════════════════════════════════════════ -->
+<div id="hud">
+
+  <div id="topbar">
+    <div class="stat">
+      <div class="stat-dot" style="background:#3d8ef5"></div>
+      <span class="stat-label">Alliés</span>
+      <span class="stat-value" id="blueCount">0</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <span class="stat-label">Vague</span>
+      <span class="stat-value" id="waveNum">—</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-dot" style="background:#e74c3c"></div>
+      <span class="stat-label">Ennemis</span>
+      <span class="stat-value" id="redCount">0</span>
+    </div>
+  </div>
+
+  <div id="resources">
+    <div class="res"><span class="res-lbl" style="color:#f5a623">OR</span><span class="res-val" id="resGold">—</span></div>
+    <div class="divider"></div>
+    <div class="res"><span class="res-lbl" style="color:#27ae60">CARB</span><span class="res-val" id="resFuel">—</span></div>
+    <div class="divider"></div>
+    <div class="res"><span class="res-lbl" style="color:#e74c3c">MUN</span><span class="res-val" id="resAmmo">—</span></div>
+  </div>
+
+  <div id="controls">
+    <div>LMB — Sél. / Glisser</div>
+    <div>RMB — Déplacer unités</div>
+    <div>MMB — Déplacer caméra</div>
+    <div>Scroll — Zoom</div>
+    <div>WASD — Caméra</div>
+    <div>A — Tout sél.</div>
+    <div>Esc — Désél.</div>
+  </div>
+
+  <div id="buildPanel">
+    <h3>Construire</h3>
+    <div class="build-section">
+      <div class="build-section-label">Base</div>
+      <button class="build-btn" id="btn_build_barracks">⚔ Caserne<span>120G</span></button>
+      <button class="build-btn" id="btn_build_workshop">🔧 Atelier<span>180G 60F</span></button>
+      <button class="build-btn" id="btn_build_hangar">🚁 Hangar<span>250G 100F</span></button>
+    </div>
+    <div class="build-section">
+      <div class="build-section-label">Économie</div>
+      <button class="build-btn" id="btn_build_mine">⛏ Mine<span>100G</span></button>
+      <button class="build-btn" id="btn_build_refinery">⚗ Raffinerie<span>140G</span></button>
+      <button class="build-btn" id="btn_build_arsenal">🔴 Arsenal<span>120G</span></button>
+    </div>
+    <div class="build-section">
+      <div class="build-section-label">Défense</div>
+      <button class="build-btn" id="btn_build_tower">🗼 Tour<span>80G 40A</span></button>
+      <button class="build-btn" id="btn_build_hospital">➕ Hôpital<span>140G 20F</span></button>
+      <button class="build-btn" id="btn_build_wall">█ Mur<span>40G</span></button>
+    </div>
+  </div>
+
+  <div id="prodPanel" class="hidden">
+    <h3 id="prodTitle">Production</h3>
+    <div id="prodQueue">File vide</div>
+    <div id="prodBtns"></div>
+  </div>
+
+  <div id="selPanel" class="hidden">
+    <h3>Sélection</h3>
+    <div id="selInfo"></div>
+  </div>
+
+  <div id="minimapWrap">
+    <div id="minimapLabel">Broken Array</div>
+    <canvas id="minimap" width="150" height="150"></canvas>
+  </div>
+
+  <div id="placingHint"></div>
+  <div id="buildError"></div>
+  <div id="waveNotif"></div>
+
+  <!-- Banner défaite / fin de niveau -->
+  <div id="banner">
+    <h2 id="bannerTitle">Victoire</h2>
+    <p id="bannerSub">La bataille est terminée</p>
+    <div class="banner-btns">
+      <button class="banner-btn" id="restartBtn">Recommencer</button>
+      <button class="banner-btn primary" id="nextLevelBtn" style="display:none">Niveau suivant →</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="dragBox"></div>
+
+<script src="js/InputState.js"></script>
+<script src="js/Game.js"></script>
+<script src="js/GameLoop.js"></script>
+<script src="js/Camera.js"></script>
+<script src="js/Building.js"></script>
+<script src="js/SquadDefs.js"></script>
+<script src="js/Squad.js"></script>
+<script src="js/ResourceNode.js"></script>
+<script src="js/ResourceSystem.js"></script>
+<script src="js/BuildingSystem.js"></script>
+<script src="js/ProductionSystem.js"></script>
+<script src="js/SquadSystem.js"></script>
+<script src="js/SquadCombatSystem.js"></script>
+<script src="js/SquadAISystem.js"></script>
+<script src="js/WorkerSystem.js"></script>
+<script src="js/WaveSystem.js"></script>
+<script src="js/ParticleSystem.js"></script>
+<script src="js/ProjectileSystem.js"></script>
+<script src="js/BuildingRenderer.js"></script>
+<script src="js/SquadRenderer.js"></script>
+<script src="js/MinimapRenderer.js"></script>
+<script src="js/Renderer.js"></script>
+<script src="js/InputManager.js"></script>
+<script src="js/AllySystem.js"></script>
+<script src="js/CheatMenu.js"></script>
+<script src="js/MainMenu.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // Fermeture crédits
+  document.getElementById("creditsCloseBtn").onclick = function() {
+    document.getElementById("creditsModal").style.display = "none";
+  };
+</script>
+</body>
+</html>

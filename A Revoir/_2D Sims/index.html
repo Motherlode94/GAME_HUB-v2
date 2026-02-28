@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les Sims 2D</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel='stylesheet' href='../css/game-shell.css'>
+</head>
+<body>
+
+    <button id='back-to-catalog' class='catalog-back' type='button' data-catalog-back='true' aria-label='Retour au catalogue'>
+        <span class='back-icon' aria-hidden='true'>&#8592;</span>
+        <span class='back-text'>Catalogue</span>
+    </button>
+    <div class="game-container">
+        <header>
+            <h1>Les Sims 2D</h1>
+            <div class="header-info">
+                <div id="location-display">Quartier residentiel</div>
+                <div id="time-display"></div>
+            </div>
+            <div class="game-controls">
+                <button id="pause-btn" type="button">Pause</button>
+                <button class="speed-btn active" data-speed="1" type="button">1x</button>
+                <button class="speed-btn" data-speed="2" type="button">2x</button>
+                <button class="speed-btn" data-speed="3" type="button">3x</button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <div id="world-viewport">
+                <div id="world"></div>
+                <div id="interaction-menu" class="interaction-menu"></div>
+            </div>
+
+            <div class="advanced-info-panel">
+                <h3>Informations</h3>
+
+                <div class="info-item">
+                    <label>Age:</label>
+                    <span id="char-age">25 ans (Adulte)</span>
+                </div>
+
+                <div class="info-item">
+                    <label>Saison:</label>
+                    <span id="season-info">Printemps, Jour 1</span>
+                </div>
+
+                <div class="info-item">
+                    <label>Reputation:</label>
+                    <span id="reputation-info">Connu (50/100)</span>
+                </div>
+
+                <div class="info-item">
+                    <label>Etat social:</label>
+                    <span id="social-status">Equilibre</span>
+                </div>
+
+                <div class="info-item">
+                    <label>Prochain:</label>
+                    <span id="next-activity">Aucune activite</span>
+                </div>
+            </div>
+
+            <aside class="sidebar">
+                <div class="character-panel">
+                    <h2 id="char-name">Alex</h2>
+                    <div id="char-money" class="money-display">500$</div>
+
+                    <div class="mood-indicator">
+                        <span id="mood-icon">:)</span>
+                        <div class="mood-bar">
+                            <div id="mood-fill" class="mood-fill"></div>
+                        </div>
+                        <span id="mood-text">Bien</span>
+                    </div>
+
+                    <div class="traits-container">
+                        <h4>Traits</h4>
+                        <div id="traits-list" class="traits-list"></div>
+                    </div>
+
+                    <div class="aspiration-container">
+                        <h4>Aspiration</h4>
+                        <div id="aspiration-progress"></div>
+                    </div>
+                </div>
+
+                <div class="needs-panel">
+                    <h3>Besoins</h3>
+                    <div id="needs-bars"></div>
+                </div>
+
+                <div class="skills-panel">
+                    <h3>Competences</h3>
+                    <div id="skills-list"></div>
+                </div>
+
+                <div class="relations-panel">
+                    <h3>Relations</h3>
+                    <div id="relations-list"></div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="quick-actions" id="quickActions">
+            <button class="quick-action-btn" data-action="eat" type="button" title="Manger">Eat</button>
+            <button class="quick-action-btn" data-action="drink" type="button" title="Boire">Drink</button>
+            <button class="quick-action-btn" data-action="sleep" type="button" title="Dormir">Sleep</button>
+            <button class="quick-action-btn" data-action="toilet" type="button" title="Toilettes">Toilet</button>
+            <button class="quick-action-btn" data-action="shower" type="button" title="Douche">Shower</button>
+            <button class="quick-action-btn" data-action="socialize" type="button" title="Socialiser">Social</button>
+            <button class="quick-action-btn" data-action="fun" type="button" title="Fun">Fun</button>
+        </div>
+
+        <div class="legend">
+            <h4>Controles</h4>
+            <p>Fleches / ZQSD: Bouger | Espace: Interagir | R: Reposer | P: Pause | 1/2/3: Vitesse</p>
+            <p>Clique sur un objet pour voir les interactions disponibles.</p>
+            <p>Touche I: Activer/desactiver le mode debug.</p>
+        </div>
+
+        <div id="debug-panel" class="debug-panel" style="display:none;">
+            <h4>Debug</h4>
+            <div id="debug-keys">Aucune touche</div>
+            <div id="debug-position"></div>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/scores.js"></script>
+
+    <script src="js/time.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/needs.js"></script>
+    <script src="js/movement.js"></script>
+    <script src="js/skills.js"></script>
+    <script src="js/relationship.js"></script>
+    <script src="js/emotions.js"></script>
+
+    <script src="js/family.js"></script>
+    <script src="js/aging.js"></script>
+    <script src="js/seasons.js"></script>
+    <script src="js/memory.js"></script>
+    <script src="js/jealousy.js"></script>
+    <script src="js/routines.js"></script>
+    <script src="js/socialNeeds.js"></script>
+    <script src="js/reputation.js"></script>
+    <script src="js/integration.js"></script>
+
+    <script src="js/worldmanager.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/objects.js"></script>
+    <script src="js/character.js"></script>
+    <script src="js/consequence.js"></script>
+    <script src="js/death.js"></script>
+    <script src="js/interaction.js"></script>
+    <script src="js/autonomousAI.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+
+<script src='../js/game-shell.js'></script>
+</body>
+</html>
+
+

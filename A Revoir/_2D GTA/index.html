@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GTA 2D - jeu web open world en JavaScript">
+  <title>GTA 2D</title>
+
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/ui.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="../css/game-shell.css">
+</head>
+<body>
+  <div id="app">
+    <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
+      <span class="back-icon">&larr;</span>
+      <span class="back-text">Retour</span>
+    </button>
+
+    <canvas id="game"></canvas>
+
+    <div class="title" id="game-title">GTA 2D</div>
+
+    <div class="controls" id="controls-hint">
+      ZQSD/Fleches: Deplacer • E: Vehicule • Espace: Tirer • A/TAB: Changer arme • 1-4: Selection rapide • F: Shop • Suis le panneau mission • Echap: Pause
+    </div>
+
+    <div class="quick-actions" aria-label="Actions rapides">
+      <button id="restart-btn" class="hud-btn" type="button">Recommencer</button>
+      <button id="main-menu-btn" class="hud-btn" type="button">Menu principal</button>
+    </div>
+
+    <button id="fullscreen-btn" title="Plein ecran">Plein ecran</button>
+
+    <aside id="mission-panel" class="mission-panel" aria-live="polite">
+      <div class="mission-head">MISSION ACTIVE</div>
+      <h2 id="mission-title" class="mission-title">AUCUNE MISSION</h2>
+      <p id="mission-objective" class="mission-objective">-</p>
+      <div class="mission-meta">
+        <span class="mission-meta-label">Progression</span>
+        <span id="mission-progress" class="mission-meta-value">-</span>
+      </div>
+      <div class="mission-meta">
+        <span class="mission-meta-label">Prime</span>
+        <span id="mission-reward" class="mission-meta-value">$0</span>
+      </div>
+      <div class="mission-meta">
+        <span class="mission-meta-label">Temps</span>
+        <span id="mission-timer" class="mission-meta-value">--</span>
+      </div>
+      <ul id="mission-feed" class="mission-feed"></ul>
+    </aside>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/scores.js"></script>
+
+  <script src="js/core/Utils.js"></script>
+  <script src="js/core/Input.js"></script>
+  <script src="js/core/Game.js"></script>
+
+  <script src="js/entities/Player.js"></script>
+  <script src="js/entities/Vehicle.js"></script>
+  <script src="js/entities/NPC.js"></script>
+  <script src="js/entities/Enemy.js"></script>
+
+  <script src="js/systems/Physics.js"></script>
+  <script src="js/systems/Collision.js"></script>
+  <script src="js/systems/Camera.js"></script>
+  <script src="js/systems/AI.js"></script>
+  <script src="js/systems/Weapon.js"></script>
+  <script src="js/systems/Missions.js"></script>
+  <script src="js/entities/Police.js"></script>
+  <script src="js/systems/Shop.js"></script>
+
+  <script src="js/world/Map.js"></script>
+  <script src="js/world/Buildings.js"></script>
+  <script src="js/world/Traffic.js"></script>
+
+  <script src="js/ui/HUD.js"></script>
+  <script src="js/ui/Minimap.js"></script>
+  <script src="js/ui/Menu.js"></script>
+
+  <script src="js/main.js"></script>
+
+  <script>
+    const canvas = document.getElementById("game");
+
+    document.getElementById("fullscreen-btn").addEventListener("click", () => {
+      if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+      } else if (canvas.webkitRequestFullscreen) {
+        canvas.webkitRequestFullscreen();
+      } else if (canvas.msRequestFullscreen) {
+        canvas.msRequestFullscreen();
+      }
+    });
+
+    const backBtn = document.getElementById("back-to-catalog");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        if (window.CatalogScore && typeof window.CatalogScore.flush === "function") {
+          window.CatalogScore.flush();
+        }
+        window.location.href = "../index.html";
+      });
+    }
+
+    const restartBtn = document.getElementById("restart-btn");
+    if (restartBtn) {
+      restartBtn.addEventListener("click", () => {
+        if (window.Game && typeof Game.resetGame === "function") {
+          Game.resetGame({ openMenu: false, submitScore: true });
+          if (Game.HUD) Game.HUD.showMessage("Partie relancee", 120);
+        }
+      });
+    }
+
+    const menuBtn = document.getElementById("main-menu-btn");
+    if (menuBtn) {
+      menuBtn.addEventListener("click", () => {
+        if (window.Game && Game.Menu && typeof Game.Menu.open === "function") {
+          Game.Menu.open("main");
+        }
+      });
+    }
+
+    setTimeout(() => {
+      const title = document.getElementById("game-title");
+      if (!title) return;
+      title.style.opacity = "0";
+      title.style.transition = "opacity 2s";
+      setTimeout(() => {
+        title.style.display = "none";
+      }, 2000);
+    }, 3500);
+
+    canvas.focus();
+    canvas.addEventListener("click", () => canvas.focus());
+  </script>
+
+  <script src="../js/game-shell.js"></script>
+</body>
+</html>

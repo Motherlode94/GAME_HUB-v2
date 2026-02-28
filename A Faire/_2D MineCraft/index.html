@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ðŸŽ® MineBlock 2D - Ã‰dition Survie</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Bouton Retour au Catalogue -->
+    <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
+        <span class="back-icon">â†</span>
+        <span class="back-text">Retour</span>
+    </button>
+
+    <div class="game-container">
+        <!-- Header avec informations -->
+        <header class="game-header">
+            <div class="header-content">
+                <h1 class="game-title">â›ï¸ MineBlock 2D</h1>
+                <div class="game-stats">
+                    <div class="stat">
+                        <span class="stat-icon">ðŸª¨</span>
+                        <span class="stat-value" id="stone-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">ðŸªµ</span>
+                        <span class="stat-value" id="wood-count">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">ðŸŒ±</span>
+                        <span class="stat-value" id="dirt-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Zone de jeu principale -->
+        <main class="game-main">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- Menu de construction -->
+            <aside class="build-menu">
+                <h2 class="menu-title">ðŸ“¦ Blocs</h2>
+                <div class="block-selector" id="blockSelector">
+                    <!-- Les blocs seront ajoutÃ©s dynamiquement -->
+                </div>
+            </aside>
+        </main>
+
+        <!-- ContrÃ´les -->
+        <footer class="game-controls">
+            <div class="control-group">
+                <button class="control-btn" id="mineBtn">
+                    <span class="btn-icon">â›ï¸</span>
+                    <span class="btn-text">Miner</span>
+                </button>
+                <button class="control-btn" id="buildBtn">
+                    <span class="btn-icon">ðŸ§±</span>
+                    <span class="btn-text">Construire</span>
+                </button>
+                <button class="control-btn" id="resetBtn">
+                    <span class="btn-icon">ðŸ”„</span>
+                    <span class="btn-text">Nouveau Monde</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Chargement des modules JavaScript -->
+    <script src="js/block.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+
+    <!-- Script du bouton retour -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const backBtn = document.getElementById('back-to-catalog');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    window.location.href = '../index.html';
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
+

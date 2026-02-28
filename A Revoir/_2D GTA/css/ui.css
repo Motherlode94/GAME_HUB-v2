@@ -1,0 +1,45 @@
+﻿/* ui.css - HUD overlays and cinematic effects */
+
+.hud-message {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font: 900 38px/1 "Arial Black", Impact, sans-serif;
+  letter-spacing: 1px;
+  text-shadow:
+    0 0 6px rgba(0, 0, 0, 0.95),
+    0 0 20px rgba(94, 181, 255, 0.7);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 35;
+}
+
+.notification {
+  position: absolute;
+  top: 110px;
+  right: 20px;
+  z-index: 26;
+  background: rgba(10, 14, 22, 0.92);
+  color: #f4f7ff;
+  border: 1px solid rgba(140, 210, 255, 0.5);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font: 700 13px/1.2 "Segoe UI", Tahoma, sans-serif;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+
+.wanted-star {
+  color: #ffe06a;
+  text-shadow: 0 0 8px rgba(255, 201, 49, 0.8);
+}
+
+@media (max-width: 920px) {
+  .notification {
+    top: auto;
+    bottom: 138px;
+    right: 12px;
+    font-size: 12px;
+  }
+}

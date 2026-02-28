@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ARCWAVE</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- ── SHOP OVERLAY ───────────────────────── -->
+<div id="shop">
+    <h1>⚡ ARCWAVE SHOP</h1>
+    <div class="subtitle">SPEND YOUR GOLD — THE NEXT WAVE AWAITS</div>
+    <div id="shop-stats">
+        <div class="gold-stat">💰 GOLD: <span id="shop-gold">0</span></div>
+        <div class="stat">WAVE: <span id="shop-wave">1</span></div>
+        <div class="stat">SCORE: <span id="shop-score">0</span></div>
+    </div>
+    <div id="shop-grid"></div>
+    <button id="next-wave-btn" onclick="startNextWave()">
+        ▶ LAUNCH WAVE <span id="next-wave-num">2</span>
+    </button>
+</div>
+
+<!-- ── GAME OVER OVERLAY ──────────────────── -->
+<div id="gameover">
+    <h1>DEFEATED</h1>
+    <div class="stats" id="gameover-stats"></div>
+    <button id="restart-btn" onclick="restartGame()">↺ PLAY AGAIN</button>
+</div>
+
+<!-- ── CONTROLS HINT ─────────────────────── -->
+<div id="controls">
+    ARROW KEYS — MOVE<br>
+    A / Z / E / R — CAST SPELL<br>
+    AIM WITH MOUSE
+</div>
+
+<!-- ── SCRIPTS (load order matters) ─────── -->
+<script src="js/utils.js"></script>
+<script src="js/projectile.js"></script>
+<script src="js/aoe.js"></script>
+<script src="js/enemy.js"></script>
+<script src="js/tower.js"></script>
+<script src="js/player.js"></script>
+<script src="js/game.js"></script>
+
+</body>
+</html>

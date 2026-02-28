@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Empire Manager 2D - Gere ton empire medieval dans ce jeu de strategie 2D">
+    <title>Empire Manager 2D</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../css/game-shell.css">
+</head>
+<body>
+    <button id="back-to-catalog" class="btn-back" aria-label="Retour au catalogue de jeux">
+        <span class="back-icon">&larr;</span>
+        <span class="back-text">Retour au Catalogue</span>
+    </button>
+
+    <div id="game-container">
+        <header id="top-bar" role="toolbar" aria-label="Ressources de l'empire">
+            <div class="resource-group">
+                <div class="res-item" data-resource="gold">
+                    <span class="res-label">Or:</span>
+                    <span id="gold-val" class="res-value">0</span>
+                </div>
+                <div class="res-item" data-resource="food">
+                    <span class="res-label">Nourriture:</span>
+                    <span id="food-val" class="res-value">0</span>
+                </div>
+                <div class="res-item" data-resource="stone">
+                    <span class="res-label">Pierre:</span>
+                    <span id="stone-val" class="res-value">0</span>
+                </div>
+                <div class="res-item" data-resource="population">
+                    <span class="res-label">Population:</span>
+                    <span id="pop-val" class="res-value">0</span>
+                </div>
+            </div>
+
+            <div class="status-group">
+                <div class="res-item" id="workers-status" data-tooltip="Ouvriers disponibles / Ouvriers maximum">
+                    <span class="res-label">Ouvriers:</span>
+                    <span class="res-value">0 / 0</span>
+                </div>
+                <div class="res-item" data-resource="happiness">
+                    <span class="res-label">Bonheur:</span>
+                    <span id="happiness-val" class="res-value">100%</span>
+                </div>
+            </div>
+        </header>
+
+        <main id="game-main">
+            <section id="game-viewport" aria-label="Carte de l'empire">
+                <div id="map-container">
+                    <canvas id="gameCanvas" width="800" height="600" aria-label="Carte interactive de l'empire">
+                        Votre navigateur ne supporte pas les elements canvas.
+                    </canvas>
+                    <div id="map-overlay" class="map-overlay">
+                        <button id="zoom-in" class="map-control" aria-label="Zoom avant">+</button>
+                        <button id="zoom-out" class="map-control" aria-label="Zoom arriere">-</button>
+                        <button id="center-map" class="map-control" aria-label="Centrer la carte">[]</button>
+                    </div>
+                </div>
+                <div id="notification-area" role="log" aria-live="polite" aria-label="Notifications du jeu"></div>
+            </section>
+
+            <aside id="side-panel" role="complementary" aria-label="Panneau de controle">
+                <section class="panel-section" aria-labelledby="construction-title">
+                    <h3 id="construction-title">Construction</h3>
+                    <div class="build-menu" role="toolbar" aria-label="Menu de construction">
+                        <button class="btn-build" onclick="Buildings.select('Ferme')" data-building="farm" aria-label="Construire une Ferme - Cout: 50 Or">
+                            <span class="building-name">Ferme</span>
+                            <small class="building-cost">50 Or</small>
+                            <span class="building-desc">+ Nourriture</span>
+                        </button>
+
+                        <button class="btn-build" onclick="Buildings.select('Maison')" data-building="house" aria-label="Construire une Maison - Cout: 40 Or">
+                            <span class="building-name">Maison</span>
+                            <small class="building-cost">40 Or</small>
+                            <span class="building-desc">+ Logements</span>
+                        </button>
+
+                        <button class="btn-build" onclick="Buildings.select('Mine')" data-building="mine" aria-label="Construire une Mine - Cout: 80 Or">
+                            <span class="building-name">Mine</span>
+                            <small class="building-cost">80 Or</small>
+                            <span class="building-desc">+ Pierre</span>
+                        </button>
+
+                        <button class="btn-build" onclick="Buildings.select('Marche')" data-building="market" aria-label="Construire un Marche - Cout: 100 Or">
+                            <span class="building-name">Marche</span>
+                            <small class="building-cost">100 Or</small>
+                            <span class="building-desc">+ Revenus</span>
+                        </button>
+
+                        <button class="btn-build" onclick="Buildings.select('Barracks')" data-building="barracks" aria-label="Construire une Caserne - Cout: 150 Or">
+                            <span class="building-name">Caserne</span>
+                            <small class="building-cost">150 Or</small>
+                            <span class="building-desc">+ Armee</span>
+                        </button>
+                    </div>
+
+                    <div id="selected-building-info" class="selected-info" aria-live="polite"></div>
+                </section>
+
+                <hr class="panel-divider">
+
+                <section class="panel-section" aria-labelledby="management-title">
+                    <h3 id="management-title">Gestion</h3>
+                    <div class="management-menu">
+                        <button class="btn-manage" onclick="Taxes.openMenu()" aria-label="Ouvrir le menu des taxes">
+                            Regler les Taxes
+                        </button>
+                        <button class="btn-manage" onclick="Army.openMenu()" aria-label="Ouvrir le menu de recrutement militaire">
+                            Recruter Soldats
+                        </button>
+                        <button class="btn-manage" onclick="Diplomacy.openMenu()" aria-label="Ouvrir le menu de diplomatie">
+                            Diplomatie
+                        </button>
+                    </div>
+                </section>
+
+                <section class="panel-section" aria-labelledby="info-title">
+                    <h3 id="info-title">Informations</h3>
+                    <div class="info-display">
+                        <div class="info-item">
+                            <span class="info-label">Mode:</span>
+                            <span id="game-mode" class="info-value">Construction</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Batiments:</span>
+                            <span id="building-count" class="info-value">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Soldats:</span>
+                            <span id="army-count" class="info-value">0</span>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </main>
+
+        <footer id="status-bar" role="status" aria-live="polite">
+            <div class="status-left">
+                <span id="game-date" class="date-display">An 1 - Mois 1</span>
+                <span id="game-speed" class="speed-display">Vitesse: 1x</span>
+            </div>
+            <div class="status-center">
+                <span id="game-status" class="status-display">Statut: En paix</span>
+                <span id="empire-score" class="status-display">Score: 0</span>
+            </div>
+            <div class="status-right">
+                <button id="pause-game" class="btn-control" aria-label="Mettre le jeu en pause">Pause</button>
+                <button id="speed-up" class="btn-control" aria-label="Accelerer le jeu">Speed+</button>
+                <button id="speed-down" class="btn-control" aria-label="Ralentir le jeu">Speed-</button>
+                <button id="save-game" class="btn-control" aria-label="Sauvegarder la partie">Save</button>
+                <button id="load-game" class="btn-control" aria-label="Charger la derniere sauvegarde">Load</button>
+                <button id="reset-game" class="btn-control" aria-label="Recommencer une nouvelle partie">Reset</button>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/scores.js"></script>
+
+    <script src="js/core/globals.js"></script>
+    <script src="js/core/state.js"></script>
+    <script src="js/core/timer.js"></script>
+
+    <script src="js/game/buildings.js"></script>
+    <script src="js/game/production.js"></script>
+    <script src="js/game/army.js"></script>
+    <script src="js/game/diplomacy.js"></script>
+    <script src="js/game/governor.js"></script>
+
+    <script src="js/mechanics/ressources.js"></script>
+    <script src="js/mechanics/taxes.js"></script>
+    <script src="js/mechanics/happiness.js"></script>
+    <script src="js/mechanics/population.js"></script>
+    <script src="js/mechanics/citizens.js"></script>
+    <script src="js/mechanics/events.js"></script>
+    <script src="js/mechanics/climate.js"></script>
+    <script src="js/mechanics/demography.js"></script>
+    <script src="js/game/economy.js"></script>
+
+    <script src="js/ui/ui.js"></script>
+    <script src="js/ui/map.js"></script>
+    <script src="js/core/main.js"></script>
+
+    <script>
+        (function () {
+            function computeEmpireScore() {
+                if (typeof gameState !== "object" || !gameState) return 0;
+
+                var resources = gameState.resources || {};
+                var population = gameState.population || {};
+                var army = gameState.army || {};
+                var buildings = Array.isArray(gameState.buildings) ? gameState.buildings.length : 0;
+
+                var resourceScore =
+                    Math.floor(resources.gold || 0) +
+                    Math.floor(resources.food || 0) * 2 +
+                    Math.floor(resources.stone || 0) * 3;
+
+                var civicScore =
+                    Math.floor(population.current || 0) * 20 +
+                    Math.floor(population.happiness || 0) * 10 +
+                    buildings * 120;
+
+                var militaryScore = Math.floor(army.total || 0) * 60;
+                var date = gameState.date || {};
+                var yearScore = Math.max(0, (date.year || 1) - 1) * 200;
+
+                return Math.max(0, resourceScore + civicScore + militaryScore + yearScore);
+            }
+
+            function syncEmpireScore() {
+                var score = computeEmpireScore();
+                var scoreEl = document.getElementById("empire-score");
+                if (scoreEl) {
+                    scoreEl.textContent = "Score: " + score;
+                }
+
+                window.gameState = window.gameState || {};
+                window.gameState.score = score;
+
+                if (window.CatalogScore && typeof window.CatalogScore.capture === "function") {
+                    window.CatalogScore.capture();
+                }
+            }
+
+            function bindControls() {
+                var pauseBtn = document.getElementById("pause-game");
+                var speedUpBtn = document.getElementById("speed-up");
+                var speedDownBtn = document.getElementById("speed-down");
+                var saveBtn = document.getElementById("save-game");
+                var loadBtn = document.getElementById("load-game");
+                var resetBtn = document.getElementById("reset-game");
+
+                if (pauseBtn) {
+                    pauseBtn.addEventListener("click", function () {
+                        if (window.Game && typeof window.Game.togglePause === "function") {
+                            window.Game.togglePause();
+                            pauseBtn.textContent = window.Game.isRunning ? "Pause" : "Play";
+                        } else if (window.Timer) {
+                            if (window.Timer.isPaused && typeof window.Timer.resume === "function") {
+                                window.Timer.resume();
+                                pauseBtn.textContent = "Pause";
+                            } else if (typeof window.Timer.pause === "function") {
+                                window.Timer.pause();
+                                pauseBtn.textContent = "Play";
+                            }
+                        }
+                    });
+                }
+
+                if (speedUpBtn) {
+                    speedUpBtn.addEventListener("click", function () {
+                        if (window.Timer && typeof window.Timer.increaseSpeed === "function") {
+                            window.Timer.increaseSpeed();
+                        }
+                    });
+                }
+
+                if (speedDownBtn) {
+                    speedDownBtn.addEventListener("click", function () {
+                        if (window.Timer && typeof window.Timer.decreaseSpeed === "function") {
+                            window.Timer.decreaseSpeed();
+                        }
+                    });
+                }
+
+                if (saveBtn) {
+                    saveBtn.addEventListener("click", function () {
+                        if (window.GameUtils && typeof window.GameUtils.saveGame === "function") {
+                            var ok = window.GameUtils.saveGame("manual");
+                            if (window.UI && typeof window.UI.notify === "function") {
+                                window.UI.notify(ok ? "Partie sauvegardee" : "Echec sauvegarde", ok ? "success" : "error");
+                            }
+                        }
+                    });
+                }
+
+                if (loadBtn) {
+                    loadBtn.addEventListener("click", function () {
+                        if (!(window.GameUtils && typeof window.GameUtils.loadGame === "function")) return;
+                        var ok = window.GameUtils.loadGame("manual") || window.GameUtils.loadGame("auto");
+                        if (ok) {
+                            if (window.State && typeof window.State.init === "function") window.State.init();
+                            if (window.UI && typeof window.UI.refresh === "function") window.UI.refresh(true);
+                            if (window.Map && typeof window.Map.draw === "function") window.Map.draw();
+                        }
+                        if (window.UI && typeof window.UI.notify === "function") {
+                            window.UI.notify(ok ? "Sauvegarde chargee" : "Aucune sauvegarde disponible", ok ? "success" : "warning");
+                        }
+                    });
+                }
+
+                if (resetBtn) {
+                    resetBtn.addEventListener("click", function () {
+                        if (!window.confirm("Reinitialiser la partie ?")) return;
+                        try {
+                            localStorage.removeItem("empire_save_manual");
+                            localStorage.removeItem("empire_save_auto");
+                        } catch (_error) {
+                            // no-op
+                        }
+                        window.location.reload();
+                    });
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                bindControls();
+                syncEmpireScore();
+                window.setInterval(syncEmpireScore, 2500);
+            });
+        })();
+    </script>
+
+    <script src="../js/game-shell.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HARDWOOD — Basketball Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,600;0,700;0,900;1,700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+
+<!-- ─── TITLE SCREEN ─── -->
+<div id="titleScreen">
+  <div class="title-glow"></div>
+  <div class="title-court"></div>
+  <div class="title-main">
+    <h1>HARDWOOD</h1>
+    <div class="sub">Basketball Manager</div>
+    <div class="tagline">Build · Manage · Dominate</div>
+    <div class="title-btns">
+      <button class="btn btn-primary" onclick="showSetup()">▶ NEW GAME</button>
+      <button class="btn btn-outline" onclick="loadGame()">↩ CONTINUE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SETUP SCREEN ─── -->
+<div id="setupScreen" class="hidden">
+  <div class="setup-box">
+    <h2>CREATE YOUR TEAM</h2>
+    <p>Set up your franchise before the season begins.</p>
+    <div class="form-group">
+      <label>Team Name</label>
+      <input type="text" id="teamNameInput" placeholder="e.g. Neon Wolves" maxlength="24"/>
+    </div>
+    <div class="form-group">
+      <label>City</label>
+      <input type="text" id="teamCityInput" placeholder="e.g. New Horizon" maxlength="20"/>
+    </div>
+    <div class="form-group">
+      <label>Team Color</label>
+      <div class="jersey-pick" id="jerseyPick"></div>
+    </div>
+    <div class="form-group">
+      <label>League Difficulty</label>
+      <select id="diffSelect">
+        <option value="easy">Rookie — Forgiving opponents</option>
+        <option value="normal" selected>Pro — Balanced challenge</option>
+        <option value="hard">Elite — Brutal AI</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:28px;">
+      <button class="btn btn-outline btn-sm" onclick="showTitle()">← Back</button>
+      <button class="btn btn-primary" style="flex:1" onclick="createTeam()">START SEASON →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MAIN APP ─── -->
+<div id="app">
+  <nav id="nav">
+    <div class="nav-logo">HW</div>
+    <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showTab('roster')">Roster</button>
+    <button class="nav-tab" onclick="showTab('tactics')">Tactics</button>
+    <button class="nav-tab" onclick="showTab('training')">Training</button>
+    <button class="nav-tab" onclick="showTab('market')">Market</button>
+    <button class="nav-tab" onclick="showTab('schedule')">Schedule</button>
+    <button class="nav-tab" onclick="showTab('league')">League</button>
+    <div class="nav-right">
+      <span class="nav-badge nav-gold" id="navBudget">💰 0K</span>
+      <span class="nav-badge nav-season" id="navSeason">Season 1</span>
+    </div>
+  </nav>
+  <div id="content"></div>
+</div>
+
+<!-- ─── MATCH SCREEN ─── -->
+<div id="matchScreen">
+  <div class="match-scoreboard">
+    <div class="score-team">
+      <div class="score-name" id="msMyName">—</div>
+      <div class="score-pts" id="msMyScore" style="color:var(--accent)">0</div>
+    </div>
+    <div>
+      <div class="score-info">
+        <div class="score-quarter" id="msQuarter">Q1</div>
+        <div class="score-timer" id="msTimer">12:00</div>
+        <div class="possession-bar" style="margin-top:6px;width:120px;">
+          <div class="poss-my" id="possBar" style="width:50%"></div>
+          <div class="poss-opp" style="flex:1"></div>
+        </div>
+      </div>
+    </div>
+    <div class="score-team">
+      <div class="score-name" id="msOppName">—</div>
+      <div class="score-pts" id="msOppScore" style="color:var(--accent2)">0</div>
+    </div>
+  </div>
+  <div class="match-main">
+    <div class="match-court">
+      <canvas id="courtCanvas" width="640" height="420"></canvas>
+    </div>
+    <div class="match-sidebar">
+      <div class="on-court-list">
+        <div class="on-court-title">ON COURT</div>
+        <div id="onCourtPlayers"></div>
+        <div class="momentum-bar"><div class="momentum-fill" id="momentumBar" style="width:50%"></div></div>
+        <div style="font-family:var(--font);font-size:.68em;color:var(--muted);letter-spacing:2px;text-align:center">MOMENTUM</div>
+      </div>
+      <div class="match-log" id="matchLog">
+        <div style="text-align:center;color:var(--muted);font-size:.8em;padding:20px">Game starting...</div>
+      </div>
+      <div class="match-actions">
+        <div class="action-title">CHOOSE ACTION</div>
+        <div class="action-grid" id="actionGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── RESULT OVERLAY ─── -->
+<div class="result-overlay hidden" id="resultOverlay">
+  <div class="result-box">
+    <div class="result-title" id="resultTitle">VICTORY</div>
+    <div class="result-score" id="resultScore">102 - 89</div>
+    <div class="result-mvp" id="resultMvp">MVP: <span>—</span></div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;" id="resultBtns"></div>
+  </div>
+</div>
+
+<!-- ─── SCRIPTS ─── -->
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/match.js"></script>
+<script src="js/views.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

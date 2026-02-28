@@ -1,0 +1,40 @@
+body {
+  margin:0;
+  font-family: system-ui;
+  background:#0e1116;
+  color:#e6edf3;
+}
+
+.topbar{
+  padding:20px;
+  border-bottom:1px solid #1f2630;
+  background:#161b22;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+  gap:20px;
+  padding:40px;
+}
+
+.card{
+  background:#161b22;
+  border:1px solid #30363d;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+.btn{
+  display:inline-block;
+  margin-top:15px;
+  padding:10px 15px;
+  background:#238636;
+  color:white;
+  text-decoration:none;
+  border-radius:6px;
+}
+.btn:hover{
+  background:#2ea043;
+}

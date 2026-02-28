@@ -1,0 +1,402 @@
+body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    font-family: 'MedievalSharp', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231a1a1a"/><path d="M0,0L100,100M100,0L0,100" stroke="%23333" stroke-width="1"/></svg>');
+    background-size: 200px 200px;
+}
+
+/* Bouton Retour */
+.btn-back {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(30, 30, 40, 0.95);
+    border: 2px solid #8B4513;
+    border-radius: 12px;
+    color: #D2691E;
+    font-family: 'MedievalSharp', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: rgba(139, 69, 19, 0.9);
+    border-color: #D2691E;
+    color: #fff;
+    transform: translateX(-5px);
+    box-shadow: 0 6px 20px rgba(210, 105, 30, 0.5);
+}
+
+.btn-back:active {
+    transform: translateX(-5px) scale(0.95);
+}
+
+.back-icon {
+    font-size: 20px;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.btn-back:hover .back-icon {
+    transform: translateX(-3px);
+}
+
+.back-text {
+    letter-spacing: 0.5px;
+}
+
+#game-container {
+    width: 80%;
+    max-width: 600px;
+    background-color: #2d2d2d;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.7),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+    border: 2px solid #5d4037;
+    position: relative;
+    overflow: hidden;
+}
+
+#game-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #8B4513, #D2691E, #8B4513);
+    border-radius: 15px 15px 0 0;
+}
+
+#text { 
+    margin-bottom: 25px; 
+    line-height: 1.6;
+    font-size: 1.1em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-left: 4px solid #8B4513;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn {
+    background: linear-gradient(145deg, #4a90e2, #357abd);
+    border: 2px solid #2c5282;
+    color: white;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1em;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn:hover { 
+    background: linear-gradient(145deg, #357abd, #2c5282);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-color: #4a90e2;
+}
+
+.btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+    z-index: -1;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+/* Stats display */
+#stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid #5d4037;
+    font-size: 0.9em;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-icon {
+    font-size: 1.2em;
+}
+
+/* Title styling */
+#game-title {
+    text-align: center;
+    font-size: 2.2em;
+    color: #D2691E;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-family: 'UnifrakturMaguntia', cursive;
+    letter-spacing: 2px;
+}
+
+/* Game header */
+#game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#game-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid #5d4037;
+    color: #D2691E;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2em;
+}
+
+.control-btn:hover {
+    background: rgba(139, 69, 19, 0.5);
+    border-color: #D2691E;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Inventory */
+#inventory-container {
+    margin: 15px 0;
+}
+
+.inventory-btn {
+    width: 100%;
+    background: linear-gradient(145deg, #5d4037, #4a342a);
+    border: 2px solid #8B4513;
+    color: #D2691E;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.inventory-btn:hover {
+    background: linear-gradient(145deg, #6d5042, #5d4037);
+    border-color: #D2691E;
+}
+
+#inventory-count {
+    background: #D2691E;
+    color: #1a1a1a;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+}
+
+/* Progress bar */
+#progress {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #5d4037;
+}
+
+#progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8B4513, #D2691E);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+#progress-text {
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: #D2691E;
+}
+
+/* Footer */
+#game-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.85em;
+    color: #999;
+}
+
+/* Achievement toast */
+#achievement-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
+    border: 2px solid #D2691E;
+    border-radius: 12px;
+    padding: 15px 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    animation: slideInRight 0.5s ease;
+}
+
+#achievement-toast.hidden {
+    display: none;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toast-icon {
+    font-size: 2em;
+}
+
+.toast-text strong {
+    display: block;
+    color: #D2691E;
+    margin-bottom: 5px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .btn-back {
+        padding: 10px 16px;
+        font-size: 14px;
+        top: 15px;
+        left: 15px;
+    }
+    
+    .back-text {
+        display: none;
+    }
+    
+    .back-icon {
+        font-size: 24px;
+    }
+    
+    #game-container {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    .btn-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #text {
+        font-size: 1em;
+        min-height: 100px;
+    }
+    
+    #stats {
+        font-size: 0.8em;
+    }
+    
+    #game-title {
+        font-size: 1.8em;
+    }
+    
+    #achievement-toast {
+        right: 10px;
+        left: 10px;
+        top: 70px;
+    }
+}
+
+/* Game over specific styling */
+.game-over {
+    color: #ff6b6b;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+/* Victory specific styling */
+.victory {
+    color: #4ecdc4;
+    text-align: center;
+}

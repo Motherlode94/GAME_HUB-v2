@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Catalogue — Warlike Gaming Corps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/leaderboard.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <p class="eyebrow">Warlike Gaming Corps</p>
+            <h1>GAME <span>CATALOGUE</span></h1>
+            <p class="subtitle">Made by HardieBay &nbsp;|&nbsp; <span id="game-count">0</span> titles available</p>
+        </div>
+        <div class="header-btns">
+            <a href="leaderboard.html" class="header-lb-btn">🏆 Leaderboard</a>
+            <a href="space.html" class="header-space-btn">🚀 Espace Joueur</a>
+        </div>
+    </header>
+
+    <div class="controls-bar">
+        <div class="container">
+            <div class="search-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="search-input" placeholder="Search games..." autocomplete="off">
+                <button class="clear-btn" id="clear-search" title="Clear">&#10005;</button>
+            </div>
+            <div class="select-wrap">
+                <select id="sort-select">
+                    <option value="default">Sort: Default</option>
+                    <option value="az">A &rarr; Z</option>
+                    <option value="za">Z &rarr; A</option>
+                    <option value="rating">Top Rated</option>
+                    <option value="year">Newest First</option>
+                </select>
+            </div>
+            <div class="filter-chips" id="filter-chips">
+                <button class="chip active" data-cat="all">All</button>
+                <button class="chip" data-cat="fps">FPS</button>
+                <button class="chip" data-cat="rpg">RPG</button>
+                <button class="chip" data-cat="strategy">Strategy</button>
+                <button class="chip" data-cat="action">Action</button>
+                <button class="chip" data-cat="survival">Survival</button>
+                <button class="chip" data-cat="sports">Sports</button>
+                <button class="chip" data-cat="adventure">Adventure</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="results-info" id="results-info"></div>
+        <div class="games-grid" id="games-grid"></div>
+        <div class="no-results hidden" id="no-results">
+            <span>&#127918;</span><p>No games found.</p>
+            <small>Try a different search or category.</small>
+        </div>
+    </main>
+
+    <!-- MODAL INFOS -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal">
+            <button class="modal-close" id="modal-close">&#10005;</button>
+            <div class="modal-badge" id="modal-badge"></div>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <div class="modal-meta" id="modal-meta"></div>
+            <p class="modal-desc" id="modal-desc"></p>
+            <div class="modal-tags" id="modal-tags"></div>
+
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-tab="scores">🏆 Scores</button>
+                <button class="modal-tab" data-tab="comments">💬 Reviews</button>
+                <button class="modal-tab" data-tab="changelog">📋 Patch Notes</button>
+            </div>
+
+            <!-- Scores (read-only — scores come from playing) -->
+            <div class="modal-tab-content active" id="tab-scores">
+                <p class="lb-scores-hint">🎮 Joue au jeu pour soumettre ton score automatiquement après la session.</p>
+                <div class="leaderboard" id="leaderboard-list"></div>
+            </div>
+
+            <!-- Comments -->
+            <div class="modal-tab-content" id="tab-comments">
+                <div class="comments-list" id="comments-list"></div>
+            </div>
+
+            <!-- Changelog -->
+            <div class="modal-tab-content" id="tab-changelog">
+                <div class="changelog-list" id="changelog-list"></div>
+            </div>
+
+            <button class="modal-play-btn hidden" id="modal-play-btn">&#9654; PLAY NOW</button>
+        </div>
+    </div>
+
+    <!-- MODAL JEU -->
+    <div class="modal-overlay modal-game-overlay hidden" id="modal-game-overlay">
+        <div class="modal modal-game" id="modal-game">
+            <div class="modal-game-topbar">
+                <span class="modal-game-title" id="modal-game-title"></span>
+                <button class="modal-close modal-game-close" id="modal-game-close">&#10005; Quitter</button>
+            </div>
+            <iframe id="game-iframe" src="" allowfullscreen allow="autoplay" title="Game"></iframe>
+        </div>
+    </div>
+
+    <!-- POST-GAME PANEL -->
+    <div class="postgame-overlay hidden" id="postgame-panel">
+        <div class="postgame-window">
+            <div class="postgame-header">
+                <span class="postgame-icon">🎮</span>
+                <div>
+                    <p class="postgame-label">Session terminée —</p>
+                    <h3 id="postgame-game-title">Game Title</h3>
+                </div>
+            </div>
+
+            <p class="postgame-subtitle">Laisse ton score et ton avis !</p>
+
+            <div class="pg-field-row">
+                <input type="text"   id="pg-score-name"  placeholder="Ton pseudo" maxlength="20">
+                <input type="number" id="pg-score-value" placeholder="Ton score (optionnel)" min="0">
+            </div>
+
+            <div class="pg-stars-wrap">
+                <span class="pg-stars-label">Ta note :</span>
+                <div class="pg-stars">
+                    <span class="pg-star" data-val="1">★</span>
+                    <span class="pg-star" data-val="2">★</span>
+                    <span class="pg-star" data-val="3">★</span>
+                    <span class="pg-star" data-val="4">★</span>
+                    <span class="pg-star" data-val="5">★</span>
+                </div>
+            </div>
+
+            <textarea id="pg-comment-text" placeholder="Ton avis sur le jeu..." rows="3" maxlength="300"></textarea>
+
+            <div class="pg-actions">
+                <button id="pg-skip-btn"   class="pg-btn-skip">Passer</button>
+                <button id="pg-submit-btn" class="pg-btn-submit">✔ Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Warlike Gaming Corps. All rights reserved.</p>
+    </footer>
+
+    <script src="js/scripts.js"></script>
+</body>
+</html>

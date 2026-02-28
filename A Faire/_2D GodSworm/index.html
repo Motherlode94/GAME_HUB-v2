@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>GodSworm - Divine Strategy</title>
+  <link rel="stylesheet" href="css/style.css">
+  
+</head>
+<body>
+  <div id="gameContainer">
+    <!-- Bouton Retour Global -->
+    <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
+        <span class="back-icon">&#8592;</span>
+        <span class="back-text">Retour</span>
+    </button>
+
+    <div id="mainMenu" class="menu-overlay hidden" aria-hidden="true">
+      <div class="menu-card">
+        <h2>MAIN MENU</h2>
+        <p>Choisis une action pour lancer ou reprendre la partie.</p>
+        <div class="menu-mode">
+          <label for="menu-mode">Mode</label>
+          <select id="menu-mode">
+            <option value="ffa">FFA (1 joueur + 3 IA)</option>
+            <option value="team">Team (2v2 + neutrals)</option>
+            <option value="sandbox">Sandbox (expansion libre)</option>
+          </select>
+        </div>
+        <div class="menu-actions">
+          <button id="menu-new-game" type="button">Nouvelle partie</button>
+          <button id="menu-continue" type="button">Continuer</button>
+          <button id="menu-load" type="button">Charger sauvegarde</button>
+          <button id="menu-reset-save" type="button">Effacer sauvegarde</button>
+        </div>
+      </div>
+    </div>
+
+    <h1 id="title">GODSWORM</h1>
+    
+    <!-- HUD Stats -->
+    <div id="hud">
+      <div class="hudPanel">
+        GOLD: <span id="goldAmount">200</span>
+      </div>
+      <div class="hudPanel">
+        FOOD: <span id="foodAmount">150</span>
+      </div>
+      <div class="hudPanel">
+        WOOD: <span id="woodAmount">100</span>
+      </div>
+      <div class="hudPanel">TEMPS: <span id="timer">0:00</span></div>
+      <div class="hudPanel">WAVE: <span id="waveValue">1</span></div>
+      <div class="hudPanel">ETAT: <span id="stateValue">Actif</span></div>
+      <div class="hudPanel">SCORE: <span id="scoreValue">0</span></div>
+    </div>
+
+    <div id="topControls">
+      <button id="pause-toggle" type="button">Pause</button>
+      <button class="speed-button active" type="button" data-speed="1">1x</button>
+      <button class="speed-button" type="button" data-speed="2">2x</button>
+      <button class="speed-button" type="button" data-speed="3">3x</button>
+      <button id="save-progress" type="button">Sauvegarder</button>
+      <button id="load-progress" type="button">Charger</button>
+      <button id="reset-progress" type="button">Reset</button>
+      <button id="open-main-menu" type="button">Main Menu</button>
+      <button id="power-smite" type="button">Smite (Z)</button>
+      <button id="power-bless" type="button">Bless (X)</button>
+      <button id="power-miracle" type="button">Miracle (C)</button>
+      <button id="capture-faith" type="button">Capturer (F)</button>
+      <span id="status-line">Commandez vos troupes pour convertir les territoires.</span>
+    </div>
+
+    <!-- Wrapper pour panels + canvas -->
+    <div id="gameWrapper">
+      <!-- Panels Ã  gauche -->
+      <div id="leftPanels">
+        <!-- Divine Presence -->
+        <div id="divinePresencePanel" class="panel">
+          <h3>âš¡ Divine Presence</h3>
+          <p>God: <span id="godName">Wyrd</span></p>
+          <p>Faith: <span id="faith">100 / 300</span></p>
+          <div class="faithBarContainer">
+            <div id="faithBar" class="faithBar"></div>
+          </div>
+          <p class="passive" id="passive">Faith generation increased in pagan lands</p>
+          <p>Time: <span id="gameTime">0s</span></p>
+          <div id="selectedInfo" style="display: none;">
+            <p class="selected">Selected: <span id="selectedFaction">-</span></p>
+            <p>Pop: <span id="selectedPop">0</span> | Res: <span id="selectedRes">0</span></p>
+          </div>
+        </div>
+
+        <!-- Divine Powers -->
+        <div id="divinePowersPanel" class="panel">
+          <h3>âš”ï¸ Commands</h3>
+          
+          <div class="power ready">
+            [B] Open Build Menu
+          </div>
+          <div class="power ready">
+            [V] Recruit Peasant from Town Hall
+          </div>
+          <div class="power ready">
+            [Q] Train Unit from selected building
+          </div>
+          
+          <hr style="border-color: #5a3a8a; margin: 8px 0;">
+          
+          <div style="font-size: 10px; color: #999;">
+            <p style="margin: 3px 0;"><strong style="color: #4caf50;">Select:</strong> Click | <strong style="color: #ffcc00;">Move:</strong> Right-Click</p>
+            <p style="margin: 3px 0;"><strong style="color: #64b5f6;">Harvest:</strong> Right-Click resource | <strong style="color: #f44336;">ESC:</strong> Cancel</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas au centre -->
+      <canvas id="gameCanvas" width="1920" height="1080"></canvas>
+
+      <!-- Panel Ã  droite -->
+      <div id="rightPanels">
+        <!-- Statistics -->
+        <div id="statisticsPanel" class="panel">
+          <h3>ðŸ“Š Statistics</h3>
+          <p>Power Level: <span id="powerLevel">0</span></p>
+          <p>Smites Used: <span id="totalSmites">0</span></p>
+          <p>Blessings: <span id="totalBlessings">0</span></p>
+          <p>Miracles: <span id="totalMiracles">0</span></p>
+          <p>Conversions: <span id="totalConversions">0</span></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <kbd>Click</kbd> SÃ©lectionner | 
+      <kbd>Shift+Click</kbd> Multi-select |
+      <kbd>Ctrl+Click</kbd> Meme type |
+      <kbd>Right-Click</kbd> Action | 
+      <kbd>B</kbd> Build Menu |
+      <kbd>Space</kbd> Pause |
+      <kbd>1/2/3</kbd> Vitesse |
+      <kbd>Z/X/C</kbd> Pouvoirs divins |
+      <kbd>T</kbd> Select same type |
+      <kbd>F</kbd> Capturer territoire (foi)
+    </div>
+
+    <div id="eventLog" aria-live="polite"></div>
+
+    <!-- MENU DE CONSTRUCTION (en overlay) -->
+    <div id="buildingMenu" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+      <div class="panel" style="width: 650px; max-height: 80vh; overflow-y: auto;">
+        <h3>ðŸ—ï¸ Construction Menu</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+          
+          <button class="buildButton" data-building="town_hall">
+            ðŸ›ï¸ Town Hall<br>
+            <span style="font-size: 10px;">Gold: 300 | Wood: 200</span>
+          </button>
+          
+          <button class="buildButton" data-building="barracks">
+            ðŸ° Barracks<br>
+            <span style="font-size: 10px;">Gold: 80 | Wood: 60</span>
+          </button>
+          
+          <button class="buildButton" data-building="archery_range">
+            ðŸŽ¯ Archery Range<br>
+            <span style="font-size: 10px;">Gold: 70 | Wood: 50</span>
+          </button>
+          
+          <button class="buildButton" data-building="shrine">
+            â›©ï¸ Shrine<br>
+            <span style="font-size: 10px;">Gold: 50 | Wood: 30</span>
+          </button>
+          
+          <button class="buildButton" data-building="temple">
+            ðŸ›ï¸ Temple<br>
+            <span style="font-size: 10px;">Gold: 150 | Wood: 100</span>
+          </button>
+          
+          <button class="buildButton" data-building="farm">
+            ðŸŒ¾ Farm<br>
+            <span style="font-size: 10px;">Gold: 40 | Wood: 30</span>
+          </button>
+          
+          <button class="buildButton" data-building="lumber_mill">
+            ðŸª“ Lumber Mill<br>
+            <span style="font-size: 10px;">Gold: 60 | Wood: 40</span>
+          </button>
+          
+          <button class="buildButton" data-building="mine">
+            â›ï¸ Mine<br>
+            <span style="font-size: 10px;">Gold: 80 | Wood: 50</span>
+          </button>
+          
+          <button class="buildButton" data-building="fortress">
+            ðŸ¯ Fortress<br>
+            <span style="font-size: 10px;">Gold: 200 | Wood: 150</span>
+          </button>
+          
+        </div>
+        <button onclick="closeBuildMenu()" style="margin-top: 15px; width: 100%; padding: 10px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Cancel [ESC]</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts dans le BON ORDRE -->
+  <script src="js/faction.js"></script>
+  <script src="js/resources.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/god.js"></script>
+  <script src="js/unit.js"></script>
+  <script src="js/building.js"></script>
+  <script>window.researchedTechs = window.researchedTechs || [];</script>
+  <script src="js/hero.js"></script>
+  <script src="js/ritual.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+
+<script src='../js/game-shell.js'></script>
+</body>
+</html>
+

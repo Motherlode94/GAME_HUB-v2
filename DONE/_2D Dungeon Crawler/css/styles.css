@@ -1,0 +1,443 @@
+/* ===== RESET & BASE ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #c9a84c;
+  --dark-gold: #7a5f1e;
+  --panel: #110e0a;
+  --border: #3d2f1a;
+  --text: #d4b896;
+}
+
+body {
+  background: #0a0806;
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background-image: radial-gradient(ellipse at 50% 0%, #1a100533 0%, transparent 60%);
+}
+
+h1 {
+  font-family: 'Cinzel Decorative', serif;
+  color: var(--gold);
+  font-size: 1.7em;
+  letter-spacing: 5px;
+  text-shadow: 0 0 20px #c9a84c77, 0 2px 4px #000;
+  margin-bottom: 14px;
+}
+
+/* ===== LAYOUT ===== */
+#game-wrapper {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+#canvas-container {
+  border: 2px solid var(--border);
+  box-shadow: 0 0 40px #00000099, 0 0 15px #c9a84c11;
+  background: #000;
+}
+
+#gameCanvas { display: block; }
+
+/* ===== SIDE PANEL ===== */
+#side-panel {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.panel-box h3 {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 0.68em;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5px 0;
+  font-size: 0.78em;
+}
+
+.stat-label { color: #7a6050; }
+.stat-val   { color: #e8d0a0; font-weight: 700; }
+
+.bar-wrap {
+  background: #0e0b08;
+  height: 7px;
+  border-radius: 2px;
+  margin: 3px 0 8px;
+  overflow: hidden;
+  border: 1px solid #221810;
+}
+
+.bar-fill { height: 100%; border-radius: 2px; transition: width 0.35s; }
+.hp-bar    { background: linear-gradient(90deg, #6b1111, #c0392b); }
+.xp-bar    { background: linear-gradient(90deg, #1a3a7a, #2471a3); }
+.enemy-bar { background: linear-gradient(90deg, #4a1a1a, #8b2020); }
+
+#message-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 0.74em;
+  color: #b09070;
+  min-height: 44px;
+  line-height: 1.6;
+}
+
+#minimap-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+  margin-bottom: 6px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 4px;
+}
+
+.leg-item {
+  font-size: 0.6em;
+  color: #5a4a38;
+  letter-spacing: 0.5px;
+}
+
+.controls-hint {
+  font-size: 0.64em;
+  color: #4a3828;
+  text-align: center;
+  line-height: 1.9;
+}
+
+/* ===== BUTTONS ===== */
+button {
+  background: linear-gradient(180deg, #3a2a14, #251b0c);
+  color: var(--gold);
+  border: 1px solid var(--dark-gold);
+  padding: 9px 16px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.74em;
+  letter-spacing: 1px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+button:hover {
+  background: linear-gradient(180deg, #4a3820, #352510);
+  border-color: var(--gold);
+  box-shadow: 0 0 12px #c9a84c33;
+  color: #f0d080;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== COMBAT OVERLAY ===== */
+#combat-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+#combat-overlay.active { display: flex; }
+
+#combat-window {
+  background: #110e0a;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 32px;
+  width: 520px;
+  max-width: 95vw;
+  box-shadow: 0 0 60px #000000bb, 0 0 30px #c9a84c18;
+}
+
+#combat-window h2 {
+  font-family: 'Cinzel Decorative', serif;
+  color: var(--gold);
+  text-align: center;
+  font-size: 1.3em;
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 15px #c9a84c55;
+}
+
+.fighters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.fighter-card {
+  flex: 1;
+  background: #1a1410;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.fighter-card h4 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.76em;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.player-name { color: #f0d080; }
+.enemy-name  { color: #e05050; }
+
+.vs-label {
+  font-size: 1.2em;
+  color: #4a3828;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 2px;
+}
+
+.fighter-stat {
+  font-size: 0.72em;
+  margin: 3px 0;
+  color: #7a6050;
+}
+.fighter-stat span { color: var(--text); }
+
+#combat-log {
+  background: #080604;
+  border: 1px solid #221810;
+  border-radius: 3px;
+  padding: 10px 14px;
+  height: 130px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.log-entry {
+  font-size: 0.74em;
+  font-family: 'Cinzel', serif;
+  padding: 3px 0;
+  border-bottom: 1px solid #130f0a;
+  line-height: 1.5;
+  color: #a08060;
+}
+
+.combat-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.combat-btns button { width: auto; flex: 1; padding: 12px; }
+
+#btn-flee {
+  background: linear-gradient(180deg, #2a1010, #1a0808);
+  border-color: #5a1818;
+  color: #d07070;
+}
+
+#btn-flee:hover {
+  background: linear-gradient(180deg, #3a1515, #281010);
+  border-color: #aa2222;
+  box-shadow: 0 0 12px #8b1a1a33;
+}
+
+/* ===== MAIN MENU ===== */
+#main-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#menu-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#menu-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  text-align: center;
+}
+
+#menu-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#menu-logo-sub {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85em;
+  color: #7a6050;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+
+#menu-logo-sub2 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8em;
+  color: #5a4030;
+  letter-spacing: 4px;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+#menu-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(2.4em, 6vw, 4em);
+  color: var(--gold);
+  letter-spacing: 6px;
+  line-height: 1.15;
+  text-shadow:
+    0 0 40px #c9a84c99,
+    0 0 80px #c9a84c44,
+    0 4px 8px #000;
+  animation: titlePulse 3s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+  0%, 100% { text-shadow: 0 0 40px #c9a84c99, 0 0 80px #c9a84c44, 0 4px 8px #000; }
+  50%       { text-shadow: 0 0 60px #c9a84ccc, 0 0 120px #c9a84c66, 0 4px 8px #000; }
+}
+
+#menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 300px;
+}
+
+.menu-btn {
+  width: 100%;
+  padding: 14px 24px;
+  font-size: 0.9em;
+  letter-spacing: 2px;
+}
+
+.menu-btn-main {
+  background: linear-gradient(180deg, #5a3a18, #3a2208);
+  border-color: var(--gold);
+  font-size: 1em;
+  box-shadow: 0 0 20px #c9a84c33;
+}
+
+.menu-btn-main:hover {
+  background: linear-gradient(180deg, #7a5228, #5a3410);
+  box-shadow: 0 0 30px #c9a84c66;
+}
+
+#menu-footer {
+  font-size: 0.62em;
+  color: #3a2818;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#howto-panel {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(5,3,2,0.97);
+  padding: 40px;
+  overflow-y: auto;
+  flex-direction: column;
+  align-items: center;
+}
+
+#howto-panel.active { display: flex; }
+
+#howto-panel h2 {
+  font-family: 'Cinzel Decorative', serif;
+  color: var(--gold);
+  font-size: 1.5em;
+  letter-spacing: 4px;
+  margin-bottom: 28px;
+  text-shadow: 0 0 20px #c9a84c55;
+}
+
+.howto-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 700px;
+  width: 100%;
+}
+
+.howto-card {
+  background: #110e0a;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px 14px;
+  text-align: center;
+}
+
+.howto-icon { font-size: 1.8em; margin-bottom: 8px; }
+
+.howto-title {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 0.72em;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.howto-desc {
+  font-size: 0.7em;
+  color: #7a6050;
+  line-height: 1.7;
+}
+
+.howto-desc strong { color: #e8d0a0; }
+
+#main-menu.fade-out {
+  animation: menuFadeOut 0.6s forwards;
+}
+
+@keyframes menuFadeOut {
+  to { opacity: 0; pointer-events: none; }
+}

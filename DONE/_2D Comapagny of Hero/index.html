@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical War</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="scanlines"></div>
+
+<!-- ══ MAIN MENU ══════════════════════════════════════════════════ -->
+<div id="mainMenu" class="screen active">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="menu-deco left"></div>
+    <div class="menu-deco right"></div>
+    <div class="menu-badge">V 0.1 — WWII TACTICAL ENGINE</div>
+
+    <div class="menu-title">TACTICAL WAR</div>
+    <div class="menu-subtitle">Stratégie en temps réel — 1944</div>
+
+    <button class="menu-btn primary" onclick="showScreen('mapSelect')">▶ &nbsp; JOUER</button>
+    <button class="menu-btn" onclick="showControls()">CONTRÔLES</button>
+    <button class="menu-btn" onclick="showCredits()">CRÉDITS</button>
+
+    <div class="menu-footer">by HARDI VICTOR MBANVU — MOTEUR RTS JS</div>
+</div>
+
+<!-- ══ MAP SELECT ════════════════════════════════════════════════ -->
+<div id="mapSelect" class="screen">
+    <button class="screen-back" onclick="showScreen('mainMenu')">◀ RETOUR</button>
+    <div class="screen-title">Sélectionnez une carte</div>
+
+    <div class="map-grid">
+        <div class="map-card" onclick="selectMap(1)">
+            <img src="assets/map01.png" alt="Carentan">
+            <div class="card-body">
+                <div class="card-name">▶ Carentan</div>
+                <div class="card-desc">Zone urbaine dense. Combat de rues et contrôle des carrefours stratégiques.</div>
+                <div class="card-tags">
+                    <span class="tag">Urbain</span>
+                    <span class="tag">7 CP</span>
+                    <span class="tag">Symétrique</span>
+                </div>
+            </div>
+        </div>
+        <div class="map-card" onclick="selectMap(2)">
+            <img src="assets/map02.png" alt="Marais du Nord">
+            <div class="card-body">
+                <div class="card-name">▶ Marais du Nord</div>
+                <div class="card-desc">Terrain marécageux. Couloirs étroits et points de passage limités.</div>
+                <div class="card-tags">
+                    <span class="tag">Marais</span>
+                    <span class="tag">7 CP</span>
+                    <span class="tag">Couloirs</span>
+                </div>
+            </div>
+        </div>
+        <div class="map-card" onclick="selectMap(3)">
+            <img src="assets/map03.png" alt="Bocage Normand">
+            <div class="card-body">
+                <div class="card-name">▶ Bocage Normand</div>
+                <div class="card-desc">Campagne ouverte avec lacs et forêts. Flancs exposés, mobilité clé.</div>
+                <div class="card-tags">
+                    <span class="tag">Bocage</span>
+                    <span class="tag">7 CP</span>
+                    <span class="tag">Ouvert</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ LOADING ═══════════════════════════════════════════════════ -->
+<div id="loading" class="screen">
+    <h1>TACTICAL WAR</h1>
+    <div id="loadBar"><div id="loadFill"></div></div>
+    <div id="loadLabel">INITIALISATION...</div>
+</div>
+
+<!-- CANVAS -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- Scripts jeu -->
+<script src="js/Camera.js"></script>
+<script src="js/NavTile.js"></script>
+<script src="js/NavGrid.js"></script>
+<script src="js/MapRenderer.js"></script>
+<script src="js/ResourceManager.js"></script>
+<script src="js/Squad.js"></script>
+<script src="js/Building.js"></script>
+<script src="js/ProductionUI.js"></script>
+<script src="js/AIController.js"></script>
+<script src="js/VictorySystem.js"></script>
+<script src="js/ObjectivesPanel.js"></script>
+<script src="js/Game.js"></script>
+
+<script>
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    if (id) document.getElementById(id).classList.add('active');
+}
+
+function selectMap(mapId) {
+    var labels = { 1:'CARENTAN', 2:'MARAIS DU NORD', 3:'BOCAGE NORMAND' };
+    showScreen('loading');
+    document.getElementById('loadLabel').textContent = 'CHARGEMENT — ' + labels[mapId] + '...';
+    document.getElementById('loadFill').style.width = '0%';
+
+    var fill = document.getElementById('loadFill');
+    var pct  = 0;
+    var iv   = setInterval(function(){ pct = Math.min(pct + 7, 88); fill.style.width = pct + '%'; }, 80);
+
+    function tryStart() {
+        if (typeof window._startGame === 'function') {
+            window._onMapLoaded = function() {
+                clearInterval(iv);
+                fill.style.width = '100%';
+                setTimeout(function(){ showScreen(null); }, 350);
+            };
+            window._startGame(mapId);
+        } else {
+            setTimeout(tryStart, 50);
+        }
+    }
+    tryStart();
+}
+
+function showCredits() {
+    alert('TACTICAL WAR\nMoteur RTS en JavaScript Canvas\nInspiration : Company of Heroes\nWWII — 1944\n\nby HARDI VICTOR MBANVU');
+}
+function showControls() {
+    alert(
+        'CONTRÔLES\n\n' +
+        'Clic gauche    : Sélectionner unité / bâtiment\n' +
+        'Clic droit     : Déplacer / Rally point\n' +
+        'WASD / Flèches : Déplacer la caméra\n' +
+        'Molette        : Zoom\n' +
+        'G              : Grille de navigation\n' +
+        'F1             : Afficher secteurs\n' +
+        'H              : Centrer sur la base\n' +
+        'Ctrl+A         : Tout sélectionner\n' +
+        'Échap          : Désélectionner\n' +
+        'Q / W / E      : Raccourcis production'
+    );
+}
+</script>
+</body>
+</html>

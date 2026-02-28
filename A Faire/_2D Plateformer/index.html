@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warlike Platformer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #06060f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+        }
+        #gameCanvas {
+            display: block;
+            border: 2px solid #e94560;
+            box-shadow: 0 0 50px rgba(233,69,96,0.35), 0 0 120px rgba(233,69,96,0.1);
+            image-rendering: pixelated;
+        }
+        #footer {
+            margin-top: 10px;
+            color: #333355;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="footer">WARLIKE GAMING CORPS &nbsp;·&nbsp; PLATFORMER v2.0 &nbsp;·&nbsp; MADE BY HARDIEBAY</div>
+
+    <script src="js/animation.js"></script>
+    <script src="js/assetLoader.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/tilemap.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/particle.js"></script>
+    <script src="js/coin.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/movingPlatform.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/hud.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

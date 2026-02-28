@@ -1,0 +1,142 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0d0d1a;
+    color: #e0e0ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+header h1 {
+    margin: 30px 0 10px;
+    font-size: 3rem;
+    color: #4488ff;
+    text-shadow: 0 0 15px #4488ff, 0 0 30px #2244aa;
+    letter-spacing: 2px;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    padding: 20px;
+    width: 100%;
+    max-width: 900px;
+}
+
+h2 {
+    margin: 10px 0;
+    color: #88aaff;
+    font-size: 1.8rem;
+}
+
+p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* HUD */
+#score, #health, #level, #combo {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 20px;
+    backdrop-filter: blur(6px);
+    border: 2px solid #4488ff;
+    box-shadow: 0 0 15px rgba(68, 136, 255, 0.5);
+    z-index: 10;
+}
+
+#score  { top: 15px; left: 15px; color: #ffff88; }
+#level  { top: 70px; left: 15px; color: #88ff88; }
+#health { top: 15px; left: 180px; color: #ff4466; width: 240px; }
+#combo  { top: 70px; left: 180px; color: #ffaa00; }
+
+/* Barre d'XP */
+.xp-bar {
+    width: 100%;
+    height: 14px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #4488ff;
+    border-radius: 7px;
+    overflow: hidden;
+    box-shadow: 0 0 12px rgba(68, 136, 255, 0.6);
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(to right, #4488ff, #88ccff);
+    border-radius: 5px;
+    box-shadow: 0 0 15px #4488ff;
+    transition: width 0.4s ease;
+}
+
+/* Canvas */
+canvas {
+    border: 4px solid #4488ff;
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(68, 136, 255, 0.6);
+    background: #000;
+    image-rendering: pixelated;
+}
+
+/* Boutons */
+button {
+    padding: 16px 40px;
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(to bottom, #4488ff, #2266cc);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(68, 136, 255, 0.6);
+    background: linear-gradient(to bottom, #5599ff, #3377dd);
+}
+
+button:active {
+    transform: translateY(2px);
+}
+
+#restartButton {
+    background: linear-gradient(to bottom, #ff4444, #cc2222);
+}
+
+#restartButton:hover {
+    background: linear-gradient(to bottom, #ff5555, #dd3333);
+}
+
+footer {
+    margin: 30px 0 20px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+    canvas { width: 100%; height: auto; }
+    #health, #combo { left: 15px; }
+    #health { top: 70px; }
+    #combo { top: 180px; }
+    header h1 { font-size: 2.2rem; }
+}

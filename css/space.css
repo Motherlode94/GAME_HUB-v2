@@ -1,0 +1,504 @@
+/* ══════════════════════════════════════════════
+   WARLIKE GAMING CORPS — Espace Joueur
+   space.css
+   ══════════════════════════════════════════════ */
+
+/* ── Header dual buttons ── */
+.header-btns {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.header-space-btn {
+    background: rgba(76,201,240,0.12);
+    border: 1px solid rgba(76,201,240,0.3);
+    border-radius: 8px;
+    color: #4cc9f0;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.9em;
+    letter-spacing: 1px;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.header-space-btn:hover {
+    background: rgba(76,201,240,0.22);
+    border-color: #4cc9f0;
+    color: #7dd8f5;
+}
+
+/* Score hint in modal */
+.lb-scores-hint {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.8em;
+    font-family: 'Rajdhani', sans-serif;
+    font-style: italic;
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    border-left: 3px solid rgba(230,57,70,0.3);
+}
+
+/* ── LOGIN SCREEN ── */
+.sp-login-screen {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.sp-login-box {
+    background: #12121e;
+    border: 1px solid rgba(76,201,240,0.2);
+    border-radius: 20px;
+    box-shadow: 0 0 60px rgba(76,201,240,0.06), 0 0 120px rgba(0,0,0,0.8);
+    padding: 48px 44px;
+    width: 460px;
+    max-width: 95vw;
+    text-align: center;
+    animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.sp-login-icon { font-size: 3em; margin-bottom: 16px; }
+
+.sp-login-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4em;
+    color: #fff;
+    margin: 0 0 10px;
+}
+
+.sp-login-sub {
+    color: rgba(255,255,255,0.45);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9em;
+    line-height: 1.6;
+    margin: 0 0 28px;
+}
+
+.sp-login-field {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.sp-login-field input {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(76,201,240,0.2);
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1em;
+    letter-spacing: 2px;
+    padding: 12px 16px;
+    outline: none;
+    text-transform: uppercase;
+    transition: border-color 0.2s;
+}
+.sp-login-field input:focus { border-color: #4cc9f0; }
+.sp-login-field input::placeholder { color: rgba(255,255,255,0.25); letter-spacing: 1px; text-transform: none; }
+
+.sp-login-field button {
+    background: #4cc9f0;
+    border: none;
+    border-radius: 10px;
+    color: #0d0d1a;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8em;
+    font-weight: 700;
+    padding: 12px 20px;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+}
+.sp-login-field button:hover  { background: #38b6e0; transform: translateY(-1px); }
+.sp-login-field button:active { transform: translateY(0); }
+
+.sp-login-error {
+    color: #e63946;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85em;
+    margin: 0 0 10px;
+}
+
+.sp-login-hint {
+    color: rgba(255,255,255,0.2);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78em;
+    margin: 0;
+}
+
+/* ── TOP BAR ── */
+.sp-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 28px;
+    padding-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.sp-welcome {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sp-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4cc9f0, #3a86ff);
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sp-welcome-label {
+    color: rgba(255,255,255,0.35);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75em;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.sp-username {
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.95em;
+}
+
+.sp-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.sp-tab-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 8px 16px;
+    transition: all 0.2s;
+}
+.sp-tab-btn:hover { border-color: rgba(76,201,240,0.3); color: rgba(255,255,255,0.8); }
+.sp-tab-btn.active {
+    background: rgba(76,201,240,0.15);
+    border-color: rgba(76,201,240,0.4);
+    color: #4cc9f0;
+}
+
+.sp-logout-btn {
+    background: transparent;
+    border: 1px solid rgba(230,57,70,0.25);
+    border-radius: 8px;
+    color: rgba(230,57,70,0.5);
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 8px 14px;
+    transition: all 0.2s;
+}
+.sp-logout-btn:hover { border-color: #e63946; color: #e63946; }
+
+/* ── PANELS ── */
+.sp-main { padding-bottom: 60px; }
+
+.sp-panel { display: none; }
+.sp-panel.active { display: block; animation: fadeUp 0.3s ease; }
+
+.sp-panel-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.sp-panel-header h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1em;
+    color: #fff;
+    margin: 0 0 6px;
+}
+.sp-panel-header p {
+    color: rgba(255,255,255,0.35);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.88em;
+    margin: 0;
+}
+
+/* ── GAME SELECTOR ── */
+.sp-game-selector-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+}
+
+.sp-select-label {
+    color: rgba(255,255,255,0.4);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+.sp-game-select {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(76,201,240,0.2);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9em;
+    padding: 8px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 200px;
+}
+.sp-game-select:focus { border-color: #4cc9f0; }
+.sp-game-select option { background: #1a1a2e; }
+
+.sp-game-tags-wrap {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.sp-msg-tag {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    transition: all 0.2s;
+}
+.sp-msg-tag:hover { border-color: rgba(76,201,240,0.3); color: rgba(255,255,255,0.7); }
+.sp-msg-tag.active {
+    background: rgba(76,201,240,0.15);
+    border-color: #4cc9f0;
+    color: #4cc9f0;
+}
+
+.sp-game-placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255,255,255,0.2);
+}
+.sp-game-placeholder span { font-size: 3em; display: block; margin-bottom: 12px; }
+.sp-game-placeholder p { font-family: 'Rajdhani', sans-serif; font-size: 0.95em; }
+
+/* ── CHAT BOX ── */
+.sp-chat-box {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    min-height: 320px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 16px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+
+.sp-no-msgs {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255,255,255,0.2);
+    margin: auto;
+}
+.sp-no-msgs span { font-size: 2.5em; display: block; margin-bottom: 10px; }
+.sp-no-msgs p { font-family: 'Rajdhani', sans-serif; font-size: 0.9em; }
+
+/* ── MESSAGES ── */
+.sp-msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.sp-msg--me {
+    flex-direction: row-reverse;
+}
+
+.sp-msg-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3a86ff, #6a4fcf);
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sp-msg-body {
+    max-width: 70%;
+    min-width: 0;
+}
+
+.sp-msg--me .sp-msg-body { align-items: flex-end; display: flex; flex-direction: column; }
+
+.sp-msg-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.sp-msg--me .sp-msg-meta { justify-content: flex-end; }
+
+.sp-msg-name {
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.82em;
+}
+
+.sp-admin-badge {
+    background: linear-gradient(135deg, #e63946, #c1121f);
+    border-radius: 4px;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.58em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+}
+
+.sp-msg-tag-badge {
+    background: rgba(76,201,240,0.15);
+    border: 1px solid rgba(76,201,240,0.3);
+    border-radius: 20px;
+    color: #4cc9f0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72em;
+    font-weight: 600;
+    padding: 1px 8px;
+}
+
+.sp-msg-time {
+    color: rgba(255,255,255,0.2);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72em;
+}
+
+.sp-msg-text {
+    background: rgba(255,255,255,0.06);
+    border-radius: 0 10px 10px 10px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9em;
+    line-height: 1.5;
+    margin: 0;
+    padding: 10px 14px;
+    word-break: break-word;
+}
+
+.sp-msg--me .sp-msg-text {
+    background: rgba(76,201,240,0.12);
+    border-radius: 10px 0 10px 10px;
+    border: 1px solid rgba(76,201,240,0.15);
+}
+
+/* ── COMPOSER ── */
+.sp-composer {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.sp-composer textarea {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.92em;
+    line-height: 1.5;
+    outline: none;
+    padding: 12px 16px;
+    resize: none;
+    transition: border-color 0.2s;
+}
+.sp-composer textarea:focus { border-color: rgba(76,201,240,0.4); }
+.sp-composer textarea::placeholder { color: rgba(255,255,255,0.25); }
+
+.sp-send-btn {
+    background: #4cc9f0;
+    border: none;
+    border-radius: 10px;
+    color: #0d0d1a;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 12px 20px;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+    min-height: 70px;
+}
+.sp-send-btn:hover  { background: #38b6e0; transform: translateY(-1px); }
+.sp-send-btn:active { transform: translateY(0); }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .sp-topbar { flex-direction: column; align-items: flex-start; }
+    .sp-topbar-actions { width: 100%; }
+    .sp-tab-btn { font-size: 0.78em; padding: 7px 12px; }
+    .sp-login-box { padding: 36px 24px; }
+    .sp-msg-body { max-width: 85%; }
+    .header-btns { flex-direction: column; gap: 6px; }
+}
+
+.hidden { display: none !important; }

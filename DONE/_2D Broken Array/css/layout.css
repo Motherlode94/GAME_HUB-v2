@@ -1,0 +1,11 @@
+#game-wrapper {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+#gameCanvas {
+    display: block;
+    background-color: #1b1f2a;
+    cursor: default;
+}
