@@ -113,18 +113,45 @@ const GAMES = [
 
 
 // ── Storage helpers ────────────────────────────
+if (window.WGC_DATA && Array.isArray(window.WGC_DATA.GAMES) && window.WGC_DATA.GAMES.length) {
+    GAMES.splice(0, GAMES.length, ...window.WGC_DATA.GAMES);
+}
+
 function getScores(gameId) {
+    if (window.WGC_DATA && typeof window.WGC_DATA.getScores === 'function') {
+        return window.WGC_DATA.getScores(gameId);
+    }
     try { return JSON.parse(localStorage.getItem(`wgc_scores_${gameId}`)) || []; }
     catch { return []; }
 }
 function saveScores(gameId, scores) {
+    if (window.WGC_DATA && typeof window.WGC_DATA.saveScores === 'function') {
+        window.WGC_DATA.saveScores(gameId, scores);
+        return;
+    }
     localStorage.setItem(`wgc_scores_${gameId}`, JSON.stringify(scores));
 }
+function addScore(gameId, entry) {
+    if (window.WGC_DATA && typeof window.WGC_DATA.addScore === 'function') {
+        return window.WGC_DATA.addScore(gameId, entry);
+    }
+    const scores = getScores(gameId);
+    scores.push(entry);
+    saveScores(gameId, scores);
+    return getScores(gameId);
+}
 function getComments(gameId) {
+    if (window.WGC_DATA && typeof window.WGC_DATA.getComments === 'function') {
+        return window.WGC_DATA.getComments(gameId);
+    }
     try { return JSON.parse(localStorage.getItem(`wgc_comments_${gameId}`)) || []; }
     catch { return []; }
 }
 function saveComments(gameId, comments) {
+    if (window.WGC_DATA && typeof window.WGC_DATA.saveComments === 'function') {
+        window.WGC_DATA.saveComments(gameId, comments);
+        return;
+    }
     localStorage.setItem(`wgc_comments_${gameId}`, JSON.stringify(comments));
 }
 
@@ -170,6 +197,9 @@ const pgStars        = document.querySelectorAll('.pg-star');
 const pgCommentText  = document.getElementById('pg-comment-text');
 const pgSubmitBtn    = document.getElementById('pg-submit-btn');
 const pgSkipBtn      = document.getElementById('pg-skip-btn');
+const modalScoreName   = document.getElementById('modal-score-name');
+const modalScoreValue  = document.getElementById('modal-score-value');
+const modalScoreSubmit = document.getElementById('modal-score-submit');
 
 // ── Grid ───────────────────────────────────────
 function getFiltered() {
@@ -248,6 +278,8 @@ function openModal(id) {
     }
 
     switchTab('scores');
+    if (modalScoreName) modalScoreName.value = playerName;
+    if (modalScoreValue) modalScoreValue.value = '';
     renderLeaderboard(id);
     renderChangelog(game);
     renderComments(id);
@@ -294,6 +326,15 @@ function renderLeaderboard(gameId) {
 // Score submission removed — scores are submitted via the post-game panel after playing
 
 // ── Changelog ─────────────────────────────────
+function submitScoreForGame(gameId, name, score) {
+    if (!name || !Number.isFinite(score) || score < 0) return;
+    addScore(gameId, {
+        name,
+        score,
+        date: new Date().toLocaleDateString('fr-FR')
+    });
+}
+
 function renderChangelog(game) {
     const container = document.getElementById('changelog-list');
     if (!game.changelog || !game.changelog.length) {
@@ -414,6 +455,37 @@ pgStars.forEach(star => {
     });
 });
 
+if (modalScoreSubmit) {
+    modalScoreSubmit.addEventListener('click', () => {
+        if (!currentGameId) return;
+
+        const name = modalScoreName.value.trim();
+        const score = Number.parseInt(modalScoreValue.value, 10);
+
+        if (!name) {
+            flashInput(modalScoreName, 'Entre ton pseudo !');
+            return;
+        }
+        if (!Number.isFinite(score) || score < 0) {
+            flashInput(modalScoreValue, 'Entre un score valide !');
+            return;
+        }
+
+        playerName = name;
+        sessionStorage.setItem('wgc_playerName', playerName);
+        submitScoreForGame(currentGameId, name, score);
+        modalScoreValue.value = '';
+        renderLeaderboard(currentGameId);
+    });
+
+    [modalScoreName, modalScoreValue].forEach((input) => {
+        if (!input) return;
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') modalScoreSubmit.click();
+        });
+    });
+}
+
 pgSubmitBtn.addEventListener('click', () => {
     if (!lastPlayedGame) return;
 
@@ -440,11 +512,7 @@ pgSubmitBtn.addEventListener('click', () => {
     const gid = lastPlayedGame.id;
 
     if (scoreValid) {
-        const scores = getScores(gid);
-        scores.push({ name, score, date: new Date().toLocaleDateString('fr-FR') });
-        scores.sort((a,b) => b.score - a.score);
-        if (scores.length > 20) scores.length = 20;
-        saveScores(gid, scores);
+        submitScoreForGame(gid, name, score);
     }
 
     if (text) {

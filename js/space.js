@@ -78,6 +78,21 @@ const gameSelect     = document.getElementById('sp-game-select');
 const gamePlaceholder= document.getElementById('sp-game-placeholder');
 const chatGame       = document.getElementById('chat-game');
 const composerGame   = document.getElementById('composer-game');
+const GAMES          = window.WGC_DATA && Array.isArray(window.WGC_DATA.GAMES)
+    ? window.WGC_DATA.GAMES
+    : [];
+
+function populateGameSelect() {
+    if (!gameSelect) return;
+    const options = ['<option value="">— Choisir un jeu —</option>'];
+    GAMES
+        .slice()
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .forEach((game) => {
+            options.push(`<option value="${game.id}">${escapeHtml(game.title)}</option>`);
+        });
+    gameSelect.innerHTML = options.join('');
+}
 
 // ── Init space after login ────────────────────
 function initSpace(user) {
@@ -92,6 +107,8 @@ function initSpace(user) {
     renderChannel('general');
     renderChannel('suggestions');
 }
+
+populateGameSelect();
 
 // Auto-login from session
 const existing = getSession();

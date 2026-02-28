@@ -80,7 +80,12 @@
 
             <!-- Scores (read-only — scores come from playing) -->
             <div class="modal-tab-content active" id="tab-scores">
-                <p class="lb-scores-hint">🎮 Joue au jeu pour soumettre ton score automatiquement après la session.</p>
+                <div class="score-submit">
+                    <input type="text" id="modal-score-name" placeholder="Ton pseudo" maxlength="20">
+                    <input type="number" id="modal-score-value" placeholder="Ton score" min="0">
+                    <button id="modal-score-submit" type="button">Enregistrer</button>
+                </div>
+                <p class="lb-scores-hint">Tu peux saisir ton score ici. Certains jeux compatibles peuvent aussi le remplir automatiquement.</p>
                 <div class="leaderboard" id="leaderboard-list"></div>
             </div>
 
@@ -151,6 +156,7 @@
         <p>&copy; 2026 Warlike Gaming Corps. All rights reserved.</p>
     </footer>
 
+    <script src="js/wgc-data.js"></script>
     <script src="js/scripts.js"></script>
 </body>
 </html>

@@ -59,7 +59,22 @@
     transition: border-color 0.2s;
 }
 
+.score-submit select {
+    flex: 1;
+    min-width: 140px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9em;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
 .score-submit input:focus { border-color: rgba(230,57,70,0.6); }
+.score-submit select:focus { border-color: rgba(230,57,70,0.6); }
 
 .score-submit input::placeholder { color: rgba(255,255,255,0.3); }
 
@@ -80,6 +95,37 @@
 
 .score-submit button:hover { background: #c1121f; transform: translateY(-1px); }
 .score-submit button:active { transform: translateY(0); }
+
+.lb-submit-panel {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    margin: 0 0 20px;
+    padding: 18px;
+}
+
+.lb-submit-title {
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.lb-submit-copy {
+    color: rgba(255,255,255,0.65);
+    font-size: 0.95rem;
+    margin-bottom: 14px;
+}
+
+.lb-submit-status {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.9rem;
+    min-height: 1.3em;
+}
+
+.lb-submit-status.ok { color: #7bd389; }
+.lb-submit-status.error { color: #ff7b7b; }
 
 .leaderboard {
     max-height: 200px;
