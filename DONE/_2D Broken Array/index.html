@@ -236,9 +236,18 @@
     letter-spacing:.14em; text-transform:uppercase; cursor:pointer; border-radius:2px;
   }
   #creditsModal .close-btn:hover { color:#fff; border-color:rgba(255,255,255,.35); }
+  .hub-back-btn {
+    position:fixed; top:12px; left:12px; z-index:9999;
+    padding:10px 14px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(6,8,16,.92); color:#fff; text-decoration:none;
+    font:700 12px/1 'Courier New', monospace; letter-spacing:.08em;
+    box-shadow:0 10px 24px rgba(0,0,0,.28);
+  }
 </style>
 </head>
 <body>
+<a class="hub-back-btn" href="../../index.html">&larr; HUB</a>
 <canvas id="gameCanvas"></canvas>
 
 <!-- ══════════════════════════════════════════════════════

@@ -1,9 +1,54 @@
+const { version } = require("react");
+
 document.addEventListener('DOMContentLoaded', function() {
 // ── Game Data ─────────────────────────────────
 const GAMES = [
-    { id: 1,  title: "Combat Arena",     category: "action",     year: 2026, rating: 9.4, description: "A fast-paced 2-player local fighting game. Double jump, dash, and unleash charged attacks to defeat your opponent.", tags: ["fighting","2-player","local","indie"], playUrl: "DONE/_2D Fight Kombat/index.html", changelog: [{ version:"1.2.0", date:"2026-03-10", notes:["Added new arena: Lava Pit","Fixed dash cancel bug","Improved hitbox precision"] },{ version:"1.1.0", date:"2026-02-01", notes:["Added character skins","Rebalanced damage values"] },{ version:"1.0.0", date:"2026-01-15", notes:["Initial release"] }] },
-    { id: 2,  title: "NFL Mini Run",     category: "sports",     year: 2026, rating: 8.8, description: "Sprint through defenders, chain touchdowns, grab power-ups, and survive longer each round in this arcade football run game.", tags: ["sports","arcade","football","mobile","score attack"], playUrl: "_2D NFL Sim/index.html", changelog: [{ version:"0.2.0", date:"2026-02-28", notes:["Added mobile joystick controls","Added combos, formations, and power-ups","Connected score reporting back to the hub"] },{ version:"0.1.0", date:"2026-02-28", notes:["Initial playable prototype"] }] },
+    {
+        id: 1,
+        title: "Combat Arena",
+        category: "action",
+        year: 2026,
+        rating: 9.4,
+        description: "A fast-paced 2-player local fighting game. Double jump, dash, and unleash charged attacks to defeat your opponent.",
+        tags: ["fighting", "2-player", "local", "indie"],
+        playUrl: "DONE/_2D Fight Kombat/index.html",
+        changelog: [
+            { version: "1.2.0", date: "2026-03-10", notes: ["Added new arena: Lava Pit", "Fixed dash cancel bug", "Improved hitbox precision"] },
+            { version: "1.1.0", date: "2026-02-01", notes: ["Added character skins", "Rebalanced damage values"] },
+            { version: "1.0.0", date: "2026-01-15", notes: ["Initial release"] }
+        ]
+    },
+    {
+        id: 2,
+        title: "NFL Mini Run",
+        category: "sports",
+        year: 2026,
+        rating: 8.8,
+        description: "Sprint through defenders, chain touchdowns, grab power-ups, and survive longer each round in this arcade football run game.",
+        tags: ["sports", "arcade", "football", "mobile", "score attack"],
+        playUrl: "_2D NFL Sim/index.html",
+        changelog: [
+            { version: "0.2.0", date: "2026-02-28", notes: ["Added mobile joystick controls", "Added combos, formations, and power-ups", "Connected score reporting back to the hub"] },
+            { version: "0.1.0", date: "2026-02-28", notes: ["Initial playable prototype"] }
+        ]
+    },
+    {
+        id: 3,
+        title: "2D Compagny of Hero",
+        category: "strategy",
+        year: 2026,
+        rating: 9.7,
+        description: "",
+        tags: [""],
+        playUrl: "DONE/_2D Compagny of Hero/index.html",
+        changelog:[
+            {},
+            {}
+        ]
+
+    }
 ];
+
 
 // ── Storage helpers ────────────────────────────
 function getScores(gameId) {
@@ -233,7 +278,7 @@ let lastPlayedGame = null;
 
 function launchGameInNewTab(game) {
     const url = new URL(game.playUrl, window.location.href).toString();
-    const opened = window.open(url, '_blank');
+    const opened = window.open(url, '_blank', 'noopener,noreferrer');
     if (!opened) window.location.href = url;
 }
 
@@ -409,23 +454,6 @@ window.addEventListener('message', (e) => {
         pgScoreValue.placeholder      = 'Score reçu du jeu';
         pgScoreValue.dataset.fromGame = 'true';
     }
-});
-
-window.addEventListener('message', (e) => {
-    if (e.origin !== location.origin || e.data?.type !== 'gameScore') return;
-
-    const reportedGame = GAMES.find(game => game.id === e.data.gameId) || lastPlayedGame;
-    if (!reportedGame) return;
-
-    lastPlayedGame = reportedGame;
-    if (postgamePanel.classList.contains('hidden')) {
-        showPostGame(reportedGame);
-    }
-
-    pgScoreValue.value            = e.data.score;
-    pgScoreValue.disabled         = true;
-    pgScoreValue.placeholder      = 'Score reÃ§u du jeu';
-    pgScoreValue.dataset.fromGame = 'true';
 });
 
 renderGrid();
