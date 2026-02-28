@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════
-//  NFL MINI RUN — game.js
-//  Features: sprint, stiff arm, power-ups, lives,
-//  levels, sound engine, particle effects, screens
+//  NFL MINI RUN — game.js  v2
+//  + Joystick mobile, traînée sprint, combo TD,
+//    pause, formation défenseurs, slow-mo power-up
 // ══════════════════════════════════════════════════
 
 const canvas  = document.getElementById("gameCanvas");
@@ -36,6 +36,11 @@ function soundTouchdown() {
   playTone(784, .18, "sine", .5, .2);
   playTone(1047,.25, "sine", .5, .35);
 }
+function soundCombo() {
+  playTone(880, .1, "sine", .5, 0);
+  playTone(1200,.1, "sine", .5, .1);
+  playTone(1600,.2, "sine", .6, .2);
+}
 function soundTackle() {
   playTone(120, .35, "sawtooth", .5);
   playTone(80,  .2,  "square",   .3, .1);
@@ -48,6 +53,8 @@ function soundPowerup() {
 function soundSprint()  { playTone(440, .06, "sine", .15); }
 function soundStiffArm(){ playTone(300, .12, "square", .3); }
 function soundExtraLife(){ playTone(660,.1,"sine",.5,0); playTone(880,.1,"sine",.5,.12); playTone(1100,.2,"sine",.5,.24); }
+function soundPause()   { playTone(440, .08, "sine", .3); }
+function soundSlowMo()  { playTone(200, .3, "sine", .4, 0); playTone(160, .3, "sine", .3, .2); }
 
 // ── Particles ──────────────────────────────────────
 const particles = [];
@@ -85,12 +92,35 @@ function drawParticles() {
   ctx.globalAlpha = 1;
 }
 
+// ── Sprint Trail ───────────────────────────────────
+const trail = [];
+function updateTrail(dt) {
+  if (sprintActive && player && !gameOver && !paused) {
+    trail.push({ x: player.x + player.w/2, y: player.y + player.h/2, life: 1 });
+  }
+  for (let i = trail.length - 1; i >= 0; i--) {
+    trail[i].life -= 0.08 * dt;
+    if (trail[i].life <= 0) trail.splice(i, 1);
+  }
+}
+function drawTrail() {
+  for (const t of trail) {
+    ctx.globalAlpha = t.life * 0.35;
+    ctx.fillStyle   = "#FFB700";
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 8 * t.life, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
 // ── Power-ups ──────────────────────────────────────
 const POWERUP_TYPES = [
-  { type:"star",   emoji:"⭐", color:"#FFB700", label:"BONUS +3",       weight:4 },
-  { type:"life",   emoji:"❤️", color:"#e63946", label:"VIE EXTRA !",    weight:2 },
-  { type:"sprint", emoji:"⚡", color:"#00ccff", label:"SPRINT INFINI !", weight:3 },
-  { type:"shield", emoji:"🛡️", color:"#4cc9f0", label:"BOUCLIER !",     weight:2 },
+  { type:"star",   emoji:"⭐", color:"#FFB700", label:"BONUS +3",          weight:4 },
+  { type:"life",   emoji:"❤️", color:"#e63946", label:"VIE EXTRA !",       weight:2 },
+  { type:"sprint", emoji:"⚡", color:"#00ccff", label:"SPRINT INFINI !",   weight:3 },
+  { type:"shield", emoji:"🛡️", color:"#4cc9f0", label:"BOUCLIER !",        weight:2 },
+  { type:"slowmo", emoji:"🧊", color:"#a0f0ff", label:"RALENTI 5s !",      weight:2 },
 ];
 let powerups = [];
 
@@ -136,6 +166,16 @@ let sprintEnergy, sprintActive, shieldActive, shieldTimer;
 let sprintInfiniteTimer, powerupCollected;
 let level, defenderSpeed;
 let msgTimer = 0;
+let paused = false;
+let scoreReported = false;
+// Combo
+let comboCount = 0;
+let comboTimer = 0;   // frames since last TD
+const COMBO_WINDOW = 480; // ~8s to chain TDs
+// Slow-mo
+let slowMoTimer = 0;
+// Flash effect on TD
+let tdFlashTimer = 0;
 
 function initPlayer() {
   player = {
@@ -145,25 +185,77 @@ function initPlayer() {
     maxSpeed: 5.5, accel: 0.44, friction: 0.87,
     stiffArmCooldown: 0,
     stiffArmActive: 0,
-    invincible: 0,      // brief iframe after tackle
+    invincible: 0,
     facingLeft: false
   };
 }
 
+// ── Defender formation patterns ────────────────────
+const FORMATIONS = ["chase", "pincer", "zone", "blitz"];
+let currentFormation = "chase";
+
 function spawnDefenders() {
   defenders = [];
   const count = 3 + Math.floor(touchdowns / 2);
+  currentFormation = FORMATIONS[Math.floor(Math.random() * FORMATIONS.length)];
+
   for (let i = 0; i < count; i++) {
     const baseSpeed = 1.3 + touchdowns * 0.1 + Math.random() * 0.5;
+    let sx = 30 + Math.random() * (W - 80);
+    let sy = 80 + Math.random() * (H * 0.4);
+
+    // Formation spawn positions
+    if (currentFormation === "pincer") {
+      sx = i % 2 === 0 ? 30 + Math.random() * W * 0.3 : W * 0.7 + Math.random() * W * 0.25;
+      sy = 80 + (i * 40) % (H * 0.35);
+    } else if (currentFormation === "zone") {
+      sx = 30 + (i / count) * (W - 60);
+      sy = 100 + Math.random() * (H * 0.25);
+    } else if (currentFormation === "blitz") {
+      sy = H * 0.55 + Math.random() * (H * 0.15);
+    }
+
     defenders.push({
-      x: 30 + Math.random() * (W - 80),
-      y: 80 + Math.random() * (H * 0.4),
+      x: sx, y: sy,
       w: 38, h: 50,
       speed: Math.min(baseSpeed, 4.5),
       vx: 0, vy: 0,
-      wobble: Math.random() * Math.PI * 2
+      wobble: Math.random() * Math.PI * 2,
+      role: i   // used for formation targeting
     });
   }
+}
+
+function getDefenderTarget(def, idx) {
+  const px = player.x + player.w / 2;
+  const py = player.y + player.h / 2;
+
+  if (currentFormation === "pincer") {
+    // Half go for player, half cut off path ahead
+    if (idx % 2 === 0) return { tx: px, ty: py };
+    // Try to intercept in front
+    const predict = 30;
+    return { tx: px + player.vx * predict, ty: py + player.vy * predict };
+  }
+
+  if (currentFormation === "zone") {
+    // Each defender holds a lane; only moves toward player if in lane
+    const laneX = 30 + (idx / defenders.length) * (W - 60);
+    if (Math.abs(px - laneX) < W / defenders.length * 1.2) {
+      return { tx: px, ty: py };
+    }
+    return { tx: laneX, ty: def.y + Math.sin(Date.now() * .001 + idx) * 30 };
+  }
+
+  if (currentFormation === "blitz") {
+    // All rush from behind player; converge fast
+    const predict = sprintActive ? 5 : 18;
+    return { tx: px + player.vx * predict, ty: py + player.vy * predict };
+  }
+
+  // Default chase with slight prediction
+  const predict = sprintActive ? 8 : 14;
+  return { tx: px + player.vx * predict, ty: py + player.vy * predict };
 }
 
 function resetGame() {
@@ -172,6 +264,8 @@ function resetGame() {
   lives           = 3;
   level           = 1;
   gameOver        = false;
+  paused          = false;
+  scoreReported   = false;
   shakeTimer      = 0;
   lastTime        = 0;
   sprintEnergy    = 100;
@@ -182,7 +276,12 @@ function resetGame() {
   powerupCollected= 0;
   powerups        = [];
   particles.length = 0;
+  trail.length    = 0;
   highscore       = getScores()[0] || 0;
+  comboCount      = 0;
+  comboTimer      = 0;
+  slowMoTimer     = 0;
+  tdFlashTimer    = 0;
   initPlayer();
   spawnDefenders();
   spawnPowerup();
@@ -190,14 +289,140 @@ function resetGame() {
   setMsg("GO ! Direction l'en-but !");
 }
 
+function reportScoreToHub() {
+  if (scoreReported || !window.opener || window.opener.closed) return;
+
+  try {
+    window.opener.postMessage({ type: "gameScore", gameId: 2, score }, "*");
+    scoreReported = true;
+  } catch (e) {}
+}
+
 // ── Keys ───────────────────────────────────────────
 const keys = {};
 window.addEventListener("keydown", e => {
   keys[e.key.toLowerCase()] = true;
-  // prevent page scroll
   if (["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase())) e.preventDefault();
+
+  // Pause
+  if ((e.key === "Escape" || e.key.toLowerCase() === "p") && gameStarted && !gameOver) {
+    togglePause();
+  }
+  // Restart on Enter when game over
+  if (gameOver && (e.key === "Enter" || e.key === " ")) {
+    e.preventDefault();
+    restartGame();
+  }
 });
-window.addEventListener("keyup",   e => { keys[e.key.toLowerCase()] = false; });
+window.addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+
+// ── Mobile Joystick ────────────────────────────────
+let joystick = null; // { id, startX, startY, curX, curY }
+let mobileInput = { ax: 0, ay: 0, sprint: false, stiff: false };
+let mobileControlsReady = false;
+
+function setupMobileControls() {
+  if (mobileControlsReady) return;
+
+  const wrap = document.getElementById("mobileControls");
+  if (!wrap) return;
+
+  const joyZone = document.getElementById("joystickZone");
+  const joyKnob = document.getElementById("joystickKnob");
+  const btnSprint = document.getElementById("btnSprint");
+  const btnStiff  = document.getElementById("btnStiff");
+  const btnPause  = document.getElementById("btnPauseMobile");
+  const MAX_DIST  = 45;
+
+  function updateKnob(dx, dy) {
+    const dist = Math.hypot(dx, dy);
+    const capped = Math.min(dist, MAX_DIST);
+    const angle  = Math.atan2(dy, dx);
+    const kx = Math.cos(angle) * capped;
+    const ky = Math.sin(angle) * capped;
+    joyKnob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
+    const norm = Math.min(dist / MAX_DIST, 1);
+    mobileInput.ax = Math.cos(angle) * norm;
+    mobileInput.ay = Math.sin(angle) * norm;
+  }
+
+  joyZone.addEventListener("touchstart", e => {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    const rect = joyZone.getBoundingClientRect();
+    joystick = { id: t.identifier, startX: rect.left + rect.width/2, startY: rect.top + rect.height/2 };
+  }, { passive: false });
+
+  joyZone.addEventListener("touchmove", e => {
+    e.preventDefault();
+    if (!joystick) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier === joystick.id) {
+        updateKnob(t.clientX - joystick.startX, t.clientY - joystick.startY);
+      }
+    }
+  }, { passive: false });
+
+  const endJoy = e => {
+    e.preventDefault();
+    joystick = null;
+    mobileInput.ax = 0;
+    mobileInput.ay = 0;
+    joyKnob.style.transform = "translate(-50%, -50%)";
+  };
+  joyZone.addEventListener("touchend",    endJoy, { passive: false });
+  joyZone.addEventListener("touchcancel", endJoy, { passive: false });
+
+  // Sprint button
+  btnSprint.addEventListener("touchstart",  e => { e.preventDefault(); mobileInput.sprint = true;  }, { passive: false });
+  btnSprint.addEventListener("touchend",    e => { e.preventDefault(); mobileInput.sprint = false; }, { passive: false });
+  btnSprint.addEventListener("touchcancel", e => { e.preventDefault(); mobileInput.sprint = false; }, { passive: false });
+
+  // Stiff arm button
+  btnStiff.addEventListener("touchstart", e => {
+    e.preventDefault();
+    if (player.stiffArmCooldown <= 0) {
+      player.stiffArmActive   = 20;
+      player.stiffArmCooldown = 90;
+      soundStiffArm();
+      triggerStiffArm();
+    }
+  }, { passive: false });
+
+  // Pause button
+  btnPause.addEventListener("touchstart", e => { e.preventDefault(); togglePause(); }, { passive: false });
+  mobileControlsReady = true;
+}
+
+function triggerStiffArm() {
+  defenders.forEach(def => {
+    const cx = def.x + def.w / 2;
+    const cy = def.y + def.h / 2;
+    const px = player.x + player.w / 2;
+    const py = player.y + player.h / 2;
+    const d  = Math.hypot(cx - px, cy - py);
+    if (d < 90) {
+      const nx = (cx - px) / d;
+      const ny = (cy - py) / d;
+      def.x += nx * 80;
+      def.y += ny * 80;
+      spawnParticles(def.x + def.w/2, def.y + def.h/2, "#FFB700", 10, 5);
+    }
+  });
+}
+
+// ── Pause ──────────────────────────────────────────
+function togglePause() {
+  if (gameOver || !gameStarted) return;
+  paused = !paused;
+  soundPause();
+  if (paused) {
+    setMsg("⏸ PAUSE — Appuie sur P pour reprendre");
+  } else {
+    lastTime = 0; // reset dt to avoid jump
+    setMsg("▶ REPRISE !");
+  }
+}
 
 // ── UI helpers ─────────────────────────────────────
 function setMsg(text, duration = 180) {
@@ -215,11 +440,16 @@ function updateHUD() {
   document.getElementById("sprintBar").style.width = sprintEnergy + "%";
   document.getElementById("shieldBar").style.width  = shieldActive ? (shieldTimer / 180 * 100) + "%" : "0%";
 
-  // Active effects
   const fx = [];
-  if (shieldActive) fx.push(`<span class="effect-badge">🛡️ BOUCLIER</span>`);
+  if (shieldActive)         fx.push(`<span class="effect-badge">🛡️ BOUCLIER</span>`);
   if (sprintInfiniteTimer > 0) fx.push(`<span class="effect-badge">⚡ SPRINT MAX</span>`);
+  if (slowMoTimer > 0)      fx.push(`<span class="effect-badge">🧊 RALENTI</span>`);
+  if (comboCount > 1)       fx.push(`<span class="effect-badge combo-badge">🔥 COMBO x${comboCount}</span>`);
   document.getElementById("activeEffects").innerHTML = fx.join("");
+
+  // Pause button state
+  const btnP = document.getElementById("btnPauseMobile");
+  if (btnP) btnP.textContent = paused ? "▶" : "⏸";
 }
 
 // ── Collision helper ───────────────────────────────
@@ -232,7 +462,7 @@ function rectsOverlap(a, b) {
 function gameLoop(timestamp) {
   if (!gameStarted) return;
   if (!lastTime) lastTime = timestamp;
-  const dt = Math.min((timestamp - lastTime) / 16.666, 3); // cap at 3x slowdown
+  const rawDt = Math.min((timestamp - lastTime) / 16.666, 3);
   lastTime = timestamp;
 
   if (gameOver) {
@@ -241,22 +471,34 @@ function gameLoop(timestamp) {
     return;
   }
 
-  update(dt);
-  draw(dt);
+  if (paused) {
+    drawPaused();
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  update(rawDt);
+  draw(rawDt);
   requestAnimationFrame(gameLoop);
 }
 
 function update(dt) {
-  // ── Input ──
-  let ax = 0, ay = 0;
-  if (keys["arrowleft"]  || keys["q"] || keys["a"]) { ax -= 1; player.facingLeft = true; }
-  if (keys["arrowright"] || keys["d"])               { ax += 1; player.facingLeft = false; }
-  if (keys["arrowup"]    || keys["z"] || keys["w"])    ay -= 1;
-  if (keys["arrowdown"]  || keys["s"])                 ay += 1;
+  // Slow-mo effect on defenders
+  const slowFactor = slowMoTimer > 0 ? 0.35 : 1.0;
+
+  // ── Input (keyboard + mobile) ──
+  let ax = mobileInput.ax;
+  let ay = mobileInput.ay;
+  if (keys["arrowleft"]  || keys["q"] || keys["a"]) { ax = -1; player.facingLeft = true; }
+  if (keys["arrowright"] || keys["d"])               { ax =  1; player.facingLeft = false; }
+  if (keys["arrowup"]    || keys["z"] || keys["w"])    ay = -1;
+  if (keys["arrowdown"]  || keys["s"])                 ay =  1;
   if (ax !== 0 && ay !== 0) { ax *= .707; ay *= .707; }
+  if (ax < 0) player.facingLeft = true;
+  if (ax > 0) player.facingLeft = false;
 
   // Sprint
-  const wantSprint = keys[" "] || keys["shift"];
+  const wantSprint = keys[" "] || keys["shift"] || mobileInput.sprint;
   const hasSprint  = sprintEnergy > 0 || sprintInfiniteTimer > 0;
   sprintActive = wantSprint && hasSprint;
   const speedMult = sprintActive ? 1.65 : 1;
@@ -272,28 +514,14 @@ function update(dt) {
     sprintEnergy = 100;
   }
 
-  // Stiff Arm
+  // Stiff Arm (keyboard)
   if (player.stiffArmCooldown > 0) player.stiffArmCooldown -= dt;
   if (player.stiffArmActive  > 0) player.stiffArmActive  -= dt;
   if ((keys["e"] || keys["f"]) && player.stiffArmCooldown <= 0) {
     player.stiffArmActive    = 20;
     player.stiffArmCooldown  = 90;
     soundStiffArm();
-    // Push nearby defender
-    defenders.forEach(def => {
-      const cx = def.x + def.w / 2;
-      const cy = def.y + def.h / 2;
-      const px = player.x + player.w / 2;
-      const py = player.y + player.h / 2;
-      const d  = Math.hypot(cx - px, cy - py);
-      if (d < 90) {
-        const nx = (cx - px) / d;
-        const ny = (cy - py) / d;
-        def.x += nx * 80;
-        def.y += ny * 80;
-        spawnParticles(def.x + def.w/2, def.y + def.h/2, "#FFB700", 10, 5);
-      }
-    });
+    triggerStiffArm();
   }
 
   if (player.invincible > 0) player.invincible -= dt;
@@ -311,35 +539,29 @@ function update(dt) {
   player.x   = Math.max(8, Math.min(W - player.w - 8, player.x));
   player.y   = Math.max(8, Math.min(H - player.h - 8, player.y));
 
-  // ── Defenders ──
-  defenders.forEach(def => {
-    def.wobble += 0.06 * dt;
-    const px = player.x + player.w / 2;
-    const py = player.y + player.h / 2;
+  // Trail
+  updateTrail(dt);
 
-    // Predictive pursuit
-    const predict = sprintActive ? 8 : 14;
-    const tx = px + player.vx * predict;
-    const ty = py + player.vy * predict;
+  // ── Defenders (with formation + slow-mo) ──
+  defenders.forEach((def, idx) => {
+    def.wobble += 0.06 * dt * slowFactor;
+    const { tx, ty } = getDefenderTarget(def, idx);
     const dx = tx - (def.x + def.w / 2);
     const dy = ty - (def.y + def.h / 2);
     const dist = Math.hypot(dx, dy) || 1;
 
-    def.vx = (dx / dist) * def.speed;
-    def.vy = (dy / dist) * def.speed;
+    def.vx = (dx / dist) * def.speed * slowFactor;
+    def.vy = (dy / dist) * def.speed * slowFactor;
     def.x += def.vx * dt;
     def.y += def.vy * dt;
 
-    // Keep in bounds
     def.x = Math.max(4, Math.min(W - def.w - 4, def.x));
     def.y = Math.max(75, Math.min(H - def.h - 4, def.y));
 
-    // Collision
     if (player.invincible <= 0 && !shieldActive && rectsOverlap(player, def)) {
       handleTackle();
     }
     if (shieldActive && rectsOverlap(player, def)) {
-      // Bounce defender
       const nx = (def.x - player.x) / (Math.hypot(def.x - player.x, def.y - player.y) || 1);
       const ny = (def.y - player.y) / (Math.hypot(def.x - player.x, def.y - player.y) || 1);
       def.x += nx * 60;
@@ -356,7 +578,6 @@ function update(dt) {
       collectPowerup(pu);
       powerups.splice(i, 1);
       powerupCollected++;
-      // Spawn another after a delay
       setTimeout(spawnPowerup, 2000 + Math.random() * 3000);
     }
   }
@@ -366,16 +587,21 @@ function update(dt) {
     touchdown();
   }
 
-  // ── Shield timer ──
+  // ── Timers ──
   if (shieldActive) {
     shieldTimer -= dt;
     if (shieldTimer <= 0) { shieldActive = false; setMsg("Bouclier terminé !"); }
   }
-
-  // ── Message timer ──
+  if (slowMoTimer > 0) {
+    slowMoTimer -= dt;
+    if (slowMoTimer <= 0) setMsg("Ralenti terminé !");
+  }
+  if (comboTimer > 0) {
+    comboTimer -= dt;
+    if (comboTimer <= 0) comboCount = 0;
+  }
+  if (tdFlashTimer > 0) tdFlashTimer -= dt;
   if (msgTimer > 0) msgTimer -= dt;
-
-  // ── Shake ──
   if (shakeTimer > 0) shakeTimer -= dt;
 
   updateParticles(dt);
@@ -387,12 +613,11 @@ function handleTackle() {
   shakeTimer = 22;
   soundTackle();
   spawnParticles(player.x + player.w/2, player.y + player.h/2, "#e63946", 16, 6);
+  comboCount = 0; // reset combo on tackle
 
   if (lives <= 0) {
     gameOver = true;
-    const s = score;
-    if (s > (getScores()[0] || 0)) saveScore(s); else saveScore(s);
-    saveScore(s);
+    saveScore(score);
     setTimeout(() => showGameOver(), 400);
   } else {
     player.invincible = 80;
@@ -426,17 +651,39 @@ function collectPowerup(pu) {
       shieldTimer  = 180;
       setMsg("🛡️ BOUCLIER ACTIVÉ !");
       break;
+    case "slowmo":
+      slowMoTimer = 300; // ~5s
+      soundSlowMo();
+      setMsg("🧊 RALENTI DES DÉFENSEURS !");
+      break;
   }
   updateHUD();
 }
 
 function touchdown() {
   touchdowns++;
-  score += 6;
-  level  = 1 + Math.floor(touchdowns / 3);
-  soundTouchdown();
+  level = 1 + Math.floor(touchdowns / 3);
+
+  // Combo system
+  comboCount++;
+  comboTimer = COMBO_WINDOW;
+  const comboBonus = (comboCount - 1) * 3; // +3 per extra chain
+  const tdPoints   = 6 + comboBonus;
+  score += tdPoints;
+
+  if (comboCount >= 2) {
+    soundCombo();
+    spawnParticles(W/2, H/2, "#ff6600", 30, 8);
+    setMsg(`🔥 COMBO x${comboCount} ! +${tdPoints} pts — Niveau ${level}`);
+  } else {
+    soundTouchdown();
+    setMsg(`🏈 TOUCHDOWN ! +${tdPoints} pts — Niveau ${level}`);
+  }
+
+  tdFlashTimer = 25;
   spawnParticles(player.x + player.w/2, 60, "#FFB700", 24, 7);
   spawnParticles(W/2, 40, "#fff", 12, 5);
+  if (comboCount >= 3) spawnParticles(W/2, H/2, "#FFB700", 40, 10);
 
   player.x  = W / 2 - 20;
   player.y  = H - 90;
@@ -445,7 +692,6 @@ function touchdown() {
 
   spawnDefenders();
   spawnPowerup();
-  setMsg(`🏈 TOUCHDOWN ! +6 pts — Niveau ${level}`);
   updateHUD();
 }
 
@@ -453,23 +699,59 @@ function touchdown() {
 function draw(dt) {
   ctx.save();
 
-  // Shake
   if (shakeTimer > 0) {
     const s = shakeTimer * 1.6;
     ctx.translate((Math.random() - .5) * s, (Math.random() - .5) * s);
   }
 
   drawField();
+  drawTrail();
   drawPowerups();
   drawDefenders();
   drawPlayer();
   drawParticles();
 
+  // TD flash overlay
+  if (tdFlashTimer > 0) {
+    ctx.globalAlpha = (tdFlashTimer / 25) * 0.45;
+    ctx.fillStyle   = "#FFB700";
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+  }
+
+  // Slow-mo tint
+  if (slowMoTimer > 0) {
+    ctx.globalAlpha = 0.07;
+    ctx.fillStyle   = "#00aaff";
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+}
+
+function drawPaused() {
+  // Keep last frame visible, overlay pause
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,.6)";
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle   = "#FFB700";
+  ctx.font        = "bold 54px 'Oswald', Arial";
+  ctx.textAlign   = "center";
+  ctx.shadowColor = "rgba(255,183,0,.5)";
+  ctx.shadowBlur  = 20;
+  ctx.fillText("⏸ PAUSE", W/2, H/2 - 20);
+  ctx.shadowBlur  = 0;
+
+  ctx.fillStyle = "#ccc";
+  ctx.font      = "22px 'Rajdhani', Arial";
+  ctx.fillText("P / Échap pour reprendre", W/2, H/2 + 24);
+
   ctx.restore();
 }
 
 function drawField() {
-  // Grass gradient
   const grad = ctx.createLinearGradient(0, 0, 0, H);
   grad.addColorStop(0,   "#1e4d1e");
   grad.addColorStop(0.5, "#256325");
@@ -477,7 +759,6 @@ function drawField() {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
-  // Alternating yard stripes
   for (let i = 0; i < 6; i++) {
     if (i % 2 === 0) {
       ctx.fillStyle = "rgba(0,0,0,.08)";
@@ -485,12 +766,10 @@ function drawField() {
     }
   }
 
-  // Yard lines
   ctx.strokeStyle = "rgba(255,255,255,.35)";
   ctx.lineWidth   = 2;
   for (let y = 75; y < H; y += 60) {
     ctx.beginPath(); ctx.moveTo(15, y); ctx.lineTo(W - 15, y); ctx.stroke();
-    // Yard markers
     ctx.fillStyle = "rgba(255,255,255,.3)";
     ctx.font = "bold 11px 'Oswald', Arial";
     ctx.textAlign = "left";
@@ -500,24 +779,20 @@ function drawField() {
     ctx.fillText(yd, W - 18, y - 3);
   }
 
-  // Sidelines
   ctx.strokeStyle = "rgba(255,255,255,.6)";
   ctx.lineWidth   = 3;
   ctx.strokeRect(10, 75, W - 20, H - 85);
 
-  // End zone
   const ezGrad = ctx.createLinearGradient(0, 0, 0, 75);
   ezGrad.addColorStop(0, "rgba(0,48,135,.7)");
   ezGrad.addColorStop(1, "rgba(0,48,135,.3)");
   ctx.fillStyle = ezGrad;
   ctx.fillRect(0, 0, W, 75);
 
-  // End zone border
   ctx.strokeStyle = "#FFB700";
   ctx.lineWidth   = 3;
   ctx.beginPath(); ctx.moveTo(10, 75); ctx.lineTo(W - 10, 75); ctx.stroke();
 
-  // END ZONE text
   ctx.fillStyle = "#FFB700";
   ctx.font      = "bold 28px 'Oswald', Arial";
   ctx.textAlign = "center";
@@ -526,7 +801,14 @@ function drawField() {
   ctx.fillText("END ZONE", W / 2, 48);
   ctx.shadowBlur  = 0;
 
-  // Arrow guide
+  // Formation indicator
+  if (currentFormation !== "chase") {
+    ctx.fillStyle = "rgba(255,183,0,.5)";
+    ctx.font      = "bold 11px 'Oswald', Arial";
+    ctx.textAlign = "right";
+    ctx.fillText(currentFormation.toUpperCase(), W - 18, H - 10);
+  }
+
   if (player && player.y > H * .5) {
     const alpha = Math.min(1, (player.y - H * .5) / (H * .3)) * (.5 + .3 * Math.sin(Date.now() * .005));
     ctx.globalAlpha = alpha;
@@ -544,45 +826,45 @@ function drawPlayer() {
   const cy  = p.y + p.h / 2;
   const t   = Date.now() * .001;
 
-  // Invincibility flicker
   if (p.invincible > 0 && Math.floor(p.invincible / 6) % 2 === 0) return;
 
   ctx.save();
   ctx.translate(cx, cy);
   if (p.facingLeft) ctx.scale(-1, 1);
 
-  // Shield glow
+  // Shadow
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.ellipse(0, p.h/2 + 2, p.w * 0.4, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
   if (shieldActive) {
     ctx.shadowColor = "#4cc9f0";
     ctx.shadowBlur  = 18;
   }
-  // Sprint glow
   if (sprintActive) {
     ctx.shadowColor = "#FFB700";
     ctx.shadowBlur  = 12;
   }
 
-  // Body (jersey #1 blue)
   ctx.fillStyle = "#003087";
   ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h * .68);
 
-  // Pants
   ctx.fillStyle = "#001a50";
   ctx.fillRect(-p.w/2, -p.h/2 + p.h * .62, p.w, p.h * .38);
 
-  // Jersey number
   ctx.fillStyle = "#FFB700";
   ctx.font      = "bold 14px 'Oswald', Arial";
   ctx.textAlign = "center";
   ctx.fillText("1", 0, -p.h/2 + p.h * .38);
 
-  // Helmet
   ctx.fillStyle = "#FFB700";
   ctx.beginPath();
   ctx.ellipse(0, -p.h/2 + 10, p.w * .42, p.h * .22, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Helmet face mask
   ctx.strokeStyle = "#ccc";
   ctx.lineWidth   = 2;
   ctx.beginPath();
@@ -594,21 +876,17 @@ function drawPlayer() {
   ctx.lineTo(p.w * .38, -p.h/2 + 10);
   ctx.stroke();
 
-  // Arms running animation
   const runPhase = Math.sin(t * 12 + (sprintActive ? 2 : 0));
   ctx.fillStyle = "#003087";
-  // Left arm
   ctx.save();
   ctx.rotate(-0.4 + runPhase * 0.4);
   ctx.fillRect(-p.w/2 - 10, -p.h/2 + 8, 10, 26);
   ctx.restore();
-  // Right arm
   ctx.save();
   ctx.rotate(0.4 - runPhase * 0.4);
   ctx.fillRect(p.w/2, -p.h/2 + 8, 10, 26);
   ctx.restore();
 
-  // Football carried (slight bob)
   const ballBob = Math.sin(t * 8) * 2;
   ctx.fillStyle = "#8B4513";
   ctx.beginPath();
@@ -621,7 +899,6 @@ function drawPlayer() {
   ctx.lineTo(p.w/2 + 6, -p.h/2 + p.h * .5 + ballBob);
   ctx.stroke();
 
-  // Stiff arm
   if (p.stiffArmActive > 0) {
     ctx.fillStyle = "#FFB700";
     ctx.shadowColor = "#FFB700";
@@ -633,7 +910,17 @@ function drawPlayer() {
     ctx.shadowBlur = 0;
   }
 
-  ctx.restore(); // translate/scale
+  // Combo glow ring
+  if (comboCount >= 2) {
+    const pulse = 0.5 + 0.5 * Math.sin(Date.now() * .01);
+    ctx.strokeStyle = `rgba(255,100,0,${pulse})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, p.w * 0.7, p.h * 0.55, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
 }
 
 function drawDefenders() {
@@ -642,34 +929,40 @@ function drawDefenders() {
     ctx.save();
     ctx.translate(def.x + def.w/2, def.y + def.h/2);
 
-    // Face toward player
     const toPlayer = player.x - def.x;
     if (toPlayer < 0) ctx.scale(-1, 1);
 
-    // Running wobble
-    const wobble = Math.sin(t * 10 + def.wobble) * 2;
+    // Shadow
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.ellipse(0, def.h/2 + 2, def.w * 0.4, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
 
-    // Body (red jersey)
+    // Slow-mo tint
+    if (slowMoTimer > 0) {
+      ctx.globalAlpha = 0.7;
+    }
+
     ctx.fillStyle = "#C8102E";
     ctx.fillRect(-def.w/2, -def.h/2, def.w, def.h * .65);
 
-    // Pants
     ctx.fillStyle = "#8a0b1e";
     ctx.fillRect(-def.w/2, -def.h/2 + def.h * .6, def.w, def.h * .4);
 
-    // Jersey number
+    ctx.globalAlpha = 1;
+
     ctx.fillStyle = "#fff";
     ctx.font      = "bold 13px 'Oswald', Arial";
     ctx.textAlign = "center";
     ctx.fillText((idx + 50).toString(), 0, -def.h/2 + def.h * .37);
 
-    // Helmet (grey)
     ctx.fillStyle = "#888";
     ctx.beginPath();
     ctx.ellipse(0, -def.h/2 + 10, def.w * .42, def.h * .23, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Red stripe on helmet
     ctx.strokeStyle = "#C8102E";
     ctx.lineWidth   = 3;
     ctx.beginPath();
@@ -677,7 +970,6 @@ function drawDefenders() {
     ctx.lineTo(def.w * .15, -def.h/2 + 18);
     ctx.stroke();
 
-    // Face mask
     ctx.strokeStyle = "#aaa";
     ctx.lineWidth   = 2;
     ctx.beginPath();
@@ -685,20 +977,26 @@ function drawDefenders() {
     ctx.lineTo(def.w * .28, -def.h/2 + 18);
     ctx.stroke();
 
-    // Arms
+    const wobble = slowMoTimer > 0 ? Math.sin(t * 3 + def.wobble) * .1 : Math.sin(t * 10 + def.wobble) * .35;
     ctx.fillStyle = "#C8102E";
-    ctx.save(); ctx.rotate(-0.3 + Math.sin(t*10 + def.wobble) * .35);
+    ctx.save(); ctx.rotate(-0.3 + wobble);
     ctx.fillRect(-def.w/2 - 9, -def.h/2 + 8, 9, 22);
     ctx.restore();
-    ctx.save(); ctx.rotate(0.3 - Math.sin(t*10 + def.wobble) * .35);
+    ctx.save(); ctx.rotate(0.3 - wobble);
     ctx.fillRect(def.w/2, -def.h/2 + 8, 9, 22);
     ctx.restore();
 
-    // Danger indicator (red glow when close)
     const dist = Math.hypot(player.x - def.x, player.y - def.y);
-    if (dist < 100) {
+    if (dist < 100 && slowMoTimer <= 0) {
       ctx.shadowColor = "rgba(255,0,0,.8)";
       ctx.shadowBlur  = Math.max(0, (100 - dist) / 3);
+    }
+    // Ice crystals on slow-mo
+    if (slowMoTimer > 0) {
+      ctx.fillStyle = "rgba(160,240,255,0.4)";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("❄", 0, -def.h/2 - 8);
     }
 
     ctx.restore();
@@ -716,11 +1014,9 @@ function drawPowerups() {
     ctx.translate(pu.x, pu.y + bob);
     ctx.scale(scale, scale);
 
-    // Glow ring
     ctx.shadowColor = pu.color;
     ctx.shadowBlur  = 12 + glow * 10;
 
-    // Background circle
     ctx.fillStyle = `rgba(${hexToRgb(pu.color)},.2)`;
     ctx.beginPath();
     ctx.arc(0, 0, 20, 0, Math.PI * 2);
@@ -730,7 +1026,6 @@ function drawPowerups() {
     ctx.lineWidth   = 2;
     ctx.stroke();
 
-    // Emoji
     ctx.shadowBlur = 0;
     ctx.font       = "20px Arial";
     ctx.textAlign  = "center";
@@ -768,26 +1063,20 @@ function drawGameOver() {
 
   ctx.fillStyle = "#ccc";
   ctx.font      = "20px 'Rajdhani', Arial";
-  ctx.fillText("Appuie sur ENTRÉE pour rejouer", W/2, H/2 + 60);
+  ctx.fillText("ENTRÉE / TAP pour rejouer", W/2, H/2 + 60);
 
   drawParticles();
   ctx.restore();
 }
-
-// ── Enter to restart when game over ───────────────
-window.addEventListener("keydown", e => {
-  if (gameOver && (e.key === "Enter" || e.key === " ")) {
-    e.preventDefault();
-    restartGame();
-  }
-});
 
 // ── Screen management ──────────────────────────────
 function startGame() {
   gameStarted = true;
   document.getElementById("titleScreen").style.display = "none";
   document.getElementById("gameScreen").classList.remove("hidden");
+  document.getElementById("mobileControls").classList.remove("hidden");
   resetGame();
+  setupMobileControls();
   requestAnimationFrame(gameLoop);
 }
 
@@ -803,8 +1092,10 @@ function restartGame() {
 function goMenu() {
   gameStarted = false;
   gameOver    = false;
+  paused      = false;
   document.getElementById("gameScreen").classList.add("hidden");
   document.getElementById("gameOverScreen").classList.add("hidden");
+  document.getElementById("mobileControls").classList.add("hidden");
   document.getElementById("titleScreen").style.display = "flex";
   renderTitleScores();
 }
@@ -817,10 +1108,11 @@ function hideHowTo() {
 }
 
 function showGameOver() {
-  document.getElementById("goTitle").textContent   = touchdowns > 0 ? "PLAQUÉ !" : "PLAQUÉ !";
-  document.getElementById("goScore").textContent   = score;
-  document.getElementById("goTd").textContent      = touchdowns;
-  document.getElementById("goLevel").textContent   = level;
+  reportScoreToHub();
+  document.getElementById("goTitle").textContent    = touchdowns > 0 ? "PLAQUÉ !" : "PLAQUÉ !";
+  document.getElementById("goScore").textContent    = score;
+  document.getElementById("goTd").textContent       = touchdowns;
+  document.getElementById("goLevel").textContent    = level;
   document.getElementById("goPowerups").textContent = powerupCollected;
 
   const hs = getScores()[0] || 0;
@@ -831,6 +1123,11 @@ function showGameOver() {
 
   document.getElementById("gameOverScreen").classList.remove("hidden");
 }
+
+// Mobile tap to restart on game over canvas
+canvas.addEventListener("touchstart", e => {
+  if (gameOver) { e.preventDefault(); restartGame(); }
+}, { passive: false });
 
 // ── Init title ─────────────────────────────────────
 renderTitleScores();

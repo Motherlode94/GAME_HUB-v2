@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>NFL Mini Run</title>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/styles.css"/>
@@ -30,6 +30,7 @@
       <kbd>← → ↑ ↓</kbd> ou <kbd>WASD/ZQSD</kbd> pour bouger
       &nbsp;|&nbsp; <kbd>ESPACE</kbd> Sprint
       &nbsp;|&nbsp; <kbd>E</kbd> Stiff Arm
+      &nbsp;|&nbsp; <kbd>P</kbd> Pause
     </p>
   </div>
 
@@ -39,12 +40,15 @@
       <h2>COMMENT JOUER</h2>
       <ul class="how-list">
         <li>🏈 <strong>Objectif</strong> — Atteins l'END ZONE en haut du terrain pour marquer un Touchdown.</li>
-        <li>🕹️ <strong>Mouvement</strong> — <kbd>← → ↑ ↓</kbd> ou <kbd>WASD</kbd> / <kbd>ZQSD</kbd></li>
-        <li>⚡ <strong>Sprint</strong> — Maintiens <kbd>ESPACE</kbd> pour un burst de vitesse (jauge limitée)</li>
-        <li>💥 <strong>Stiff Arm</strong> — Appuie sur <kbd>E</kbd> pour repousser un défenseur proche</li>
+        <li>🕹️ <strong>Mouvement</strong> — <kbd>← → ↑ ↓</kbd> ou <kbd>WASD</kbd> / <kbd>ZQSD</kbd> — ou joystick mobile</li>
+        <li>⚡ <strong>Sprint</strong> — Maintiens <kbd>ESPACE</kbd> ou bouton ⚡ (jauge limitée)</li>
+        <li>💥 <strong>Stiff Arm</strong> — <kbd>E</kbd> ou bouton 💥 pour repousser un défenseur proche</li>
+        <li>⏸ <strong>Pause</strong> — <kbd>P</kbd> ou <kbd>Échap</kbd> ou bouton ⏸</li>
         <li>⭐ <strong>Power-ups</strong> — Ramasse les objets qui apparaissent sur le terrain :
-          <br>&nbsp;&nbsp;&nbsp;⭐ Étoile = score bonus &nbsp;|&nbsp; ❤️ Vie extra &nbsp;|&nbsp; ⚡ Sprint infini 5s &nbsp;|&nbsp; 🛡️ Bouclier 3s
+          <br>&nbsp;&nbsp;&nbsp;⭐ Étoile = score bonus &nbsp;|&nbsp; ❤️ Vie extra &nbsp;|&nbsp; ⚡ Sprint infini 5s &nbsp;|&nbsp; 🛡️ Bouclier 3s &nbsp;|&nbsp; 🧊 Ralenti défenseurs 5s
         </li>
+        <li>🔥 <strong>Combo</strong> — Enchaîne les TDs rapidement pour multiplier tes points !</li>
+        <li>🧠 <strong>Formations</strong> — Les défenseurs changent de tactique à chaque round (PINCER, ZONE, BLITZ…)</li>
         <li>❤️ <strong>Vies</strong> — Tu démarres avec 3 vies. Un tackle = une vie perdue.</li>
         <li>📈 <strong>Difficulté</strong> — Chaque TD ajoute un défenseur et les accélère.</li>
       </ul>
@@ -78,7 +82,7 @@
       </div>
     </div>
 
-    <!-- Sprint bar -->
+    <!-- Sprint / shield bar -->
     <div id="sprintBarWrap">
       <span class="bar-label">SPRINT</span>
       <div class="bar-track"><div class="bar-fill" id="sprintBar"></div></div>
@@ -96,6 +100,18 @@
         <button class="btn-sm btn-gold" onclick="restartGame()">↺ RESTART</button>
         <button class="btn-sm btn-grey" onclick="goMenu()">⌂ MENU</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MOBILE CONTROLS -->
+  <div id="mobileControls" class="hidden">
+    <div id="joystickZone">
+      <div id="joystickKnob"></div>
+    </div>
+    <div id="mobileRightBtns">
+      <button id="btnPauseMobile" class="mob-btn mob-pause">⏸</button>
+      <button id="btnSprint"      class="mob-btn mob-sprint">⚡</button>
+      <button id="btnStiff"       class="mob-btn mob-stiff">💥</button>
     </div>
   </div>
 

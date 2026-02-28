@@ -254,9 +254,88 @@ kbd {
 }
 @keyframes pulse { from { opacity:.7 } to { opacity:1 } }
 
+/* ── COMBO BADGE ──────────────────────────────── */
+.combo-badge {
+  background: rgba(255,100,0,.2) !important;
+  border-color: #ff6600 !important;
+  color: #ff8c00 !important;
+  animation: comboPulse .5s infinite alternate !important;
+}
+@keyframes comboPulse {
+  from { transform: scale(1);   box-shadow: none; }
+  to   { transform: scale(1.08); box-shadow: 0 0 10px rgba(255,100,0,.5); }
+}
+
+/* ── MOBILE CONTROLS ──────────────────────────── */
+#mobileControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 620px; max-width: 100%;
+  padding: 10px 14px 6px;
+  gap: 12px;
+  pointer-events: auto;
+}
+#mobileControls.hidden { display: none; }
+
+/* Joystick */
+#joystickZone {
+  position: relative;
+  width: 110px; height: 110px;
+  background: rgba(255,255,255,.06);
+  border: 2px solid rgba(255,255,255,.15);
+  border-radius: 50%;
+  touch-action: none;
+  flex-shrink: 0;
+}
+#joystickKnob {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 46px; height: 46px;
+  background: radial-gradient(circle, rgba(255,183,0,.9), rgba(200,100,0,.7));
+  border: 2px solid #FFB700;
+  border-radius: 50%;
+  box-shadow: 0 0 14px rgba(255,183,0,.4);
+  pointer-events: none;
+  transition: transform 0.04s;
+}
+
+/* Right buttons */
+#mobileRightBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+.mob-btn {
+  font-size: 1.3em;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  cursor: pointer;
+  touch-action: none;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+  font-family: Arial, sans-serif;
+}
+.mob-btn:active { background: rgba(255,255,255,.22); transform: scale(.92); }
+.mob-sprint { background: rgba(0,170,255,.18); border-color: #00aaff; font-size: 1.5em; }
+.mob-stiff  { background: rgba(255,183,0,.18);  border-color: #FFB700; }
+.mob-pause  { font-size: 1em; width: 46px; height: 46px; background: rgba(255,255,255,.06); }
+
+/* Only show mobile controls on touch devices */
+@media (hover: hover) and (pointer: fine) {
+  #mobileControls { display: none !important; }
+}
+
 /* ── RESPONSIVE ───────────────────────────────── */
 @media (max-width: 660px) {
   #hud, #sprintBarWrap, #msgLine, #bottomBar { width: 100vw; }
   #gameCanvas { width: 100vw !important; height: auto !important; }
+  #mobileControls { width: 100vw; }
   .overlay-box { padding: 24px 20px; }
 }
