@@ -364,7 +364,28 @@ body::after {
 .score-timer   { font-family: var(--font); font-size: 2em; font-weight: 700; }
 
 .match-main    { display: flex; flex: 1; overflow: hidden; }
-.match-court   { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.match-court   {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(61,127,255,.12), transparent 42%),
+    linear-gradient(180deg, #08101d 0%, #0d1828 100%);
+}
+
+#courtCanvas {
+  width: min(100%, 980px);
+  height: auto;
+  max-height: calc(100vh - 170px);
+  border-radius: 18px;
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.35),
+    inset 0 0 0 1px rgba(255,255,255,.05);
+}
 
 .match-sidebar {
   width: 320px; background: var(--bg2);
