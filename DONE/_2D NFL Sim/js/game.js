@@ -293,7 +293,7 @@ function reportScoreToHub() {
   if (scoreReported || !window.opener || window.opener.closed) return;
 
   try {
-    window.opener.postMessage({ type: "gameScore", gameId: 2, score }, "*");
+    window.opener.postMessage({ type: "gameScore", gameId: 8, score }, "*");
     scoreReported = true;
   } catch (e) {}
 }

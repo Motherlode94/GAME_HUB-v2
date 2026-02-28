@@ -432,7 +432,10 @@ pgSubmitBtn.addEventListener('click', () => {
     const scoreValid = score !== null && !isNaN(score) && score >= 0;
 
     const text = pgCommentText.value.trim();
-    if (!text) { flashInput(pgCommentText, 'Ecris quelque chose...'); return; }
+    if (!scoreValid && !text) {
+        flashInput(pgCommentText, 'Ajoute un avis ou un score...');
+        return;
+    }
 
     const gid = lastPlayedGame.id;
 
@@ -444,20 +447,22 @@ pgSubmitBtn.addEventListener('click', () => {
         saveScores(gid, scores);
     }
 
-    const comments = getComments(gid);
-    comments.push({
-        name,
-        stars: selectedStars || 3,
-        score: scoreValid ? score : null,
-        text,
-        date: new Date().toLocaleDateString('fr-FR'),
-        ts: new Date().toISOString()
-    });
-    saveComments(gid, comments);
+    if (text) {
+        const comments = getComments(gid);
+        comments.push({
+            name,
+            stars: selectedStars || 3,
+            score: scoreValid ? score : null,
+            text,
+            date: new Date().toLocaleDateString('fr-FR'),
+            ts: new Date().toISOString()
+        });
+        saveComments(gid, comments);
+    }
 
     closePostGame();
     openModal(gid);
-    switchTab('comments');
+    switchTab(text ? 'comments' : 'scores');
 });
 
 pgSkipBtn.addEventListener('click', closePostGame);
@@ -510,7 +515,15 @@ function flashInput(input, msg) {
 // Games can send: parent.postMessage({ type: 'gameScore', score: 1234 }, '*')
 window.addEventListener('message', (e) => {
     if (e.origin !== location.origin) return;
-    if (e.data?.type === 'gameScore' && lastPlayedGame) {
+    if (e.data?.type === 'gameScore') {
+        const reportedGame = GAMES.find(game => game.id === Number(e.data.gameId)) || lastPlayedGame;
+        if (!reportedGame) return;
+
+        lastPlayedGame = reportedGame;
+        if (postgamePanel.classList.contains('hidden')) {
+            showPostGame(reportedGame);
+        }
+
         pgScoreValue.value            = e.data.score;
         pgScoreValue.disabled         = true;
         pgScoreValue.placeholder      = 'Score reçu du jeu';

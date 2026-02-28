@@ -1,28 +1,37 @@
 document.addEventListener('DOMContentLoaded', function() {
 // ── Shared game titles (same list as scripts.js) ──
-const GAME_TITLES = {
-    1:'Combat Arena', 2:'Vampire Sim', 3:'Zombie Shooter', 4:'Pixel Platformer',
-    5:'FreeForce 2D', 6:'Racing Rivals', 7:'Axis Infinity', 8:'2D Shooter',
-    9:'Dungeon Crawler', 10:'2D Mario Like', 11:'2D Mario Kart', 12:'2D GodSworm',
-    13:'2D Football Sim', 14:'2D Sims', 15:'2D Minecraft', 16:'2D Hack n Slash',
-    17:'2D GTA', 18:'2D Rpg', 19:'2D Tower Defense', 20:'2D Gestion Tycoon', 21:'2D Empire Game'
-};
-const GAME_CATS = {
-    1:'action',2:'adventure',3:'survival',4:'platformer',5:'action',6:'racing',
-    7:'',8:'shooter',9:'adventure',10:'platformer',11:'racing',12:'adventure',
-    13:'sports',14:'simulation',15:'sandbox',16:'action',17:'action',18:'rpg',
-    19:'strategy',20:'simulation',21:'strategy'
-};
+const GAMES = [
+    { id: 1, title: 'Combat Arena', category: 'action' },
+    { id: 2, title: '2D Basket Sim', category: 'sports' },
+    { id: 3, title: 'Broken Array', category: 'strategy' },
+    { id: 4, title: 'Tactical War', category: 'strategy' },
+    { id: 5, title: 'Dungeon Crawler 2D', category: 'rpg' },
+    { id: 6, title: 'FreeForce 2D', category: 'action' },
+    { id: 7, title: 'HARDWOOD', category: 'sports' },
+    { id: 8, title: 'NFL Mini Run', category: 'sports' }
+];
 
 function getScores(id)   { try { return JSON.parse(localStorage.getItem(`wgc_scores_${id}`))   || []; } catch { return []; } }
 function getComments(id) { try { return JSON.parse(localStorage.getItem(`wgc_comments_${id}`)) || []; } catch { return []; } }
 
+function normalizeScores(scores) {
+    return scores
+        .filter(entry => entry && typeof entry === 'object')
+        .map(entry => ({
+            name: typeof entry.name === 'string' && entry.name.trim() ? entry.name.trim() : 'Anonyme',
+            score: Number(entry.score) || 0,
+            date: entry.date || ''
+        }))
+        .filter(entry => entry.score >= 0)
+        .sort((a, b) => b.score - a.score);
+}
+
 function loadAllData() {
-    return Object.keys(GAME_TITLES).map(id => {
-        const gid      = parseInt(id);
-        const scores   = getScores(gid).sort((a,b) => b.score - a.score);
+    return GAMES.map(game => {
+        const gid      = game.id;
+        const scores   = normalizeScores(getScores(gid));
         const comments = getComments(gid);
-        return { id: gid, title: GAME_TITLES[gid], category: GAME_CATS[gid], scores, comments };
+        return { id: gid, title: game.title, category: game.category, scores, comments };
     }).filter(g => g.scores.length > 0 || g.comments.length > 0);
 }
 
@@ -75,7 +84,7 @@ function renderPage() {
         const avgStars      = g.comments.length
             ? (g.comments.reduce((s,c) => s + (c.stars||0), 0) / g.comments.length).toFixed(1)
             : null;
-        const latestComment = g.comments.sort((a,b) => new Date(b.ts) - new Date(a.ts))[0];
+        const latestComment = [...g.comments].sort((a,b) => new Date(b.ts) - new Date(a.ts))[0];
 
         return `
         <div class="lb-card">
