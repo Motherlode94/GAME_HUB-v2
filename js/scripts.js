@@ -340,7 +340,7 @@ let lastPlayedGame = null;
 
 function launchGameInNewTab(game) {
     const url = new URL(game.playUrl, window.location.href).toString();
-    const opened = window.open(url, '_blank', 'noopener,noreferrer');
+    const opened = window.open(url, '_blank');
     if (!opened) window.location.href = url;
 }
 
