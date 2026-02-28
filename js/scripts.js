@@ -1,4 +1,3 @@
-const { version } = require("react");
 
 document.addEventListener('DOMContentLoaded', function() {
 // ── Game Data ─────────────────────────────────
@@ -20,32 +19,95 @@ const GAMES = [
     },
     {
         id: 2,
+        title: "2D Basket Sim",
+        category: "sports",
+        year: 2026,
+        rating: 8.9,
+        description: "An arcade basketball challenge with classic, precision, and survival modes built around speed, shot timing, and score combos.",
+        tags: ["basketball", "arcade", "sports", "score attack", "combo"],
+        playUrl: "DONE/_2D Basket Sim/index.html",
+        changelog: [
+            { version: "1.0.0", date: "2026-02-28", notes: ["Initial release"] }
+        ]
+    },
+    {
+        id: 3,
+        title: "Broken Array",
+        category: "strategy",
+        year: 2026,
+        rating: 8.6,
+        description: "A minimalist tactical RTS where you build a base, manage resources, train squads, and survive escalating attack waves.",
+        tags: ["strategy", "rts", "base building", "survival", "waves"],
+        playUrl: "DONE/_2D Broken Array/index.html",
+        changelog: [
+            { version: "1.0.0", date: "2026-02-28", notes: ["Initial release"] }
+        ]
+    },
+    {
+        id: 4,
+        title: "Tactical War",
+        category: "strategy",
+        year: 2026,
+        rating: 8.8,
+        description: "A World War II real-time strategy game focused on squad control, map pressure, and tactical battlefield positioning.",
+        tags: ["strategy", "rts", "wwii", "squads", "tactics"],
+        playUrl: "DONE/_2D Comapagny of Hero/index.html",
+        changelog: [
+            { version: "0.1.0", date: "2026-02-28", notes: ["Initial playable build"] }
+        ]
+    },
+    {
+        id: 5,
+        title: "Dungeon Crawler 2D",
+        category: "rpg",
+        year: 2026,
+        rating: 9.0,
+        description: "Explore a procedural dungeon, fight enemies in turn-based battles, loot rooms, and level up through endless runs.",
+        tags: ["rpg", "dungeon", "turn-based", "loot", "procedural"],
+        playUrl: "DONE/_2D Dungeon Crawler/index.html",
+        changelog: [
+            { version: "1.0.0", date: "2026-02-28", notes: ["Initial release"] }
+        ]
+    },
+    {
+        id: 6,
+        title: "FreeForce 2D",
+        category: "action",
+        year: 2026,
+        rating: 8.7,
+        description: "A side-scrolling action shooter with multiple weapons, enemy types, bosses, power-ups, and score chasing.",
+        tags: ["action", "shooter", "bosses", "weapons", "arcade"],
+        playUrl: "DONE/_2D FreeForce/index.html",
+        changelog: [
+            { version: "1.0.0", date: "2026-02-28", notes: ["Initial release"] }
+        ]
+    },
+    {
+        id: 7,
+        title: "HARDWOOD",
+        category: "sports",
+        year: 2026,
+        rating: 8.8,
+        description: "A basketball management game where you build your franchise, set up your team, and guide a season from the front office.",
+        tags: ["sports", "manager", "basketball", "team building", "simulation"],
+        playUrl: "DONE/_2D HardWood/index.html",
+        changelog: [
+            { version: "1.0.0", date: "2026-02-28", notes: ["Initial release"] }
+        ]
+    },
+    {
+        id: 8,
         title: "NFL Mini Run",
         category: "sports",
         year: 2026,
         rating: 8.8,
         description: "Sprint through defenders, chain touchdowns, grab power-ups, and survive longer each round in this arcade football run game.",
         tags: ["sports", "arcade", "football", "mobile", "score attack"],
-        playUrl: "_2D NFL Sim/index.html",
+        playUrl: "DONE/_2D NFL Sim/index.html",
         changelog: [
-            { version: "0.2.0", date: "2026-02-28", notes: ["Added mobile joystick controls", "Added combos, formations, and power-ups", "Connected score reporting back to the hub"] },
+            { version: "0.2.0", date: "2026-02-28", notes: ["Added mobile joystick controls", "Added combos, formations, and power-ups"] },
             { version: "0.1.0", date: "2026-02-28", notes: ["Initial playable prototype"] }
         ]
-    },
-    {
-        id: 3,
-        title: "2D Compagny of Hero",
-        category: "strategy",
-        year: 2026,
-        rating: 9.7,
-        description: "",
-        tags: [""],
-        playUrl: "DONE/_2D Compagny of Hero/index.html",
-        changelog:[
-            {},
-            {}
-        ]
-
     }
 ];
 
