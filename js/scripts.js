@@ -197,9 +197,10 @@ const pgStars        = document.querySelectorAll('.pg-star');
 const pgCommentText  = document.getElementById('pg-comment-text');
 const pgSubmitBtn    = document.getElementById('pg-submit-btn');
 const pgSkipBtn      = document.getElementById('pg-skip-btn');
-const modalScoreName   = document.getElementById('modal-score-name');
-const modalScoreValue  = document.getElementById('modal-score-value');
-const modalScoreSubmit = document.getElementById('modal-score-submit');
+const sessionBanner      = document.getElementById('session-banner');
+const sessionBannerTitle = document.getElementById('session-banner-title');
+const sessionFinishBtn   = document.getElementById('session-finish-btn');
+const sessionCancelBtn   = document.getElementById('session-cancel-btn');
 
 // ── Grid ───────────────────────────────────────
 function getFiltered() {
@@ -278,8 +279,6 @@ function openModal(id) {
     }
 
     switchTab('scores');
-    if (modalScoreName) modalScoreName.value = playerName;
-    if (modalScoreValue) modalScoreValue.value = '';
     renderLeaderboard(id);
     renderChangelog(game);
     renderComments(id);
@@ -379,6 +378,27 @@ function renderComments(gameId) {
 // ── Game launch ───────────────────────────────
 let lastPlayedGame = null;
 
+function persistActiveSession(game) {
+    if (!game) return;
+    sessionStorage.setItem('wgc_activeGameId', String(game.id));
+}
+
+function clearActiveSession() {
+    sessionStorage.removeItem('wgc_activeGameId');
+}
+
+function syncSessionBanner() {
+    if (!sessionBanner) return;
+
+    if (!lastPlayedGame || !postgamePanel.classList.contains('hidden')) {
+        sessionBanner.classList.add('hidden');
+        return;
+    }
+
+    sessionBannerTitle.textContent = lastPlayedGame.title;
+    sessionBanner.classList.remove('hidden');
+}
+
 function launchGameInNewTab(game) {
     const url = new URL(game.playUrl, window.location.href).toString();
     const opened = window.open(url, '_blank');
@@ -395,6 +415,8 @@ function openGame(game) {
     }
 
     lastPlayedGame = game;
+    persistActiveSession(game);
+    syncSessionBanner();
 
     // Avoid iframe usage because deployed environments report CSP frame-src warnings.
     launchGameInNewTab(game);
@@ -406,7 +428,6 @@ function closeGame() {
     gameIframe.src = '';
     document.body.style.overflow = '';
 
-    // Show post-game panel
     if (lastPlayedGame) {
         showPostGame(lastPlayedGame);
     }
@@ -429,13 +450,16 @@ function showPostGame(game) {
     postgamePanel.classList.remove('hidden');
     postgamePanel.classList.add('open');
     document.body.style.overflow = 'hidden';
+    syncSessionBanner();
 }
 
 function closePostGame() {
     postgamePanel.classList.remove('open');
     postgamePanel.classList.add('hidden');
     document.body.style.overflow = '';
+    clearActiveSession();
     lastPlayedGame = null;
+    syncSessionBanner();
 }
 
 
@@ -455,34 +479,18 @@ pgStars.forEach(star => {
     });
 });
 
-if (modalScoreSubmit) {
-    modalScoreSubmit.addEventListener('click', () => {
-        if (!currentGameId) return;
-
-        const name = modalScoreName.value.trim();
-        const score = Number.parseInt(modalScoreValue.value, 10);
-
-        if (!name) {
-            flashInput(modalScoreName, 'Entre ton pseudo !');
-            return;
-        }
-        if (!Number.isFinite(score) || score < 0) {
-            flashInput(modalScoreValue, 'Entre un score valide !');
-            return;
-        }
-
-        playerName = name;
-        sessionStorage.setItem('wgc_playerName', playerName);
-        submitScoreForGame(currentGameId, name, score);
-        modalScoreValue.value = '';
-        renderLeaderboard(currentGameId);
+if (sessionFinishBtn) {
+    sessionFinishBtn.addEventListener('click', () => {
+        if (!lastPlayedGame) return;
+        showPostGame(lastPlayedGame);
     });
+}
 
-    [modalScoreName, modalScoreValue].forEach((input) => {
-        if (!input) return;
-        input.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') modalScoreSubmit.click();
-        });
+if (sessionCancelBtn) {
+    sessionCancelBtn.addEventListener('click', () => {
+        clearActiveSession();
+        lastPlayedGame = null;
+        syncSessionBanner();
     });
 }
 
@@ -598,6 +606,14 @@ window.addEventListener('message', (e) => {
         pgScoreValue.dataset.fromGame = 'true';
     }
 });
+
+const activeGameId = Number(sessionStorage.getItem('wgc_activeGameId'));
+if (activeGameId) {
+    lastPlayedGame = GAMES.find((game) => game.id === activeGameId) || null;
+}
+
+window.addEventListener('focus', syncSessionBanner);
+syncSessionBanner();
 
 renderGrid();
 }); // end DOMContentLoaded

@@ -80,12 +80,7 @@
 
             <!-- Scores (read-only — scores come from playing) -->
             <div class="modal-tab-content active" id="tab-scores">
-                <div class="score-submit">
-                    <input type="text" id="modal-score-name" placeholder="Ton pseudo" maxlength="20">
-                    <input type="number" id="modal-score-value" placeholder="Ton score" min="0">
-                    <button id="modal-score-submit" type="button">Enregistrer</button>
-                </div>
-                <p class="lb-scores-hint">Tu peux saisir ton score ici. Certains jeux compatibles peuvent aussi le remplir automatiquement.</p>
+                <p class="lb-scores-hint">Les scores s’enregistrent après la partie. Lance un jeu, termine ta session, puis valide ton score.</p>
                 <div class="leaderboard" id="leaderboard-list"></div>
             </div>
 
@@ -149,6 +144,17 @@
                 <button id="pg-skip-btn"   class="pg-btn-skip">Passer</button>
                 <button id="pg-submit-btn" class="pg-btn-submit">✔ Envoyer</button>
             </div>
+        </div>
+    </div>
+
+    <div class="session-banner hidden" id="session-banner">
+        <div class="session-banner-copy">
+            <p class="session-banner-label">Session en cours</p>
+            <strong id="session-banner-title">Jeu</strong>
+        </div>
+        <div class="session-banner-actions">
+            <button id="session-finish-btn" type="button">Terminer la session</button>
+            <button id="session-cancel-btn" type="button">Annuler</button>
         </div>
     </div>
 

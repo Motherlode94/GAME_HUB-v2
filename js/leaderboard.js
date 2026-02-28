@@ -10,43 +10,24 @@ function getComments(id) {
     return typeof WGC.getComments === 'function' ? WGC.getComments(id) : [];
 }
 
-function addScore(id, entry) {
-    if (typeof WGC.addScore === 'function') {
-        return WGC.addScore(id, entry);
-    }
-    return [];
-}
-
-function findGameByInput(value) {
-    if (typeof WGC.findGameByInput === 'function') {
-        return WGC.findGameByInput(value);
-    }
-    return null;
-}
-
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function loadAllData() {
-    return GAMES.map((game) => {
-        const scores = getScores(game.id);
-        const comments = getComments(game.id);
-        return {
-            id: game.id,
-            title: game.title,
-            category: game.category,
-            scores,
-            comments
-        };
-    }).filter((game) => game.scores.length > 0 || game.comments.length > 0);
+    return GAMES.map((game) => ({
+        id: game.id,
+        title: game.title,
+        category: game.category,
+        scores: getScores(game.id),
+        comments: getComments(game.id)
+    })).filter((game) => game.scores.length > 0 || game.comments.length > 0);
 }
 
 function renderPage() {
     const search = document.getElementById('lb-search').value.trim().toLowerCase();
     const sort = document.getElementById('lb-sort').value;
-
     let data = loadAllData();
 
     if (search) {
@@ -67,8 +48,8 @@ function renderPage() {
 
     if (data.length === 0) {
         grid.innerHTML = '';
-        empty.classList.remove('hidden');
         summary.innerHTML = '';
+        empty.classList.remove('hidden');
         return;
     }
 
@@ -120,7 +101,7 @@ function renderPage() {
             ${latestComment ? `
             <div class="lb-card-review">
                 <div class="lb-review-header">
-                    <span class="lb-review-name">${escapeHtml(latestComment.name)}</span>
+                    <span class="lb-review-name">${escapeHtml(latestComment.name || '')}</span>
                     <span class="lb-review-stars">${'*'.repeat(latestComment.stars || 0)}</span>
                     <span class="lb-review-date">${latestComment.date || ''}</span>
                 </div>
@@ -133,73 +114,13 @@ function renderPage() {
     }).join('');
 }
 
-function setSubmitStatus(message, tone) {
-    const status = document.getElementById('lb-submit-status');
-    status.textContent = message;
-    status.className = 'lb-submit-status' + (tone ? ' ' + tone : '');
-}
-
-function populateGameOptions() {
-    const list = document.getElementById('lb-game-options');
-    list.innerHTML = GAMES.map((game) => `<option value="${escapeHtml(game.title)}"></option>`).join('');
-}
-
-function submitManualScore() {
-    const gameInput = document.getElementById('lb-submit-game');
-    const nameInput = document.getElementById('lb-submit-name');
-    const scoreInput = document.getElementById('lb-submit-score');
-
-    const game = findGameByInput(gameInput.value);
-    if (!game) {
-        setSubmitStatus('Jeu introuvable. Entre le nom exact ou choisis dans la liste.', 'error');
-        gameInput.focus();
-        return;
-    }
-
-    const name = nameInput.value.trim();
-    if (!name) {
-        setSubmitStatus('Entre un pseudo.', 'error');
-        nameInput.focus();
-        return;
-    }
-
-    const score = Number.parseInt(scoreInput.value, 10);
-    if (!Number.isFinite(score) || score < 0) {
-        setSubmitStatus('Entre un score valide.', 'error');
-        scoreInput.focus();
-        return;
-    }
-
-    sessionStorage.setItem('wgc_playerName', name);
-    addScore(game.id, {
-        name,
-        score,
-        date: new Date().toLocaleDateString('fr-FR')
-    });
-
-    gameInput.value = game.title;
-    scoreInput.value = '';
-    setSubmitStatus(`Score enregistre pour ${game.title}.`, 'ok');
-    renderPage();
-}
-
-populateGameOptions();
-document.getElementById('lb-submit-name').value = sessionStorage.getItem('wgc_playerName') || '';
 document.getElementById('lb-search').addEventListener('input', renderPage);
 document.getElementById('lb-sort').addEventListener('change', renderPage);
-document.getElementById('lb-submit-btn').addEventListener('click', submitManualScore);
-document.getElementById('lb-submit-score').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') submitManualScore();
-});
-document.getElementById('lb-submit-game').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') submitManualScore();
-});
 document.getElementById('lb-clear-all').addEventListener('click', () => {
     if (!confirm('Effacer tous les scores et avis locaux ?')) return;
     Object.keys(localStorage)
         .filter((key) => key.startsWith('wgc_'))
         .forEach((key) => localStorage.removeItem(key));
-    setSubmitStatus('Donnees locales effacees.', 'ok');
     renderPage();
 });
 

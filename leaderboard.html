@@ -34,25 +34,12 @@
             <button id="lb-clear-all" class="lb-danger-btn">🗑 Effacer mes données</button>
         </div>
 
-        <section class="lb-submit-panel">
-            <h2 class="lb-submit-title">Soumettre un score</h2>
-            <p class="lb-submit-copy">Entre le nom du jeu ou choisis-le dans la liste, puis enregistre ton score localement.</p>
-            <div class="score-submit">
-                <input type="text" id="lb-submit-game" list="lb-game-options" placeholder="Nom du jeu" autocomplete="off">
-                <datalist id="lb-game-options"></datalist>
-                <input type="text" id="lb-submit-name" placeholder="Ton pseudo" maxlength="20" autocomplete="off">
-                <input type="number" id="lb-submit-score" placeholder="Ton score" min="0">
-                <button id="lb-submit-btn" type="button">Enregistrer</button>
-            </div>
-            <p id="lb-submit-status" class="lb-submit-status"></p>
-        </section>
-
         <div id="lb-summary" class="lb-summary"></div>
         <div id="lb-grid"    class="lb-grid"></div>
         <div id="lb-empty"   class="lb-empty-state hidden">
             <span>🏆</span>
             <p>Aucun score enregistré.</p>
-            <small>Utilise le formulaire ci-dessus pour enregistrer ton score.</small>
+            <small>Lance un jeu depuis le catalogue, puis valide ton score à la fin de la session.</small>
             <a href="index.html" class="lb-play-link">Voir les jeux →</a>
         </div>
 
