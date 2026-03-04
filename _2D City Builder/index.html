@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#080c14">
+  <title>City Builder</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Ambient background -->
+  <div id="ambient"></div>
+  <div id="day-overlay"></div>
+
+  <!-- ═══ WELCOME ═══ -->
+  <div id="welcome">
+    <div class="welcome-card">
+      <div class="welcome-badge">SIMULATION</div>
+      <h1>CITY<br>BUILDER</h1>
+      <p>Construisez, développez et gérez votre métropole. Gérez l'énergie, l'eau, et le bonheur de vos citoyens.</p>
+      <div class="welcome-stats">
+        <div class="ws"><span>🏗️</span>11 bâtiments</div>
+        <div class="ws"><span>⚡</span>Énergie & Eau</div>
+        <div class="ws"><span>📊</span>Économie</div>
+      </div>
+      <button id="btn-start" onclick="startGame()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        Commencer
+      </button>
+      <div class="welcome-hint">Clavier : 1-9 pour les outils · Molette pour zoomer</div>
+    </div>
+  </div>
+
+  <!-- ═══ TOP BAR ═══ -->
+  <header id="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <svg class="logo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="10" width="6" height="11" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="15" y="7" width="6" height="14" rx="1"/></svg>
+        <span>CITY BUILDER</span>
+      </div>
+    </div>
+    <div class="topbar-stats" id="topbar-stats">
+      <div class="hud-stat" data-type="money">
+        <div class="hud-icon">💰</div>
+        <div class="hud-data">
+          <div class="hud-val" id="s-budget">10 000</div>
+          <div class="hud-label">Budget</div>
+        </div>
+      </div>
+      <div class="hud-stat" data-type="pop">
+        <div class="hud-icon">👥</div>
+        <div class="hud-data">
+          <div class="hud-val" id="s-pop">0</div>
+          <div class="hud-label">Population</div>
+        </div>
+      </div>
+      <div class="hud-stat" data-type="happy">
+        <div class="hud-icon" id="happy-icon">😊</div>
+        <div class="hud-data">
+          <div class="hud-val" id="s-happy">50</div>
+          <div class="hud-label">Satisfaction</div>
+        </div>
+      </div>
+      <div class="hud-stat" data-type="power">
+        <div class="hud-icon">⚡</div>
+        <div class="hud-data">
+          <div class="hud-val" id="s-power">0/0</div>
+          <div class="hud-label">Énergie</div>
+        </div>
+      </div>
+      <div class="hud-stat" data-type="water">
+        <div class="hud-icon">💧</div>
+        <div class="hud-data">
+          <div class="hud-val" id="s-water">0/0</div>
+          <div class="hud-label">Eau</div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div id="speed-controls">
+        <button class="spd-btn" onclick="setSpeed(0)" title="Pause">⏸</button>
+        <button class="spd-btn active" onclick="setSpeed(1)" title="×1">▶</button>
+        <button class="spd-btn" onclick="setSpeed(2)" title="×2">⏩</button>
+        <button class="spd-btn" onclick="setSpeed(3)" title="×3">⚡</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ SIDE PANEL (desktop) ═══ -->
+  <aside id="side-panel">
+    <div class="panel-section">
+      <div class="panel-header">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M9 12l2 2 4-4"/></svg>
+        Statistiques
+      </div>
+      <div class="panel-grid">
+        <div class="pg-item"><span class="pg-label">Bâtiments</span><span class="pg-val" id="ip-buildings">0</span></div>
+        <div class="pg-item"><span class="pg-label">Routes</span><span class="pg-val" id="ip-roads">0</span></div>
+        <div class="pg-item"><span class="pg-label">Revenus</span><span class="pg-val income" id="ip-income">+0 $</span></div>
+        <div class="pg-item"><span class="pg-label">Dépenses</span><span class="pg-val expense" id="ip-expense">-0 $</span></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-header">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Ressources
+      </div>
+      <div class="bar-group">
+        <div class="bar-row">
+          <span class="bar-label">⚡ Énergie</span>
+          <span class="bar-val" id="bar-power-txt">0%</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill orange" id="bar-power"></div></div>
+      </div>
+      <div class="bar-group">
+        <div class="bar-row">
+          <span class="bar-label">💧 Eau</span>
+          <span class="bar-val" id="bar-water-txt">0%</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill cyan" id="bar-water"></div></div>
+      </div>
+      <div class="bar-group">
+        <div class="bar-row">
+          <span class="bar-label">😊 Bonheur</span>
+          <span class="bar-val" id="bar-happy-txt">50%</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill green" id="bar-happy"></div></div>
+      </div>
+    </div>
+    <!-- Minimap -->
+    <div class="panel-section minimap-section">
+      <div class="panel-header">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+        Carte
+      </div>
+      <canvas id="minimap-canvas" width="180" height="180"></canvas>
+    </div>
+  </aside>
+
+  <!-- ═══ VIEWPORT ═══ -->
+  <div id="viewport">
+    <div id="map-container">
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TOOLBAR ═══ -->
+  <nav id="toolbar">
+    <div class="toolbar-scroll" id="toolbar-scroll">
+      <button class="tool-btn active" onclick="selectTool('road',this)" data-tool="road">
+        <span class="t-icon">🛣️</span><span class="t-label">Route</span><span class="t-cost">10$</span>
+        <span class="t-key">1</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('house',this)" data-tool="house">
+        <span class="t-icon">🏠</span><span class="t-label">Maison</span><span class="t-cost">100$</span>
+        <span class="t-key">2</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('shop',this)" data-tool="shop">
+        <span class="t-icon">🏪</span><span class="t-label">Commerce</span><span class="t-cost">200$</span>
+        <span class="t-key">3</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('office',this)" data-tool="office">
+        <span class="t-icon">🏢</span><span class="t-label">Bureau</span><span class="t-cost">350$</span>
+        <span class="t-key">4</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('park',this)" data-tool="park">
+        <span class="t-icon">🌳</span><span class="t-label">Parc</span><span class="t-cost">80$</span>
+        <span class="t-key">5</span>
+      </button>
+      <div class="tool-divider"></div>
+      <button class="tool-btn" onclick="selectTool('power',this)" data-tool="power">
+        <span class="t-icon">🔌</span><span class="t-label">Centrale</span><span class="t-cost">500$</span>
+        <span class="t-key">6</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('water',this)" data-tool="water">
+        <span class="t-icon">🚰</span><span class="t-label">Eau</span><span class="t-cost">300$</span>
+        <span class="t-key">7</span>
+      </button>
+      <div class="tool-divider"></div>
+      <button class="tool-btn" onclick="selectTool('fire',this)" data-tool="fire">
+        <span class="t-icon">🚒</span><span class="t-label">Pompiers</span><span class="t-cost">400$</span>
+        <span class="t-key">8</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('police',this)" data-tool="police">
+        <span class="t-icon">🚔</span><span class="t-label">Police</span><span class="t-cost">400$</span>
+        <span class="t-key">9</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('school',this)" data-tool="school">
+        <span class="t-icon">🏫</span><span class="t-label">École</span><span class="t-cost">600$</span>
+        <span class="t-key">0</span>
+      </button>
+      <div class="tool-divider"></div>
+      <button class="tool-btn demolish" onclick="selectTool('demolish',this)" data-tool="demolish">
+        <span class="t-icon">🗑️</span><span class="t-label">Démolir</span><span class="t-cost">—</span>
+        <span class="t-key">D</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ MOBILE STATS TOGGLE ═══ -->
+  <button id="mobile-stats-btn" onclick="toggleMobileStats()">📊</button>
+
+  <!-- Tooltip (desktop only) -->
+  <div id="tooltip"><div class="tt-title"></div><div class="tt-info"></div></div>
+
+  <!-- Notifications container -->
+  <div id="notif-container"></div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
