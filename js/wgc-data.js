@@ -106,7 +106,20 @@
                 { version: "0.2.0", date: "2026-02-28", notes: ["Added mobile joystick controls", "Added combos, formations, and power-ups"] },
                 { version: "0.1.0", date: "2026-02-28", notes: ["Initial playable prototype"] }
             ]
-        }
+        },
+        {
+            id: 9,
+            title: "City Builder",
+            category: "simulation",
+            year: 2026,
+            rating: 8.7,
+            description: "Build and manage your own city. Place roads, houses, shops, and services while balancing power, water, budget, and citizen satisfaction.",
+            tags: ["simulation", "city builder", "management", "economy", "mobile"],
+            playUrl: "DONE/_2D City Builder/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-04", notes: ["Initial release with 11 building types", "Power & water resource system", "Day/night cycle and satisfaction mechanics", "Full mobile support with touch & pinch-to-zoom"] }
+            ]
+        },
     ];
 
     function parseJson(value, fallback) {
