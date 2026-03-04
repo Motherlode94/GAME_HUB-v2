@@ -152,7 +152,24 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 
-.topbar-left { flex-shrink: 0; }
+.topbar-left { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+.back-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: all .15s ease;
+  flex-shrink: 0;
+}
+.back-btn:hover {
+  background: rgba(59,158,255,.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.back-btn:active { transform: scale(.92); }
 .logo {
   display: flex; align-items: center; gap: 8px;
   font-family: var(--font-display);
@@ -655,6 +672,7 @@ html, body {
   #topbar { padding: 0 10px; gap: 8px; }
   .logo span { display: none; }
   .logo-icon { width: 22px; height: 22px; }
+  .back-btn { width: 32px; height: 32px; }
   .topbar-right { display: none; } /* hide speed on mobile */
 
   .topbar-stats { gap: 4px; justify-content: flex-end; }
