@@ -1,276 +1,93 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Mario Kart Racing - Édition Complète</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏎️ Mario Kart 2D</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <button id='back-to-catalog' class='catalog-back' type='button' data-catalog-back='true' aria-label='Retour au catalogue'>
-        <span class='back-icon' aria-hidden='true'>&#8592;</span>
-        <span class='back-text'>Catalogue</span>
-    </button>
-    <div class="game-wrapper">
-        <!-- MENU PRINCIPAL -->
-        <div id="main-menu" class="screen active">
-            <div class="menu-container">
-                <h1 class="game-logo">
-                    🎮<br>
-                    MARIO KART<br>
-                    <span class="logo-subtitle">RACING</span>
-                </h1>
-                <div class="menu-buttons">
-                    <button class="menu-btn" onclick="showScreen('character-select')">
-                        🎮 DÉMARRER LA COURSE
-                    </button>
-                    <button class="menu-btn" onclick="showScreen('settings')">
-                        ⚙️ OPTIONS
-                    </button>
-                    <button class="menu-btn" onclick="showScreen('controls')">
-                        🎯 CONTRÔLES
-                    </button>
-                </div>
-                <div class="menu-footer">
-                    <p>🏆 Battez vos adversaires sur le circuit Rainbow Road ! 🏆</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- SÉLECTION DE PERSONNAGE -->
-        <div id="character-select" class="screen">
-            <div class="select-container">
-                <h2 class="select-title">CHOISISSEZ VOTRE PILOTE</h2>
-                <div class="character-grid">
-                    <div class="character-card" data-character="mario">
-                        <div class="character-icon">🧑‍🦰</div>
-                        <div class="character-name">MARIO</div>
-                        <div class="character-stats">
-                            <div class="stat-bar">
-                                <span>Vitesse:</span>
-                                <div class="bar"><div style="width: 80%"></div></div>
-                            </div>
-                            <div class="stat-bar">
-                                <span>Accélération:</span>
-                                <div class="bar"><div style="width: 70%"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="character-card" data-character="luigi">
-                        <div class="character-icon">👨</div>
-                        <div class="character-name">LUIGI</div>
-                        <div class="character-stats">
-                            <div class="stat-bar">
-                                <span>Vitesse:</span>
-                                <div class="bar"><div style="width: 75%"></div></div>
-                            </div>
-                            <div class="stat-bar">
-                                <span>Accélération:</span>
-                                <div class="bar"><div style="width: 85%"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="character-card" data-character="peach">
-                        <div class="character-icon">👸</div>
-                        <div class="character-name">PEACH</div>
-                        <div class="character-stats">
-                            <div class="stat-bar">
-                                <span>Vitesse:</span>
-                                <div class="bar"><div style="width: 70%"></div></div>
-                            </div>
-                            <div class="stat-bar">
-                                <span>Accélération:</span>
-                                <div class="bar"><div style="width: 90%"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="character-card" data-character="bowser">
-                        <div class="character-icon">🐲</div>
-                        <div class="character-name">BOWSER</div>
-                        <div class="character-stats">
-                            <div class="stat-bar">
-                                <span>Vitesse:</span>
-                                <div class="bar"><div style="width: 95%"></div></div>
-                            </div>
-                            <div class="stat-bar">
-                                <span>Accélération:</span>
-                                <div class="bar"><div style="width: 60%"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="back-btn" onclick="showScreen('main-menu')">← RETOUR</button>
-            </div>
-        </div>
-
-        <!-- ÉCRAN DE CHARGEMENT -->
-        <div id="loading-screen" class="screen">
-            <div class="loading-container">
-                <h2 class="loading-title">PRÉPARATION DE LA COURSE...</h2>
-                <div class="loading-track">🌈 RAINBOW ROAD 🌈</div>
-                <div class="loading-bar">
-                    <div class="loading-progress" id="loading-progress"></div>
-                </div>
-                <div class="loading-racers">
-                    <div class="racer-preview">
-                        <span id="player-preview">🧑‍🦰</span> VOUS
-                    </div>
-                    <div class="racer-preview">🤖 CPU 1</div>
-                    <div class="racer-preview">🤖 CPU 2</div>
-                    <div class="racer-preview">🤖 CPU 3</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- JEU PRINCIPAL -->
-        <div id="game-screen" class="screen">
-            <div class="game-container">
-                <!-- HUD EN JEU -->
-                <div class="game-hud">
-                    <div class="hud-left">
-                        <div class="position-display">
-                            <div class="position-number" id="player-position">1</div>
-                            <div class="position-suffix">ER</div>
-                        </div>
-                        <div class="lap-counter">
-                            <div class="lap-label">TOUR</div>
-                            <div class="lap-value" id="lap-display">1/3</div>
-                        </div>
-                    </div>
-
-                    <div class="hud-center">
-                        <div class="timer-display" id="race-timer">0:00.000</div>
-                        <div class="minimap" id="minimap"></div>
-                    </div>
-
-                    <div class="hud-right">
-                        <div class="speed-display">
-                            <div class="speed-value" id="speed-value">0</div>
-                            <div class="speed-label">km/h</div>
-                        </div>
-                        <div class="item-slot">
-                            <div class="item-icon" id="current-item">❌</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Canvas de jeu -->
-                <canvas id="game-canvas" width="1200" height="800"></canvas>
-
-                <!-- Classement en jeu -->
-                <div class="race-standings">
-                    <div class="standings-title">CLASSEMENT</div>
-                    <div id="standings-list"></div>
-                </div>
-
-                <!-- Compte à rebours départ -->
-                <div class="countdown-overlay hidden" id="countdown-overlay">
-                    <div class="countdown-number" id="countdown-number">3</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ÉCRAN DE FIN -->
-        <div id="results-screen" class="screen">
-            <div class="results-container">
-                <div class="results-header">
-                    <h1 class="results-title" id="results-title">🏆 VICTOIRE ! 🏆</h1>
-                </div>
-                <div class="results-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Position Finale:</span>
-                        <span class="stat-number" id="final-position">1er</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Temps Total:</span>
-                        <span class="stat-number" id="final-time">0:00.000</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Meilleur Tour:</span>
-                        <span class="stat-number" id="best-lap">0:00.000</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Pièces Collectées:</span>
-                        <span class="stat-number" id="total-coins">0</span>
-                    </div>
-                </div>
-                <div class="final-standings">
-                    <h3>CLASSEMENT FINAL</h3>
-                    <div id="final-standings-list"></div>
-                </div>
-                <div class="results-buttons">
-                    <button class="menu-btn" onclick="restartRace()">🔄 REJOUER</button>
-                    <button class="menu-btn" onclick="showScreen('main-menu')">🏠 MENU PRINCIPAL</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CONTRÔLES -->
-        <div id="controls" class="screen">
-            <div class="controls-container">
-                <h2>🎮 CONTRÔLES</h2>
-                <div class="controls-grid">
-                    <div class="control-item">
-                        <div class="key-display">↑</div>
-                        <div class="control-desc">Accélérer</div>
-                    </div>
-                    <div class="control-item">
-                        <div class="key-display">↓</div>
-                        <div class="control-desc">Freiner / Reculer</div>
-                    </div>
-                    <div class="control-item">
-                        <div class="key-display">← →</div>
-                        <div class="control-desc">Diriger</div>
-                    </div>
-                    <div class="control-item">
-                        <div class="key-display">ESPACE</div>
-                        <div class="control-desc">Utiliser Objet</div>
-                    </div>
-                    <div class="control-item">
-                        <div class="key-display">ESC</div>
-                        <div class="control-desc">Pause</div>
-                    </div>
-                </div>
-                <button class="back-btn" onclick="showScreen('main-menu')">← RETOUR</button>
-            </div>
-        </div>
-
-        <!-- OPTIONS -->
-        <div id="settings" class="screen">
-            <div class="settings-container">
-                <h2>⚙️ OPTIONS</h2>
-                <div class="settings-list">
-                    <div class="setting-item">
-                        <label>Difficulté IA:</label>
-                        <select id="difficulty">
-                            <option value="easy">Facile</option>
-                            <option value="normal" selected>Normal</option>
-                            <option value="hard">Difficile</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label>Nombre de Tours:</label>
-                        <select id="lap-count">
-                            <option value="2">2 Tours</option>
-                            <option value="3" selected>3 Tours</option>
-                            <option value="5">5 Tours</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label>Effets Sonores:</label>
-                        <input type="checkbox" id="sound-fx" checked>
-                    </div>
-                    <div class="setting-item">
-                        <label>Musique:</label>
-                        <input type="checkbox" id="music" checked>
-                    </div>
-                </div>
-                <button class="back-btn" onclick="showScreen('main-menu')">← RETOUR</button>
-            </div>
-        </div>
+    <div id="ui">
+      <div class="hud-panel left-panel">
+        <div class="hud-row"><span class="hud-label">TOUR</span><span class="hud-value" id="lapCount">1/3</span></div>
+        <div class="hud-row"><span class="hud-label">TEMPS</span><span class="hud-value" id="timer">0:00.0</span></div>
+        <div class="hud-row" id="posRow"><span class="hud-label">POS</span><span class="hud-value" id="position">1er</span></div>
+      </div>
+      <div class="hud-center">
+        <div id="modeTag"></div>
+        <div id="lapIndicator"></div>
+      </div>
+      <div class="hud-panel right-panel">
+        <div class="hud-row"><span class="hud-label">KM/H</span><span class="hud-value" id="speed">0</span></div>
+        <div class="item-display" id="itemBox"><span id="itemDisplay">—</span></div>
+        <div class="hud-row" id="bestLapRow" style="display:none"><span class="hud-label">BEST</span><span class="hud-value" id="bestLap">—</span></div>
+      </div>
     </div>
 
-    <script src="js/scripts.js"></script>
+    <div id="elimBar" style="display:none">
+      <div id="elimFill"></div>
+      <span id="elimLabel">ÉLIM DANS <span id="elimCountdown">30</span>s</span>
+    </div>
+
+    <canvas id="minimap" width="130" height="100"></canvas>
+
+    <div id="screenOverlay">
+      <div id="menuScreen">
+        <div class="logo">
+          <span class="logo-kart">🏎️</span>
+          <h1>MARIO KART 2D</h1>
+        </div>
+
+        <div class="mode-grid">
+          <div class="mode-card selected" onclick="selectMode('race')" id="card-race">
+            <div class="mode-icon">🏆</div>
+            <div class="mode-name">GRAND PRIX</div>
+            <div class="mode-desc">Battez 3 adversaires sur plusieurs tours. Items activés.</div>
+          </div>
+          <div class="mode-card" onclick="selectMode('time')" id="card-time">
+            <div class="mode-icon">⏱️</div>
+            <div class="mode-name">CONTRE-LA-MONTRE</div>
+            <div class="mode-desc">Seul sur la piste. Battez votre meilleur tour !</div>
+          </div>
+          <div class="mode-card" onclick="selectMode('elim')" id="card-elim">
+            <div class="mode-icon">💀</div>
+            <div class="mode-name">ÉLIMINATION</div>
+            <div class="mode-desc">Toutes les 30s, le dernier est éliminé. Survivez !</div>
+          </div>
+        </div>
+
+        <div class="config-row">
+          <div class="config-group">
+            <span class="config-label">TOURS</span>
+            <div class="btn-group">
+              <button class="pill selected" onclick="setLaps(3)" id="lap-3">3</button>
+              <button class="pill" onclick="setLaps(5)" id="lap-5">5</button>
+              <button class="pill" onclick="setLaps(7)" id="lap-7">7</button>
+            </div>
+          </div>
+          <div class="config-group">
+            <span class="config-label">DIFFICULTÉ</span>
+            <div class="btn-group">
+              <button class="pill selected" onclick="setDiff('normal')" id="diff-normal">NORMAL</button>
+              <button class="pill" onclick="setDiff('hard')" id="diff-hard">DIFFICILE</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <span>⬆️ Accélérer</span>
+          <span>⬇️ Freiner</span>
+          <span>⬅️ ➡️ Tourner</span>
+          <span>ESPACE Item</span>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">DÉMARRER !</button>
+      </div>
+    </div>
+  </div>
+  <script src="js/game.js"></script>
 </body>
 </html>

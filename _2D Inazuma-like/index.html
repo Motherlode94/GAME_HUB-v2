@@ -1,0 +1,100 @@
+<!-- /index.html -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inazuma Mini Soccer (Vanilla)</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo-badge">⚡</div>
+        <div>
+          <div class="title">Inazuma Mini Soccer</div>
+          <div class="subtitle">Arcade • Special Moves • Canvas</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="btnPlay" class="btn primary">Jouer</button>
+        <button id="btnPause" class="btn">Pause</button>
+        <button id="btnReset" class="btn danger">Reset</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <div class="hud">
+        <div class="hud-left">
+          <div class="chip"><span>Score</span> <strong id="hudScore">0 - 0</strong></div>
+          <div class="chip"><span>Temps</span> <strong id="hudTime">02:00</strong></div>
+        </div>
+
+        <div class="hud-center">
+          <div class="meter">
+            <div class="meter-label">Stamina</div>
+            <div class="meter-bar"><div id="hudStamina" class="meter-fill"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter-label">Puissance tir</div>
+            <div class="meter-bar"><div id="hudPower" class="meter-fill alt"></div></div>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <div class="chip hotkey">
+            <strong>Déplacement</strong>
+            <span>ZQSD / WASD</span>
+          </div>
+          <div class="chip hotkey">
+            <strong>Tir/Passe</strong>
+            <span>E (maintenir = charger)</span>
+          </div>
+          <div class="chip hotkey">
+            <strong>Sprint</strong>
+            <span>Shift</span>
+          </div>
+          <div class="chip hotkey">
+            <strong>Special</strong>
+            <span>Espace</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="game" width="1100" height="650"></canvas>
+        <div id="toast" class="toast hidden"></div>
+        <div id="overlay" class="overlay">
+          <div class="panel">
+            <div class="panel-title">⚡ Inazuma Mini Soccer</div>
+            <p class="panel-text">
+              Marque des buts, charge tes tirs, et déclenche un <strong>Special Move</strong> (Espace).
+              <br/>Mode arcade, IA simple, pur Vanilla JS.
+            </p>
+            <div class="panel-actions">
+              <button id="btnOverlayPlay" class="btn primary big">Lancer le match</button>
+              <button id="btnOverlayHelp" class="btn big">Aide</button>
+            </div>
+            <div id="help" class="help hidden">
+              <ul>
+                <li><strong>E</strong> : tap = passe / relâcher après charge = tir</li>
+                <li><strong>Shift</strong> : sprint (consomme stamina)</li>
+                <li><strong>Espace</strong> : dash + tir surpuissant (coûte stamina)</li>
+                <li>Astuce: charge ton tir face au but + special = tirs “anime”</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>Vanilla HTML/CSS/JS • Sans import/export • Canvas</span>
+    </footer>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
