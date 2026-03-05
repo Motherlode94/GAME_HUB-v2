@@ -653,4 +653,81 @@ header > .header-lb-btn {
 
 .lb-main { padding-top: 28px; padding-bottom: 60px; }
 
+@media (max-width: 900px) {
+    .header-btns {
+        position: static;
+        transform: none;
+        margin-top: 18px;
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 700px) {
+    .lb-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lb-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lb-controls input,
+    .lb-controls select,
+    .lb-danger-btn {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .lb-summary {
+        gap: 10px;
+    }
+
+    .lb-stat {
+        min-width: 100px;
+        padding: 12px 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .header-btns {
+        flex-direction: column;
+        align-items: stretch;
+        width: min(100%, 280px);
+        margin: 14px auto 0;
+    }
+
+    .header-btns .header-lb-btn,
+    .header-btns .header-space-btn {
+        text-align: center;
+    }
+
+    .lb-main {
+        padding-top: 18px;
+    }
+
+    .lb-card {
+        padding: 16px;
+    }
+
+    .lb-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .lb-card-meta {
+        align-items: flex-start;
+    }
+
+    .lb-card-row {
+        grid-template-columns: 24px 1fr;
+    }
+
+    .lb-card-row .lb-score {
+        grid-column: 2;
+        justify-self: end;
+    }
+}
+
 .hidden { display: none !important; }
