@@ -499,6 +499,50 @@
     .sp-login-box { padding: 36px 24px; }
     .sp-msg-body { max-width: 85%; }
     .header-btns { flex-direction: column; gap: 6px; }
+    .sp-login-field { flex-direction: column; }
+    .sp-login-field button { width: 100%; }
+    .sp-composer { flex-direction: column; align-items: stretch; }
+    .sp-send-btn { width: 100%; min-height: 46px; }
+    .sp-chat-box { min-height: 260px; max-height: 58vh; }
+}
+
+@media (max-width: 520px) {
+    .header-btns {
+        position: static;
+        transform: none;
+        margin-top: 14px;
+        width: min(100%, 280px);
+    }
+
+    .header-space-btn,
+    .header-lb-btn {
+        text-align: center;
+    }
+
+    .sp-topbar-actions {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }
+
+    .sp-tab-btn,
+    .sp-logout-btn {
+        flex: 0 0 auto;
+    }
+
+    .sp-game-select {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .sp-game-tags-wrap {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sp-login-title {
+        font-size: 1.2em;
+    }
 }
 
 .hidden { display: none !important; }

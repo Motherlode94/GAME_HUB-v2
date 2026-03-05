@@ -31,13 +31,36 @@
 }
 
 /* ── Body & Background ── */
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
 body {
     font-family: var(--font-body);
     background-color: var(--dark);
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
+    max-width: 100%;
     position: relative;
+}
+
+body.home-page {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+body.home-page > main.container {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+body.home-page > footer {
+    margin-top: auto;
 }
 
 body::before {
@@ -466,9 +489,10 @@ header h1 span {
 /* ── Games Grid ── */
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 1fr));
     gap: 22px;
     padding-bottom: 60px;
+    min-width: 0;
 }
 
 /* ── Game Card ── */
@@ -907,11 +931,18 @@ footer {
 
 /* ── Responsive ── */
 @media (max-width: 700px) {
+    body.home-page {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: clip;
+    }
+
     header { padding: 50px 20px 36px; }
     header h1 { font-size: 2em; }
     .controls-bar .container { flex-direction: column; align-items: stretch; }
     .search-wrap { min-width: unset; }
-    .games-grid { grid-template-columns: 1fr; }
+    .games-grid { grid-template-columns: minmax(0, 1fr); }
+    .game-card { width: 100%; }
     .modal { padding: 28px 22px; }
     .modal-game { width: 100%; height: 100%; border-radius: 0; border: none; }
     .modal-game-overlay { padding: 0; }
@@ -927,5 +958,77 @@ footer {
     }
     .session-banner-actions button {
         flex: 1;
+    }
+}
+
+@media (max-width: 520px) {
+    .container {
+        padding: 0 14px;
+    }
+
+    .controls-bar {
+        padding: 14px 0;
+    }
+
+    .filter-chips {
+        width: 100%;
+        flex-wrap: wrap;
+        overflow-x: visible;
+        gap: 6px;
+        padding-bottom: 0;
+    }
+
+    .chip {
+        flex: 0 1 auto;
+        font-size: 0.58em;
+        padding: 7px 12px;
+        white-space: nowrap;
+    }
+
+    .modal-overlay {
+        padding: 12px;
+    }
+
+    .modal {
+        padding: 24px 16px;
+    }
+
+    .modal-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-tab {
+        flex: 0 0 auto;
+        padding: 8px 10px;
+    }
+
+    .modal-meta {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .lb-row {
+        grid-template-columns: 30px 1fr auto;
+        row-gap: 4px;
+    }
+
+    .lb-date {
+        grid-column: 2 / -1;
+        text-align: right;
+    }
+
+    .modal-game-topbar {
+        padding: 10px 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .modal-game-title {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
