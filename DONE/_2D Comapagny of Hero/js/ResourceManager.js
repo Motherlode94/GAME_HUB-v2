@@ -17,35 +17,37 @@ RTS.Game = RTS.Game || {};
 RTS.Game.ResourceManager = function(team) {
     this.team = team;
 
-    this.manpower  = 200;
-    this.munitions = 30;
-    this.fuel      = 20;
+    this.manpower  = 600;   // était 200 — assez pour 2 unités dès le départ
+    this.munitions = 120;   // était 30  — permet d'acheter des unités spécialisées
+    this.fuel      = 80;    // était 20  — permet un véhicule léger direct
 
     this.maxManpower  = 9999;
-    this.maxMunitions = 600;
-    this.maxFuel      = 600;
+    this.maxMunitions = 999;
+    this.maxFuel      = 999;
 
     // Taux / seconde
-    this._mpRate  = 8;    // manpower de base
-    this._munRate = 0;
-    this._fuRate  = 0;
+    this._mpRate  = 18;   // était 8  → 1080/min (confortable, permet de jouer)
+    this._munRate = 1.5;  // était 0  → taux de base même sans point capturé
+    this._fuRate  = 1.0;  // était 0  → idem
 
     // Pour affichage HUD (+X/min)
-    this.manpowerRate  = this._mpRate;
-    this.munitionsRate = 0;
-    this.fuelRate      = 0;
+    this.manpowerRate  = Math.round(this._mpRate * 60);
+    this.munitionsRate = Math.round(this._munRate * 60);
+    this.fuelRate      = Math.round(this._fuRate  * 60);
 };
 
 RTS.Game.ResourceManager.prototype.syncWithNavGrid = function(navGrid) {
-    this._munRate = 0;
-    this._fuRate  = 0;
     var self = this;
+    var bonusMun = 0, bonusFu = 0;
     navGrid.capturePoints.forEach(function(cp) {
         if (cp.owner !== self.team) return;
         var rate = (cp.resourceRate || 0) / 60; // /min → /sec
-        if (cp.type === 'munitions') self._munRate += rate;
-        if (cp.type === 'fuel')      self._fuRate  += rate;
+        if (cp.type === 'munitions') bonusMun += rate;
+        if (cp.type === 'fuel')      bonusFu  += rate;
     });
+    // Conserver le taux de base + ajouter le bonus des points capturés
+    this._munRate = 1.5 + bonusMun;
+    this._fuRate  = 1.0 + bonusFu;
     this.manpowerRate  = Math.round(this._mpRate  * 60);
     this.munitionsRate = Math.round(this._munRate * 60);
     this.fuelRate      = Math.round(this._fuRate  * 60);

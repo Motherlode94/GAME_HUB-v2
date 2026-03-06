@@ -49,6 +49,10 @@ var _UI_COL = {
 // ---------------------------------------------------------------------------
 
 RTS.Game.ProductionUI.prototype.selectBuilding = function(building) {
+    // Réinitialiser le scroll si on change de bâtiment
+    if (building && this.selectedBuilding && building.type !== this.selectedBuilding.type) {
+        if (this._scrollOffset) this._scrollOffset[building.type] = 0;
+    }
     this.selectedBuilding = building;
     this.visible          = !!building;
     this.activeTab        = 'produce';
@@ -97,7 +101,8 @@ RTS.Game.ProductionUI.prototype.render = function(ctx, mouseX, mouseY) {
 
     ctx.fillStyle=col.text; ctx.font='bold 11px "Courier New"';
     ctx.textAlign='left'; ctx.textBaseline='top';
-    ctx.fillText('▶ '+b.label, p, barY+p);
+    var unitCount = b.produces ? b.produces.length : 0;
+    ctx.fillText('▶ '+b.label + (unitCount > 0 ? '  ['+unitCount+' UNITÉS]' : ''), p, barY+p);
 
     if (!b.isBuilt) {
         ctx.fillStyle=col.text+'aa'; ctx.font='9px "Courier New"';
@@ -157,7 +162,8 @@ RTS.Game.ProductionUI.prototype._renderAbilityPanel = function(ctx, col, cv, mx,
         artillery:'ARTILLERIE', medic:'MÉDECIN', recon:'RECONNAISSANCE',
         support:'SOUTIEN', tank:'BLINDÉ', heavy_tank:'BLINDÉ LOURD',
         tank_destroyer:'CHASSEUR DE CHARS', engineer:'GÉNIE', sniper:'SNIPER',
-        gunship:'HÉLICO ATTAQUE', transport:'TRANSPORT', airstrike:'FRAPPE'
+        gunship:'HÉLICO ATTAQUE', transport:'TRANSPORT', airstrike:'FRAPPE',
+        anti_inf:'ANTI-INFANTERIE'
     };
     ctx.fillStyle = col.text; ctx.font='bold 11px "Courier New"';
     ctx.textAlign='left'; ctx.textBaseline='top';
@@ -293,51 +299,101 @@ RTS.Game.ProductionUI.prototype._renderTabs = function(ctx,col,barY,p,hasPioneer
 
 RTS.Game.ProductionUI.prototype._renderProduceButtons = function(ctx,col,b,res,barY,startX,mx,my) {
     var btnW=105, btnH=78, btnY=barY+this.padding+22;
-    var p=this.padding;
+    var cv = this.canvas;
 
-    b.produces.forEach(function(prod,idx){
-        var bx=startX+idx*(btnW+5);
-        var hover=mx>=bx&&mx<=bx+btnW&&my>=btnY&&my<=btnY+btnH;
-        var canAfford=this._canAfford(res,prod.cost);
+    // Scroll : stocker l'offset par type de bâtiment
+    if (!this._scrollOffset) this._scrollOffset = {};
+    if (this._scrollOffset[b.type] === undefined) this._scrollOffset[b.type] = 0;
 
-        ctx.fillStyle=!canAfford?col.btnDisabled:hover?col.btnHover:col.btnBg;
-        ctx.fillRect(bx,btnY,btnW,btnH);
-        ctx.strokeStyle=hover&&canAfford?col.text:canAfford?col.border+'99':'#333333';
-        ctx.lineWidth=1.5; ctx.strokeRect(bx,btnY,btnW,btnH);
+    var total      = b.produces.length;
+    var availW     = cv.width - startX - 100;
+    var maxVisible = Math.max(1, Math.floor(availW / (btnW + 5)));
+    var offset     = Math.max(0, Math.min(this._scrollOffset[b.type], total - maxVisible));
+    this._scrollOffset[b.type] = offset;
 
-        // Icône rôle
-        var roleIcons = {rifle:'👊',mg:'🔥',pioneer:'🔧',assault:'💪',at_inf:'🚀',
-            mortar:'💣',medic:'➕',sniper:'🎯',jeep:'🚗',halftrack:'🚛',
-            recon_car:'👁',anti_inf_car:'⚡',sherman:'🛡',panzer:'🛡',
-            tank_destroyer:'🎯',heavy_tank:'💪',artillery_truck:'💥',
-            heli_transport:'🚁',heli_attack:'🚁',airstrike:'✈'};
+    // --- Flèche gauche ---
+    if (offset > 0) {
+        var lx = startX - 20, ly = btnY + btnH/2 - 14;
+        ctx.fillStyle = col.btnHover; ctx.fillRect(lx, ly, 16, 28);
+        ctx.strokeStyle = col.border; ctx.lineWidth=1; ctx.strokeRect(lx, ly, 16, 28);
+        ctx.fillStyle = col.text; ctx.font='bold 11px Arial';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('◀', lx+8, ly+14);
+        this.buttons.push({x:lx,y:ly,w:16,h:28,action:'scroll',dir:-1,bType:b.type});
+    }
+
+    // --- Flèche droite ---
+    if (offset + maxVisible < total) {
+        var rx2 = startX + maxVisible*(btnW+5) + 4, ry2 = btnY + btnH/2 - 14;
+        ctx.fillStyle = col.btnHover; ctx.fillRect(rx2, ry2, 16, 28);
+        ctx.strokeStyle = col.border; ctx.lineWidth=1; ctx.strokeRect(rx2, ry2, 16, 28);
+        ctx.fillStyle = col.text; ctx.font='bold 11px Arial';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('▶', rx2+8, ry2+14);
+        this.buttons.push({x:rx2,y:ry2,w:16,h:28,action:'scroll',dir:1,bType:b.type});
+    }
+
+    // --- Indicateur page ---
+    if (total > maxVisible) {
+        ctx.fillStyle=col.text+'66'; ctx.font='8px "Courier New"';
+        ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText((offset+1)+'-'+Math.min(offset+maxVisible,total)+'/'+total,
+                     startX + maxVisible*(btnW+5)/2, barY+3);
+    }
+
+    // --- Icônes par unitType ---
+    var ICONS = {
+        rifle:'👊', mg:'🔥', pioneer:'🔧', assault:'💪', at_inf:'🚀',
+        mortar:'💣', medic:'➕', sniper:'🎯', jeep:'🚗', halftrack:'🚛',
+        recon_car:'👁', anti_inf_car:'⚡', sherman:'🛡', panzer:'🛡',
+        tank_destroyer:'🎯', heavy_tank:'🔱', artillery_truck:'💥',
+        heli_transport:'🚁', heli_attack:'🚁', airstrike:'✈',
+        flamethrower:'🔥', paratrooper:'🪂', officer:'⭐',
+        m10_wolverine:'🛡', p47_thunderbolt:'✈',
+        // Nouvelles alliées
+        ranger:'🗡', combat_engineer:'⚙', commando:'🕵',
+        aa_halftrack:'🛡', bofors:'🎯',
+        m7_priest:'💥', calliope:'🚀',
+        at_gun:'🎯', gun_17pdr:'💥'
+    };
+
+    // --- Boutons visibles ---
+    b.produces.slice(offset, offset + maxVisible).forEach(function(prod, idx) {
+        var bx = startX + idx*(btnW+5);
+        var hover     = mx>=bx && mx<=bx+btnW && my>=btnY && my<=btnY+btnH;
+        var canAfford = this._canAfford(res, prod.cost);
+
+        ctx.fillStyle = !canAfford ? col.btnDisabled : hover ? col.btnHover : col.btnBg;
+        ctx.fillRect(bx, btnY, btnW, btnH);
+        ctx.strokeStyle = hover&&canAfford ? col.text : canAfford ? col.border+'99' : '#333333';
+        ctx.lineWidth=1.5; ctx.strokeRect(bx, btnY, btnW, btnH);
+
         ctx.font='13px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(roleIcons[prod.unitType]||'⚔', bx+14, btnY+11);
+        ctx.fillText(ICONS[prod.unitType]||'⚔', bx+14, btnY+11);
 
-        ctx.fillStyle=canAfford?col.text:col.text+'55'; ctx.font='bold 8px "Courier New"';
-        ctx.textAlign='left'; ctx.textBaseline='top';
+        ctx.fillStyle = canAfford ? col.text : col.text+'55';
+        ctx.font='bold 8px "Courier New"'; ctx.textAlign='left'; ctx.textBaseline='top';
         ctx.fillText('['+prod.key+'] '+prod.label, bx+26, btnY+5);
 
-        var cy=btnY+20;
-        this._drawCost(ctx,prod.cost,res,col,bx+4,cy,btnW-8,canAfford);
+        var cy = btnY+20;
+        this._drawCost(ctx, prod.cost, res, col, bx+4, cy, btnW-8, canAfford);
 
-        ctx.fillStyle=col.text+'88'; ctx.font='8px "Courier New"';
-        ctx.textAlign='left';
-        ctx.fillText('⏱ '+prod.time+'s',bx+4,cy+26);
+        ctx.fillStyle=col.text+'88'; ctx.font='8px "Courier New"'; ctx.textAlign='left';
+        ctx.fillText('⏱ '+prod.time+'s', bx+4, cy+26);
 
         if (hover&&canAfford) { ctx.fillStyle=col.text+'22'; ctx.fillRect(bx,btnY,btnW,btnH); }
         this.buttons.push({x:bx,y:btnY,w:btnW,h:btnH,action:'produce',prod:prod,canAfford:canAfford});
-    },this);
+    }, this);
 
-    // Rally
-    var rx=startX+b.produces.length*(btnW+5)+10;
-    var hover2=mx>=rx&&mx<=rx+70&&my>=btnY&&my<=btnY+btnH;
-    ctx.fillStyle=hover2?col.btnHover:col.btnBg; ctx.fillRect(rx,btnY,70,btnH);
-    ctx.strokeStyle=col.border+'66'; ctx.lineWidth=1; ctx.strokeRect(rx,btnY,70,btnH);
+    // --- Rally ---
+    var rallyX = startX + maxVisible*(btnW+5) + 28;
+    var hov2   = mx>=rallyX && mx<=rallyX+70 && my>=btnY && my<=btnY+btnH;
+    ctx.fillStyle = hov2 ? col.btnHover : col.btnBg; ctx.fillRect(rallyX,btnY,70,btnH);
+    ctx.strokeStyle=col.border+'66'; ctx.lineWidth=1; ctx.strokeRect(rallyX,btnY,70,btnH);
     ctx.fillStyle=col.text+'aa'; ctx.font='9px "Courier New"';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('[R] RALLYE',rx+35,btnY+btnH/2);
-    this.buttons.push({x:rx,y:btnY,w:70,h:btnH,action:'rally'});
+    ctx.fillText('[R] RALLYE', rallyX+35, btnY+btnH/2);
+    this.buttons.push({x:rallyX,y:btnY,w:70,h:btnH,action:'rally'});
 };
 
 // ---------------------------------------------------------------------------
@@ -408,7 +464,12 @@ RTS.Game.ProductionUI.prototype.handleClick = function(sx, sy) {
     for (var i=0;i<this.buttons.length;i++) {
         var b=this.buttons[i];
         if (sx>=b.x&&sx<=b.x+b.w&&sy>=b.y&&sy<=b.y+b.h) {
-            if (b.action==='tab') { this.activeTab=b.tabId; return null; }
+            if (b.action==='tab')    { this.activeTab=b.tabId; return null; }
+            if (b.action==='scroll') {
+                if (!this._scrollOffset) this._scrollOffset = {};
+                this._scrollOffset[b.bType] = (this._scrollOffset[b.bType]||0) + b.dir;
+                return null;
+            }
             return b;
         }
     }
@@ -418,14 +479,15 @@ RTS.Game.ProductionUI.prototype.handleClick = function(sx, sy) {
 RTS.Game.ProductionUI.prototype.handleKey = function(key) {
     if (!this.visible||!this.selectedBuilding) return null;
     var uk=key.toUpperCase(), b=this.selectedBuilding;
+    var res=this.getResources();
     if (this.activeTab==='construct'&&b.constructs) {
         var found=null;
-        b.constructs.forEach(function(c){if(c.key===uk)found={action:'construct',cons:c,canAfford:true};});
+        b.constructs.forEach(function(c){if(c.key===uk)found={action:'construct',cons:c,canAfford:this._canAfford(res,c.cost)};},this);
         if (found) return found;
     }
     if (b.produces) {
         var found2=null;
-        b.produces.forEach(function(p){if(p.key===uk)found2={action:'produce',prod:p,canAfford:true};});
+        b.produces.forEach(function(p){if(p.key===uk)found2={action:'produce',prod:p,canAfford:this._canAfford(res,p.cost)};},this);
         return found2;
     }
     return null;

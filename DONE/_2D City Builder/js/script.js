@@ -7,16 +7,25 @@
 const GRID = 30;
 
 const BUILDINGS = {
-  road:   { cost: 10,  emoji: '',    label: 'Route',         pN: 0, wN: 0, pop: 0,     income: 0,  upkeep: 0, happy: 0,  pG: 0,  wG: 0  },
-  house:  { cost: 100, emoji: '🏠', label: 'Maison',        pN: 1, wN: 1, pop: [3,8], income: 5,  upkeep: 1, happy: 0,  pG: 0,  wG: 0  },
-  shop:   { cost: 200, emoji: '🏪', label: 'Commerce',      pN: 2, wN: 1, pop: [1,3], income: 12, upkeep: 3, happy: 2,  pG: 0,  wG: 0  },
-  office: { cost: 350, emoji: '🏢', label: 'Bureau',        pN: 3, wN: 1, pop: [2,6], income: 18, upkeep: 5, happy: 0,  pG: 0,  wG: 0  },
-  park:   { cost: 80,  emoji: '🌳', label: 'Parc',          pN: 0, wN: 1, pop: 0,     income: 0,  upkeep: 1, happy: 5,  pG: 0,  wG: 0  },
-  power:  { cost: 500, emoji: '⚡', label: 'Centrale',      pN: 0, wN: 0, pop: 0,     income: 0,  upkeep: 8, happy: -3, pG: 20, wG: 0  },
-  water:  { cost: 300, emoji: '💧', label: "Château d'eau", pN: 1, wN: 0, pop: 0,     income: 0,  upkeep: 5, happy: 0,  pG: 0,  wG: 15 },
-  fire:   { cost: 400, emoji: '🚒', label: 'Pompiers',      pN: 2, wN: 2, pop: 0,     income: 0,  upkeep: 6, happy: 4,  pG: 0,  wG: 0  },
-  police: { cost: 400, emoji: '🚔', label: 'Police',        pN: 2, wN: 1, pop: 0,     income: 0,  upkeep: 6, happy: 4,  pG: 0,  wG: 0  },
-  school: { cost: 600, emoji: '🏫', label: 'École',         pN: 3, wN: 2, pop: 0,     income: 0,  upkeep: 8, happy: 6,  pG: 0,  wG: 0  },
+  road:     { cost: 10,   emoji: '',    label: 'Route',         pN: 0, wN: 0, pop: 0,      income: 0,  upkeep: 0,  happy: 0,  pG: 0,  wG: 0  },
+  house:    { cost: 100,  emoji: '🏠', label: 'Maison',        pN: 1, wN: 1, pop: [3,8],  income: 5,  upkeep: 1,  happy: 0,  pG: 0,  wG: 0  },
+  shop:     { cost: 200,  emoji: '🏪', label: 'Commerce',      pN: 2, wN: 1, pop: [1,3],  income: 12, upkeep: 3,  happy: 2,  pG: 0,  wG: 0  },
+  office:   { cost: 350,  emoji: '🏢', label: 'Bureau',        pN: 3, wN: 1, pop: [2,6],  income: 18, upkeep: 5,  happy: 0,  pG: 0,  wG: 0  },
+  park:     { cost: 80,   emoji: '🌳', label: 'Parc',          pN: 0, wN: 1, pop: 0,      income: 0,  upkeep: 1,  happy: 5,  pG: 0,  wG: 0  },
+  power:    { cost: 500,  emoji: '⚡', label: 'Centrale',      pN: 0, wN: 0, pop: 0,      income: 0,  upkeep: 8,  happy: -3, pG: 20, wG: 0  },
+  water:    { cost: 300,  emoji: '💧', label: "Château d'eau", pN: 1, wN: 0, pop: 0,      income: 0,  upkeep: 5,  happy: 0,  pG: 0,  wG: 15 },
+  fire:     { cost: 400,  emoji: '🚒', label: 'Pompiers',      pN: 2, wN: 2, pop: 0,      income: 0,  upkeep: 6,  happy: 4,  pG: 0,  wG: 0  },
+  police:   { cost: 400,  emoji: '🚔', label: 'Police',        pN: 2, wN: 1, pop: 0,      income: 0,  upkeep: 6,  happy: 4,  pG: 0,  wG: 0  },
+  school:   { cost: 600,  emoji: '🏫', label: 'École',         pN: 3, wN: 2, pop: 0,      income: 0,  upkeep: 8,  happy: 6,  pG: 0,  wG: 0  },
+  // ── Bâtiments avancés (depuis events.js) ──
+  hospital: { cost: 800,  emoji: '🏥', label: 'Hôpital',       pN: 4, wN: 3, pop: 0,      income: 0,  upkeep: 10, happy: 8,  pG: 0,  wG: 0  },
+  stadium:  { cost: 1200, emoji: '🏟️', label: 'Stade',         pN: 5, wN: 2, pop: 0,      income: 20, upkeep: 12, happy: 10, pG: 0,  wG: 0  },
+  market:   { cost: 450,  emoji: '🏬', label: 'Marché',        pN: 2, wN: 1, pop: [1,4],  income: 16, upkeep: 4,  happy: 4,  pG: 0,  wG: 0  },
+  factory:  { cost: 700,  emoji: '🏭', label: 'Usine',         pN: 5, wN: 2, pop: [2,5],  income: 25, upkeep: 8,  happy: -5, pG: 0,  wG: 0  },
+  solar:    { cost: 900,  emoji: '☀️', label: 'Solaire',       pN: 0, wN: 0, pop: 0,      income: 0,  upkeep: 3,  happy: 2,  pG: 15, wG: 0  },
+  windmill: { cost: 600,  emoji: '💨', label: 'Éolienne',      pN: 0, wN: 0, pop: 0,      income: 0,  upkeep: 2,  happy: 1,  pG: 10, wG: 0  },
+  library:  { cost: 500,  emoji: '📚', label: 'Bibliothèque',  pN: 2, wN: 1, pop: 0,      income: 0,  upkeep: 5,  happy: 7,  pG: 0,  wG: 0  },
+  airport:  { cost: 2000, emoji: '✈️', label: 'Aéroport',      pN: 8, wN: 4, pop: [5,15], income: 40, upkeep: 20, happy: 3,  pG: 0,  wG: 0  },
 };
 
 // ── GAME STATE ──
@@ -202,14 +211,14 @@ function createMap() {
       tile.addEventListener('mousedown', e => {
         if (e.button === 0) {
           mouseDown = true;
-          buildAt(x, y);
+          window.buildAt(x, y);
         }
       });
       tile.addEventListener('mouseenter', () => {
-        if (mouseDown && (tool === 'road' || tool === 'demolish')) buildAt(x, y);
-        showTooltip(x, y);
+        if (mouseDown && (tool === 'road' || tool === 'demolish')) window.buildAt(x, y);
+        window.showTooltip(x, y);
       });
-      tile.addEventListener('mouseleave', hideTooltip);
+      tile.addEventListener('mouseleave', () => window.hideTooltip());
 
       // ── Touch tap to build ──
       tile.addEventListener('touchstart', e => {
@@ -225,7 +234,7 @@ function createMap() {
         if (dist < 20) {
           // it was a tap, not a drag
           e.preventDefault();
-          buildAt(x, y);
+          window.buildAt(x, y);
         }
         tile._touchX = null;
       });
@@ -234,6 +243,7 @@ function createMap() {
     }
   }
   window.addEventListener('mouseup', () => { mouseDown = false; });
+  window.buildAt = buildAt;
 }
 
 // ═══════════════════════════════════════
@@ -284,7 +294,7 @@ function buildAt(x, y) {
   setTimeout(() => cell.el.classList.remove('just-built'), 400);
 
   if (info.emoji) {
-    cell.el.innerHTML = `<span class="emoji">${info.emoji}</span>`;
+    cell.el.innerHTML = `<span class="emoji" style="font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',serif">${info.emoji}</span>`;
   } else if (tool === 'road') {
     cell.el.innerHTML = '<span class="emoji">─</span>';
   }
@@ -314,6 +324,15 @@ function countType() {
     for (let x = 0; x < GRID; x++)
       if (grid[y][x].type) c++;
   return c;
+}
+window.countType = countType;
+
+function countBuildingType(type) {
+  let count = 0;
+  for (let y = 0; y < GRID; y++)
+    for (let x = 0; x < GRID; x++)
+      if (grid[y][x].type === type) count++;
+  return count;
 }
 
 function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
@@ -358,6 +377,11 @@ function recalcResources() {
   if (!hasPower) sat -= 15;
   if (!hasWater) sat -= 15;
   if (population > 0 && rd < population / 8) sat -= 5;
+  // Pénalités externes (crime, pollution) injectées par systems.js
+  if (typeof window._satPenaltyCrime     === 'number') sat -= window._satPenaltyCrime;
+  if (typeof window._satPenaltyPollution === 'number') sat -= window._satPenaltyPollution;
+  // Bonus externe (Smart City, etc.) injecté par progression.js
+  if (typeof window._satBonus            === 'number') sat += window._satBonus;
   satisfaction = clamp(Math.round(sat), 0, 100);
 
   res = { pG, pN, wG, wN, income: inc, upkeep: up, buildings: bld, roads: rd };
@@ -449,6 +473,8 @@ function showTooltip(x, y) {
 function hideTooltip() {
   tooltipEl.classList.remove('visible');
 }
+window.showTooltip = showTooltip;
+window.hideTooltip = hideTooltip;
 
 // ═══════════════════════════════════════
 //  NOTIFICATIONS
@@ -516,7 +542,11 @@ document.addEventListener('click', e => {
 // ═══════════════════════════════════════
 //  GAME LOOP
 // ═══════════════════════════════════════
-function gameTick() {
+// ── Safe gameTick dispatcher ──
+// Modules can push to window._gameTickExtensions instead of patching gameTick
+window._gameTickExtensions = window._gameTickExtensions || [];
+
+window.gameTick = function gameTick() {
   if (!gameStarted || speed === 0) return;
 
   for (let i = 0; i < speed; i++) {
@@ -548,9 +578,14 @@ function gameTick() {
   }
 
   updateUI();
-}
 
-setInterval(gameTick, 200);
+  // Run extensions (journal, savegame, etc.)
+  for (const ext of window._gameTickExtensions) {
+    try { ext(); } catch(e) { console.error('[gameTick ext]', e); }
+  }
+};
+
+setInterval(() => window.gameTick(), 200);
 
 // ═══════════════════════════════════════
 //  INIT

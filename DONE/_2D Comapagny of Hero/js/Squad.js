@@ -64,6 +64,7 @@ RTS.Game.Squad = function(x, y, team, type) {
     this._isSetup       = false;
     this._healTimer     = 0;
     this._artilleryTimer= 0;
+    this._inspireActive = false;
 };
 
 // ---------------------------------------------------------------------------
@@ -121,7 +122,102 @@ RTS.Game.Squad.STATS = {
     heli_attack:   { count:1, speed:150, radius:28, vision:340, attackRange:290, damage:40, fireRate:0.8, captureSpeed:0.0, aerial:true, altitude:55, role:'gunship',
                     abilities:['rocket_barrage'] },
     airstrike:     { count:1, speed:420, radius:18, vision:380, attackRange:220, damage:130,fireRate:0.6, captureSpeed:0.0, aerial:true, altitude:110, role:'airstrike',
-                    abilities:[] }
+                    abilities:[] },
+
+    // ══ NOUVELLES UNITÉS ══════════════════════════════════════════════════
+
+    // ── INFANTERIE ALLIÉE ─────────────────────────────────────────────────
+    // Lance-flammes — portée courte, dégâts massifs contre l'infanterie
+    flamethrower:  { count:3, speed:65,  radius:26, vision:170, attackRange:85,  damage:32, fireRate:2.5, captureSpeed:0.5, armorType:'none', role:'assault',
+                    abilities:['flamethrower_spray','smoke'] },
+    // Parachutistes — infanterie d'élite rapide, excellente en assaut
+    paratrooper:   { count:5, speed:110, radius:28, vision:230, attackRange:150, damage:13, fireRate:2.0, captureSpeed:1.0, armorType:'none', role:'assault',
+                    abilities:['grenade','focus_fire','smoke'] },
+    // Officier — commande sur le terrain, inspire les alliés proches
+    officer:       { count:2, speed:90,  radius:24, vision:260, attackRange:140, damage:8,  fireRate:1.0, captureSpeed:0.5, armorType:'none', role:'infantry',
+                    abilities:['inspire','focus_fire'] },
+
+    // ── BLINDÉS ALLIÉS ────────────────────────────────────────────────────
+    // M10 Wolverine — chasseur de chars rapide, blindage léger
+    m10_wolverine: { count:1, speed:110, radius:28, vision:260, attackRange:310, damage:90, fireRate:0.4, captureSpeed:0.0, armorType:'light', role:'tank_destroyer', vehicle:true,
+                    abilities:['focus_fire'] },
+    // P-47 Thunderbolt — avion d'attaque au sol allié
+    p47_thunderbolt:{ count:1,speed:380, radius:20, vision:420, attackRange:250, damage:110,fireRate:0.55,captureSpeed:0.0, aerial:true, altitude:90, role:'airstrike',
+                    abilities:['rocket_barrage'] },
+
+    // ── INFANTERIE AXIS ───────────────────────────────────────────────────
+    // Panzergrenadier — infanterie motorisée d'élite axis
+    panzergrenadier:{ count:4, speed:100, radius:26, vision:210, attackRange:140, damage:16, fireRate:2.0, captureSpeed:0.8, armorType:'none', role:'assault',
+                    abilities:['grenade','suppression_fire'] },
+    // Sturmtruppen — unité de choc axis, combat rapproché
+    sturmtruppen:  { count:4, speed:95,  radius:26, vision:200, attackRange:105, damage:20, fireRate:2.4, captureSpeed:0.6, armorType:'none', role:'assault',
+                    abilities:['grenade','smoke'] },
+
+    // ── BLINDÉS AXIS ──────────────────────────────────────────────────────
+    // Tiger I — char lourd redoutable, armure quasi-indestructible
+    tiger:         { count:1, speed:60,  radius:36, vision:240, attackRange:310, damage:110,fireRate:0.32,captureSpeed:0.0, armorType:'heavy', role:'heavy_tank', vehicle:true,
+                    abilities:['focus_fire','barrage'] },
+    // StuG III — canon d'assaut sans tourelle, anti-char efficace
+    stug:          { count:1, speed:80,  radius:30, vision:220, attackRange:270, damage:85, fireRate:0.42,captureSpeed:0.0, armorType:'heavy', role:'tank_destroyer', vehicle:true,
+                    abilities:['focus_fire'] },
+    // Fw 190 — avion d'attaque axis
+    fw190:         { count:1, speed:400, radius:20, vision:400, attackRange:240, damage:95, fireRate:0.5, captureSpeed:0.0, aerial:true, altitude:90, role:'airstrike',
+                    abilities:[] },
+
+    // ══ NOUVELLES UNITÉS — ALLIÉES ════════════════════════════════════════════
+
+    // ── ÉLITE INFANTERIE ──────────────────────────────────────────────────────
+    // Rangers — infanterie d'élite polyvalente, petite escouade mais létale
+    ranger:         { count:3, speed:115, radius:24, vision:260, attackRange:170, damage:22, fireRate:2.0, captureSpeed:0.9, armorType:'none', role:'assault',
+                     abilities:['grenade','focus_fire','smoke'] },
+    // Combat Engineer — pionnier offensif, excellent pour capturer
+    combat_engineer:{ count:4, speed:80,  radius:26, vision:210, attackRange:130, damage:14, fireRate:1.2, captureSpeed:1.8, armorType:'none', role:'engineer',
+                     abilities:['smoke','grenade'] },
+    // Commando — unité furtive, haute mobilité, dégâts élevés
+    commando:       { count:2, speed:130, radius:20, vision:300, attackRange:145, damage:35, fireRate:1.4, captureSpeed:0.5, armorType:'none', role:'assault',
+                     abilities:['focus_fire','smoke'] },
+
+    // ── VÉHICULES AA ──────────────────────────────────────────────────────────
+    // M16 AA Half-Track — anti-aérien mobile, quad .50cal, supprime l'infanterie
+    aa_halftrack:   { count:1, speed:100, radius:26, vision:280, attackRange:220, damage:28, fireRate:3.5, captureSpeed:0.0, armorType:'light', role:'anti_air', vehicle:true,
+                     abilities:['suppression_fire'] },
+    // Bofors 40mm — canon AA tracté, excellent contre aériens et infanterie groupée
+    bofors:         { count:1, speed:40,  radius:22, vision:320, attackRange:260, damage:45, fireRate:1.8, captureSpeed:0.0, armorType:'light', role:'anti_air', vehicle:true,
+                     abilities:['focus_fire'] },
+
+    // ── ARTILLERIE AUTOMOTRICE ────────────────────────────────────────────────
+    // M7 Priest — obusier automoteur longue portée
+    m7_priest:      { count:1, speed:65,  radius:30, vision:210, attackRange:700, damage:95, fireRate:0.12, captureSpeed:0.0, armorType:'light', role:'artillery', vehicle:true,
+                     abilities:['barrage'] },
+    // Calliope — Sherman lance-roquettes, AOE dévastateur sur zone
+    calliope:       { count:1, speed:75,  radius:32, vision:200, attackRange:500, damage:70, fireRate:0.08, captureSpeed:0.0, armorType:'heavy', role:'artillery', vehicle:true,
+                     abilities:['rocket_barrage','barrage'] },
+
+    // ── CANONS ANTICHAR TRACTÉS ───────────────────────────────────────────────
+    // 57mm AT Gun — canon antichar léger, précis, peu mobile
+    at_gun:         { count:2, speed:30,  radius:24, vision:240, attackRange:320, damage:120, fireRate:0.28, captureSpeed:0.0, armorType:'light', role:'anti_tank',
+                     abilities:['focus_fire'] },
+    // 17-Pounder — canon antichar lourd, perce tous les blindages
+    gun_17pdr:      { count:2, speed:20,  radius:26, vision:260, attackRange:380, damage:160, fireRate:0.20, captureSpeed:0.0, armorType:'light', role:'anti_tank',
+                     abilities:['focus_fire','rocket_barrage'] },
+
+    // ══ NOUVELLES UNITÉS — AXIS ═══════════════════════════════════════════════
+
+    // Flak 88 — le légendaire canon AA/AT axis, dévastateur contre tout
+    flak88:         { count:2, speed:15,  radius:28, vision:300, attackRange:400, damage:150, fireRate:0.22, captureSpeed:0.0, armorType:'light', role:'anti_tank',
+                     abilities:['focus_fire'] },
+    // Nebelwerfer — lance-roquettes multiple axis, barrage AOE
+    nebelwerfer:    { count:2, speed:35,  radius:24, vision:190, attackRange:550, damage:75, fireRate:0.10, captureSpeed:0.0, armorType:'none', role:'artillery',
+                     abilities:['barrage','rocket_barrage'] },
+    // Fallschirmjäger — parachutistes d'élite axis
+    fallschirmjager:{ count:4, speed:105, radius:26, vision:230, attackRange:150, damage:18, fireRate:2.2, captureSpeed:0.8, armorType:'none', role:'assault',
+                     abilities:['grenade','focus_fire','smoke'] },
+    // Jagdpanther — chasseur de chars axis ultra-efficace
+    jagdpanther:    { count:1, speed:70,  radius:34, vision:250, attackRange:360, damage:130, fireRate:0.30, captureSpeed:0.0, armorType:'heavy', role:'tank_destroyer', vehicle:true,
+                     abilities:['focus_fire'] },
+    // Me 262 — avion à réaction axis, vitesse extrême
+    me262:          { count:1, speed:500, radius:18, vision:420, attackRange:260, damage:120, fireRate:0.50, captureSpeed:0.0, aerial:true, altitude:100, role:'airstrike',
+                     abilities:[] }
 };
 
 RTS.Game.Squad.COLORS = {
@@ -136,7 +232,24 @@ RTS.Game.Squad.SOLDIER_HP = {
     sherman:620, panzer:700, tank_destroyer:550, heavy_tank:900,
     artillery_truck:320,
     heli_transport:260, heli_attack:360,
-    airstrike:9999
+    airstrike:9999,
+    // Nouvelles unités
+    flamethrower:60, paratrooper:65, officer:75,
+    m10_wolverine:420,
+    p47_thunderbolt:9999,
+    panzergrenadier:70, sturmtruppen:65,
+    tiger:1100, stug:680,
+    fw190:9999,
+    // Alliées — élite infanterie
+    ranger:80, combat_engineer:60, commando:70,
+    // Alliées — AA
+    aa_halftrack:200, bofors:180,
+    // Alliées — artillerie automotrice
+    m7_priest:380, calliope:650,
+    // Alliées — canons AT tractés
+    at_gun:140, gun_17pdr:160,
+    // Axis — nouvelles
+    flak88:170, nebelwerfer:120, fallschirmjager:75, jagdpanther:850, me262:9999
 };
 
 // Bonus dégâts selon rôle vs type de cible
@@ -159,13 +272,16 @@ RTS.Game.Squad.DAMAGE_MODIFIER = function(attackerRole, targetArmor) {
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.ABILITY_DEFS = {
-    grenade:          { label:'Grenade',      key:'G', icon:'💥', cooldown:15, duration:0,   description:'Explosion AOE courte portée' },
-    smoke:            { label:'Fumigène',     key:'S', icon:'🌫', cooldown:20, duration:8,   description:'Écran de fumée, bloque la vision' },
-    focus_fire:       { label:'Tir concentré',key:'F', icon:'🎯', cooldown:12, duration:5,   description:'+40% précision, suppression bonus' },
-    suppression_fire: { label:'Suppression',  key:'U', icon:'🔥', cooldown:18, duration:6,   description:'Supprime les unités ennemies' },
-    rocket_barrage:   { label:'Roquettes',    key:'R', icon:'🚀', cooldown:30, duration:3,   description:'Barrage de roquettes AOE' },
-    barrage:          { label:'Barrage',      key:'B', icon:'💣', cooldown:45, duration:4,   description:'Tir indirect longue portée' },
-    heal:             { label:'Soins',        key:'H', icon:'➕', cooldown:25, duration:8,   description:'Régénère les soldats alliés proches' }
+    grenade:          { label:'Grenade',        key:'G', icon:'💥', cooldown:15, duration:0,   description:'Explosion AOE courte portée' },
+    smoke:            { label:'Fumigène',       key:'S', icon:'🌫', cooldown:20, duration:8,   description:'Écran de fumée, bloque la vision' },
+    focus_fire:       { label:'Tir concentré',  key:'F', icon:'🎯', cooldown:12, duration:5,   description:'+40% précision, suppression bonus' },
+    suppression_fire: { label:'Suppression',    key:'U', icon:'🔥', cooldown:18, duration:6,   description:'Supprime les unités ennemies' },
+    rocket_barrage:   { label:'Roquettes',      key:'R', icon:'🚀', cooldown:30, duration:3,   description:'Barrage de roquettes AOE' },
+    barrage:          { label:'Barrage',        key:'B', icon:'💣', cooldown:45, duration:4,   description:'Tir indirect longue portée' },
+    heal:             { label:'Soins',          key:'H', icon:'➕', cooldown:25, duration:8,   description:'Régénère les soldats alliés proches' },
+    // Nouvelles abilities
+    flamethrower_spray:{ label:'Gerbe de feu',  key:'F', icon:'🔥', cooldown:20, duration:3,   description:'Cône de flammes AOE dévastateur' },
+    inspire:          { label:'Inspiration',    key:'I', icon:'⭐', cooldown:35, duration:10,  description:'+30% cadence de tir alliés proches' }
 };
 
 RTS.Game.Squad.prototype._buildAbilities = function(list) {
@@ -190,12 +306,41 @@ RTS.Game.Squad.prototype.activateAbility = function(id, allSquads, targetX, targ
     ab.active = true;
     ab.durationLeft = def.duration;
 
-    if (id === 'grenade')         this._doGrenade(targetX || this.x + 60, targetY || this.y);
-    if (id === 'smoke')           this._smokeActive = true;
-    if (id === 'rocket_barrage')  this._doRocketBarrage(allSquads);
-    if (id === 'barrage')         this._doBarrage(allSquads);
-    if (id === 'heal')            this._healActive = true;
+    if (id === 'grenade')            this._doGrenade(targetX || this.x + 60, targetY || this.y);
+    if (id === 'smoke')              this._smokeActive = true;
+    if (id === 'rocket_barrage')     this._doRocketBarrage(allSquads);
+    if (id === 'barrage')            this._doBarrage(allSquads);
+    if (id === 'heal')               this._healActive = true;
+    if (id === 'flamethrower_spray') this._doFlamethrowerSpray(allSquads);
+    if (id === 'inspire')            this._inspireActive = true;
     return true;
+};
+
+RTS.Game.Squad.prototype._doFlamethrowerSpray = function(allSquads) {
+    if (!allSquads) return;
+    var self = this;
+    var enemies = allSquads.filter(function(s){ return s.team !== self.team && !s.dead; });
+    // Hit all enemies in a short cone (within attackRange)
+    for (var k = 0; k < 3; k++) {
+        (function(delay) {
+            setTimeout(function() {
+                self._explosions.push({ x: self.x + (Math.random()-.5)*50, y: self.y + (Math.random()-.5)*50, r:0, maxR:45, life:0.5 });
+                enemies.forEach(function(sq) {
+                    if (sq.dead) return;
+                    var dx = sq.x - self.x, dy = sq.y - self.y;
+                    if (Math.sqrt(dx*dx+dy*dy) > self.attackRange * 1.1) return;
+                    sq.soldiers.forEach(function(s) {
+                        if (!s.dead) {
+                            // Lance-flammes inefficace contre blindage lourd
+                            var mod = sq.armorType === 'heavy' ? 0.15 : sq.armorType === 'light' ? 0.5 : 1.0;
+                            s.hp -= self.damage * mod;
+                            if (s.hp <= 0) { s.hp = 0; s.dead = true; }
+                        }
+                    });
+                });
+            }, delay);
+        })(k * 200);
+    }
 };
 
 RTS.Game.Squad.prototype._doGrenade = function(tx, ty) {
@@ -307,8 +452,9 @@ RTS.Game.Squad.prototype.update = function(dt, allSquads) {
             ab.durationLeft -= dt;
             if (ab.durationLeft <= 0) {
                 ab.active = false;
-                if (id === 'smoke')  self._smokeActive = false;
-                if (id === 'heal')   self._healActive  = false;
+                if (id === 'smoke')    self._smokeActive  = false;
+                if (id === 'heal')     self._healActive   = false;
+                if (id === 'inspire')  self._inspireActive = false;
             }
         }
     });
@@ -377,6 +523,31 @@ RTS.Game.Squad.prototype._autoAbilities = function(dt, allSquads) {
     var self = this;
     var tgt  = this.target;
     if (!tgt) return;
+
+    // Officier : inspire si alliés en combat à proximité
+    if (this.role === 'infantry' && this.type === 'officer' && this.abilities.inspire && this.abilities.inspire.timer <= 0) {
+        var alliesInCombat = allSquads.some(function(sq) {
+            if (sq.team !== self.team || sq.dead || sq === self) return false;
+            var dx=sq.x-self.x,dy=sq.y-self.y;
+            return Math.sqrt(dx*dx+dy*dy)<180 && sq.inCombat;
+        });
+        if (alliesInCombat) {
+            this.activateAbility('inspire', allSquads);
+            // Propager _inspireActive aux alliés proches
+            allSquads.forEach(function(sq) {
+                if (sq.team !== self.team || sq.dead || sq === self) return;
+                var dx=sq.x-self.x, dy=sq.y-self.y;
+                if (Math.sqrt(dx*dx+dy*dy) < 180) sq._inspireActive = true;
+            });
+        }
+    }
+
+    // Lance-flammes : spray si ennemi très proche
+    if (this.type === 'flamethrower' && this.abilities.flamethrower_spray && this.abilities.flamethrower_spray.timer <= 0) {
+        if (tgt && !tgt.dead && this._dist(tgt) < this.attackRange + 20) {
+            this.activateAbility('flamethrower_spray', allSquads);
+        }
+    }
 
     // Medic : heal si alliés proches blessés
     if (this.role === 'medic' && this.abilities.heal && this.abilities.heal.timer <= 0) {
@@ -455,7 +626,9 @@ RTS.Game.Squad.prototype._updateCombat = function(dt, all) {
         return;
     }
 
-    if (this.target && this.inCombat && this._fireTimer >= this._fireInterval) {
+    var inspireBonus = this._inspireActive ? 1.3 : 1.0;
+
+    if (this.target && this.inCombat && this._fireTimer >= this._fireInterval / inspireBonus) {
         this._fireTimer = 0;
         this._shoot(this.target);
     }
@@ -499,6 +672,10 @@ RTS.Game.Squad.prototype._shoot = function(tgt) {
     var focusBonus  = (this.abilities.focus_fire  && this.abilities.focus_fire.active)  ? 1.4 : 1.0;
     var suppBonus   = (this.abilities.suppression_fire && this.abilities.suppression_fire.active) ? 1.6 : 1.0;
     var dmgModifier = RTS.Game.Squad.DAMAGE_MODIFIER(this.role, tgt.armorType || 'none');
+
+    // Inspire reçu d'un officier allié proche : bonus cadence de tir
+    var inspireBonus = 1.0;
+    if (this._inspireActive) inspireBonus = 1.3;
 
     alive.forEach(function(sol) {
         var ts=tAlive[Math.floor(Math.random()*tAlive.length)];
@@ -645,6 +822,22 @@ RTS.Game.Squad.prototype._drawInfantry = function(ctx,col) {
         artillery:'rgba(255,200,0,0.22)', medic:'rgba(0,255,120,0.22)',
         engineer:'rgba(200,180,100,0.22)'
     };
+    // Flammes visuelles pour lance-flammes
+    if (this.type === 'flamethrower' && this.inCombat) {
+        var ft = this._time;
+        for (var fi = 0; fi < 4; fi++) {
+            var fa = Math.random() * Math.PI * 2;
+            var fr = 6 + Math.sin(ft * 8 + fi) * 4;
+            var fx = this.x + Math.cos(fa) * fr;
+            var fy = this.y + Math.sin(fa) * fr;
+            var flameGrad = ctx.createRadialGradient(fx, fy, 0, fx, fy, 12);
+            flameGrad.addColorStop(0, 'rgba(255,240,80,0.9)');
+            flameGrad.addColorStop(0.5,'rgba(255,100,0,0.6)');
+            flameGrad.addColorStop(1, 'rgba(200,30,0,0)');
+            ctx.fillStyle = flameGrad;
+            ctx.beginPath(); ctx.arc(fx, fy, 12, 0, Math.PI*2); ctx.fill();
+        }
+    }
     var glowColor = roleColors[this.role] || col.glow;
     var glow=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.radius*1.5);
     glow.addColorStop(0,glowColor); glow.addColorStop(1,'rgba(0,0,0,0)');
@@ -734,12 +927,17 @@ RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
         ctx.fillStyle='#222'; ctx.fillRect(-3,-38,6,20);
         ctx.strokeStyle='#88aa44'; ctx.lineWidth=2; ctx.strokeRect(-12,-22,24,44);
 
-    } else if (t==='sherman'||t==='panzer'||t==='tank_destroyer'||t==='heavy_tank') {
+    } else if (t==='sherman'||t==='panzer'||t==='tank_destroyer'||t==='heavy_tank'||t==='tiger'||t==='stug'||t==='m10_wolverine'||t==='calliope'||t==='jagdpanther') {
         var configs = {
             sherman:         { w:11, h:20, bodyColor:col.dark,   trackColor:'#111', turretR:8,  barrelLen:12 },
             panzer:          { w:13, h:22, bodyColor:'#4a3a1a',   trackColor:'#111', turretR:9,  barrelLen:14 },
             tank_destroyer:  { w:11, h:20, bodyColor:'#3a2a0a',   trackColor:'#111', turretR:7,  barrelLen:20, noTurret:true },
-            heavy_tank:      { w:15, h:26, bodyColor:'#1a2a4a',   trackColor:'#111', turretR:11, barrelLen:10 }
+            heavy_tank:      { w:15, h:26, bodyColor:'#1a2a4a',   trackColor:'#111', turretR:11, barrelLen:10 },
+            tiger:           { w:16, h:28, bodyColor:'#3a3010',   trackColor:'#111', turretR:12, barrelLen:18 },
+            stug:            { w:13, h:22, bodyColor:'#2a3010',   trackColor:'#111', turretR:8,  barrelLen:22, noTurret:true },
+            m10_wolverine:   { w:10, h:19, bodyColor:'#1a3a1a',   trackColor:'#111', turretR:7,  barrelLen:14, openTop:true },
+            calliope:        { w:12, h:22, bodyColor:'#1a3020',   trackColor:'#111', turretR:9,  barrelLen:8,  rocketPod:true },
+            jagdpanther:     { w:14, h:25, bodyColor:'#2a2808',   trackColor:'#111', turretR:9,  barrelLen:26, noTurret:true }
         };
         var c = configs[t];
         ctx.fillStyle=c.bodyColor; ctx.fillRect(-c.w,-c.h,c.w*2,c.h*2);
@@ -753,13 +951,89 @@ RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
             ctx.beginPath();ctx.arc(c.w+2,wy,3,0,Math.PI*2);ctx.fill();
         }
         if (!c.noTurret) {
-            ctx.fillStyle=t==='panzer'?'#3d3010':t==='heavy_tank'?'#0d1a3a':'#1a3380';
+            ctx.fillStyle=t==='panzer'?'#3d3010':t==='heavy_tank'?'#0d1a3a':t==='tiger'?'#2d2000':'#1a3380';
             ctx.beginPath(); ctx.arc(0,0,c.turretR,0,Math.PI*2); ctx.fill();
             ctx.strokeStyle=col.accent; ctx.lineWidth=1; ctx.stroke();
         }
+        // M10 : tourelle ouverte (anneau)
+        if (c.openTop) {
+            ctx.strokeStyle=col.accent+'88'; ctx.lineWidth=2;
+            ctx.beginPath(); ctx.arc(0,0,c.turretR,0,Math.PI*2); ctx.stroke();
+        }
+        // Calliope : pod de roquettes sur la tourelle
+        if (c.rocketPod) {
+            ctx.fillStyle='#334'; ctx.fillRect(-c.turretR,-c.turretR,c.turretR*2,c.turretR*1.5);
+            for(var rr=0;rr<3;rr++){
+                ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(-c.turretR*0.6+rr*c.turretR*0.6,-c.turretR*0.3,2.5,0,Math.PI*2); ctx.fill();
+            }
+        }
         ctx.fillStyle='#111'; ctx.fillRect(-2,-c.h-c.barrelLen,4,c.h*0.5+c.barrelLen);
         ctx.strokeStyle=col.accent; ctx.lineWidth=1.5; ctx.strokeRect(-c.w,-c.h,c.w*2,c.h*2);
-    }
+
+    } else if (t==='aa_halftrack'||t==='bofors'||t==='m7_priest'||t==='at_gun'||t==='gun_17pdr'||t==='flak88'||t==='nebelwerfer') {
+        // Véhicules/canons spéciaux
+        if (t==='aa_halftrack') {
+            // Châssis half-track + tourelle quad .50
+            ctx.fillStyle=col.base; ctx.fillRect(-10,-17,20,34);
+            ctx.fillStyle='#222'; ctx.fillRect(-13,-17,4,34); ctx.fillRect(9,-17,4,34);
+            for(var wi=0;wi<4;wi++){ctx.fillStyle='#555';ctx.beginPath();ctx.arc(-11,-12+wi*8,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(11,-12+wi*8,3,0,Math.PI*2);ctx.fill();}
+            // Tourelle AA avec 4 canons
+            ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(0,-3,7,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#111';
+            ctx.fillRect(-6,-16,3,14); ctx.fillRect(3,-16,3,14);
+            ctx.fillRect(-8,-13,3,10); ctx.fillRect(5,-13,3,10);
+            ctx.strokeStyle='#44aaff'; ctx.lineWidth=1.5; ctx.strokeRect(-10,-17,20,34);
+
+        } else if (t==='bofors') {
+            // Affut de canon AA carré
+            ctx.fillStyle='#2a3a1a'; ctx.fillRect(-9,-9,18,18);
+            ctx.fillStyle='#1a1a1a'; ctx.fillRect(-10,-10,20,4); ctx.fillRect(-10,6,20,4);
+            // Canon
+            ctx.fillStyle='#222'; ctx.fillRect(-2,-28,4,22);
+            ctx.fillRect(-4,-32,8,6);
+            ctx.strokeStyle='#88ff44'; ctx.lineWidth=1.5; ctx.strokeRect(-9,-9,18,18);
+
+        } else if (t==='m7_priest') {
+            // Châssis Sherman + howitzer
+            ctx.fillStyle='#1a3020'; ctx.fillRect(-11,-20,22,40);
+            ctx.fillStyle='#111'; ctx.fillRect(-14,-20,4,40); ctx.fillRect(10,-20,4,40);
+            for(var pi=0;pi<5;pi++){ctx.fillStyle='#333';ctx.beginPath();ctx.arc(-12,-14+pi*7,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(12,-14+pi*7,3,0,Math.PI*2);ctx.fill();}
+            // Superstructure ouverte
+            ctx.fillStyle='#0d2010'; ctx.fillRect(-8,-14,16,18);
+            // Obusier court
+            ctx.fillStyle='#111'; ctx.fillRect(-3,-28,6,16);
+            ctx.strokeStyle='#44ff88'; ctx.lineWidth=1.5; ctx.strokeRect(-11,-20,22,40);
+
+        } else if (t==='at_gun'||t==='gun_17pdr'||t==='flak88') {
+            // Canons tractés — affut bas + long canon
+            var barLen = t==='gun_17pdr'?38 : t==='flak88'?42 : 30;
+            var aCol   = t==='flak88'?'#2a2808':'#2a1a1a';
+            ctx.fillStyle=aCol; ctx.fillRect(-9,-8,18,16);
+            // Roues
+            ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(-11,6,5,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(11,6,5,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#555'; ctx.beginPath(); ctx.arc(-11,6,3,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(11,6,3,0,Math.PI*2); ctx.fill();
+            // Bouclier
+            ctx.fillStyle='#333'; ctx.fillRect(-8,-12,16,10);
+            // Canon
+            ctx.fillStyle='#111'; ctx.fillRect(-2,-barLen,4,barLen-8);
+            ctx.strokeStyle= t==='flak88'?'#aaaa44':col.accent; ctx.lineWidth=1.5; ctx.strokeRect(-9,-8,18,16);
+
+        } else if (t==='nebelwerfer') {
+            // Lance-roquettes multiple sur affut
+            ctx.fillStyle='#1a1a0a'; ctx.fillRect(-8,-6,16,12);
+            ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(-9,8,4,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(9,8,4,0,Math.PI*2); ctx.fill();
+            // Tubes (5 roquettes)
+            for(var ni=0;ni<5;ni++){
+                var nx=-8+ni*4;
+                ctx.fillStyle='#222'; ctx.fillRect(nx,-22,3,18);
+                ctx.strokeStyle='#aa4400'; ctx.lineWidth=0.5; ctx.strokeRect(nx,-22,3,18);
+            }
+            ctx.strokeStyle='#aa6600'; ctx.lineWidth=1.5; ctx.strokeRect(-8,-6,16,12);
+        }
+    } // fin else if canons spéciaux
 
     if (this.selected) {
         ctx.beginPath(); ctx.arc(0,0,this.radius+6,0,Math.PI*2);
@@ -798,19 +1072,25 @@ RTS.Game.Squad.prototype._drawAerial = function(ctx,col) {
         if (t==='heli_attack') {
             ctx.fillStyle='#111'; ctx.fillRect(-2,-ah/2-11,4,13);
         }
-    } else if (t==='airstrike') {
-        ctx.fillStyle=col.base;
+    } else if (t==='airstrike'||t==='p47_thunderbolt'||t==='fw190') {
+        // Corps d'avion (silhouette plus détaillée pour les nouvelles unités)
+        var planeCol = t==='fw190' ? '#553300' : col.base;
+        ctx.fillStyle=planeCol;
         ctx.beginPath();
-        ctx.moveTo(0,-20); ctx.lineTo(4,6); ctx.lineTo(0,4); ctx.lineTo(-4,6); ctx.closePath();
+        ctx.moveTo(0,-22); ctx.lineTo(4,8); ctx.lineTo(0,6); ctx.lineTo(-4,8); ctx.closePath();
         ctx.fill(); ctx.strokeStyle=col.accent; ctx.lineWidth=1; ctx.stroke();
-        ctx.fillStyle=col.dark;
-        ctx.beginPath(); ctx.moveTo(0,-4);ctx.lineTo(22,10);ctx.lineTo(14,10);ctx.lineTo(0,1);ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(0,-4);ctx.lineTo(-22,10);ctx.lineTo(-14,10);ctx.lineTo(0,1);ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(0,4);ctx.lineTo(6,12);ctx.lineTo(-6,12);ctx.closePath();
+        // Ailes
+        ctx.fillStyle=t==='fw190'?'#3a2200':col.dark;
+        var ws = t==='p47_thunderbolt' ? 26 : 22;
+        ctx.beginPath(); ctx.moveTo(0,-2);ctx.lineTo(ws,12);ctx.lineTo(ws-8,12);ctx.lineTo(0,3);ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(0,-2);ctx.lineTo(-ws,12);ctx.lineTo(-ws+8,12);ctx.lineTo(0,3);ctx.closePath(); ctx.fill();
+        // Stabilisateurs
+        ctx.beginPath(); ctx.moveTo(0,6);ctx.lineTo(7,14);ctx.lineTo(-7,14);ctx.closePath();
         ctx.fillStyle=col.dark; ctx.fill();
-        ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=2;
-        ctx.beginPath();ctx.moveTo(-4,6);ctx.lineTo(-4,30);ctx.stroke();
-        ctx.beginPath();ctx.moveTo(4,6);ctx.lineTo(4,30);ctx.stroke(); ctx.restore();
+        // Traînée
+        ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(-3,8);ctx.lineTo(-3,32);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(3,8);ctx.lineTo(3,32);ctx.stroke(); ctx.restore();
     }
 
     ctx.restore();
@@ -828,7 +1108,20 @@ RTS.Game.Squad.prototype._drawLabel = function(ctx,col,x,y) {
         jeep:'JEEP', halftrack:'HT', recon_car:'REC', anti_inf_car:'AIC',
         sherman:'M4', panzer:'PZ', tank_destroyer:'TD', heavy_tank:'HVY',
         artillery_truck:'ART',
-        heli_transport:'HT-TR', heli_attack:'HT-AT', airstrike:'AIR'
+        heli_transport:'HT-TR', heli_attack:'HT-AT', airstrike:'AIR',
+        // Nouvelles unités
+        flamethrower:'FLAME', paratrooper:'PARA', officer:'OFF',
+        m10_wolverine:'M10', p47_thunderbolt:'P-47',
+        panzergrenadier:'PzGr', sturmtruppen:'STRM',
+        tiger:'TIGER', stug:'STUG', fw190:'FW190',
+        // Nouvelles alliées
+        ranger:'RGR', combat_engineer:'ENG', commando:'CDO',
+        aa_halftrack:'AA-HT', bofors:'BOFR',
+        m7_priest:'M7', calliope:'CALL',
+        at_gun:'57mm', gun_17pdr:'17PDR',
+        // Nouvelles axis
+        flak88:'FL88', nebelwerfer:'NBEL', fallschirmjager:'FJ',
+        jagdpanther:'JgPz', me262:'Me262'
     };
     var lbl=L[this.type]||this.type.substring(0,4).toUpperCase();
     ctx.fillStyle='rgba(0,0,0,0.65)'; ctx.fillRect(x-13,y-7,26,13);

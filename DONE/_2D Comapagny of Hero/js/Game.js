@@ -93,49 +93,83 @@ window.onload = function() {
 
         var cp = navGrid.capturePoints;
 
+        // Trouver les QG par owner (robuste quelque soit l'ordre des CPs)
+        var alliedHQcp = cp.filter(function(c){ return c.isHQ && c.owner==='allied'; })[0];
+        var axisHQcp   = cp.filter(function(c){ return c.isHQ && c.owner==='axis';   })[0];
+
         // --- Ressources ---
         resources = new RTS.Game.ResourceManager('allied');
         aiRes     = new RTS.Game.ResourceManager('axis');
         resources.syncWithNavGrid(navGrid);
         aiRes.syncWithNavGrid(navGrid);
 
-        // --- Bâtiments ---
-        var alliedHQ = new RTS.Game.Building(cp[0].x, cp[0].y, 'allied', 'hq');
-        alliedHQ.rallyX = cp[0].x + 80; alliedHQ.rallyY = cp[0].y - 50;
+        // --- Bâtiments QG ---
+        var alliedHQ = new RTS.Game.Building(alliedHQcp.x, alliedHQcp.y, 'allied', 'hq');
+        alliedHQ.rallyX = alliedHQcp.x + 80; alliedHQ.rallyY = alliedHQcp.y - 50;
         buildings.push(alliedHQ);
 
-        var axisHQ = new RTS.Game.Building(cp[6].x, cp[6].y, 'axis', 'hq');
-        axisHQ.rallyX = cp[6].x - 80; axisHQ.rallyY = cp[6].y + 50;
+        var axisHQ = new RTS.Game.Building(axisHQcp.x, axisHQcp.y, 'axis', 'hq');
+        axisHQ.rallyX = axisHQcp.x - 80; axisHQ.rallyY = axisHQcp.y + 50;
         buildings.push(axisHQ);
 
+        // --- Avant-postes axis (petites bases à détruire) ---
+        cp.filter(function(c){ return c.isOutpost; }).forEach(function(ocp) {
+            var ob = new RTS.Game.Building(ocp.x, ocp.y, 'axis', 'support');
+            ob.rallyX = ocp.x; ob.rallyY = ocp.y + 70;
+            ob.isBuilt = true; ob.buildProgress = 1.0;
+            buildings.push(ob);
+            // Garnison initiale autour de l'avant-poste
+            squads.push(new RTS.Game.Squad(ocp.x + 40,  ocp.y + 30,  'axis', 'mg'));
+            squads.push(new RTS.Game.Squad(ocp.x - 40,  ocp.y - 20,  'axis', 'panzergrenadier'));
+        });
+
         // --- Escouades alliées initiales ---
-        var hqX = cp[0].x, hqY = cp[0].y;
+        var hqX = alliedHQcp.x, hqY = alliedHQcp.y;
         squads.push(new RTS.Game.Squad(hqX+100, hqY-40,  'allied', 'rifle'));
         squads.push(new RTS.Game.Squad(hqX+140, hqY+20,  'allied', 'rifle'));
         squads.push(new RTS.Game.Squad(hqX+60,  hqY+60,  'allied', 'mg'));
         squads.push(new RTS.Game.Squad(hqX+80,  hqY+100, 'allied', 'pioneer'));
 
+        // --- Bâtiments alliés pré-construits (accès immédiat aux nouvelles unités) ---
+        var barracks = new RTS.Game.Building(hqX + 180, hqY - 80, 'allied', 'barracks');
+        barracks.rallyX = hqX + 250; barracks.rallyY = hqY - 20;
+        barracks.isBuilt = true; barracks.buildProgress = 1.0;
+        buildings.push(barracks);
+
+        var support = new RTS.Game.Building(hqX + 180, hqY + 60, 'allied', 'support');
+        support.rallyX = hqX + 250; support.rallyY = hqY + 120;
+        support.isBuilt = true; support.buildProgress = 1.0;
+        buildings.push(support);
+
+        var motorPool = new RTS.Game.Building(hqX - 120, hqY + 80, 'allied', 'motor_pool');
+        motorPool.rallyX = hqX - 60; motorPool.rallyY = hqY + 150;
+        motorPool.isBuilt = true; motorPool.buildProgress = 1.0;
+        buildings.push(motorPool);
+
         // --- IA Axis ---
         aiCtrl = new RTS.Game.AIController(navGrid, buildings, squads, aiRes);
-        var axX = cp[6].x, axY = cp[6].y;
+        var axX = axisHQcp.x, axY = axisHQcp.y;
         squads.push(new RTS.Game.Squad(axX-100, axY+40, 'axis', 'rifle'));
         squads.push(new RTS.Game.Squad(axX-60,  axY+80, 'axis', 'rifle'));
 
-        // --- UI ---
+        // --- UI : sélectionner la caserne par défaut ---
         prodUI = new RTS.Game.ProductionUI(canvas, function() {
             return resources.get();
         });
-        prodUI.selectBuilding(alliedHQ);
+        prodUI.selectBuilding(barracks); // caserne visible immédiatement
 
         camera.snapTo(hqX, hqY);
 
         // --- Systèmes victoire & objectifs ---
         objectivesPanel = new RTS.Game.ObjectivesPanel(canvas);
+        // BUG 8 FIX — pass live references (squads/buildings arrays),
+        // not snapshots, so VictorySystem always evaluates current state
         victorySystem = new RTS.Game.VictorySystem(
             navGrid, squads, buildings,
             function(winner, condition, finalStats) { gameOver = true; },
             function(objectives) { if (objectivesPanel) objectivesPanel.setObjectives(objectives); }
         );
+        gameOver = false;
         objectivesPanel.setObjectives(victorySystem.getObjectives());
         navGrid.capturePoints.forEach(function(cp) { _prevCPOwners[cp.id] = cp.owner; });
 
@@ -215,7 +249,7 @@ window.onload = function() {
         if (objectivesPanel) { objectivesPanel.update(dt); if(victorySystem) objectivesPanel.setScore(victorySystem.getScore()); }
 
         // ---- RENDER ----
-        mapRenderer.render(ctx, canvas, camera, navGrid);
+        mapRenderer.render(ctx, canvas, camera, navGrid, dt);
 
         ctx.save();
         ctx.scale(camera.zoom, camera.zoom);
@@ -498,10 +532,13 @@ window.onload = function() {
     document.addEventListener('keydown', function(e) {
         keys[e.key]=true;
 
-        if (e.key==='g'||e.key==='G') mapRenderer.showNavGrid=!mapRenderer.showNavGrid;
-        if (e.key==='F1') { mapRenderer.showSectors=!mapRenderer.showSectors; e.preventDefault(); }
+        if (mapRenderer) {
+            if (e.key==='g'||e.key==='G') mapRenderer.showNavGrid=!mapRenderer.showNavGrid;
+            if (e.key==='F1') { mapRenderer.showSectors=!mapRenderer.showSectors; e.preventDefault(); }
+        }
 
-        if ((e.key==='r'||e.key==='R')&&!prodUI.visible) {
+        // BUG 1 FIX — guard prodUI existence before .visible access
+        if ((e.key==='r'||e.key==='R') && !(prodUI&&prodUI.visible)) {
             if (navGrid) for(var y=0;y<navGrid.rows;y++) for(var x=0;x<navGrid.cols;x++) navGrid.grid[y][x].fogState=2;
         }
 
@@ -524,12 +561,26 @@ window.onload = function() {
             }
         }
 
+        // BUG 2 FIX — ability shortcuts for selected squads
+        if (prodUI && !prodUI.selectedBuilding && prodUI.selectedSquads && prodUI.selectedSquads.length > 0) {
+            var sq = prodUI.selectedSquads[0];
+            if (sq && sq.abilities) {
+                var defs = RTS.Game.Squad.ABILITY_DEFS;
+                Object.keys(sq.abilities).forEach(function(id) {
+                    var def = defs[id];
+                    if (def && e.key.toUpperCase() === def.key) {
+                        sq.activateAbility(id, squads);
+                    }
+                });
+            }
+        }
+
         // Raccourcis production / construction
         if (prodUI&&prodUI.visible&&prodUI.selectedBuilding) {
             var btn=prodUI.handleKey(e.key);
             if (btn) {
-                if      (btn.action==='produce'  &&(btn.canAfford!==false)) _tryProduce(btn.prod);
-                else if (btn.action==='construct'&&(btn.canAfford!==false)) _startBuildMode(btn.cons);
+                if      (btn.action==='produce'  &&btn.canAfford) _tryProduce(btn.prod);
+                else if (btn.action==='construct'&&btn.canAfford) _startBuildMode(btn.cons);
             }
         }
 

@@ -41,7 +41,7 @@ RTS.SquadDefs = {
         formationSpread: 20,
         formationType:   "grid",
 
-        attackRange:     80,
+        attackRange:     220,
         attackDamage:    9,
         attackRate:      0.75,
         combatMode:      "burst",
@@ -70,7 +70,7 @@ RTS.SquadDefs = {
         formationSpread: 18,
         formationType:   "grid",
 
-        attackRange:     160,
+        attackRange:     380,
         attackDamage:    120,
         attackRate:      0.22,
         combatMode:      "missile",
@@ -99,7 +99,7 @@ RTS.SquadDefs = {
         formationSpread: 24,
         formationType:   "grid",
 
-        attackRange:     260,
+        attackRange:     600,
         attackDamage:    95,
         attackRate:      0.25,
         combatMode:      "single",
@@ -126,7 +126,7 @@ RTS.SquadDefs = {
         formationSpread: 18,
         formationType:   "grid",
 
-        attackRange:     200,
+        attackRange:     450,
         attackDamage:    110,
         attackRate:      0.28,
         combatMode:      "missile",
@@ -160,7 +160,7 @@ RTS.SquadDefs = {
         formationSpread: 0,
         formationType:   "solo",
 
-        attackRange:     150,
+        attackRange:     340,
         attackDamage:    95,
         attackRate:      0.30,
         combatMode:      "shell",
@@ -190,7 +190,7 @@ RTS.SquadDefs = {
         formationSpread: 0,
         formationType:   "solo",
 
-        attackRange:     110,
+        attackRange:     280,
         attackDamage:    22,
         attackRate:      2.8,
         combatMode:      "machinegun",
@@ -217,7 +217,7 @@ RTS.SquadDefs = {
         formationSpread: 0,
         formationType:   "solo",
 
-        attackRange:     85,
+        attackRange:     200,
         attackDamage:    14,
         attackRate:      3.5,
         combatMode:      "machinegun",
@@ -244,8 +244,8 @@ RTS.SquadDefs = {
         formationSpread: 0,
         formationType:   "solo",
 
-        attackRange:     380,
-        minRange:        100,
+        attackRange:     700,
+        minRange:        200,
         attackDamage:    100,
         attackRate:      0.18,
         combatMode:      "artillery",
@@ -275,8 +275,8 @@ RTS.SquadDefs = {
         formationSpread: 0,
         formationType:   "solo",
 
-        attackRange:     500,
-        minRange:        150,
+        attackRange:     950,
+        minRange:        300,
         attackDamage:    70,
         attackRate:      0.10,
         combatMode:      "artillery",
@@ -312,7 +312,7 @@ RTS.SquadDefs = {
         formationSpread: 0,
         formationType:   "solo",
 
-        attackRange:     140,
+        attackRange:     320,
         attackDamage:    55,
         attackRate:      0.50,
         combatMode:      "rocket",
@@ -343,7 +343,7 @@ RTS.SquadDefs = {
         formationSpread: 0,
         formationType:   "solo",
 
-        attackRange:     90,
+        attackRange:     230,
         attackDamage:    18,
         attackRate:      4.0,
         combatMode:      "machinegun",

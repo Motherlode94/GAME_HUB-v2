@@ -11,9 +11,6 @@ RTS.Engine = RTS.Engine || {};
  *  - Conversions monde ↔ écran
  */
 
-var units = [];
-var lastTime = performance.now();
-
 RTS.Engine.Camera = function(viewWidth, viewHeight, mapWidth, mapHeight) {
 
     // Position courante (interpolée)

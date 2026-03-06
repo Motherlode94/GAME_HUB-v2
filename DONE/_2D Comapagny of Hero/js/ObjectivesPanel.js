@@ -99,9 +99,9 @@ RTS.Game.ObjectivesPanel.prototype.update = function(dt) {
         this._alerts.push(this._alertQueue.shift());
     }
 
-    // Vieillir alertes
+    // Vieillir alertes (decay normalisé : ~4s à tous framerates)
     for (var i = this._alerts.length - 1; i >= 0; i--) {
-        this._alerts[i].life -= this._alerts[i].decay;
+        this._alerts[i].life -= dt * 0.25;
         if (this._alerts[i].life <= 0) this._alerts.splice(i, 1);
     }
 };

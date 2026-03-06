@@ -50,7 +50,7 @@ RTS.Game.Map.MapRenderer = function(imagePath, onLoadCallback) {
     this.image.onerror = function() {
         // Image absente — on utilise une taille par défaut et un terrain procédural
         console.warn('[MapRenderer] Image non trouvée, terrain procédural utilisé.');
-        if (onLoadCallback) onLoadCallback(2048, 1536);
+        if (onLoadCallback) onLoadCallback(3840, 2880);
     };
 
     this.image.src = imagePath;
@@ -67,8 +67,8 @@ RTS.Game.Map.MapRenderer = function(imagePath, onLoadCallback) {
  * @param {RTS.Engine.Camera}        camera
  * @param {RTS.Game.Map.NavGrid}     navGrid  (peut être null pendant le chargement)
  */
-RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGrid) {
-    this.time += 0.016;
+RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGrid, dt) {
+    this.time += (dt !== undefined ? dt : 0.016);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -114,7 +114,7 @@ RTS.Game.Map.MapRenderer.prototype._renderTerrain = function(ctx, canvas) {
         ctx.fillRect(0, 0, this.image.width, this.image.height);
     } else {
         // Terrain procédural si l'image est absente
-        this._renderProceduralTerrain(ctx, 2048, 1536);
+        this._renderProceduralTerrain(ctx, 3840, 2880);
     }
 };
 
@@ -421,6 +421,18 @@ RTS.Game.Map.MapRenderer.prototype._drawCapturePoint = function(ctx, cp, camera)
     } else if (cp.type === 'vp') {
         // Étoile de victoire
         this._drawStar(ctx, x, y, 5, iconR * 0.85, iconR * 0.38, palette.border);
+
+    } else if (cp.type === 'outpost') {
+        // Avant-poste ennemi — croix de visée rouge
+        ctx.strokeStyle = palette.border;
+        ctx.lineWidth   = 2.5;
+        ctx.beginPath(); ctx.moveTo(x - iconR*0.7, y); ctx.lineTo(x + iconR*0.7, y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, y - iconR*0.7); ctx.lineTo(x, y + iconR*0.7); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x, y, iconR*0.4, 0, Math.PI*2);
+        ctx.strokeStyle = palette.border; ctx.lineWidth = 1.5; ctx.stroke();
+        // Texte d'alerte
+        ctx.fillStyle = palette.text; ctx.font = 'bold 7px "Courier New"';
+        ctx.fillText('⚠', x, y + iconR * 0.72);
     }
 
     // --- Barre de progression de capture ---

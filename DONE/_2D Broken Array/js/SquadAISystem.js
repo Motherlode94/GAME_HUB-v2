@@ -50,10 +50,11 @@ RTS.SquadAISystem = {
                 return;
             }
 
-            if (closestD > range * 0.88) {
+            // Avancer si hors portée, s'arrêter dès qu'on peut tirer (92%)
+            if (closestD > range * 0.92) {
                 red.target = { x: closest.x, y: closest.y };
             } else {
-                red.target = null;
+                red.target = null;   // en portée → on tire, on ne bouge plus
             }
         });
     }

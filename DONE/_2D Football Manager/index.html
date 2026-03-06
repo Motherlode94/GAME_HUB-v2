@@ -4,17 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚽ Awakening Football - Le foot dépasse ses limites</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel='stylesheet' href='../css/game-shell.css'>
 </head>
 <body>
 
     <div class="background-animation"></div>
 
-    <!-- Bouton Retour Global -->
     <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
         <span class="back-icon">←</span>
         <span class="back-text">Retour</span>
+    </button>
+
+    <button class="btn-sound" id="soundToggle" title="Son on/off">
+        <span id="soundIcon">🔊</span>
     </button>
 
     <header>
@@ -29,7 +34,7 @@
                 <span class="stat-label">Équipes</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number">4</span>
+                <span class="stat-number">5</span>
                 <span class="stat-label">Modes</span>
             </div>
             <div class="stat-item">
@@ -60,8 +65,7 @@
                 <button class="mode-btn" data-mode="league">
                     <span class="mode-icon">🏅</span>
                     <span class="mode-name">Ligue</span>
-                    <span class="mode-desc">Compétition complète</span>
-                    <span class="coming-soon">Bientôt</span>
+                    <span class="mode-desc">Saison complète avec classement</span>
                 </button>
                 <button class="mode-btn" data-mode="career-player">
                     <span class="mode-icon">⭐</span>
@@ -85,16 +89,6 @@
         <p>Awakening Football © 2025 | Propulsé par les Éveils</p>
     </footer>
 
-    <!-- ============================= -->
-    <!-- SCRIPTS DU CATALOGUE -->
-    <!-- ============================= -->
-    <script src="../js/config.js"></script>
-    <script src="../js/data.js"></script>
-    <script src="../js/storage.js"></script>
-    <script src="../js/scores.js"></script>
-
     <script src="script.js"></script>
-
-    <script src='../js/game-shell.js'></script>
 </body>
 </html>

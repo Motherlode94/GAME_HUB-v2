@@ -52,7 +52,13 @@ RTS.Game.AIController.prototype._getPhase = function() {
 
 RTS.Game.AIController.prototype._spawnInterval = function() {
     var p = this._getPhase();
-    return p === 1 ? 22 : p === 2 ? 16 : 12;
+    return p === 1 ? 20 : p === 2 ? 14 : 10;
+};
+
+// Nombre minimum d'escouades en garnison selon la phase
+RTS.Game.AIController.prototype._garrisonMin = function() {
+    var p = this._getPhase();
+    return p === 1 ? 2 : p === 2 ? 1 : 1;
 };
 
 // ---------------------------------------------------------------------------
@@ -100,15 +106,18 @@ RTS.Game.AIController.prototype._spawnUnit = function() {
 
     // Choix de l'unité selon la phase
     var pool;
-    if (phase===1)      pool=['rifle','rifle','rifle','mg'];
-    else if (phase===2) pool=['rifle','rifle','mg','mg','halftrack'];
-    else                pool=['rifle','mg','mg','halftrack','sherman','heli_attack'];
+    if (phase===1)      pool=['rifle','rifle','rifle','mg','sturmtruppen','sturmtruppen','panzergrenadier'];
+    else if (phase===2) pool=['panzergrenadier','panzergrenadier','mg','mg','halftrack','sturmtruppen','fallschirmjager','nebelwerfer','stug'];
+    else                pool=['panzergrenadier','mg','halftrack','stug','tiger','jagdpanther','fallschirmjager','flak88','nebelwerfer','fw190','me262'];
 
     var type = pool[Math.floor(Math.random()*pool.length)];
 
     // Limiter les véhicules lourds si pas de bâtiment
-    if ((type==='sherman'||type==='halftrack')&&!this._hasBuilding('motor_pool')&&!this._hasBuilding('tank_depot')) type='mg';
-    if (type==='heli_attack'&&!this._hasBuilding('airfield')) type='mg';
+    if ((type==='stug'||type==='halftrack'||type==='jagdpanther')&&!this._hasBuilding('motor_pool')&&!this._hasBuilding('tank_depot')) type='mg';
+    if ((type==='tiger')&&!this._hasBuilding('tank_depot')) type='panzergrenadier';
+    if ((type==='heli_attack'||type==='fw190'||type==='me262')&&!this._hasBuilding('airfield')) type='mg';
+    if ((type==='flak88'||type==='nebelwerfer')&&!this._hasBuilding('support')) type='panzergrenadier';
+    if (type==='fallschirmjager'&&phase<2) type='sturmtruppen';
 
     var jitter=function(){return(Math.random()-.5)*70;};
     var sq=new RTS.Game.Squad(hq.x+jitter(),hq.y+60+jitter(),'axis',type);
@@ -156,7 +165,7 @@ RTS.Game.AIController.prototype._think = function() {
         if (!isIdle) return;
 
         // Forcer garnison si sous le minimum
-        if (garrisonCount<self._minGarrison&&hq) {
+        if (garrisonCount<self._garrisonMin()&&hq) {
             var path=self.navGrid.findPath(sq.x,sq.y,hq.x+(Math.random()-.5)*80,hq.y+(Math.random()-.5)*80);
             if (path.length){sq.path=path;sq.pathIndex=0;garrisonCount++;return;}
         }

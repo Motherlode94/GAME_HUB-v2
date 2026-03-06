@@ -1,18 +1,14 @@
 window.RTS = window.RTS || {};
 
 /**
- * WaveSystem
+ * WaveSystem — Vagues progressives avec flanc multiple, vagues rush et boss.
  *
- * Vagues 1-2  : riflemen uniquement
- * Vagues 3-4  : + sniper_team, at_team, manpads
- * Vague  5    : + matv
- * Vague  6    : + bradley
- * Vagues 7+   : + m1a2, paladin
- * Vagues 9+   : + mlrs, apache
+ * Niveau : toutes les 8 vagues → écran "Niveau terminé"
+ * Vague  3   : vague rush (+60% unités)
+ * Vague  5   : boss wave (véhicules lourds garantis, spawn multi-flancs)
+ * Vague  8   : boss final niveau (+ apache/MLRS garantis)
  *
- * Niveau : toutes les 5 vagues nettoyées → écran "Niveau terminé"
- * game.level  : niveau courant (initialisé à 1 dans main.js)
- * difficulty  : "easy" | "normal" | "hard" — affecte prepTime, cooldown, count, HP
+ * difficulty : "easy" | "normal" | "hard"
  */
 RTS.WaveSystem = {
 
@@ -21,27 +17,28 @@ RTS.WaveSystem = {
     _waveInLevel: 0,
     _levelDone:   false,
 
-    // ── Configuration par difficulté ──────────────────────────────────────────
+    // ── Config par difficulté ─────────────────────────────────────────────────
     DIFF: {
-        easy:   { prepTime: 120, cooldown: 40, squadCount: 3, hpScale: 0.60, label: "FACILE"  },
-        normal: { prepTime: 60,  cooldown: 20, squadCount: 5, hpScale: 1.00, label: "NORMAL"  },
-        hard:   { prepTime: 35,  cooldown: 10, squadCount: 8, hpScale: 1.55, label: "DIFFICILE"}
+        easy:   { prepTime: 90,  cooldown: 30, squadCount: 4,  hpScale: 0.70, label: "FACILE"    },
+        normal: { prepTime: 55,  cooldown: 14, squadCount: 8,  hpScale: 1.10, label: "NORMAL"    },
+        hard:   { prepTime: 30,  cooldown: 7,  squadCount: 14, hpScale: 1.80, label: "DIFFICILE" }
     },
 
-    // Définie avant reset() via RTS.WaveSystem.difficulty = "..."
     difficulty: "normal",
 
+    // Catalogue : minWave abaissé pour accélérer l'escalade
     CATALOG: [
         { type: "riflemen",    cost: 1, minWave: 1 },
-        { type: "sniper_team", cost: 2, minWave: 3 },
-        { type: "at_team",     cost: 2, minWave: 3 },
-        { type: "manpads",     cost: 2, minWave: 4 },
-        { type: "matv",        cost: 2, minWave: 5 },
-        { type: "bradley",     cost: 3, minWave: 6 },
-        { type: "m1a2",        cost: 5, minWave: 7 },
-        { type: "paladin",     cost: 4, minWave: 7 },
-        { type: "mlrs",        cost: 5, minWave: 9 },
-        { type: "apache",      cost: 4, minWave: 9 }
+        { type: "at_team",     cost: 2, minWave: 2 },
+        { type: "sniper_team", cost: 2, minWave: 2 },
+        { type: "manpads",     cost: 2, minWave: 3 },
+        { type: "matv",        cost: 2, minWave: 3 },
+        { type: "bradley",     cost: 3, minWave: 4 },
+        { type: "m1a2",        cost: 5, minWave: 5 },
+        { type: "paladin",     cost: 4, minWave: 5 },
+        { type: "mlrs",        cost: 5, minWave: 7 },
+        { type: "apache",      cost: 4, minWave: 7 },
+        { type: "blackhawk",   cost: 3, minWave: 6 }
     ],
 
     reset: function() {
@@ -60,7 +57,7 @@ RTS.WaveSystem = {
 
         var cfg = this._cfg();
 
-        // ── Défaite ──────────────────────────────────────────────────────────
+        // ── Défaite : plus de squads ET plus de bâtiments bleus ──────────────
         var blues = game.squads.filter(function(s) {
             return s.team === "blue" &&
                    s.def && s.def.combatMode !== "harvest" &&
@@ -73,7 +70,7 @@ RTS.WaveSystem = {
             return;
         }
 
-        // ── Phase de préparation ─────────────────────────────────────────────
+        // ── Phase de préparation ──────────────────────────────────────────────
         if (!this._prepDone) {
             this._timer += delta;
             var rem = Math.ceil(cfg.prepTime - this._timer);
@@ -86,7 +83,7 @@ RTS.WaveSystem = {
             return;
         }
 
-        // ── Entre vagues ─────────────────────────────────────────────────────
+        // ── Entre vagues ──────────────────────────────────────────────────────
         var reds = game.squads.filter(function(s) { return s.team === "red" && !s.isDead(); });
 
         if (reds.length === 0) {
@@ -106,60 +103,110 @@ RTS.WaveSystem = {
     _launchWave: function(game) {
         this._waveInLevel++;
 
-        if (this._waveInLevel > 5) {
+        // Niveau terminé après 8 vagues
+        if (this._waveInLevel > 8) {
             this._levelDone = true;
             RTS.WaveSystem._showLevelComplete(game);
             return;
         }
 
         game.wave++;
-        this._spawnWave(game);
+
+        var isRush = (this._waveInLevel % 3 === 0);  // vague 3, 6 → rush
+        var isBoss = (this._waveInLevel === 5 || this._waveInLevel === 8); // boss
+
+        this._spawnWave(game, isRush, isBoss);
 
         var cfg = this._cfg();
+        var tag = isBoss ? "⚠ VAGUE BOSS" : (isRush ? "⚡ VAGUE RUSH" : "— VAGUE");
         RTS.WaveSystem._notif(
-            "— VAGUE " + this._waveInLevel + "/5  (Niv. " + (game.level || 1) +
+            tag + " " + this._waveInLevel + "/8  (Niv. " + (game.level || 1) +
             " · " + cfg.label + ") —", "1"
         );
-        setTimeout(function() { RTS.WaveSystem._notif("", "0"); }, 3000);
+        setTimeout(function() { RTS.WaveSystem._notif("", "0"); }, 3500);
 
         var el = document.getElementById("waveNum");
-        if (el) el.textContent = "N" + (game.level || 1) + " · " + this._waveInLevel + "/5";
+        if (el) el.textContent = "N" + (game.level || 1) + " · " + this._waveInLevel + "/8";
     },
 
-    _spawnWave: function(game) {
+    _spawnWave: function(game, isRush, isBoss) {
         var w    = game.wave;
         var lvl  = game.level || 1;
         var cfg  = this._cfg();
-        var count = cfg.squadCount;
+
+        // Nombre d'unités : rush +60%, boss +80%, normal +0%
+        var baseCount = cfg.squadCount + Math.floor((w - 1) * 0.6) + (lvl - 1) * 2;
+        var count = isRush ? Math.round(baseCount * 1.6)
+                  : isBoss ? Math.round(baseCount * 1.8)
+                  : baseCount;
 
         var avail = this.CATALOG.filter(function(e) { return e.minWave <= w; });
 
-        for (var i = 0; i < count; i++) {
-            var pool;
+        // HP multiplicateur — escalade plus agressive
+        var hpMult = Math.min(
+            cfg.hpScale * (1 + (w - 1) * 0.13 + (lvl - 1) * 0.22),
+            cfg.hpScale * 5.5
+        );
 
-            if (w <= 3) {
-                pool = avail.filter(function(e) { return e.cost <= 2; });
-            } else if (w <= 6) {
-                pool = (i >= 3) ? avail : avail.filter(function(e) { return e.cost <= 2; });
-            } else {
+        // ── Points de spawn ──
+        // Flancs possibles : droite (toujours), puis gauche/haut/bas selon vague
+        var flanks = [ { side: "right" } ];
+        if (w >= 4)  flanks.push({ side: "bottom" });
+        if (w >= 6)  flanks.push({ side: "top" });
+        if (isBoss)  flanks.push({ side: "left" });   // boss attaque de partout
+
+        for (var i = 0; i < count; i++) {
+            // Choix du pool selon vague
+            var pool;
+            if (isBoss) {
+                // Boss wave : au moins la moitié en unités lourdes
                 var heavy = avail.filter(function(e) { return e.cost >= 3; });
-                pool = (i < 3 && heavy.length > 0) ? heavy : avail;
+                pool = (i < Math.ceil(count / 2) && heavy.length > 0) ? heavy : avail;
+            } else if (w <= 2) {
+                pool = avail.filter(function(e) { return e.cost <= 1; });
+            } else if (w <= 4) {
+                pool = (i >= Math.floor(count * 0.6))
+                    ? avail
+                    : avail.filter(function(e) { return e.cost <= 2; });
+            } else {
+                var heavyPool = avail.filter(function(e) { return e.cost >= 3; });
+                pool = (i < Math.ceil(count * 0.4) && heavyPool.length > 0) ? heavyPool : avail;
             }
 
             if (!pool || pool.length === 0) pool = avail;
 
             var entry = pool[Math.floor(Math.random() * pool.length)];
-            var x = RTS.WORLD_W - 120 - Math.random() * 250;
-            var y = 100 + (i / count) * (RTS.WORLD_H - 200) + (Math.random() - 0.5) * 80;
+
+            // Flanc aléatoire parmi les flancs disponibles
+            var flank = flanks[Math.floor(Math.random() * flanks.length)];
+            var x, y;
+            var margin = 120;
+
+            switch (flank.side) {
+                case "right":
+                    x = RTS.WORLD_W - margin - Math.random() * 200;
+                    y = 80 + Math.random() * (RTS.WORLD_H - 160);
+                    break;
+                case "left":
+                    x = margin + Math.random() * 200;
+                    y = 80 + Math.random() * (RTS.WORLD_H - 160);
+                    break;
+                case "top":
+                    x = 200 + Math.random() * (RTS.WORLD_W - 400);
+                    y = margin + Math.random() * 100;
+                    break;
+                case "bottom":
+                    x = 200 + Math.random() * (RTS.WORLD_W - 400);
+                    y = RTS.WORLD_H - margin - Math.random() * 100;
+                    break;
+                default:
+                    x = RTS.WORLD_W - margin - Math.random() * 200;
+                    y = 80 + Math.random() * (RTS.WORLD_H - 160);
+            }
 
             var sq = new RTS.Squad(x, y, "red", entry.type);
             if (!sq.members || sq.members.length === 0) continue;
 
-            // HP croissant : difficulté × vague × niveau
-            var hpMult = Math.min(
-                cfg.hpScale * (1 + (w - 1) * 0.08 + (lvl - 1) * 0.15),
-                cfg.hpScale * 4.0
-            );
             sq.members.forEach(function(m) {
                 m.maxHp = m.hp = Math.round(m.maxHp * hpMult);
             });
@@ -168,20 +215,19 @@ RTS.WaveSystem = {
         }
     },
 
-    // ── Forcer la prochaine vague (cheat) ─────────────────────────────────────
+    // ── Forcer la prochaine vague (cheat) ────────────────────────────────────
     forceNextWave: function(game) {
         if (!this._prepDone) {
             this._prepDone = true;
             this._timer    = 0;
         }
-        // Tuer tous les rouges restants
         game.squads.forEach(function(s) {
             if (s.team === "red") s.members.forEach(function(m) { m.dead = true; m.hp = 0; });
         });
         this._timer = this._cfg().cooldown + 1;
     },
 
-    // ── UI helpers ───────────────────────────────────────────────────────────
+    // ── UI helpers ────────────────────────────────────────────────────────────
 
     _notif: function(txt, opacity) {
         var el = document.getElementById("waveNotif");
@@ -201,8 +247,8 @@ RTS.WaveSystem = {
     _showLevelComplete: function(game) {
         var lvl = game.level || 1;
         document.getElementById("bannerTitle").textContent = "NIVEAU " + lvl + " TERMINÉ";
-        document.getElementById("bannerSub").textContent   =
-            "5 vagues repoussées · Niveau " + (lvl + 1) + " disponible";
+        document.getElementById("bannerSub").textContent =
+            "8 vagues repoussées · Niveau " + (lvl + 1) + " disponible";
 
         var nxt = document.getElementById("nextLevelBtn");
         if (nxt) {
@@ -223,9 +269,10 @@ RTS.WaveSystem = {
         game.projectiles = [];
         game.particles   = [];
         game.craters     = [];
-        game.resources.gold += 300;
-        game.resources.fuel += 150;
-        game.resources.ammo += 100;
+        // Bonus de ressources à chaque niveau
+        game.resources.gold += 400 + (game.level - 1) * 100;
+        game.resources.fuel += 200 + (game.level - 1) * 50;
+        game.resources.ammo += 150 + (game.level - 1) * 50;
         RTS.WaveSystem.reset();
         RTS.WaveSystem._notif("NIVEAU " + game.level + " — PRÉPAREZ-VOUS !", "1");
         setTimeout(function() { RTS.WaveSystem._notif("", "0"); }, 4000);

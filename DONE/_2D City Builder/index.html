@@ -22,15 +22,18 @@
       <h1>CITY<br>BUILDER</h1>
       <p>Construisez, développez et gérez votre métropole. Gérez l'énergie, l'eau, et le bonheur de vos citoyens.</p>
       <div class="welcome-stats">
-        <div class="ws"><span>🏗️</span>11 bâtiments</div>
-        <div class="ws"><span>⚡</span>Énergie & Eau</div>
-        <div class="ws"><span>📊</span>Économie</div>
+        <div class="ws"><span>🏗️</span>19 bâtiments</div>
+        <div class="ws"><span>🌦️</span>Météo & Saisons</div>
+        <div class="ws"><span>🎲</span>Événements</div>
+        <div class="ws"><span>🗺️</span>Terrain varié</div>
+        <div class="ws"><span>🏆</span>Missions</div>
+        <div class="ws"><span>💾</span>Sauvegarde</div>
       </div>
       <button id="btn-start" onclick="startGame()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
         Commencer
       </button>
-      <div class="welcome-hint">Clavier : 1-9 pour les outils · Molette pour zoomer</div>
+      <div class="welcome-hint">Clavier : 1-9 pour les outils · Molette pour zoomer · Ctrl+S pour sauvegarder</div>
     </div>
   </div>
 
@@ -44,6 +47,7 @@
         <svg class="logo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="10" width="6" height="11" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="15" y="7" width="6" height="14" rx="1"/></svg>
         <span>CITY BUILDER</span>
       </div>
+      <!-- Rank badge injected by missions.js -->
     </div>
     <div class="topbar-stats" id="topbar-stats">
       <div class="hud-stat" data-type="money">
@@ -81,8 +85,11 @@
           <div class="hud-label">Eau</div>
         </div>
       </div>
+      <!-- Weather widget injected by events.js -->
     </div>
     <div class="topbar-right">
+      <!-- Save button injected by savegame.js -->
+      <!-- Journal button injected by journal.js -->
       <div id="speed-controls">
         <button class="spd-btn" onclick="setSpeed(0)" title="Pause">⏸</button>
         <button class="spd-btn active" onclick="setSpeed(1)" title="×1">▶</button>
@@ -141,6 +148,7 @@
       </div>
       <canvas id="minimap-canvas" width="180" height="180"></canvas>
     </div>
+    <!-- Mission panel injected by missions.js -->
   </aside>
 
   <!-- ═══ VIEWPORT ═══ -->
@@ -200,6 +208,39 @@
         <span class="t-icon">🗑️</span><span class="t-label">Démolir</span><span class="t-cost">—</span>
         <span class="t-key">D</span>
       </button>
+      <div class="tool-divider"></div>
+      <button class="tool-btn" onclick="selectTool('hospital',this)" data-tool="hospital">
+        <span class="t-icon">🏥</span><span class="t-label">Hôpital</span><span class="t-cost">800$</span>
+        <span class="new-badge">NEW</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('stadium',this)" data-tool="stadium">
+        <span class="t-icon">🏟️</span><span class="t-label">Stade</span><span class="t-cost">1200$</span>
+        <span class="new-badge">NEW</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('market',this)" data-tool="market">
+        <span class="t-icon">🏬</span><span class="t-label">Marché</span><span class="t-cost">450$</span>
+        <span class="new-badge">NEW</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('factory',this)" data-tool="factory">
+        <span class="t-icon">🏭</span><span class="t-label">Usine</span><span class="t-cost">700$</span>
+        <span class="new-badge">NEW</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('solar',this)" data-tool="solar">
+        <span class="t-icon">☀️</span><span class="t-label">Solaire</span><span class="t-cost">900$</span>
+        <span class="new-badge">NEW</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('windmill',this)" data-tool="windmill">
+        <span class="t-icon">💨</span><span class="t-label">Éolienne</span><span class="t-cost">600$</span>
+        <span class="new-badge">NEW</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('library',this)" data-tool="library">
+        <span class="t-icon">📚</span><span class="t-label">Biblio</span><span class="t-cost">500$</span>
+        <span class="new-badge">NEW</span>
+      </button>
+      <button class="tool-btn" onclick="selectTool('airport',this)" data-tool="airport">
+        <span class="t-icon">✈️</span><span class="t-label">Aéroport</span><span class="t-cost">2000$</span>
+        <span class="new-badge">NEW</span>
+      </button>
     </div>
   </nav>
 
@@ -212,6 +253,25 @@
   <!-- Notifications container -->
   <div id="notif-container"></div>
 
+  <!--
+    ═══════════════════════════════════════
+    SCRIPTS — ordre important :
+      1. script.js   → moteur principal
+      2. terrain.js  → terrain procédural (patch buildAt)
+      3. events.js   → météo, événements, nouveaux bâtiments
+      4. missions.js → objectifs & rang
+      5. journal.js  → historique & graphiques
+      6. savegame.js → sauvegarde / chargement
+    ═══════════════════════════════════════
+  -->
   <script src="js/script.js"></script>
+  <script src="js/terrain.js"></script>
+  <script src="js/events.js"></script>
+  <script src="js/missions.js"></script>
+  <script src="js/journal.js"></script>
+  <script src="js/vehicles.js"></script>
+  <script src="js/systems.js"></script>
+  <script src="js/progression.js"></script>
+  <script src="js/savegame.js"></script>
 </body>
 </html>

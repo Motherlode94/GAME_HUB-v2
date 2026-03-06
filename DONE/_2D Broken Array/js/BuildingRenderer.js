@@ -137,20 +137,47 @@ RTS.BuildingRenderer = {
     },
 
     _detail_tower: function(ctx, b, hx, hy, w, h, isBlue, def) {
-        // Corps étroit, hauteur double
-        // Canon orienté vers l'extérieur
-        ctx.fillStyle = isBlue ? "#0a0a20" : "#200a0a";
-        ctx.fillRect(hx+4, hy+20, w-8, h-20);
-        ctx.strokeStyle = def.stroke; ctx.lineWidth = 1;
-        ctx.strokeRect(hx+4, hy+20, w-8, h-20);
-        // Tourelle haute
-        ctx.fillStyle = "#0a0a14"; ctx.fillRect(hx, hy, w, 22);
-        ctx.strokeStyle = def.stroke; ctx.lineWidth = 1.5; ctx.strokeRect(hx, hy, w, 22);
-        // Canon
-        ctx.fillStyle = "#555"; ctx.fillRect(b.x-2, hy-14, 4, 18);
-        ctx.font = "bold 8px 'Courier New'"; ctx.textAlign = "center";
-        ctx.fillStyle = def.stroke; ctx.fillText("TW", b.x, hy+14); ctx.textAlign = "left";
-    },
+    // Socle de la tourelle
+    ctx.fillStyle = isBlue ? "#0a0a20" : "#200a0a";
+    ctx.fillRect(hx + 4, hy + 20, w - 8, h - 20);
+    ctx.strokeStyle = def.stroke; ctx.lineWidth = 1;
+    ctx.strokeRect(hx + 4, hy + 20, w - 8, h - 20);
+
+    // Tourelle haute (tête rotative)
+    ctx.fillStyle = "#0a0a14"; ctx.fillRect(hx, hy, w, 22);
+    ctx.strokeStyle = def.stroke; ctx.lineWidth = 1.5; ctx.strokeRect(hx, hy, w, 22);
+
+    // Canon orienté vers la cible (b._aimAngle) — ou vers le haut par défaut
+    var angle = (b._aimAngle !== undefined) ? b._aimAngle : -Math.PI / 2;
+    var cannonLen = 18;
+    ctx.save();
+    ctx.translate(b.x, hy + 11);   // centre de la tourelle
+    ctx.rotate(angle);
+    ctx.fillStyle = "#888";
+    ctx.fillRect(0, -2, cannonLen, 4);
+    // Cache-flamme
+    ctx.fillStyle = "#aaa";
+    ctx.fillRect(cannonLen - 3, -3, 5, 6);
+    // Tube secondaire (mitrailleuse coaxiale)
+    ctx.fillStyle = "#666";
+    ctx.fillRect(0, 3, cannonLen - 4, 2);
+    ctx.restore();
+
+    // Anneau de rotation
+    ctx.beginPath(); ctx.arc(b.x, hy + 11, 7, 0, Math.PI * 2);
+    ctx.fillStyle = "#1a1a2a"; ctx.fill();
+    ctx.strokeStyle = def.stroke; ctx.lineWidth = 1; ctx.stroke();
+
+    // Label
+    ctx.font = "bold 8px 'Courier New'"; ctx.textAlign = "center";
+    ctx.fillStyle = def.stroke; ctx.fillText("TW", b.x, hy + 14); ctx.textAlign = "left";
+
+    // Indicateur brouillage (EventSystem)
+    if (RTS.EventSystem && RTS.EventSystem.isTowerJammed && RTS.EventSystem.isTowerJammed()) {
+        ctx.font = "9px 'Courier New'"; ctx.textAlign = "center";
+        ctx.fillStyle = "#e74c3c"; ctx.fillText("📵", b.x, hy - 4); ctx.textAlign = "left";
+    }
+},
 
     _detail_mine: function(ctx, b, hx, hy, w, h, isBlue, def) {
         // Toit en pente

@@ -47,40 +47,86 @@ RTS.Game.Map.NavGrid.prototype._defineSectors = function() {
     var mh = this.mapHeight;
     var mapId = this.mapId || 1;
 
+    // Helper pour créer un CP standard
+    function cp(id, name, sName, px, py, type, owner, prog, rType, rRate, hq, outpost) {
+        return { id:id, name:name, shortName:sName,
+                 x:mw*px, y:mh*py, type:type, owner:owner,
+                 captureProgress:prog, captureRate:0,
+                 resourceType:rType, resourceRate:rRate,
+                 isHQ:!!hq, isOutpost:!!outpost };
+    }
+
     if (mapId === 1) {
-        // MAP 01 — CARENTAN : zone urbaine, combat de rues
+        // MAP 01 — CARENTAN : diagonale bas-gauche → haut-droite
+        // Espacement minimum ~0.18 entre chaque point
         this.capturePoints = [
-            { id:0, name:'QG Allié',       shortName:'QG',   x:mw*0.10, y:mh*0.87, type:'hq',        owner:'allied', captureProgress:100, captureRate:0, resourceType:null,        resourceRate:0,  isHQ:true  },
-            { id:1, name:'Munitions A',     shortName:'MUN',  x:mw*0.27, y:mh*0.74, type:'munitions',  owner:'allied', captureProgress:100, captureRate:0, resourceType:'munitions',  resourceRate:10, isHQ:false },
-            { id:2, name:'Carburant A',     shortName:'FUEL', x:mw*0.20, y:mh*0.46, type:'fuel',       owner:'neutral',captureProgress:0,   captureRate:0, resourceType:'fuel',       resourceRate:5,  isHQ:false },
-            { id:3, name:'Point de Victoire',shortName:'VP',  x:mw*0.50, y:mh*0.50, type:'vp',         owner:'neutral',captureProgress:0,   captureRate:0, resourceType:null,        resourceRate:0,  isHQ:false },
-            { id:4, name:'Carburant B',     shortName:'FUEL', x:mw*0.80, y:mh*0.54, type:'fuel',       owner:'neutral',captureProgress:0,   captureRate:0, resourceType:'fuel',       resourceRate:5,  isHQ:false },
-            { id:5, name:'Munitions B',     shortName:'MUN',  x:mw*0.73, y:mh*0.26, type:'munitions',  owner:'axis',   captureProgress:100, captureRate:0, resourceType:'munitions',  resourceRate:10, isHQ:false },
-            { id:6, name:'QG Axis',         shortName:'QG',   x:mw*0.90, y:mh*0.13, type:'hq',        owner:'axis',   captureProgress:100, captureRate:0, resourceType:null,        resourceRate:0,  isHQ:true  }
+            cp( 0,'QG Allié',         'QG',   0.04,0.94,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',          'QG',   0.96,0.06,'hq',        'axis',   100,null,        0, true,  false),
+            // Zone alliée
+            cp( 2,'Dépôt Munitions',  'MUN',  0.12,0.76,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Carburant Ouest',  'FUEL', 0.05,0.52,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Quart allié
+            cp( 4,'Église',           'EGL',  0.24,0.34,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 7,'Marché',           'MRC',  0.18,0.60,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            // Centre
+            cp( 5,'Carrefour VP',     'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
+            // Quart axis
+            cp( 8,'Usine Nord',       'USN',  0.76,0.28,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            cp( 6,'Gare Est',         'GAR',  0.82,0.65,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            // Zone axis
+            cp( 9,'Carburant Est',    'FUEL', 0.95,0.46,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            cp(10,'Arsenal Axis',     'MUN',  0.88,0.22,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Avant-postes axis (zones avancées bien distinctes)
+            cp(11,'Avant-Poste Sud',  'APO',  0.62,0.78,'outpost',   'axis',      0, null,       0, false, true),
+            cp(12,'Avant-Poste Nord', 'APO',  0.68,0.16,'outpost',   'axis',      0, null,       0, false, true)
         ];
 
     } else if (mapId === 2) {
-        // MAP 02 — MARAIS DU NORD : couloirs étroits, centre contesté
+        // MAP 02 — MARAIS DU NORD : QG haut et bas, flancs larges
         this.capturePoints = [
-            { id:0, name:'QG Allié',        shortName:'QG',   x:mw*0.50, y:mh*0.92, type:'hq',        owner:'allied', captureProgress:100, captureRate:0, resourceType:null,        resourceRate:0,  isHQ:true  },
-            { id:1, name:'Dépôt Sud',        shortName:'MUN',  x:mw*0.25, y:mh*0.75, type:'munitions',  owner:'allied', captureProgress:100, captureRate:0, resourceType:'munitions',  resourceRate:10, isHQ:false },
-            { id:2, name:'Passage Ouest',    shortName:'FUEL', x:mw*0.18, y:mh*0.50, type:'fuel',       owner:'neutral',captureProgress:0,   captureRate:0, resourceType:'fuel',       resourceRate:5,  isHQ:false },
-            { id:3, name:'Village Central',  shortName:'VP',   x:mw*0.50, y:mh*0.48, type:'vp',         owner:'neutral',captureProgress:0,   captureRate:0, resourceType:null,        resourceRate:0,  isHQ:false },
-            { id:4, name:'Passage Est',      shortName:'FUEL', x:mw*0.82, y:mh*0.50, type:'fuel',       owner:'neutral',captureProgress:0,   captureRate:0, resourceType:'fuel',       resourceRate:5,  isHQ:false },
-            { id:5, name:'Dépôt Nord',       shortName:'MUN',  x:mw*0.75, y:mh*0.25, type:'munitions',  owner:'axis',   captureProgress:100, captureRate:0, resourceType:'munitions',  resourceRate:10, isHQ:false },
-            { id:6, name:'QG Axis',          shortName:'QG',   x:mw*0.50, y:mh*0.08, type:'hq',        owner:'axis',   captureProgress:100, captureRate:0, resourceType:null,        resourceRate:0,  isHQ:true  }
+            cp( 0,'QG Allié',         'QG',   0.50,0.96,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',          'QG',   0.50,0.04,'hq',        'axis',   100,null,        0, true,  false),
+            // Flanc gauche allié
+            cp( 2,'Dépôt Sud-Ouest',  'MUN',  0.12,0.82,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Passage Ouest',    'FUEL', 0.05,0.58,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Centre-bas
+            cp( 7,'Croisée Sud',      'CRS',  0.30,0.70,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            cp( 6,'Marécage',         'MRC',  0.14,0.36,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            // Centre exact
+            cp( 5,'Village VP',       'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
+            // Centre-haut
+            cp( 4,'Pont Nord',        'PNT',  0.50,0.26,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 8,'Verger Est',       'VRG',  0.86,0.36,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            // Flanc droit axis
+            cp( 9,'Passage Est',      'FUEL', 0.95,0.58,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            cp(10,'Dépôt Nord-Est',   'MUN',  0.88,0.18,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Avant-postes (coins opposés)
+            cp(11,'Bunker Ouest',     'BNK',  0.18,0.18,'outpost',   'axis',      0, null,       0, false, true),
+            cp(12,'Bunker Est',       'BNK',  0.82,0.78,'outpost',   'axis',      0, null,       0, false, true)
         ];
 
     } else {
-        // MAP 03 — BOCAGE NORMAND : campagne ouverte, flancs exposés
+        // MAP 03 — BOCAGE NORMAND : diagonale haut-gauche → bas-droite
         this.capturePoints = [
-            { id:0, name:'QG Allié',        shortName:'QG',   x:mw*0.12, y:mh*0.15, type:'hq',        owner:'allied', captureProgress:100, captureRate:0, resourceType:null,        resourceRate:0,  isHQ:true  },
-            { id:1, name:'Ferme Ouest',      shortName:'MUN',  x:mw*0.22, y:mh*0.40, type:'munitions',  owner:'allied', captureProgress:100, captureRate:0, resourceType:'munitions',  resourceRate:10, isHQ:false },
-            { id:2, name:'Lac Nord',         shortName:'FUEL', x:mw*0.45, y:mh*0.20, type:'fuel',       owner:'neutral',captureProgress:0,   captureRate:0, resourceType:'fuel',       resourceRate:5,  isHQ:false },
-            { id:3, name:'Ruines Centrales', shortName:'VP',   x:mw*0.50, y:mh*0.55, type:'vp',         owner:'neutral',captureProgress:0,   captureRate:0, resourceType:null,        resourceRate:0,  isHQ:false },
-            { id:4, name:'Lac Sud',          shortName:'FUEL', x:mw*0.55, y:mh*0.75, type:'fuel',       owner:'neutral',captureProgress:0,   captureRate:0, resourceType:'fuel',       resourceRate:5,  isHQ:false },
-            { id:5, name:'Ferme Est',        shortName:'MUN',  x:mw*0.78, y:mh*0.60, type:'munitions',  owner:'axis',   captureProgress:100, captureRate:0, resourceType:'munitions',  resourceRate:10, isHQ:false },
-            { id:6, name:'QG Axis',          shortName:'QG',   x:mw*0.88, y:mh*0.85, type:'hq',        owner:'axis',   captureProgress:100, captureRate:0, resourceType:null,        resourceRate:0,  isHQ:true  }
+            cp( 0,'QG Allié',         'QG',   0.04,0.06,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',          'QG',   0.96,0.94,'hq',        'axis',   100,null,        0, true,  false),
+            // Zone alliée
+            cp( 2,'Ferme Alliée',     'MUN',  0.14,0.22,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Lac Nord-Ouest',   'FUEL', 0.06,0.46,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Quart allié
+            cp( 4,'Moulin Ouest',     'MLN',  0.26,0.36,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 7,'Hameau Centre',    'HMS',  0.28,0.65,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            // Centre
+            cp( 5,'Ruines VP',        'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
+            // Quart axis
+            cp( 6,'Colline 112',      'H112', 0.72,0.36,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            cp( 8,'Route Nationale',  'RN',   0.74,0.64,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            // Zone axis
+            cp( 9,'Lac Sud-Est',      'FUEL', 0.94,0.52,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            cp(10,'Dépôt Axis',       'MUN',  0.86,0.78,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Avant-postes axis
+            cp(11,'Poste Avancé Est', 'PAN',  0.76,0.18,'outpost',   'axis',      0, null,       0, false, true),
+            cp(12,'Poste Avancé Sud', 'PAS',  0.60,0.84,'outpost',   'axis',      0, null,       0, false, true)
         ];
     }
 
@@ -175,9 +221,8 @@ RTS.Game.Map.NavGrid.prototype._applyTerrainNoise = function() {
  * Révèle la zone de départ du joueur Allié (QG + premier secteur).
  */
 RTS.Game.Map.NavGrid.prototype._revealStartingArea = function() {
-    var hq   = this.capturePoints[0];
-    var mun  = this.capturePoints[1];
-
+    var hq  = this.capturePoints[0]; // QG allié
+    var mun = this.capturePoints[2]; // premier dépôt allié
     this.revealFog(hq.x,  hq.y,  this.cellSize * 14);
     this.revealFog(mun.x, mun.y, this.cellSize * 7);
 };
@@ -353,6 +398,39 @@ RTS.Game.Map.NavGrid.prototype.getResources = function() {
 };
 
 // ---------------------------------------------------------------------------
+//  MIN-HEAP pour l'open list A* (O(log n) au lieu de O(n))
+// ---------------------------------------------------------------------------
+
+RTS.Game.Map.NavGrid.prototype._heapPush = function(heap, tile) {
+    heap.push(tile);
+    var i = heap.length - 1;
+    while (i > 0) {
+        var parent = (i - 1) >> 1;
+        if (heap[parent].f <= heap[i].f) break;
+        var tmp = heap[parent]; heap[parent] = heap[i]; heap[i] = tmp;
+        i = parent;
+    }
+};
+
+RTS.Game.Map.NavGrid.prototype._heapPop = function(heap) {
+    var top = heap[0];
+    var last = heap.pop();
+    if (heap.length > 0) {
+        heap[0] = last;
+        var i = 0;
+        while (true) {
+            var l = 2*i+1, r = 2*i+2, smallest = i;
+            if (l < heap.length && heap[l].f < heap[smallest].f) smallest = l;
+            if (r < heap.length && heap[r].f < heap[smallest].f) smallest = r;
+            if (smallest === i) break;
+            var tmp = heap[i]; heap[i] = heap[smallest]; heap[smallest] = tmp;
+            i = smallest;
+        }
+    }
+    return top;
+};
+
+// ---------------------------------------------------------------------------
 //  PATHFINDING A*
 // ---------------------------------------------------------------------------
 
@@ -374,29 +452,23 @@ RTS.Game.Map.NavGrid.prototype.findPath = function(fromWorldX, fromWorldY, toWor
         for (var x = 0; x < this.cols; x++)
             this.grid[y][x].resetPathfinding();
 
-    var open   = [];
+    var open   = [];   // min-heap
     var closed = {};
 
     startTile.g = 0;
     startTile.h = this._heuristic(startG.x, startG.y, endG.x, endG.y);
     startTile.f = startTile.h;
-    open.push(startTile);
+    this._heapPush(open, startTile);
     startTile.inOpen = true;
 
     while (open.length > 0) {
-        // Extraire le nœud avec le f le plus bas
-        var current = open[0];
-        var ci      = 0;
-        for (var i = 1; i < open.length; i++) {
-            if (open[i].f < current.f) { current = open[i]; ci = i; }
-        }
+        var current = this._heapPop(open);
+        current.inOpen = false;
 
         if (current.x === endG.x && current.y === endG.y) {
             return this._reconstructPath(current);
         }
 
-        open.splice(ci, 1);
-        current.inOpen  = false;
         current.inClosed = true;
 
         var neighbors = this._getNeighbors(current.x, current.y);
@@ -410,7 +482,7 @@ RTS.Game.Map.NavGrid.prototype.findPath = function(fromWorldX, fromWorldY, toWor
                 n.g      = tentativeG;
                 n.h      = this._heuristic(n.x, n.y, endG.x, endG.y);
                 n.f      = n.g + n.h;
-                if (!n.inOpen) { open.push(n); n.inOpen = true; }
+                if (!n.inOpen) { this._heapPush(open, n); n.inOpen = true; }
             }
         }
     }
