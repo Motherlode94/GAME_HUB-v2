@@ -21,6 +21,31 @@
             letter-spacing: .08em;
             box-shadow: 0 10px 24px rgba(0,0,0,.28);
         }
+        .difficulty-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0 16px;
+            color: #f4f1db;
+            font: 700 12px/1 Arial, sans-serif;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+        .difficulty-btn {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.25);
+            background: rgba(10,12,14,.65);
+            color: #f4f1db;
+            cursor: pointer;
+            font: 700 12px/1 Arial, sans-serif;
+            letter-spacing: .04em;
+        }
+        .difficulty-btn.active {
+            border-color: #f4f1db;
+            background: rgba(244,241,219,.16);
+        }
     </style>
 </head>
 <body>
@@ -28,7 +53,6 @@
 
 <div class="scanlines"></div>
 
-<!-- ══ MAIN MENU ══════════════════════════════════════════════════ -->
 <div id="mainMenu" class="screen active">
     <div class="corner tl"></div>
     <div class="corner tr"></div>
@@ -36,41 +60,47 @@
     <div class="corner br"></div>
     <div class="menu-deco left"></div>
     <div class="menu-deco right"></div>
-    <div class="menu-badge">V 0.1 — WWII TACTICAL ENGINE</div>
+    <div class="menu-badge">V 0.1 - WWII TACTICAL ENGINE</div>
 
     <div class="menu-title">TACTICAL WAR</div>
-    <div class="menu-subtitle">Stratégie en temps réel — 1944</div>
+    <div class="menu-subtitle">Strategie en temps reel - 1944</div>
 
     <button class="menu-btn primary" onclick="showScreen('mapSelect')">▶ &nbsp; JOUER</button>
-    <button class="menu-btn" onclick="showControls()">CONTRÔLES</button>
-    <button class="menu-btn" onclick="showCredits()">CRÉDITS</button>
+    <button class="menu-btn" onclick="showControls()">CONTROLES</button>
+    <button class="menu-btn" onclick="showCredits()">CREDITS</button>
 
-    <div class="menu-footer">by HARDI VICTOR MBANVU — MOTEUR RTS JS</div>
+    <div class="menu-footer">by HARDI VICTOR MBANVU - MOTEUR RTS JS</div>
 </div>
 
-<!-- ══ MAP SELECT ════════════════════════════════════════════════ -->
 <div id="mapSelect" class="screen">
     <button class="screen-back" onclick="showScreen('mainMenu')">◀ RETOUR</button>
-    <div class="screen-title">Sélectionnez une carte</div>
+    <div class="screen-title">Selectionnez une carte</div>
+    <div class="difficulty-bar">
+        <span>Difficulte IA</span>
+        <button id="diffEasy" class="difficulty-btn" onclick="setDifficulty('easy')">Facile</button>
+        <button id="diffNormal" class="difficulty-btn active" onclick="setDifficulty('normal')">Normal</button>
+        <button id="diffHard" class="difficulty-btn" onclick="setDifficulty('hard')">Difficile</button>
+    </div>
 
     <div class="map-grid">
         <div class="map-card" onclick="selectMap(1)">
             <img src="assets/map01.png" alt="Carentan">
             <div class="card-body">
                 <div class="card-name">▶ Carentan</div>
-                <div class="card-desc">Zone urbaine dense. Combat de rues et contrôle des carrefours stratégiques.</div>
+                <div class="card-desc">Zone urbaine dense. Combat de rues et controle des carrefours strategiques.</div>
                 <div class="card-tags">
                     <span class="tag">Urbain</span>
                     <span class="tag">7 CP</span>
-                    <span class="tag">Symétrique</span>
+                    <span class="tag">Symetrique</span>
                 </div>
             </div>
         </div>
+
         <div class="map-card" onclick="selectMap(2)">
             <img src="assets/map02.png" alt="Marais du Nord">
             <div class="card-body">
                 <div class="card-name">▶ Marais du Nord</div>
-                <div class="card-desc">Terrain marécageux. Couloirs étroits et points de passage limités.</div>
+                <div class="card-desc">Terrain marecageux. Couloirs etroits et points de passage limites.</div>
                 <div class="card-tags">
                     <span class="tag">Marais</span>
                     <span class="tag">7 CP</span>
@@ -78,11 +108,12 @@
                 </div>
             </div>
         </div>
+
         <div class="map-card" onclick="selectMap(3)">
             <img src="assets/map03.png" alt="Bocage Normand">
             <div class="card-body">
                 <div class="card-name">▶ Bocage Normand</div>
-                <div class="card-desc">Campagne ouverte avec lacs et forêts. Flancs exposés, mobilité clé.</div>
+                <div class="card-desc">Campagne ouverte avec lacs et forets. Flancs exposes, mobilite cle.</div>
                 <div class="card-tags">
                     <span class="tag">Bocage</span>
                     <span class="tag">7 CP</span>
@@ -90,20 +121,43 @@
                 </div>
             </div>
         </div>
+
+        <div class="map-card" onclick="selectMap(4)">
+            <img src="assets/map04.png" alt="Foret de Vire">
+            <div class="card-body">
+                <div class="card-name">▶ Foret de Vire</div>
+                <div class="card-desc">Lignes de vue courtes, couverture dense et percees rapides sur les flancs.</div>
+                <div class="card-tags">
+                    <span class="tag">Foret</span>
+                    <span class="tag">7 CP</span>
+                    <span class="tag">Aggressif</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-card" onclick="selectMap(5)">
+            <img src="assets/map05.png" alt="Monts d'Acier">
+            <div class="card-body">
+                <div class="card-name">▶ Monts d'Acier</div>
+                <div class="card-desc">Carte large avec axe central dominant. Ideale pour blindes et manoeuvres.</div>
+                <div class="card-tags">
+                    <span class="tag">Plateau</span>
+                    <span class="tag">7 CP</span>
+                    <span class="tag">Large</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- ══ LOADING ═══════════════════════════════════════════════════ -->
 <div id="loading" class="screen">
     <h1>TACTICAL WAR</h1>
     <div id="loadBar"><div id="loadFill"></div></div>
     <div id="loadLabel">INITIALISATION...</div>
 </div>
 
-<!-- CANVAS -->
 <canvas id="gameCanvas"></canvas>
 
-<!-- Scripts jeu -->
 <script src="js/Camera.js"></script>
 <script src="js/NavTile.js"></script>
 <script src="js/NavGrid.js"></script>
@@ -118,20 +172,45 @@
 <script src="js/Game.js"></script>
 
 <script>
+window._selectedDifficulty = 'normal';
+
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
     if (id) document.getElementById(id).classList.add('active');
 }
 
+function setDifficulty(level) {
+    window._selectedDifficulty = level;
+    ['diffEasy','diffNormal','diffHard'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
+    if (level === 'easy')   document.getElementById('diffEasy').classList.add('active');
+    if (level === 'normal') document.getElementById('diffNormal').classList.add('active');
+    if (level === 'hard')   document.getElementById('diffHard').classList.add('active');
+}
+
 function selectMap(mapId) {
-    var labels = { 1:'CARENTAN', 2:'MARAIS DU NORD', 3:'BOCAGE NORMAND' };
+    var labels = {
+        1: 'CARENTAN',
+        2: 'MARAIS DU NORD',
+        3: 'BOCAGE NORMAND',
+        4: 'FORET DE VIRE',
+        5: 'MONTS D ACIER'
+    };
+
     showScreen('loading');
-    document.getElementById('loadLabel').textContent = 'CHARGEMENT — ' + labels[mapId] + '...';
+    var diffNames = { easy:'FACILE', normal:'NORMAL', hard:'DIFFICILE' };
+    var diff = window._selectedDifficulty || 'normal';
+    document.getElementById('loadLabel').textContent = 'CHARGEMENT - ' + (labels[mapId] || ('MAP ' + mapId)) + ' - ' + (diffNames[diff] || 'NORMAL') + '...';
     document.getElementById('loadFill').style.width = '0%';
 
     var fill = document.getElementById('loadFill');
-    var pct  = 0;
-    var iv   = setInterval(function(){ pct = Math.min(pct + 7, 88); fill.style.width = pct + '%'; }, 80);
+    var pct = 0;
+    var iv = setInterval(function() {
+        pct = Math.min(pct + 7, 88);
+        fill.style.width = pct + '%';
+    }, 80);
 
     function tryStart() {
         if (typeof window._startGame === 'function') {
@@ -140,30 +219,42 @@ function selectMap(mapId) {
                 fill.style.width = '100%';
                 setTimeout(function(){ showScreen(null); }, 350);
             };
-            window._startGame(mapId);
+            window._startGame(mapId, window._selectedDifficulty || 'normal');
         } else {
             setTimeout(tryStart, 50);
         }
     }
+
     tryStart();
 }
 
 function showCredits() {
-    alert('TACTICAL WAR\nMoteur RTS en JavaScript Canvas\nInspiration : Company of Heroes\nWWII — 1944\n\nby HARDI VICTOR MBANVU');
+    alert('TACTICAL WAR\nMoteur RTS en JavaScript Canvas\nInspiration : Company of Heroes\nWWII - 1944\n\nby HARDI VICTOR MBANVU');
 }
+
 function showControls() {
     alert(
-        'CONTRÔLES\n\n' +
-        'Clic gauche    : Sélectionner unité / bâtiment\n' +
-        'Clic droit     : Déplacer / Rally point\n' +
-        'WASD / Flèches : Déplacer la caméra\n' +
+        'CONTROLES\n\n' +
+        'Clic gauche    : Selectionner unite / batiment\n' +
+        'Clic droit     : Deplacer / Rally point\n' +
+        'Shift + Clic droit : Ajouter un waypoint\n' +
+        'Clic molette   : Pan camera (maintenir + glisser)\n' +
+        'ZQSD           : Deplacer la camera\n' +
         'Molette        : Zoom\n' +
         'G              : Grille de navigation\n' +
         'F1             : Afficher secteurs\n' +
-        'H              : Centrer sur la base\n' +
-        'Ctrl+A         : Tout sélectionner\n' +
-        'Échap          : Désélectionner\n' +
-        'Q / W / E      : Raccourcis production'
+        'Shift+R        : Revele le brouillard (debug)\n' +
+        'H / Espace     : Centrer sur la base\n' +
+        'Ctrl+A         : Tout selectionner\n' +
+        'Echap          : Deselectionner\n' +
+        'T              : Retraite escouades selectionnees\n' +
+        'V              : Renfort au QG (Shift+V = full)\n' +
+        'A / W / E / R  : Raccourcis production\n' +
+        'N / X / C / V / B : Construction depuis QG\n' +
+        '1 / 2 / 3      : Upgrade des tiers (QG)\n' +
+        'Z / X / C      : Choix doctrine (QG, permanent)\n' +
+        'Y / U          : Call-ins doctrine (si doctrine active)\n' +
+        'Shift + prod   : Ajouter 5 unites'
     );
 }
 </script>

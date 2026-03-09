@@ -45,6 +45,22 @@ const MISSIONS = [
     check: () => countBuildingType('water') >= 1,
     reward: { budget: 400, label: '+400$' },
   },
+  {
+    id: 'starter_network',
+    tier: 1, title: 'Voirie de Base',
+    desc: 'Construisez 8 routes pour lancer votre réseau.',
+    icon: '🛣️',
+    check: () => countBuildingType('road') >= 8,
+    reward: { budget: 350, label: '+350$ + routes moins chères' },
+  },
+  {
+    id: 'first_upgrade',
+    tier: 1, title: 'Première Amélioration',
+    desc: 'Améliorez un bâtiment au niveau 2.',
+    icon: '⬆️',
+    check: () => getHighestBuildingLevel() >= 2,
+    reward: { budget: 700, label: '+700$ + coût amélioration réduit' },
+  },
 
   // ── TIER 2 : Bourg ──
   {
@@ -95,6 +111,22 @@ const MISSIONS = [
     check: () => countBuildingType('fire') >= 1 && countBuildingType('police') >= 1,
     reward: { budget: 900, label: '+900$' },
   },
+  {
+    id: 'cityhall_admin',
+    tier: 2, title: 'Administration Centrale',
+    desc: 'Construisez un Hôtel de Ville.',
+    icon: '🏛️',
+    check: () => countBuildingType('cityhall') >= 1,
+    reward: { budget: 1500, label: '+1 500$ + usure réduite' },
+  },
+  {
+    id: 'frontier_guard',
+    tier: 2, title: 'Frontière Sécurisée',
+    desc: 'Construisez une caserne ET une tour de garde.',
+    icon: '🛡️',
+    check: () => countBuildingType('barracks') >= 1 && countBuildingType('watchtower') >= 1,
+    reward: { budget: 1200, label: '+1 200$ + menace réduite' },
+  },
 
   // ── TIER 3 : Ville ──
   {
@@ -136,6 +168,22 @@ const MISSIONS = [
     icon: '📈',
     check: () => countBuildingType('shop') >= 3 && countBuildingType('office') >= 2 && countBuildingType('market') >= 1,
     reward: { budget: 1800, label: '+1 800$' },
+  },
+  {
+    id: 'maintenance_master',
+    tier: 3, title: 'Maître d\'Entretien',
+    desc: 'Maintenez un état moyen >= 85% avec au moins 15 bâtiments.',
+    icon: '🔧',
+    check: () => res.buildings >= 15 && getAverageBuildingCondition() >= 85,
+    reward: { budget: 2000, label: '+2 000$ + réparations moins chères' },
+  },
+  {
+    id: 'master_builder',
+    tier: 3, title: 'Architecte Expert',
+    desc: 'Atteignez le niveau 3 sur un bâtiment.',
+    icon: '🏗️',
+    check: () => getHighestBuildingLevel() >= 3,
+    reward: { budget: 2200, label: '+2 200$ + bonus bâtiments améliorés' },
   },
 
   // ── TIER 4 : Métropole ──
@@ -198,6 +246,7 @@ const CITY_RANKS = [
 const missionState = {
   completed: new Set(),
   active: [],
+  appliedPerks: new Set(),
 };
 
 // ── HELPERS ──
@@ -217,8 +266,39 @@ function getNextRank() {
   return null;
 }
 
+function getHighestBuildingLevel() {
+  if (typeof grid === 'undefined') return 1;
+  let maxLevel = 1;
+  for (let y = 0; y < GRID; y++) {
+    for (let x = 0; x < GRID; x++) {
+      const c = grid[y][x];
+      if (!c.type || c.type === 'road') continue;
+      const lvl = Number.isFinite(c.level) ? c.level : 1;
+      if (lvl > maxLevel) maxLevel = lvl;
+    }
+  }
+  return maxLevel;
+}
+
+function getAverageBuildingCondition() {
+  if (typeof window._godAvgCondition === 'number') return window._godAvgCondition;
+  if (typeof grid === 'undefined') return 100;
+  let sum = 0, count = 0;
+  for (let y = 0; y < GRID; y++) {
+    for (let x = 0; x < GRID; x++) {
+      const c = grid[y][x];
+      if (!c.type || c.type === 'road') continue;
+      const cond = Number.isFinite(c.condition) ? c.condition : 100;
+      sum += cond;
+      count++;
+    }
+  }
+  return count > 0 ? Math.round(sum / count) : 100;
+}
+
 // ── MISSION CHECK (called every tick) ──
 function checkMissions() {
+  syncMissionPerksFromCompleted();
   for (const m of MISSIONS) {
     if (missionState.completed.has(m.id)) continue;
     if (m.check()) {
@@ -234,6 +314,7 @@ function completeMission(m, showToast = true) {
 
   // Apply reward
   if (m.reward.budget) budget += m.reward.budget;
+  applyMissionPerks(m);
 
   // Visual feedback only during active game
   if (showToast) {
@@ -243,6 +324,63 @@ function completeMission(m, showToast = true) {
 
   recalcResources();
   updateUI();
+}
+
+function applyMissionPerks(m) {
+  if (missionState.appliedPerks.has(m.id)) return;
+  const safeMul = (v, mul, min = 1) => Math.max(min, Math.round(v * mul));
+
+  switch (m.id) {
+    case 'starter_network':
+      if (BUILDINGS.road) BUILDINGS.road.cost = Math.max(5, safeMul(BUILDINGS.road.cost, 0.8, 5));
+      break;
+    case 'first_power':
+      if (BUILDINGS.power) BUILDINGS.power.pG = safeMul(BUILDINGS.power.pG, 1.2);
+      if (BUILDINGS.solar) BUILDINGS.solar.pG = safeMul(BUILDINGS.solar.pG, 1.15);
+      break;
+    case 'first_water':
+      if (BUILDINGS.water) BUILDINGS.water.wG = safeMul(BUILDINGS.water.wG, 1.2);
+      break;
+    case 'first_upgrade':
+      window._godUpgradeDiscount = Math.min(0.45, (window._godUpgradeDiscount || 0) + 0.12);
+      break;
+    case 'cityhall_admin':
+      window._godDeteriorationBonus = Math.min(0.5, (window._godDeteriorationBonus || 0) + 0.12);
+      Object.keys(BUILDINGS).forEach(k => {
+        if (BUILDINGS[k].upkeep > 0) BUILDINGS[k].upkeep = Math.max(1, safeMul(BUILDINGS[k].upkeep, 0.92));
+      });
+      break;
+    case 'frontier_guard':
+      window._godThreatMitigationBonus = (window._godThreatMitigationBonus || 0) + 1.2;
+      break;
+    case 'green_energy':
+      if (BUILDINGS.solar) {
+        BUILDINGS.solar.pG = safeMul(BUILDINGS.solar.pG, 1.2);
+        BUILDINGS.solar.upkeep = Math.max(1, safeMul(BUILDINGS.solar.upkeep, 0.8));
+      }
+      if (BUILDINGS.windmill) {
+        BUILDINGS.windmill.pG = safeMul(BUILDINGS.windmill.pG, 1.2);
+        BUILDINGS.windmill.upkeep = Math.max(1, safeMul(BUILDINGS.windmill.upkeep, 0.8));
+      }
+      break;
+    case 'maintenance_master':
+      window._godRepairDiscount = Math.min(0.55, (window._godRepairDiscount || 0) + 0.2);
+      window._godDeteriorationBonus = Math.min(0.55, (window._godDeteriorationBonus || 0) + 0.1);
+      break;
+    case 'master_builder':
+      window._godUpgradeOutputBonus = Math.min(0.35, (window._godUpgradeOutputBonus || 0) + 0.12);
+      break;
+    default:
+      break;
+  }
+
+  missionState.appliedPerks.add(m.id);
+}
+
+function syncMissionPerksFromCompleted() {
+  for (const m of MISSIONS) {
+    if (missionState.completed.has(m.id)) applyMissionPerks(m);
+  }
 }
 
 function showMissionComplete(m) {
@@ -340,8 +478,14 @@ function getMissionProgress(m) {
     const target = parseInt(m.id.split('_')[1]);
     return `${Math.min(budget, target).toLocaleString('fr-FR')} / ${target.toLocaleString('fr-FR')} $`;
   }
+  if (m.id === 'starter_network') return `${Math.min(countBuildingType('road'), 8)} / 8 routes`;
   if (m.id === 'roads_20') return `${Math.min(countBuildingType('road'), 20)} / 20 routes`;
   if (m.id === 'park_3')   return `${Math.min(countBuildingType('park'), 3)} / 3 parcs`;
+  if (m.id === 'cityhall_admin') return `${Math.min(countBuildingType('cityhall'), 1)} / 1 mairie`;
+  if (m.id === 'frontier_guard') return `${Math.min(countBuildingType('barracks'), 1) + Math.min(countBuildingType('watchtower'), 1)} / 2 défenses`;
+  if (m.id === 'first_upgrade') return `${Math.min(getHighestBuildingLevel(), 2)} / 2 niveau`;
+  if (m.id === 'master_builder') return `${Math.min(getHighestBuildingLevel(), 3)} / 3 niveau`;
+  if (m.id === 'maintenance_master') return `${Math.min(getAverageBuildingCondition(), 85)} / 85% état`;
   return null;
 }
 

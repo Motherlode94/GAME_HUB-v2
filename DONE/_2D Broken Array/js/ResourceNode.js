@@ -9,7 +9,7 @@ RTS.ResourceNode = function(x, y, type, amount) {
     this.x      = x;
     this.y      = y;
     this.type   = type;
-    this.amount = amount || 400;
+    this.amount = amount || 650;
     this.maxAmount = this.amount;
     this.size   = 18;
     this.depleted = false;
@@ -41,7 +41,7 @@ RTS.ResourceNode.generateMap = function() {
             pos[0] + (Math.random() - 0.5) * 80,
             pos[1] + (Math.random() - 0.5) * 80,
             type,
-            300 + Math.floor(Math.random() * 300)
+            500 + Math.floor(Math.random() * 500)
         ));
     });
 

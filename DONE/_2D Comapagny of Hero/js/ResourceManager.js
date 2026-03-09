@@ -17,18 +17,25 @@ RTS.Game = RTS.Game || {};
 RTS.Game.ResourceManager = function(team) {
     this.team = team;
 
-    this.manpower  = 600;   // était 200 — assez pour 2 unités dès le départ
-    this.munitions = 120;   // était 30  — permet d'acheter des unités spécialisées
-    this.fuel      = 80;    // était 20  — permet un véhicule léger direct
+    // Le joueur (allied) démarre avec moins de ressources.
+    if (team === 'allied') {
+        this.manpower  = 320;
+        this.munitions = 40;
+        this.fuel      = 20;
+    } else {
+        this.manpower  = 520;
+        this.munitions = 90;
+        this.fuel      = 60;
+    }
 
     this.maxManpower  = 9999;
     this.maxMunitions = 999;
     this.maxFuel      = 999;
 
-    // Taux / seconde
-    this._mpRate  = 18;   // était 8  → 1080/min (confortable, permet de jouer)
-    this._munRate = 1.5;  // était 0  → taux de base même sans point capturé
-    this._fuRate  = 1.0;  // était 0  → idem
+    // Taux / seconde (plus strict pour un pacing proche CoH).
+    this._mpRate  = 10;
+    this._munRate = 0.8;
+    this._fuRate  = 0.45;
 
     // Pour affichage HUD (+X/min)
     this.manpowerRate  = Math.round(this._mpRate * 60);
@@ -45,9 +52,9 @@ RTS.Game.ResourceManager.prototype.syncWithNavGrid = function(navGrid) {
         if (cp.type === 'munitions') bonusMun += rate;
         if (cp.type === 'fuel')      bonusFu  += rate;
     });
-    // Conserver le taux de base + ajouter le bonus des points capturés
-    this._munRate = 1.5 + bonusMun;
-    this._fuRate  = 1.0 + bonusFu;
+    // Conserver le taux de base strict + bonus des points capturés.
+    this._munRate = 0.8 + bonusMun;
+    this._fuRate  = 0.45 + bonusFu;
     this.manpowerRate  = Math.round(this._mpRate  * 60);
     this.munitionsRate = Math.round(this._munRate * 60);
     this.fuelRate      = Math.round(this._fuRate  * 60);

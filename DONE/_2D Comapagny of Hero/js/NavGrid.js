@@ -311,6 +311,7 @@ RTS.Game.Map.NavGrid.prototype.updateCapture = function(deltaTime, squads) {
         var axisCount   = 0;
 
         squads.forEach(function(sq) {
+            if (sq.retreating) return;
             var dx   = sq.x - cp.x;
             var dy   = sq.y - cp.y;
             var dist = Math.sqrt(dx * dx + dy * dy);

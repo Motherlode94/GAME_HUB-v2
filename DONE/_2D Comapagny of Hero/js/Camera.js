@@ -4,7 +4,7 @@ RTS.Engine = RTS.Engine || {};
 /**
  * Camera — Caméra RTS avec :
  *  - Défilement par les bords de l'écran (edge scrolling)
- *  - Défilement clavier (WASD / Flèches)
+ *  - Défilement clavier (ZQSD)
  *  - Zoom centré sur la souris (molette)
  *  - Interpolation douce (lerp)
  *  - Clamp aux bords de la carte
@@ -28,7 +28,7 @@ RTS.Engine.Camera = function(viewWidth, viewHeight, mapWidth, mapHeight) {
 
     // Vitesse de défilement (pixels/frame en espace monde)
     this.speed    = 14;
-    this.edgeSize = 22;          // zone de déclenchement en pixels depuis le bord
+    this.edgeSize = 14;          // zone de déclenchement en pixels depuis le bord
 
     // Dimensions
     this.viewWidth  = viewWidth;
@@ -37,7 +37,11 @@ RTS.Engine.Camera = function(viewWidth, viewHeight, mapWidth, mapHeight) {
     this.mapHeight  = mapHeight;
 
     // Lerp — coefficient d'interpolation (0..1, plus élevé = plus réactif)
-    this.lerpFactor = 0.14;
+    this.lerpFactor = 0.24;
+
+    // Petit verrou d'input après un recentrage pour éviter que la caméra reparte
+    // immédiatement à cause du bord écran / d'une touche encore enfoncée.
+    this._inputLockFrames = 0;
 };
 
 // ---------------------------------------------------------------------------
@@ -55,17 +59,26 @@ RTS.Engine.Camera.prototype.update = function(mouseX, mouseY, keys) {
 
     var speed = this.speed / this.zoom;  // Vitesse adaptée au zoom
 
-    // --- Edge scrolling ---
-    if (mouseX < this.edgeSize)                    this.targetX -= speed;
-    if (mouseX > this.viewWidth  - this.edgeSize)  this.targetX += speed;
-    if (mouseY < this.edgeSize)                    this.targetY -= speed;
-    if (mouseY > this.viewHeight - this.edgeSize)  this.targetY += speed;
+    if (this._inputLockFrames > 0) {
+        this._inputLockFrames--;
+    } else {
+        // --- Edge scrolling ---
+        if (mouseX < this.edgeSize)                    this.targetX -= speed;
+        if (mouseX > this.viewWidth  - this.edgeSize)  this.targetX += speed;
+        if (mouseY < this.edgeSize)                    this.targetY -= speed;
+        if (mouseY > this.viewHeight - this.edgeSize)  this.targetY += speed;
 
-    // --- Clavier ---
-    if (keys['a'] || keys['ArrowLeft'])  this.targetX -= speed;
-    if (keys['d'] || keys['ArrowRight']) this.targetX += speed;
-    if (keys['w'] || keys['ArrowUp'])    this.targetY -= speed;
-    if (keys['s'] || keys['ArrowDown'])  this.targetY += speed;
+        // --- Clavier (AZERTY: ZQSD) ---
+        var left  = keys['q'] || keys['Q'];
+        var right = keys['d'] || keys['D'];
+        var up    = keys['z'] || keys['Z'];
+        var down  = keys['s'] || keys['S'];
+
+        if (left)  this.targetX -= speed;
+        if (right) this.targetX += speed;
+        if (up)    this.targetY -= speed;
+        if (down)  this.targetY += speed;
+    }
 
     // --- Clamp aux limites de la carte ---
     // Si la carte est plus petite que la vue, on autorise une position négative
@@ -199,4 +212,14 @@ RTS.Engine.Camera.prototype.snapTo = function(worldX, worldY) {
 
     this.x = this.targetX = x;
     this.y = this.targetY = y;
+    this._inputLockFrames = 10;
+};
+
+/**
+ * Pan manuel (drag) en pixels écran.
+ * deltaX > 0 : souris va à droite -> caméra va à gauche (sens RTS naturel).
+ */
+RTS.Engine.Camera.prototype.panByScreenDelta = function(deltaX, deltaY) {
+    this.targetX -= deltaX / this.zoom;
+    this.targetY -= deltaY / this.zoom;
 };

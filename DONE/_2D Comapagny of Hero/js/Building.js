@@ -12,6 +12,7 @@ RTS.Game.Building = function(x, y, team, type) {
     this.h        = stats.h;
     this.maxQueue = stats.maxQueue;
     this.produces = stats.produces;
+    this.upgrades = stats.upgrades || [];
     this.label    = stats.label;
 
     this.queue  = [];
@@ -35,75 +36,62 @@ RTS.Game.Building.STATS = {
     hq: {
         w:80, h:60, maxQueue:4, buildTime:0, label:'QG',
         produces: [
-            { unitType:'rifle',   cost:{manpower:280},              time:15, label:'Fusiliers',   key:'Q' },
-            { unitType:'mg',      cost:{manpower:360},              time:22, label:'Mitrailleur', key:'W' },
-            { unitType:'pioneer', cost:{manpower:200},              time:12, label:'Pionniers',   key:'E' }
+            { unitType:'pioneer', cost:{manpower:220}, time:16, label:'Pionniers', key:'A', minTier:1, desc:'Construction et reparations' }
+        ],
+        upgrades: [
+            { id:'battle_phase_1', targetTier:2, requiresTier:1, cost:{manpower:240,fuel:30}, time:70, key:'1', label:'Phase Combat I', desc:'Debloque le Tier 2' },
+            { id:'battle_phase_2', targetTier:3, requiresTier:2, cost:{manpower:320,fuel:55}, time:85, key:'2', label:'Phase Combat II', desc:'Debloque le Tier 3' },
+            { id:'battle_phase_3', targetTier:4, requiresTier:3, cost:{manpower:420,fuel:85}, time:100, key:'3', label:'Phase Combat III', desc:'Debloque le Tier 4' }
         ],
         constructs: [
-            { buildingType:'barracks',    cost:{manpower:200},           time:45, label:'Caserne',         key:'Z' },
-            { buildingType:'support',     cost:{manpower:180},           time:40, label:'Soutien',          key:'X' },
-            { buildingType:'motor_pool',  cost:{manpower:260,fuel:25},   time:55, label:'Parc Motorisé',    key:'C' },
-            { buildingType:'tank_depot',  cost:{manpower:400,fuel:60},   time:80, label:'Dépôt Blindés',    key:'V' },
-            { buildingType:'airfield',    cost:{manpower:350,fuel:80},   time:90, label:'Terrain Aviation', key:'B' }
+            { buildingType:'barracks',   cost:{manpower:220},          time:55,  label:'Caserne',          key:'N', minTier:1, requires:[], desc:'Infanterie de base' },
+            { buildingType:'support',    cost:{manpower:220},          time:58,  label:'Soutien',          key:'X', minTier:2, requires:['barracks'], desc:'Armes d appui' },
+            { buildingType:'motor_pool', cost:{manpower:300,fuel:35},  time:72,  label:'Parc Motorise',    key:'C', minTier:3, requires:['support'], desc:'Vehicules legers' },
+            { buildingType:'tank_depot', cost:{manpower:460,fuel:80},  time:98,  label:'Depot Blindes',    key:'V', minTier:3, requires:['motor_pool'], desc:'Chars et anti-char' },
+            { buildingType:'airfield',   cost:{manpower:420,fuel:110}, time:112, label:'Terrain Aviation', key:'B', minTier:4, requires:['support','motor_pool'], desc:'Support aerien' }
         ]
     },
     barracks: {
-        w:70, h:50, maxQueue:5, buildTime:45, label:'CASERNE',
+        w:70, h:50, maxQueue:4, buildTime:55, label:'CASERNE',
         produces: [
-            { unitType:'rifle',       cost:{manpower:240},                   time:12, label:'Fusiliers',      key:'Q' },
-            { unitType:'assault',     cost:{manpower:340,munitions:20},      time:18, label:'Assault',        key:'W' },
-            { unitType:'mg',          cost:{manpower:320},                   time:20, label:'Mitrailleur',    key:'E' },
-            { unitType:'sniper',      cost:{manpower:340,munitions:25},      time:20, label:'Sniper',         key:'R' },
-            { unitType:'mortar',      cost:{manpower:300,munitions:15},      time:22, label:'Mortier',        key:'T' },
-            { unitType:'flamethrower',cost:{manpower:380,munitions:30},      time:24, label:'Lance-Flammes',  key:'Y' },
-            { unitType:'paratrooper', cost:{manpower:460,munitions:35},      time:28, label:'Parachutistes',  key:'U' },
-            { unitType:'officer',     cost:{manpower:420},                   time:26, label:'Officier',       key:'I' },
-            { unitType:'ranger',      cost:{manpower:500,munitions:40},      time:30, label:'Rangers',        key:'O' },
-            { unitType:'commando',    cost:{manpower:520,munitions:50},      time:32, label:'Commando',       key:'P' }
+            { unitType:'rifle',        cost:{manpower:250},              time:18, label:'Fusiliers',       key:'A', minTier:1, desc:'Infanterie ligne' },
+            { unitType:'assault',      cost:{manpower:360,munitions:25}, time:26, label:'Assaut',          key:'W', minTier:2, desc:'Close combat' },
+            { unitType:'flamethrower', cost:{manpower:400,munitions:35}, time:32, label:'Lance-Flammes',   key:'E', minTier:2, desc:'Anti-infanterie' },
+            { unitType:'officer',      cost:{manpower:440},              time:34, label:'Officier',        key:'R', minTier:2, desc:'Buff de combat' }
         ]
     },
     support: {
-        w:65, h:48, maxQueue:4, buildTime:40, label:'SOUTIEN',
+        w:65, h:48, maxQueue:3, buildTime:58, label:'SOUTIEN',
         produces: [
-            { unitType:'pioneer',        cost:{manpower:180},                   time:12, label:'Pionniers',       key:'Q' },
-            { unitType:'at_inf',         cost:{manpower:380,munitions:30},      time:25, label:'Anti-Tank',       key:'W' },
-            { unitType:'medic',          cost:{manpower:260},                   time:18, label:'Médecin',         key:'E' },
-            { unitType:'sniper',         cost:{manpower:340,munitions:20},      time:22, label:'Sniper',          key:'R' },
-            { unitType:'combat_engineer',cost:{manpower:320,munitions:20},      time:20, label:'Eng. Combat',     key:'T' },
-            { unitType:'at_gun',         cost:{manpower:400,munitions:40},      time:30, label:'Canon AT 57mm',   key:'Y' },
-            { unitType:'gun_17pdr',      cost:{manpower:520,munitions:60},      time:38, label:'Canon 17-Pdr',    key:'U' }
+            { unitType:'mg',      cost:{manpower:340},              time:28, label:'Mitrailleur', key:'A', minTier:2, desc:'Suppression' },
+            { unitType:'mortar',  cost:{manpower:320,munitions:20}, time:30, label:'Mortier',     key:'W', minTier:2, desc:'Tir indirect' },
+            { unitType:'sniper',  cost:{manpower:360,munitions:25}, time:34, label:'Sniper',      key:'E', minTier:3, desc:'Longue portee' },
+            { unitType:'medic',   cost:{manpower:280},              time:26, label:'Medecin',     key:'R', minTier:3, desc:'Soin de section' }
         ]
     },
     motor_pool: {
-        w:85, h:60, maxQueue:3, buildTime:55, label:'PARC MOT.',
+        w:85, h:60, maxQueue:3, buildTime:72, label:'PARC MOT.',
         produces: [
-            { unitType:'jeep',           cost:{manpower:200,fuel:15},              time:18, label:'Jeep',            key:'Q' },
-            { unitType:'recon_car',      cost:{manpower:220,fuel:20},              time:20, label:'Recon',           key:'W' },
-            { unitType:'halftrack',      cost:{manpower:340,fuel:30},              time:28, label:'Half-Track',      key:'E' },
-            { unitType:'anti_inf_car',   cost:{manpower:380,fuel:35},              time:30, label:'Anti-Inf Car',    key:'R' },
-            { unitType:'artillery_truck',cost:{manpower:420,fuel:50,munitions:30}, time:38, label:'Artillerie',      key:'T' },
-            { unitType:'aa_halftrack',   cost:{manpower:360,fuel:30,munitions:20}, time:28, label:'AA Half-Track',   key:'Y' },
-            { unitType:'bofors',         cost:{manpower:380,munitions:35},         time:32, label:'Bofors 40mm',     key:'U' },
-            { unitType:'m7_priest',      cost:{manpower:500,fuel:65,munitions:40}, time:42, label:'M7 Priest',       key:'I' }
+            { unitType:'jeep',         cost:{manpower:220,fuel:18},      time:26, label:'Jeep',               key:'A', minTier:2, desc:'Recon mobile' },
+            { unitType:'halftrack',    cost:{manpower:370,fuel:38},      time:38, label:'Half-Track',         key:'W', minTier:3, desc:'Transport combat' },
+            { unitType:'anti_inf_car', cost:{manpower:420,fuel:45},      time:42, label:'Auto-Mitrailleuse',  key:'E', minTier:3, desc:'Anti-infanterie' },
+            { unitType:'at_gun',       cost:{manpower:430,munitions:45}, time:40, label:'Canon AT 57mm',      key:'R', minTier:3, desc:'Anti-char tracte' }
         ]
     },
     tank_depot: {
-        w:95, h:70, maxQueue:2, buildTime:80, label:'DÉPÔT BLINDÉS',
+        w:95, h:70, maxQueue:2, buildTime:98, label:'DEPOT BLINDES',
         produces: [
-            { unitType:'sherman',        cost:{manpower:540,fuel:75},      time:40, label:'Sherman M4',     key:'Q' },
-            { unitType:'tank_destroyer', cost:{manpower:600,fuel:90},      time:45, label:'Tank Destroyer', key:'W' },
-            { unitType:'m10_wolverine',  cost:{manpower:560,fuel:80},      time:38, label:'M10 Wolverine',  key:'E' },
-            { unitType:'heavy_tank',     cost:{manpower:720,fuel:120},     time:55, label:'Heavy Tank',     key:'R' },
-            { unitType:'calliope',       cost:{manpower:650,fuel:100,munitions:50}, time:50, label:'Calliope',      key:'T' }
+            { unitType:'sherman',        cost:{manpower:600,fuel:90},  time:56, label:'Sherman M4',     key:'A', minTier:3, desc:'Char polyvalent' },
+            { unitType:'tank_destroyer', cost:{manpower:680,fuel:105}, time:62, label:'Tank Destroyer', key:'W', minTier:3, desc:'Anti-char' },
+            { unitType:'heavy_tank',     cost:{manpower:820,fuel:145}, time:74, label:'Char Lourd',     key:'E', minTier:4, desc:'Percussion frontale' }
         ]
     },
     airfield: {
-        w:110, h:75, maxQueue:2, buildTime:90, label:'AVIATION',
+        w:110, h:75, maxQueue:2, buildTime:112, label:'AVIATION',
         produces: [
-            { unitType:'heli_transport', cost:{manpower:380,fuel:60},              time:35, label:'Hélico Transport',  key:'Q' },
-            { unitType:'heli_attack',    cost:{manpower:480,fuel:90},              time:45, label:'Hélico Attaque',    key:'W' },
-            { unitType:'airstrike',      cost:{manpower:0,munitions:120,fuel:0},   time:20, label:'Frappe Aérienne',   key:'E' },
-            { unitType:'p47_thunderbolt',cost:{manpower:0,munitions:150,fuel:30},  time:25, label:'P-47 Thunderbolt',  key:'R' }
+            { unitType:'heli_transport', cost:{manpower:430,fuel:80},             time:50, label:'Helico Transport', key:'A', minTier:3, desc:'Projection rapide' },
+            { unitType:'heli_attack',    cost:{manpower:560,fuel:120},            time:62, label:'Helico Attaque',   key:'W', minTier:4, desc:'Appui anti-char' },
+            { unitType:'airstrike',      cost:{manpower:0,munitions:160,fuel:20}, time:34, label:'Frappe Aerienne',  key:'E', minTier:4, desc:'Burst ponctuel' }
         ]
     }
 };

@@ -53,11 +53,11 @@ RTS.Game.Squad = function(x, y, team, type) {
     if (this.type === 'airstrike') this._lifeTimer = 10;
     if (this.type === 'artillery_truck') this._lifeTimer = 0;
 
-    // ── ABILITIES ──────────────────────────────────────────────────────────
+    // â”€â”€ ABILITIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Chaque ability : { cooldown, timer, active, duration, durationLeft }
     this.abilities = this._buildAbilities(s.abilities || []);
 
-    // États spéciaux
+    // Ã‰tats spÃ©ciaux
     this._smokeActive   = false;
     this._smokeTimer    = 0;
     this._setupTimer    = 0;     // mortier : délai avant tir
@@ -65,14 +65,18 @@ RTS.Game.Squad = function(x, y, team, type) {
     this._healTimer     = 0;
     this._artilleryTimer= 0;
     this._inspireActive = false;
+
+    // CoH-like states
+    this.retreating = false;
+    this.coverLevel = 0; // 0:none, 1:light, 2:heavy
 };
 
 // ---------------------------------------------------------------------------
-//  STATS — toutes les unités
+//  STATS â€” toutes les unitÃ©s
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.STATS = {
-    // ── INFANTERIE DE BASE ─────────────────────────────────────────────────
+    // â”€â”€ INFANTERIE DE BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     rifle:    { count:4, speed:85,  radius:26, vision:210, attackRange:160, damage:8,  fireRate:1.2, captureSpeed:1.0, armorType:'none', role:'infantry',
                 abilities:['grenade','focus_fire'] },
     mg:       { count:3, speed:55,  radius:28, vision:250, attackRange:230, damage:14, fireRate:2.8, captureSpeed:0.5, armorType:'none', role:'support',
@@ -82,7 +86,7 @@ RTS.Game.Squad.STATS = {
     pioneer:  { count:4, speed:75,  radius:26, vision:200, attackRange:120, damage:6,  fireRate:1.0, captureSpeed:1.5, armorType:'none', role:'engineer',
                 abilities:['smoke'] },
 
-    // ── INFANTERIE SPÉCIALISÉE ─────────────────────────────────────────────
+    // â”€â”€ INFANTERIE SPÃ‰CIALISÃ‰E â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     assault:  { count:4, speed:100, radius:26, vision:190, attackRange:110, damage:18, fireRate:2.2, captureSpeed:0.8, armorType:'none', role:'assault',
                 abilities:['grenade','smoke','focus_fire'] },
     at_inf:   { count:3, speed:70,  radius:26, vision:200, attackRange:200, damage:90, fireRate:0.3, captureSpeed:0.5, armorType:'none', role:'anti_tank',
@@ -92,7 +96,7 @@ RTS.Game.Squad.STATS = {
     medic:    { count:3, speed:80,  radius:24, vision:220, attackRange:80,  damage:2,  fireRate:0.5, captureSpeed:0.5, armorType:'none', role:'medic',
                 abilities:['heal'] },
 
-    // ── VÉHICULES LÉGERS ───────────────────────────────────────────────────
+    // â”€â”€ VÃ‰HICULES LÃ‰GERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     jeep:         { count:1, speed:160, radius:18, vision:310, attackRange:170, damage:10, fireRate:1.5, captureSpeed:0.0, armorType:'light', role:'recon', vehicle:true,
                     abilities:['focus_fire'] },
     halftrack:    { count:1, speed:120, radius:24, vision:220, attackRange:200, damage:18, fireRate:1.8, captureSpeed:0.0, armorType:'light', role:'support', vehicle:true,
@@ -102,7 +106,7 @@ RTS.Game.Squad.STATS = {
     anti_inf_car: { count:1, speed:130, radius:20, vision:230, attackRange:190, damage:22, fireRate:2.5, captureSpeed:0.0, armorType:'light', role:'anti_inf', vehicle:true,
                     abilities:['suppression_fire'] },
 
-    // ── BLINDÉS ───────────────────────────────────────────────────────────
+    // â”€â”€ BLINDÃ‰S â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     sherman:      { count:1, speed:90,  radius:30, vision:220, attackRange:260, damage:65, fireRate:0.45,captureSpeed:0.0, armorType:'heavy', role:'tank', vehicle:true,
                     abilities:['focus_fire'] },
     panzer:       { count:1, speed:85,  radius:32, vision:230, attackRange:280, damage:75, fireRate:0.4, captureSpeed:0.0, armorType:'heavy', role:'tank', vehicle:true,
@@ -112,11 +116,11 @@ RTS.Game.Squad.STATS = {
     heavy_tank:   { count:1, speed:55,  radius:36, vision:200, attackRange:240, damage:95, fireRate:0.3, captureSpeed:0.0, armorType:'heavy', role:'heavy_tank', vehicle:true,
                     abilities:['barrage'] },
 
-    // ── SUPPORT ───────────────────────────────────────────────────────────
+    // â”€â”€ SUPPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     artillery_truck:{ count:1,speed:70, radius:26, vision:200, attackRange:600, damage:80, fireRate:0.15,captureSpeed:0.0, armorType:'light', role:'artillery', vehicle:true,
                     abilities:['barrage'] },
 
-    // ── AÉRIENS ───────────────────────────────────────────────────────────
+    // â”€â”€ AÃ‰RIENS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     heli_transport:{ count:1, speed:180, radius:28, vision:310, attackRange:0,   damage:0,  fireRate:0,   captureSpeed:0.0, aerial:true, altitude:55, role:'transport',
                     abilities:[] },
     heli_attack:   { count:1, speed:150, radius:28, vision:340, attackRange:290, damage:40, fireRate:0.8, captureSpeed:0.0, aerial:true, altitude:55, role:'gunship',
@@ -124,98 +128,98 @@ RTS.Game.Squad.STATS = {
     airstrike:     { count:1, speed:420, radius:18, vision:380, attackRange:220, damage:130,fireRate:0.6, captureSpeed:0.0, aerial:true, altitude:110, role:'airstrike',
                     abilities:[] },
 
-    // ══ NOUVELLES UNITÉS ══════════════════════════════════════════════════
+    // â•â• NOUVELLES UNITÃ‰S â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    // ── INFANTERIE ALLIÉE ─────────────────────────────────────────────────
-    // Lance-flammes — portée courte, dégâts massifs contre l'infanterie
+    // â”€â”€ INFANTERIE ALLIÃ‰E â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Lance-flammes â€” portÃ©e courte, dÃ©gÃ¢ts massifs contre l'infanterie
     flamethrower:  { count:3, speed:65,  radius:26, vision:170, attackRange:85,  damage:32, fireRate:2.5, captureSpeed:0.5, armorType:'none', role:'assault',
                     abilities:['flamethrower_spray','smoke'] },
-    // Parachutistes — infanterie d'élite rapide, excellente en assaut
+    // Parachutistes â€” infanterie d'Ã©lite rapide, excellente en assaut
     paratrooper:   { count:5, speed:110, radius:28, vision:230, attackRange:150, damage:13, fireRate:2.0, captureSpeed:1.0, armorType:'none', role:'assault',
                     abilities:['grenade','focus_fire','smoke'] },
-    // Officier — commande sur le terrain, inspire les alliés proches
+    // Officier â€” commande sur le terrain, inspire les alliÃ©s proches
     officer:       { count:2, speed:90,  radius:24, vision:260, attackRange:140, damage:8,  fireRate:1.0, captureSpeed:0.5, armorType:'none', role:'infantry',
                     abilities:['inspire','focus_fire'] },
 
-    // ── BLINDÉS ALLIÉS ────────────────────────────────────────────────────
-    // M10 Wolverine — chasseur de chars rapide, blindage léger
+    // â”€â”€ BLINDÃ‰S ALLIÃ‰S â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // M10 Wolverine â€” chasseur de chars rapide, blindage lÃ©ger
     m10_wolverine: { count:1, speed:110, radius:28, vision:260, attackRange:310, damage:90, fireRate:0.4, captureSpeed:0.0, armorType:'light', role:'tank_destroyer', vehicle:true,
                     abilities:['focus_fire'] },
-    // P-47 Thunderbolt — avion d'attaque au sol allié
+    // P-47 Thunderbolt â€” avion d'attaque au sol alliÃ©
     p47_thunderbolt:{ count:1,speed:380, radius:20, vision:420, attackRange:250, damage:110,fireRate:0.55,captureSpeed:0.0, aerial:true, altitude:90, role:'airstrike',
                     abilities:['rocket_barrage'] },
 
-    // ── INFANTERIE AXIS ───────────────────────────────────────────────────
-    // Panzergrenadier — infanterie motorisée d'élite axis
+    // â”€â”€ INFANTERIE AXIS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Panzergrenadier â€” infanterie motorisÃ©e d'Ã©lite axis
     panzergrenadier:{ count:4, speed:100, radius:26, vision:210, attackRange:140, damage:16, fireRate:2.0, captureSpeed:0.8, armorType:'none', role:'assault',
                     abilities:['grenade','suppression_fire'] },
-    // Sturmtruppen — unité de choc axis, combat rapproché
+    // Sturmtruppen â€” unitÃ© de choc axis, combat rapprochÃ©
     sturmtruppen:  { count:4, speed:95,  radius:26, vision:200, attackRange:105, damage:20, fireRate:2.4, captureSpeed:0.6, armorType:'none', role:'assault',
                     abilities:['grenade','smoke'] },
 
-    // ── BLINDÉS AXIS ──────────────────────────────────────────────────────
-    // Tiger I — char lourd redoutable, armure quasi-indestructible
+    // â”€â”€ BLINDÃ‰S AXIS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Tiger I â€” char lourd redoutable, armure quasi-indestructible
     tiger:         { count:1, speed:60,  radius:36, vision:240, attackRange:310, damage:110,fireRate:0.32,captureSpeed:0.0, armorType:'heavy', role:'heavy_tank', vehicle:true,
                     abilities:['focus_fire','barrage'] },
-    // StuG III — canon d'assaut sans tourelle, anti-char efficace
+    // StuG III â€” canon d'assaut sans tourelle, anti-char efficace
     stug:          { count:1, speed:80,  radius:30, vision:220, attackRange:270, damage:85, fireRate:0.42,captureSpeed:0.0, armorType:'heavy', role:'tank_destroyer', vehicle:true,
                     abilities:['focus_fire'] },
-    // Fw 190 — avion d'attaque axis
+    // Fw 190 â€” avion d'attaque axis
     fw190:         { count:1, speed:400, radius:20, vision:400, attackRange:240, damage:95, fireRate:0.5, captureSpeed:0.0, aerial:true, altitude:90, role:'airstrike',
                     abilities:[] },
 
-    // ══ NOUVELLES UNITÉS — ALLIÉES ════════════════════════════════════════════
+    // â•â• NOUVELLES UNITÃ‰S â€” ALLIÃ‰ES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    // ── ÉLITE INFANTERIE ──────────────────────────────────────────────────────
-    // Rangers — infanterie d'élite polyvalente, petite escouade mais létale
+    // â”€â”€ Ã‰LITE INFANTERIE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Rangers â€” infanterie d'Ã©lite polyvalente, petite escouade mais lÃ©tale
     ranger:         { count:3, speed:115, radius:24, vision:260, attackRange:170, damage:22, fireRate:2.0, captureSpeed:0.9, armorType:'none', role:'assault',
                      abilities:['grenade','focus_fire','smoke'] },
-    // Combat Engineer — pionnier offensif, excellent pour capturer
+    // Combat Engineer â€” pionnier offensif, excellent pour capturer
     combat_engineer:{ count:4, speed:80,  radius:26, vision:210, attackRange:130, damage:14, fireRate:1.2, captureSpeed:1.8, armorType:'none', role:'engineer',
                      abilities:['smoke','grenade'] },
-    // Commando — unité furtive, haute mobilité, dégâts élevés
+    // Commando â€” unitÃ© furtive, haute mobilitÃ©, dÃ©gÃ¢ts Ã©levÃ©s
     commando:       { count:2, speed:130, radius:20, vision:300, attackRange:145, damage:35, fireRate:1.4, captureSpeed:0.5, armorType:'none', role:'assault',
                      abilities:['focus_fire','smoke'] },
 
-    // ── VÉHICULES AA ──────────────────────────────────────────────────────────
-    // M16 AA Half-Track — anti-aérien mobile, quad .50cal, supprime l'infanterie
+    // â”€â”€ VÃ‰HICULES AA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // M16 AA Half-Track â€” anti-aÃ©rien mobile, quad .50cal, supprime l'infanterie
     aa_halftrack:   { count:1, speed:100, radius:26, vision:280, attackRange:220, damage:28, fireRate:3.5, captureSpeed:0.0, armorType:'light', role:'anti_air', vehicle:true,
                      abilities:['suppression_fire'] },
-    // Bofors 40mm — canon AA tracté, excellent contre aériens et infanterie groupée
+    // Bofors 40mm â€” canon AA tractÃ©, excellent contre aÃ©riens et infanterie groupÃ©e
     bofors:         { count:1, speed:40,  radius:22, vision:320, attackRange:260, damage:45, fireRate:1.8, captureSpeed:0.0, armorType:'light', role:'anti_air', vehicle:true,
                      abilities:['focus_fire'] },
 
-    // ── ARTILLERIE AUTOMOTRICE ────────────────────────────────────────────────
-    // M7 Priest — obusier automoteur longue portée
+    // â”€â”€ ARTILLERIE AUTOMOTRICE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // M7 Priest â€” obusier automoteur longue portÃ©e
     m7_priest:      { count:1, speed:65,  radius:30, vision:210, attackRange:700, damage:95, fireRate:0.12, captureSpeed:0.0, armorType:'light', role:'artillery', vehicle:true,
                      abilities:['barrage'] },
-    // Calliope — Sherman lance-roquettes, AOE dévastateur sur zone
+    // Calliope â€” Sherman lance-roquettes, AOE dÃ©vastateur sur zone
     calliope:       { count:1, speed:75,  radius:32, vision:200, attackRange:500, damage:70, fireRate:0.08, captureSpeed:0.0, armorType:'heavy', role:'artillery', vehicle:true,
                      abilities:['rocket_barrage','barrage'] },
 
-    // ── CANONS ANTICHAR TRACTÉS ───────────────────────────────────────────────
-    // 57mm AT Gun — canon antichar léger, précis, peu mobile
+    // â”€â”€ CANONS ANTICHAR TRACTÃ‰S â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // 57mm AT Gun â€” canon antichar lÃ©ger, prÃ©cis, peu mobile
     at_gun:         { count:2, speed:30,  radius:24, vision:240, attackRange:320, damage:120, fireRate:0.28, captureSpeed:0.0, armorType:'light', role:'anti_tank',
                      abilities:['focus_fire'] },
-    // 17-Pounder — canon antichar lourd, perce tous les blindages
+    // 17-Pounder â€” canon antichar lourd, perce tous les blindages
     gun_17pdr:      { count:2, speed:20,  radius:26, vision:260, attackRange:380, damage:160, fireRate:0.20, captureSpeed:0.0, armorType:'light', role:'anti_tank',
                      abilities:['focus_fire','rocket_barrage'] },
 
-    // ══ NOUVELLES UNITÉS — AXIS ═══════════════════════════════════════════════
+    // â•â• NOUVELLES UNITÃ‰S â€” AXIS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-    // Flak 88 — le légendaire canon AA/AT axis, dévastateur contre tout
+    // Flak 88 â€” le lÃ©gendaire canon AA/AT axis, dÃ©vastateur contre tout
     flak88:         { count:2, speed:15,  radius:28, vision:300, attackRange:400, damage:150, fireRate:0.22, captureSpeed:0.0, armorType:'light', role:'anti_tank',
                      abilities:['focus_fire'] },
-    // Nebelwerfer — lance-roquettes multiple axis, barrage AOE
+    // Nebelwerfer â€” lance-roquettes multiple axis, barrage AOE
     nebelwerfer:    { count:2, speed:35,  radius:24, vision:190, attackRange:550, damage:75, fireRate:0.10, captureSpeed:0.0, armorType:'none', role:'artillery',
                      abilities:['barrage','rocket_barrage'] },
-    // Fallschirmjäger — parachutistes d'élite axis
+    // FallschirmjÃ¤ger â€” parachutistes d'Ã©lite axis
     fallschirmjager:{ count:4, speed:105, radius:26, vision:230, attackRange:150, damage:18, fireRate:2.2, captureSpeed:0.8, armorType:'none', role:'assault',
                      abilities:['grenade','focus_fire','smoke'] },
-    // Jagdpanther — chasseur de chars axis ultra-efficace
+    // Jagdpanther â€” chasseur de chars axis ultra-efficace
     jagdpanther:    { count:1, speed:70,  radius:34, vision:250, attackRange:360, damage:130, fireRate:0.30, captureSpeed:0.0, armorType:'heavy', role:'tank_destroyer', vehicle:true,
                      abilities:['focus_fire'] },
-    // Me 262 — avion à réaction axis, vitesse extrême
+    // Me 262 â€” avion Ã  rÃ©action axis, vitesse extrÃªme
     me262:          { count:1, speed:500, radius:18, vision:420, attackRange:260, damage:120, fireRate:0.50, captureSpeed:0.0, aerial:true, altitude:100, role:'airstrike',
                      abilities:[] }
 };
@@ -233,26 +237,26 @@ RTS.Game.Squad.SOLDIER_HP = {
     artillery_truck:320,
     heli_transport:260, heli_attack:360,
     airstrike:9999,
-    // Nouvelles unités
+    // Nouvelles unitÃ©s
     flamethrower:60, paratrooper:65, officer:75,
     m10_wolverine:420,
     p47_thunderbolt:9999,
     panzergrenadier:70, sturmtruppen:65,
     tiger:1100, stug:680,
     fw190:9999,
-    // Alliées — élite infanterie
+    // AlliÃ©es â€” Ã©lite infanterie
     ranger:80, combat_engineer:60, commando:70,
-    // Alliées — AA
+    // AlliÃ©es â€” AA
     aa_halftrack:200, bofors:180,
-    // Alliées — artillerie automotrice
+    // AlliÃ©es â€” artillerie automotrice
     m7_priest:380, calliope:650,
-    // Alliées — canons AT tractés
+    // AlliÃ©es â€” canons AT tractÃ©s
     at_gun:140, gun_17pdr:160,
-    // Axis — nouvelles
+    // Axis â€” nouvelles
     flak88:170, nebelwerfer:120, fallschirmjager:75, jagdpanther:850, me262:9999
 };
 
-// Bonus dégâts selon rôle vs type de cible
+// Bonus dÃ©gÃ¢ts selon rÃ´le vs type de cible
 RTS.Game.Squad.DAMAGE_MODIFIER = function(attackerRole, targetArmor) {
     var table = {
         anti_tank:     { none:0.4, light:1.2, heavy:2.2 },
@@ -273,7 +277,7 @@ RTS.Game.Squad.DAMAGE_MODIFIER = function(attackerRole, targetArmor) {
 
 RTS.Game.Squad.ABILITY_DEFS = {
     grenade:          { label:'Grenade',        key:'G', icon:'💥', cooldown:15, duration:0,   description:'Explosion AOE courte portée' },
-    smoke:            { label:'Fumigène',       key:'S', icon:'🌫', cooldown:20, duration:8,   description:'Écran de fumée, bloque la vision' },
+    smoke:            { label:'Fumigène',       key:'M', icon:'🌫', cooldown:20, duration:8,   description:'Écran de fumée, bloque la ligne de vue' },
     focus_fire:       { label:'Tir concentré',  key:'F', icon:'🎯', cooldown:12, duration:5,   description:'+40% précision, suppression bonus' },
     suppression_fire: { label:'Suppression',    key:'U', icon:'🔥', cooldown:18, duration:6,   description:'Supprime les unités ennemies' },
     rocket_barrage:   { label:'Roquettes',      key:'R', icon:'🚀', cooldown:30, duration:3,   description:'Barrage de roquettes AOE' },
@@ -295,7 +299,7 @@ RTS.Game.Squad.prototype._buildAbilities = function(list) {
 };
 
 // ---------------------------------------------------------------------------
-//  ACTIVATE ABILITY (appelé depuis UI ou IA)
+//  ACTIVATE ABILITY (appelÃ© depuis UI ou IA)
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.prototype.activateAbility = function(id, allSquads, targetX, targetY) {
@@ -345,7 +349,7 @@ RTS.Game.Squad.prototype._doFlamethrowerSpray = function(allSquads) {
 
 RTS.Game.Squad.prototype._doGrenade = function(tx, ty) {
     var self = this;
-    // Explosion AOE après 1.2s
+    // Explosion AOE aprÃ¨s 1.2s
     setTimeout(function() {
         self._explosions.push({ x:tx, y:ty, r:0, maxR:70, life:0.6 });
     }, 1200);
@@ -361,7 +365,7 @@ RTS.Game.Squad.prototype._doRocketBarrage = function(allSquads) {
             setTimeout(function() {
                 var ox = (Math.random()-.5)*50, oy = (Math.random()-.5)*50;
                 self._explosions.push({ x:tgt.x+ox, y:tgt.y+oy, r:0, maxR:55, life:0.5 });
-                // Dégâts
+                // DÃ©gÃ¢ts
                 if (!tgt.dead) {
                     tgt.soldiers.forEach(function(s){
                         if (!s.dead) { s.hp -= self.damage * 0.7; if(s.hp<=0){s.hp=0;s.dead=true;} }
@@ -432,6 +436,28 @@ RTS.Game.Squad.prototype._maxTotalHP = function() {
     var hp=0; this.soldiers.forEach(function(s){hp+=s.maxHP;}); return hp;
 };
 
+RTS.Game.Squad.prototype.canReinforce = function() {
+    if (this.dead || this.retreating || this.isVehicle || this.isAerial) return false;
+    var alive = this._aliveSoldiers().length;
+    return alive < this.maxSoldiers;
+};
+
+RTS.Game.Squad.prototype.reinforceOne = function() {
+    if (!this.canReinforce()) return false;
+    for (var i = 0; i < this.soldiers.length; i++) {
+        var s = this.soldiers[i];
+        if (s.dead) {
+            s.dead = false;
+            s.hp = s.maxHP;
+            s.suppressed = false;
+            s.suppressTimer = 0;
+            s.deathAnim = 0;
+            return true;
+        }
+    }
+    return false;
+};
+
 // ---------------------------------------------------------------------------
 //  UPDATE
 // ---------------------------------------------------------------------------
@@ -464,7 +490,7 @@ RTS.Game.Squad.prototype.update = function(dt, allSquads) {
         if (this._lifeTimer <= 0) { this.dead = true; return; }
     }
 
-    // Fumigènes : particules
+    // FumigÃ¨nes : particules
     if (this._smokeActive) {
         if (Math.random() < 0.4) {
             this._smokeParticles.push({ x:this.x+(Math.random()-.5)*40, y:this.y+(Math.random()-.5)*40, r:8, life:2.5, maxLife:2.5 });
@@ -485,7 +511,7 @@ RTS.Game.Squad.prototype.update = function(dt, allSquads) {
         }
     }
 
-    // Fumée : particules decay
+    // FumÃ©e : particules decay
     for (var i=this._smokeParticles.length-1;i>=0;i--) {
         this._smokeParticles[i].life -= dt;
         this._smokeParticles[i].r   += dt * 6;
@@ -507,6 +533,14 @@ RTS.Game.Squad.prototype.update = function(dt, allSquads) {
 
     if (this._aliveSoldiers().length === 0) { this.dead=true; this.inCombat=false; this.target=null; return; }
 
+    if (this.retreating) {
+        this.inCombat = false;
+        this.target = null;
+        this._move(dt);
+        if (!this.path.length || this.pathIndex >= this.path.length) this.retreating = false;
+        return;
+    }
+
     // IA auto-abilities
     this._autoAbilities(dt, allSquads);
 
@@ -515,7 +549,7 @@ RTS.Game.Squad.prototype.update = function(dt, allSquads) {
 };
 
 // ---------------------------------------------------------------------------
-//  IA AUTO-ABILITIES (déclenchement situationnel)
+//  IA AUTO-ABILITIES (dÃ©clenchement situationnel)
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.prototype._autoAbilities = function(dt, allSquads) {
@@ -524,7 +558,7 @@ RTS.Game.Squad.prototype._autoAbilities = function(dt, allSquads) {
     var tgt  = this.target;
     if (!tgt) return;
 
-    // Officier : inspire si alliés en combat à proximité
+    // Officier : inspire si alliÃ©s en combat Ã  proximitÃ©
     if (this.role === 'infantry' && this.type === 'officer' && this.abilities.inspire && this.abilities.inspire.timer <= 0) {
         var alliesInCombat = allSquads.some(function(sq) {
             if (sq.team !== self.team || sq.dead || sq === self) return false;
@@ -533,7 +567,7 @@ RTS.Game.Squad.prototype._autoAbilities = function(dt, allSquads) {
         });
         if (alliesInCombat) {
             this.activateAbility('inspire', allSquads);
-            // Propager _inspireActive aux alliés proches
+            // Propager _inspireActive aux alliÃ©s proches
             allSquads.forEach(function(sq) {
                 if (sq.team !== self.team || sq.dead || sq === self) return;
                 var dx=sq.x-self.x, dy=sq.y-self.y;
@@ -542,14 +576,14 @@ RTS.Game.Squad.prototype._autoAbilities = function(dt, allSquads) {
         }
     }
 
-    // Lance-flammes : spray si ennemi très proche
+    // Lance-flammes : spray si ennemi trÃ¨s proche
     if (this.type === 'flamethrower' && this.abilities.flamethrower_spray && this.abilities.flamethrower_spray.timer <= 0) {
         if (tgt && !tgt.dead && this._dist(tgt) < this.attackRange + 20) {
             this.activateAbility('flamethrower_spray', allSquads);
         }
     }
 
-    // Medic : heal si alliés proches blessés
+    // Medic : heal si alliÃ©s proches blessÃ©s
     if (this.role === 'medic' && this.abilities.heal && this.abilities.heal.timer <= 0) {
         var needsHeal = allSquads.some(function(sq){
             if (sq.team !== self.team || sq.dead) return false;
@@ -571,12 +605,12 @@ RTS.Game.Squad.prototype._autoAbilities = function(dt, allSquads) {
         if (underHeavyFire) this.activateAbility('smoke', allSquads);
     }
 
-    // AT Infantry : rocket barrage si cible est un véhicule
+    // AT Infantry : rocket barrage si cible est un vÃ©hicule
     if (this.role === 'anti_tank' && this.abilities.rocket_barrage && this.abilities.rocket_barrage.timer <= 0) {
         if (tgt && tgt.isVehicle && !tgt.dead) this.activateAbility('rocket_barrage', allSquads);
     }
 
-    // Mortar / Artillery : barrage si plusieurs ennemis groupés
+    // Mortar / Artillery : barrage si plusieurs ennemis groupÃ©s
     if ((this.role === 'artillery') && this.abilities.barrage && this.abilities.barrage.timer <= 0) {
         var nearby = allSquads.filter(function(sq){
             if (sq.team===self.team||sq.dead) return false;
@@ -609,6 +643,7 @@ RTS.Game.Squad.prototype._autoAbilities = function(dt, allSquads) {
 RTS.Game.Squad.prototype._updateCombat = function(dt, all) {
     if (this.type === 'heli_transport') return;
     if (this.attackRange === 0) return;
+    if (this.retreating) return;
 
     if (this.target) {
         if (this.target.dead || this._dist(this.target) > this.attackRange * 1.35)
@@ -635,11 +670,12 @@ RTS.Game.Squad.prototype._updateCombat = function(dt, all) {
 };
 
 RTS.Game.Squad.prototype._findTarget = function(all) {
+    if (this.retreating) return null;
     var self=this, best=null, bestD=Infinity;
     all.forEach(function(sq) {
         if (sq.team===self.team||sq.dead) return;
         if (sq.isAerial && self.type!=='mg' && self.type!=='sniper' && self.type!=='heli_attack') return;
-        // AT infantry prioritise les véhicules
+        // AT infantry prioritise les vÃ©hicules
         var d=self._dist(sq);
         if (d>self.attackRange) return;
         var score = d;
@@ -665,6 +701,7 @@ RTS.Game.Squad.prototype._exitCombat = function() {
 };
 
 RTS.Game.Squad.prototype._shoot = function(tgt) {
+    if (this.retreating) return;
     var self=this;
     var alive=this._aliveSoldiers(), tAlive=tgt._aliveSoldiers();
     if (!alive.length||!tAlive.length) return;
@@ -673,7 +710,7 @@ RTS.Game.Squad.prototype._shoot = function(tgt) {
     var suppBonus   = (this.abilities.suppression_fire && this.abilities.suppression_fire.active) ? 1.6 : 1.0;
     var dmgModifier = RTS.Game.Squad.DAMAGE_MODIFIER(this.role, tgt.armorType || 'none');
 
-    // Inspire reçu d'un officier allié proche : bonus cadence de tir
+    // Inspire reÃ§u d'un officier alliÃ© proche : bonus cadence de tir
     var inspireBonus = 1.0;
     if (this._inspireActive) inspireBonus = 1.3;
 
@@ -682,7 +719,14 @@ RTS.Game.Squad.prototype._shoot = function(tgt) {
         var sx=self.x+sol.ox, sy=self.y+sol.oy-self.altitude;
         var tx=tgt.x+ts.ox,   ty=tgt.y+ts.oy-tgt.altitude;
         var baseAcc = self.type==='sniper'?0.88 : self.isVehicle?0.65 : 0.55;
-        var hit = Math.random() < Math.min(0.97, baseAcc * focusBonus);
+        var coverAccMul = 1.0;
+        var coverDmgMul = 1.0;
+        if (!self.isVehicle && !tgt.isVehicle && !tgt.isAerial) {
+            if (tgt.coverLevel === 1) { coverAccMul = 0.80; coverDmgMul = 0.90; }
+            else if (tgt.coverLevel >= 2) { coverAccMul = 0.60; coverDmgMul = 0.75; }
+        }
+        var smokeAccMul = (tgt._smokeParticles && tgt._smokeParticles.length > 0) ? 0.75 : 1.0;
+        var hit = Math.random() < Math.min(0.97, baseAcc * focusBonus * coverAccMul * smokeAccMul);
 
         self._muzzleFlashes.push({x:sx,y:sy,angle:Math.atan2(ty-sy,tx-sx),life:0.09});
         self._tracers.push({x1:sx,y1:sy,
@@ -690,7 +734,9 @@ RTS.Game.Squad.prototype._shoot = function(tgt) {
             y2:hit?ty:ty+(Math.random()-.5)*50, life:0.13});
 
         if (hit) {
-            var finalDmg = self.damage * dmgModifier * focusBonus;
+            var retreatDmgMul = tgt.retreating ? 0.35 : 1.0;
+            var doctrineMul = tgt.doctrineDamageTakenMul || 1.0;
+            var finalDmg = self.damage * dmgModifier * focusBonus * coverDmgMul * retreatDmgMul * doctrineMul;
             ts.hp -= finalDmg;
             self._hitSparks.push({x:tx,y:ty,life:0.2});
 
@@ -718,8 +764,15 @@ RTS.Game.Squad.prototype._move = function(dt) {
     var dx=t.x-this.x, dy=t.y-this.y, d=Math.sqrt(dx*dx+dy*dy);
     if (d<5){this.pathIndex++;return;}
     this._angle=Math.atan2(dy,dx);
-    this.x+=(dx/d)*this.speed*dt;
-    this.y+=(dy/d)*this.speed*dt;
+    var suppressedCount = 0;
+    for (var i = 0; i < this.soldiers.length; i++) {
+        if (!this.soldiers[i].dead && this.soldiers[i].suppressed) suppressedCount++;
+    }
+    var suppressMul = suppressedCount > 0 ? (1 - Math.min(0.5, suppressedCount * 0.12)) : 1.0;
+    var retreatMul = this.retreating ? 1.55 : 1.0;
+    var speedMul = suppressMul * retreatMul;
+    this.x+=(dx/d)*this.speed*speedMul*dt;
+    this.y+=(dy/d)*this.speed*speedMul*dt;
 };
 
 // ---------------------------------------------------------------------------
@@ -740,7 +793,7 @@ RTS.Game.Squad.prototype.render = function(ctx) {
     ctx.save();
     var col=RTS.Game.Squad.COLORS[this.team]||RTS.Game.Squad.COLORS.allied;
 
-    // Fumée
+    // FumÃ©e
     this._drawSmoke(ctx);
     // Explosions
     this._drawExplosions(ctx);
@@ -762,7 +815,7 @@ RTS.Game.Squad.prototype.render = function(ctx) {
         ctx.stroke(); ctx.restore();
     }
 
-    // Anneau sélection
+    // Anneau sÃ©lection
     if (this.selected) {
         var sy0=this.y-this.altitude;
         ctx.beginPath(); ctx.arc(this.x,sy0,this.radius+6,0,Math.PI*2);
@@ -785,7 +838,7 @@ RTS.Game.Squad.prototype.render = function(ctx) {
         ctx.strokeStyle='#ffdd44'; ctx.lineWidth=3; ctx.stroke();
     }
 
-    // Ombre sol aériens
+    // Ombre sol aÃ©riens
     if (this.isAerial&&!this.dead) {
         ctx.save(); ctx.globalAlpha=0.22;
         ctx.fillStyle='#000';
@@ -801,7 +854,7 @@ RTS.Game.Squad.prototype.render = function(ctx) {
     this._drawHitSparks(ctx);
     if (!this.dead&&(this.inCombat||this.selected)) this._drawHealthBar(ctx,col);
 
-    // Icône heal actif
+    // IcÃ´ne heal actif
     if (this._healActive) {
         ctx.fillStyle='#44ff88'; ctx.font='bold 11px Arial';
         ctx.textAlign='center'; ctx.textBaseline='bottom';
@@ -816,7 +869,7 @@ RTS.Game.Squad.prototype.render = function(ctx) {
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.prototype._drawInfantry = function(ctx,col) {
-    // Couleur de glow selon rôle
+    // Couleur de glow selon rÃ´le
     var roleColors = {
         assault:'rgba(255,120,0,0.22)', anti_tank:'rgba(255,50,50,0.22)',
         artillery:'rgba(255,200,0,0.22)', medic:'rgba(0,255,120,0.22)',
@@ -859,7 +912,7 @@ RTS.Game.Squad.prototype._drawSoldier = function(ctx,sol,col) {
         ctx.moveTo(sx+4,sy-4);ctx.lineTo(sx-4,sy+4); ctx.stroke(); ctx.restore(); return;
     }
 
-    // Couleur selon rôle
+    // Couleur selon rÃ´le
     var soldierColor = col.base;
     if (this.role==='assault')    soldierColor='#ff6600';
     if (this.role==='anti_tank')  soldierColor='#cc0000';
@@ -885,7 +938,7 @@ RTS.Game.Squad.prototype._drawSoldier = function(ctx,sol,col) {
 };
 
 // ---------------------------------------------------------------------------
-//  DRAW VÉHICULE
+//  DRAW VÃ‰HICULE
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
@@ -971,9 +1024,9 @@ RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
         ctx.strokeStyle=col.accent; ctx.lineWidth=1.5; ctx.strokeRect(-c.w,-c.h,c.w*2,c.h*2);
 
     } else if (t==='aa_halftrack'||t==='bofors'||t==='m7_priest'||t==='at_gun'||t==='gun_17pdr'||t==='flak88'||t==='nebelwerfer') {
-        // Véhicules/canons spéciaux
+        // VÃ©hicules/canons spÃ©ciaux
         if (t==='aa_halftrack') {
-            // Châssis half-track + tourelle quad .50
+            // ChÃ¢ssis half-track + tourelle quad .50
             ctx.fillStyle=col.base; ctx.fillRect(-10,-17,20,34);
             ctx.fillStyle='#222'; ctx.fillRect(-13,-17,4,34); ctx.fillRect(9,-17,4,34);
             for(var wi=0;wi<4;wi++){ctx.fillStyle='#555';ctx.beginPath();ctx.arc(-11,-12+wi*8,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(11,-12+wi*8,3,0,Math.PI*2);ctx.fill();}
@@ -985,7 +1038,7 @@ RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
             ctx.strokeStyle='#44aaff'; ctx.lineWidth=1.5; ctx.strokeRect(-10,-17,20,34);
 
         } else if (t==='bofors') {
-            // Affut de canon AA carré
+            // Affut de canon AA carrÃ©
             ctx.fillStyle='#2a3a1a'; ctx.fillRect(-9,-9,18,18);
             ctx.fillStyle='#1a1a1a'; ctx.fillRect(-10,-10,20,4); ctx.fillRect(-10,6,20,4);
             // Canon
@@ -994,7 +1047,7 @@ RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
             ctx.strokeStyle='#88ff44'; ctx.lineWidth=1.5; ctx.strokeRect(-9,-9,18,18);
 
         } else if (t==='m7_priest') {
-            // Châssis Sherman + howitzer
+            // ChÃ¢ssis Sherman + howitzer
             ctx.fillStyle='#1a3020'; ctx.fillRect(-11,-20,22,40);
             ctx.fillStyle='#111'; ctx.fillRect(-14,-20,4,40); ctx.fillRect(10,-20,4,40);
             for(var pi=0;pi<5;pi++){ctx.fillStyle='#333';ctx.beginPath();ctx.arc(-12,-14+pi*7,3,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(12,-14+pi*7,3,0,Math.PI*2);ctx.fill();}
@@ -1005,7 +1058,7 @@ RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
             ctx.strokeStyle='#44ff88'; ctx.lineWidth=1.5; ctx.strokeRect(-11,-20,22,40);
 
         } else if (t==='at_gun'||t==='gun_17pdr'||t==='flak88') {
-            // Canons tractés — affut bas + long canon
+            // Canons tractÃ©s â€” affut bas + long canon
             var barLen = t==='gun_17pdr'?38 : t==='flak88'?42 : 30;
             var aCol   = t==='flak88'?'#2a2808':'#2a1a1a';
             ctx.fillStyle=aCol; ctx.fillRect(-9,-8,18,16);
@@ -1044,7 +1097,7 @@ RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
 };
 
 // ---------------------------------------------------------------------------
-//  DRAW AÉRIEN
+//  DRAW AÃ‰RIEN
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.prototype._drawAerial = function(ctx,col) {
@@ -1073,7 +1126,7 @@ RTS.Game.Squad.prototype._drawAerial = function(ctx,col) {
             ctx.fillStyle='#111'; ctx.fillRect(-2,-ah/2-11,4,13);
         }
     } else if (t==='airstrike'||t==='p47_thunderbolt'||t==='fw190') {
-        // Corps d'avion (silhouette plus détaillée pour les nouvelles unités)
+        // Corps d'avion (silhouette plus dÃ©taillÃ©e pour les nouvelles unitÃ©s)
         var planeCol = t==='fw190' ? '#553300' : col.base;
         ctx.fillStyle=planeCol;
         ctx.beginPath();
@@ -1087,7 +1140,7 @@ RTS.Game.Squad.prototype._drawAerial = function(ctx,col) {
         // Stabilisateurs
         ctx.beginPath(); ctx.moveTo(0,6);ctx.lineTo(7,14);ctx.lineTo(-7,14);ctx.closePath();
         ctx.fillStyle=col.dark; ctx.fill();
-        // Traînée
+        // TraÃ®nÃ©e
         ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.lineWidth=2;
         ctx.beginPath();ctx.moveTo(-3,8);ctx.lineTo(-3,32);ctx.stroke();
         ctx.beginPath();ctx.moveTo(3,8);ctx.lineTo(3,32);ctx.stroke(); ctx.restore();
@@ -1109,12 +1162,12 @@ RTS.Game.Squad.prototype._drawLabel = function(ctx,col,x,y) {
         sherman:'M4', panzer:'PZ', tank_destroyer:'TD', heavy_tank:'HVY',
         artillery_truck:'ART',
         heli_transport:'HT-TR', heli_attack:'HT-AT', airstrike:'AIR',
-        // Nouvelles unités
+        // Nouvelles unitÃ©s
         flamethrower:'FLAME', paratrooper:'PARA', officer:'OFF',
         m10_wolverine:'M10', p47_thunderbolt:'P-47',
         panzergrenadier:'PzGr', sturmtruppen:'STRM',
         tiger:'TIGER', stug:'STUG', fw190:'FW190',
-        // Nouvelles alliées
+        // Nouvelles alliÃ©es
         ranger:'RGR', combat_engineer:'ENG', commando:'CDO',
         aa_halftrack:'AA-HT', bofors:'BOFR',
         m7_priest:'M7', calliope:'CALL',

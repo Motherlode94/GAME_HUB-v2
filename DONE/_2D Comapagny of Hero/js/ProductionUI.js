@@ -11,6 +11,13 @@ RTS.Game.ProductionUI = function(canvas, getResources) {
     this.buttons          = [];
     this.visible          = false;
     this.activeTab        = 'produce';
+    this.techState        = {
+        built:{}, counts:{}, availablePioneers:0,
+        population:0, popCap:0, techTier:1,
+        upgradeInProgress:null,
+        commandPoints:0, commandPointCap:12,
+        doctrineSelected:null
+    };
 
     this.barH    = 110;
     this.resBarH = 28;
@@ -55,7 +62,7 @@ RTS.Game.ProductionUI.prototype.selectBuilding = function(building) {
     }
     this.selectedBuilding = building;
     this.visible          = !!building;
-    this.activeTab        = 'produce';
+    this.activeTab        = (building && building.type === 'hq') ? 'construct' : 'produce';
 };
 
 RTS.Game.ProductionUI.prototype.setSelectedPioneers = function(arr) {
@@ -64,6 +71,22 @@ RTS.Game.ProductionUI.prototype.setSelectedPioneers = function(arr) {
 
 RTS.Game.ProductionUI.prototype.setSelectedSquads = function(arr) {
     this.selectedSquads = arr || [];
+};
+
+RTS.Game.ProductionUI.prototype.setTechState = function(state) {
+    state = state || {};
+    this.techState = {
+        built: state.built || {},
+        counts: state.counts || {},
+        availablePioneers: state.availablePioneers || 0,
+        population: state.population || 0,
+        popCap: state.popCap || 0,
+        techTier: state.techTier || 1,
+        upgradeInProgress: state.upgradeInProgress || null,
+        commandPoints: state.commandPoints || 0,
+        commandPointCap: state.commandPointCap || 12,
+        doctrineSelected: state.doctrineSelected || null
+    };
 };
 
 // ---------------------------------------------------------------------------
@@ -117,18 +140,24 @@ RTS.Game.ProductionUI.prototype.render = function(ctx, mouseX, mouseY) {
         ctx.fillText('⚙ '+item.unitType.toUpperCase()+' — '+prog+'%',p,barY+p+16);
     }
 
-    var hasPioneer = this.selectedPioneers.length > 0;
     var showTabs   = b.type === 'hq' && (b.constructs && b.constructs.length > 0);
     var contentX   = 175;
 
     if (showTabs) {
-        this._renderTabs(ctx, col, barY, p, hasPioneer);
+        this._renderTabs(ctx, col, barY, p, true);
     }
 
-    if (this.activeTab === 'construct' && showTabs && hasPioneer) {
+    if (this.activeTab === 'construct' && showTabs) {
         this._renderConstructButtons(ctx, col, b, res, barY, contentX, mouseX, mouseY);
     } else {
         this._renderProduceButtons(ctx, col, b, res, barY, contentX, mouseX, mouseY);
+    }
+
+    if (b.type === 'hq') {
+        ctx.fillStyle = col.text+'77';
+        ctx.font = '8px "Courier New"';
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText('Tech: [1]/[2]/[3]  Doctrine: [Z]/[X]/[C]  Call-ins: [Y]/[U]', p, barY + this.barH - 12);
     }
 
     ctx.restore();
@@ -262,9 +291,32 @@ RTS.Game.ProductionUI.prototype._renderResourceBar = function(ctx, res, col, cv)
         ctx.fillText('+'+item.rate+'/min',x+130,rh/2-4);
     });
 
+    if (this.techState && this.techState.popCap > 0) {
+        var pop = this.techState.population || 0;
+        var cap = this.techState.popCap || 0;
+        var tier = this.techState.techTier || 1;
+        var cp = this.techState.commandPoints || 0;
+        var cpCap = this.techState.commandPointCap || 12;
+        var doc = this.techState.doctrineSelected ? this.techState.doctrineSelected.toUpperCase() : 'NONE';
+
+        ctx.fillStyle = pop >= cap ? '#ff5555' : 'rgba(255,255,255,0.85)';
+        ctx.font='bold 10px "Courier New"'; ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText('POP '+pop+'/'+cap, 620, rh/2-4);
+
+        ctx.fillStyle = 'rgba(170,220,255,0.9)';
+        ctx.fillText('TIER '+tier, 710, rh/2-4);
+
+        ctx.fillStyle = 'rgba(255,170,120,0.95)';
+        ctx.fillText('CP '+cp+'/'+cpCap, 800, rh/2-4);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font='8px "Courier New"';
+        ctx.fillText('DOC '+doc, 890, rh/2-4);
+    }
+
     ctx.fillStyle='rgba(255,255,255,0.25)'; ctx.font='8px "Courier New"';
     ctx.textAlign='right'; ctx.textBaseline='middle';
-    ctx.fillText('G=grille  F1=secteurs  H=base  Échap=QG',cv.width-10,rh/2);
+    ctx.fillText('H=base  T=retraite  V=renfort  1/2/3=tech  Z/X/C=doctrine  Y/U=call-in',cv.width-10,rh/2);
 
     ctx.restore();
 };
@@ -276,7 +328,7 @@ RTS.Game.ProductionUI.prototype._renderResourceBar = function(ctx, res, col, cv)
 RTS.Game.ProductionUI.prototype._renderTabs = function(ctx,col,barY,p,hasPioneer) {
     var tabs=[
         {id:'produce',  label:'PRODUCTION'},
-        {id:'construct',label:'CONSTRUCTION'+(hasPioneer?'':' (pioneer requis)')}
+        {id:'construct',label:'CONSTRUCTION'}
     ];
     var tabW=130, tabH=18, tabY=barY+2;
     tabs.forEach(function(tab,i){
@@ -362,16 +414,19 @@ RTS.Game.ProductionUI.prototype._renderProduceButtons = function(ctx,col,b,res,b
         var bx = startX + idx*(btnW+5);
         var hover     = mx>=bx && mx<=bx+btnW && my>=btnY && my<=btnY+btnH;
         var canAfford = this._canAfford(res, prod.cost);
+        var tierReq   = prod.minTier || 1;
+        var tierOk    = (this.techState.techTier || 1) >= tierReq;
+        var enabled   = canAfford && tierOk;
 
-        ctx.fillStyle = !canAfford ? col.btnDisabled : hover ? col.btnHover : col.btnBg;
+        ctx.fillStyle = !enabled ? col.btnDisabled : hover ? col.btnHover : col.btnBg;
         ctx.fillRect(bx, btnY, btnW, btnH);
-        ctx.strokeStyle = hover&&canAfford ? col.text : canAfford ? col.border+'99' : '#333333';
+        ctx.strokeStyle = hover&&enabled ? col.text : enabled ? col.border+'99' : '#333333';
         ctx.lineWidth=1.5; ctx.strokeRect(bx, btnY, btnW, btnH);
 
         ctx.font='13px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(ICONS[prod.unitType]||'⚔', bx+14, btnY+11);
 
-        ctx.fillStyle = canAfford ? col.text : col.text+'55';
+        ctx.fillStyle = enabled ? col.text : col.text+'55';
         ctx.font='bold 8px "Courier New"'; ctx.textAlign='left'; ctx.textBaseline='top';
         ctx.fillText('['+prod.key+'] '+prod.label, bx+26, btnY+5);
 
@@ -380,9 +435,13 @@ RTS.Game.ProductionUI.prototype._renderProduceButtons = function(ctx,col,b,res,b
 
         ctx.fillStyle=col.text+'88'; ctx.font='8px "Courier New"'; ctx.textAlign='left';
         ctx.fillText('⏱ '+prod.time+'s', bx+4, cy+26);
+        if (!tierOk) {
+            ctx.fillStyle = col.costBad;
+            ctx.fillText('Tier '+tierReq+' requis', bx+4, cy+36);
+        }
 
-        if (hover&&canAfford) { ctx.fillStyle=col.text+'22'; ctx.fillRect(bx,btnY,btnW,btnH); }
-        this.buttons.push({x:bx,y:btnY,w:btnW,h:btnH,action:'produce',prod:prod,canAfford:canAfford});
+        if (hover&&enabled) { ctx.fillStyle=col.text+'22'; ctx.fillRect(bx,btnY,btnW,btnH); }
+        this.buttons.push({x:bx,y:btnY,w:btnW,h:btnH,action:'produce',prod:prod,canAfford:enabled});
     }, this);
 
     // --- Rally ---
@@ -407,11 +466,13 @@ RTS.Game.ProductionUI.prototype._renderConstructButtons = function(ctx,col,b,res
     b.constructs.forEach(function(cons,idx){
         var bx=startX+idx*(btnW+5);
         var hover=mx>=bx&&mx<=bx+btnW&&my>=btnY&&my<=btnY+btnH;
+        var availability = this._getConstructAvailability(cons);
         var canAfford=this._canAfford(res,cons.cost);
+        var enabled = canAfford && availability.canBuild;
 
-        ctx.fillStyle=!canAfford?col.btnDisabled:hover?col.btnHover:col.btnBg;
+        ctx.fillStyle=!enabled?col.btnDisabled:hover?col.btnHover:col.btnBg;
         ctx.fillRect(bx,btnY,btnW,btnH);
-        ctx.strokeStyle=hover&&canAfford?col.text:canAfford?col.border+'99':'#333333';
+        ctx.strokeStyle=hover&&enabled?col.text:enabled?col.border+'99':'#333333';
         ctx.lineWidth=1.5; ctx.strokeRect(bx,btnY,btnW,btnH);
 
         ctx.fillStyle=col.border+'44'; ctx.fillRect(bx+4,btnY+4,18,18);
@@ -419,7 +480,7 @@ RTS.Game.ProductionUI.prototype._renderConstructButtons = function(ctx,col,b,res
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText('⌂',bx+13,btnY+13);
 
-        ctx.fillStyle=canAfford?col.text:col.text+'55'; ctx.font='bold 8px "Courier New"';
+        ctx.fillStyle=enabled?col.text:col.text+'55'; ctx.font='bold 8px "Courier New"';
         ctx.textAlign='left'; ctx.textBaseline='top';
         ctx.fillText('['+cons.key+'] '+cons.label,bx+26,btnY+5);
 
@@ -427,8 +488,12 @@ RTS.Game.ProductionUI.prototype._renderConstructButtons = function(ctx,col,b,res
         ctx.fillStyle=col.text+'88'; ctx.font='8px "Courier New"';
         ctx.textAlign='left';
         ctx.fillText('⏱ '+cons.time+'s',bx+4,btnY+48);
+        if (!availability.canBuild) {
+            ctx.fillStyle = col.costBad;
+            ctx.fillText(availability.reason, bx+4, btnY+60);
+        }
 
-        this.buttons.push({x:bx,y:btnY,w:btnW,h:btnH,action:'construct',cons:cons,canAfford:canAfford});
+        this.buttons.push({x:bx,y:btnY,w:btnW,h:btnH,action:'construct',cons:cons,canAfford:canAfford,canBuild:availability.canBuild});
     },this);
 };
 
@@ -454,6 +519,35 @@ RTS.Game.ProductionUI.prototype._canAfford = function(res,cost) {
     return (res.manpower  >= (cost.manpower  ||0)) &&
            (res.munitions >= (cost.munitions ||0)) &&
            (res.fuel      >= (cost.fuel      ||0));
+};
+
+RTS.Game.ProductionUI.prototype._getConstructAvailability = function(cons) {
+    var state = this.techState || {};
+    var counts = state.counts || {};
+    var built = state.built || {};
+
+    if ((counts[cons.buildingType] || 0) > 0) {
+        return { canBuild:false, reason:'Deja present' };
+    }
+    if ((state.availablePioneers || 0) <= 0) {
+        return { canBuild:false, reason:'Aucun pioneer' };
+    }
+
+    var tierReq = cons.minTier || 1;
+    if ((state.techTier || 1) < tierReq) {
+        return { canBuild:false, reason:'Tier '+tierReq+' requis' };
+    }
+
+    var reqs = cons.requires || [];
+    for (var i = 0; i < reqs.length; i++) {
+        if (!built[reqs[i]]) {
+            var reqStats = RTS.Game.Building.STATS[reqs[i]];
+            var reqLabel = reqStats ? reqStats.label : reqs[i].toUpperCase();
+            return { canBuild:false, reason:'Req: ' + reqLabel };
+        }
+    }
+
+    return { canBuild:true, reason:'' };
 };
 
 // ---------------------------------------------------------------------------
@@ -482,12 +576,21 @@ RTS.Game.ProductionUI.prototype.handleKey = function(key) {
     var res=this.getResources();
     if (this.activeTab==='construct'&&b.constructs) {
         var found=null;
-        b.constructs.forEach(function(c){if(c.key===uk)found={action:'construct',cons:c,canAfford:this._canAfford(res,c.cost)};},this);
+        b.constructs.forEach(function(c){
+            if (c.key!==uk) return;
+            var availability = this._getConstructAvailability(c);
+            found={action:'construct',cons:c,canAfford:this._canAfford(res,c.cost),canBuild:availability.canBuild};
+        },this);
         if (found) return found;
     }
     if (b.produces) {
         var found2=null;
-        b.produces.forEach(function(p){if(p.key===uk)found2={action:'produce',prod:p,canAfford:this._canAfford(res,p.cost)};},this);
+        b.produces.forEach(function(p){
+            if (p.key!==uk) return;
+            var tierReq = p.minTier || 1;
+            var tierOk = (this.techState.techTier || 1) >= tierReq;
+            found2={action:'produce',prod:p,canAfford:this._canAfford(res,p.cost)&&tierOk};
+        },this);
         return found2;
     }
     return null;

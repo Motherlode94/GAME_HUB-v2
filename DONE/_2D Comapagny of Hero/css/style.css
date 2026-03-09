@@ -328,7 +328,11 @@ body::after {
 /* ── GRILLE CARTES ────────────────────────────────────────────── */
 .map-grid {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 18px;
+    max-width: 1220px;
+    padding: 0 20px;
 }
 
 .map-card {

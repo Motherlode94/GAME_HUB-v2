@@ -19,7 +19,7 @@ RTS.DefenseTower = {
     RANGE:        185,  // portée de détection (px monde)
     DAMAGE:       38,   // dégâts par projectile
     RATE:         0.9,  // tirs/seconde
-    AMMO_COST:    2,    // munitions consommées par tir
+    AMMO_COST:    1,    // munitions consommées par tir
     PROJ_SPEED:   520,  // vitesse du projectile
 
     // ── Mise à jour principale ────────────────────────────────────────────────

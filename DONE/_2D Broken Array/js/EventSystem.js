@@ -84,14 +84,14 @@ RTS.EventSystem = {
                     var alive = game.resourceNodes.filter(function(n) { return !n.depleted; });
                     if (alive.length > 0) {
                         var pick = alive[Math.floor(Math.random() * alive.length)];
-                        pick.amount = Math.min(pick.maxAmount, pick.amount + 200);
-                        return "Nœud " + pick.type + " renforcé de 200 unités";
+                        pick.amount = Math.min(pick.maxAmount, pick.amount + 320);
+                        return "Nœud " + pick.type + " renforcé de 320 unités";
                     }
                     return "Aucun nœud à réapprovisionner";
                 }
                 var node = depleted[Math.floor(Math.random() * depleted.length)];
                 node.depleted = false;
-                node.amount   = 250;
+                node.amount   = Math.max(350, Math.floor(node.maxAmount * 0.6));
                 return "Gisement de " + node.type + " réapprovisionné !";
             }
         },

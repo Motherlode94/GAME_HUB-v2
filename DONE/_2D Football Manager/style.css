@@ -651,6 +651,154 @@ button {
 
 .sub-btn:hover { background: rgba(245,158,11,0.5); }
 
+/* ====== Finale Screens ====== */
+.finale-screen {
+    position: relative;
+    overflow: hidden;
+}
+
+.finale-hero {
+    position: relative;
+    border-radius: 18px;
+    padding: 26px 18px 22px;
+    margin: 6px 0 18px;
+    border: 1px solid rgba(255,255,255,0.15);
+    text-align: center;
+    overflow: hidden;
+}
+
+.finale-hero::after {
+    content: '';
+    position: absolute;
+    inset: -35%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.2), transparent 60%);
+    filter: blur(25px);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.finale-hero.champion {
+    background: linear-gradient(135deg, rgba(250,204,21,0.22), rgba(34,197,94,0.2));
+    box-shadow: 0 0 0 1px rgba(250,204,21,0.2), 0 20px 36px rgba(0,0,0,0.28);
+}
+
+.finale-hero.podium {
+    background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(20,184,166,0.2));
+    box-shadow: 0 0 0 1px rgba(34,211,238,0.18), 0 20px 36px rgba(0,0,0,0.24);
+}
+
+.finale-hero.defeat {
+    background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(249,115,22,0.2));
+    box-shadow: 0 0 0 1px rgba(248,113,113,0.2), 0 20px 36px rgba(0,0,0,0.22);
+}
+
+.finale-kicker {
+    font-family: 'Orbitron', sans-serif;
+    color: rgba(226,232,240,0.9);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.finale-icon {
+    font-size: 64px;
+    line-height: 1;
+    margin: 4px 0 8px;
+    animation: finalePulse 2.8s ease-in-out infinite;
+}
+
+.finale-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(22px, 4vw, 36px);
+    letter-spacing: 1px;
+    color: #fff;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.45);
+    margin-bottom: 6px;
+}
+
+.finale-subtitle {
+    color: #dbeafe;
+    font-size: 15px;
+    margin: 0 auto;
+    max-width: 760px;
+}
+
+.finale-ribbon {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #fff;
+    background: rgba(15,23,42,0.45);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.finale-highlights {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0 8px;
+}
+
+.finale-chip {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+}
+
+.finale-chip-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    color: #fff;
+}
+
+.finale-chip-label {
+    color: #cbd5e1;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+.finale-confetti {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    opacity: 0.45;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(250,204,21,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle at 30% 70%, rgba(34,197,94,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle at 55% 25%, rgba(59,130,246,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle at 78% 65%, rgba(244,114,182,0.95) 0 2px, transparent 3px),
+        radial-gradient(circle at 92% 38%, rgba(168,85,247,0.95) 0 2px, transparent 3px);
+    background-size: 180px 180px;
+    animation: confettiDrift 16s linear infinite;
+}
+
+.finale-hero.defeat .finale-confetti {
+    opacity: 0.2;
+    filter: saturate(0.6);
+}
+
+@keyframes finalePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+}
+
+@keyframes confettiDrift {
+    0% { transform: translateY(-8px) translateX(0); }
+    50% { transform: translateY(8px) translateX(5px); }
+    100% { transform: translateY(-8px) translateX(0); }
+}
+
 /* ====== Scrollbars ====== */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
@@ -666,6 +814,7 @@ button {
     .formation-grid { grid-template-columns: repeat(2, 1fr); }
     .panel-grid-4 { grid-template-columns: repeat(2, 1fr); }
     .panel-grid-3 { grid-template-columns: 1fr; }
+    .finale-highlights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .strategy-row { flex-wrap: wrap; }
     .btn-back { padding: 10px 16px; font-size: 14px; bottom: 15px; right: 15px; }
     .back-text { display: none; }
