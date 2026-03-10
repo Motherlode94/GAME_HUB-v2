@@ -1,4 +1,4 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+﻿* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     background: #060e06;
@@ -14,9 +14,25 @@ body {
     overflow-y: auto;
 }
 
+.hub-back-btn {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 9999;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(7,10,18,.82);
+    color: #fff;
+    text-decoration: none;
+    font: 700 14px/1 'Rajdhani', Arial, sans-serif;
+    letter-spacing: .08em;
+    box-shadow: 0 10px 24px rgba(0,0,0,.28);
+}
+
 .hidden { display: none !important; }
 
-/* ── TITLE SCREEN ─────────────────────── */
+/* TITLE SCREEN */
 #titleScreen {
     position: relative;
     display: flex; flex-direction: column;
@@ -93,7 +109,7 @@ body {
     50%       { box-shadow: 0 0 35px rgba(255,140,0,.7); }
 }
 
-/* ── MODE SELECTION ───────────────────── */
+/* MODE SELECTION */
 .mode-select { width: 560px; max-width: 95vw; }
 .mode-title {
     font-family: 'Oswald', sans-serif;
@@ -132,7 +148,7 @@ body {
 .mode-desc { font-size: .72em; color: #777; margin-top: 4px; line-height: 1.4; }
 .mode-card.active .mode-desc { color: #aaa; }
 
-/* ── BUTTONS ──────────────────────────── */
+/* BUTTONS */
 .menu-btns { display: flex; flex-direction: column; gap: 12px; width: 260px; }
 .btn-primary, .btn-secondary, .btn-sm {
     font-family: 'Oswald', sans-serif;
@@ -159,7 +175,7 @@ body {
 .btn-grey { background: rgba(255,255,255,.1); color: #ccc; border: 1px solid rgba(255,255,255,.15); }
 .btn-grey:hover { background: rgba(255,255,255,.18); }
 
-/* ── HS BOX ───────────────────────────── */
+/* HS BOX */
 .hs-box {
     padding: 14px 28px;
     border: 1px solid rgba(255,140,0,.2);
@@ -174,12 +190,11 @@ body {
 .hs-row { display: flex; justify-content: space-between; font-size: 1em; color: #aaa; padding: 3px 0; }
 .hs-row span:last-child { color: #FF8C00; font-weight: 700; }
 
-/* ── OVERLAYS ─────────────────────────── */
+/* OVERLAYS */
 .overlay {
     position: fixed; inset: 0; z-index: 50;
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,.88);
-    backdrop-filter: blur(4px);
 }
 .overlay-box {
     background: linear-gradient(160deg, #1a0d00, #0a1520);
@@ -206,7 +221,7 @@ body {
 }
 .how-list li strong { color: #fff; }
 
-/* ── GAME OVER ────────────────────────── */
+/* GAME OVER */
 .go-box h2 { color: #FF8C00; text-shadow: 0 0 30px rgba(255,140,0,.5); }
 .go-score { font-size: 1.3em; color: #ccc; margin: 8px 0; }
 .go-score strong { color: #FF8C00; font-size: 1.4em; }
@@ -230,7 +245,7 @@ body {
 .go-btns { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
 .go-btns .btn-primary, .go-btns .btn-secondary { width: auto; padding: 12px 28px; }
 
-/* ── GAME SCREEN ──────────────────────── */
+/* GAME SCREEN */
 #gameScreen {
     display: flex; flex-direction: column; align-items: center; gap: 0;
 }
@@ -310,7 +325,7 @@ body {
 .streak-dot.miss { background: #e63946; border-color: #e63946; }
 .streak-dot.swish { background: #00e5ff; border-color: #00e5ff; box-shadow: 0 0 12px #00e5ff; }
 
-/* ── SURVIVAL LIVES WARN ──────────────── */
+/* SURVIVAL LIVES WARN */
 .lives-danger { animation: lifeWarn .4s ease-in-out infinite alternate; }
 @keyframes lifeWarn {
     from { color: #e63946 !important; }

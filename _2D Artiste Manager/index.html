@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -15,6 +15,12 @@
   <div class="title-tagline">Construis l'empire culturel de demain</div>
   <div class="title-cards" id="title-cards"></div>
   <button class="btn-cta" onclick="startGame()">▶ Lancer l'Agence</button>
+  <div class="title-actions">
+    <button class="btn-action blue" id="continue-btn" onclick="continueGame()">Continuer</button>
+    <button class="btn-action" onclick="importSave()">Importer</button>
+    <button class="btn-action" onclick="exportSave()">Exporter</button>
+    <button class="btn-action red" onclick="deleteSave()">Supprimer save</button>
+  </div>
   <div class="title-meta">Gérez musiciens · peintres · comédiens · photographes · poètes</div>
 </div>
 
@@ -36,6 +42,9 @@
       <button class="btn-tab" onclick="openTab('projects')"  id="tab-projects" >🎬 Projets</button>
       <button class="btn-tab" onclick="openTab('market')"    id="tab-market"   >🏪 Marché</button>
       <button class="btn-tab" onclick="openTab('events')"    id="tab-events"   >🎤 Événements</button>
+      <button class="btn-tab" onclick="manualSave()">💾 Save</button>
+      <button class="btn-tab" onclick="exportSave()">Export</button>
+      <button class="btn-tab" onclick="importSave()">Import</button>
     </div>
     <button class="btn-nextweek" onclick="nextWeek()">⏩ Semaine suivante</button>
   </div>
@@ -71,6 +80,14 @@
           </div>
           <div id="rep-label" style="text-align:center;font-size:.8rem;margin-top:.5rem;"></div>
         </div>
+        <div class="dash-card">
+          <div class="dash-card-title">🧠 Upgrades Agence</div>
+          <div id="upgrades-grid"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">🏆 Objectifs</div>
+          <div id="milestones-dash"></div>
+        </div>
       </div>
     </div>
 
@@ -81,12 +98,12 @@
         <button class="btn-action green" onclick="openTab('market')">+ Recruter</button>
       </div>
       <div class="artist-filters">
-        <button class="filter-btn active" onclick="filterArtists('all')">Tous</button>
-        <button class="filter-btn" onclick="filterArtists('musician')">🎵 Musiciens</button>
-        <button class="filter-btn" onclick="filterArtists('painter')">🎨 Peintres</button>
-        <button class="filter-btn" onclick="filterArtists('comedian')">🎭 Comédiens</button>
-        <button class="filter-btn" onclick="filterArtists('photographer')">📷 Photographes</button>
-        <button class="filter-btn" onclick="filterArtists('poet')">✍️ Poètes</button>
+        <button class="filter-btn active" data-filter="all" onclick="filterArtists('all', this)">Tous</button>
+        <button class="filter-btn" data-filter="musician" onclick="filterArtists('musician', this)">🎵 Musiciens</button>
+        <button class="filter-btn" data-filter="painter" onclick="filterArtists('painter', this)">🎨 Peintres</button>
+        <button class="filter-btn" data-filter="comedian" onclick="filterArtists('comedian', this)">🎭 Comédiens</button>
+        <button class="filter-btn" data-filter="photographer" onclick="filterArtists('photographer', this)">📷 Photographes</button>
+        <button class="filter-btn" data-filter="poet" onclick="filterArtists('poet', this)">✍️ Poètes</button>
       </div>
       <div class="artists-grid" id="artists-grid"></div>
       <div class="empty-roster" id="empty-roster">
@@ -186,3 +203,4 @@
 <script src="js/game.js"></script>
 </body>
 </html>
+

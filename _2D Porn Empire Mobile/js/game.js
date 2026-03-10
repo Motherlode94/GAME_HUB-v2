@@ -127,6 +127,16 @@
         return Math.round(value).toLocaleString("fr-FR");
     }
 
+    function statColor(val, danger = 22, warn = 45) {
+        if (val <= danger) return "var(--bad)";
+        if (val <= warn)   return "var(--warn)";
+        return "var(--good)";
+    }
+
+    function colorStat(el, val) {
+        el.style.color = statColor(val);
+    }
+
     function log(s, text) {
         s.logs.unshift(text);
         s.logs = s.logs.slice(0, 24);
@@ -163,26 +173,56 @@
         const roll = Math.random();
         report.event = "Journee stable.";
 
-        if (roll < 0.12) {
+        if (roll < 0.09) {
             const fine = rnd(380, 1500);
             state.cash -= fine;
             state.compliance -= rnd(3, 7);
             state.brand -= rnd(1, 3);
             state.issues += 1;
             report.event = `Signalement legal: penalite ${fmt(fine)} credits.`;
-        } else if (roll < 0.23) {
+        } else if (roll < 0.18) {
             const pop = rnd(1800, 6800);
             state.audience += pop;
             state.brand += rnd(1, 3);
             report.event = `Un teaser devient viral (+${fmt(pop)} audience).`;
-        } else if (roll < 0.33) {
+        } else if (roll < 0.27) {
             state.morale -= rnd(3, 6);
             state.issues += 1;
             report.event = "Fatigue de tournage: moral equipe en baisse.";
-        } else if (roll < 0.42) {
+        } else if (roll < 0.35) {
             state.compliance += rnd(2, 5);
             state.brand += 1;
             report.event = "Revue juridique proactive: dossiers assainis.";
+        } else if (roll < 0.42) {
+            const bonus = rnd(400, 1100);
+            state.cash += bonus;
+            state.brand += rnd(1, 2);
+            report.event = `Partenariat sponsor: +${fmt(bonus)} credits, marque en hausse.`;
+        } else if (roll < 0.48) {
+            const takedownCost = rnd(300, 900);
+            state.cash -= takedownCost;
+            state.compliance -= rnd(2, 6);
+            state.audience = Math.max(0, state.audience - rnd(1500, 4000));
+            state.issues += 1;
+            report.event = `Takedown de contenu sur plateforme. -${fmt(takedownCost)} credits, audience perdue.`;
+        } else if (roll < 0.54) {
+            const pop2 = rnd(3000, 10000);
+            state.audience += pop2;
+            report.event = `Algorithme favorise une video: +${fmt(pop2)} audience soudaine.`;
+        } else if (roll < 0.60) {
+            state.morale -= rnd(5, 10);
+            state.compliance -= rnd(2, 5);
+            state.issues += 1;
+            report.event = "Conflit interne sur le plateau: morale et conformite impactees.";
+        } else if (roll < 0.66) {
+            state.catalog += rnd(1, 3);
+            state.audience += rnd(500, 2000);
+            report.event = "Un contenu archive regagne en popularite. Catalogue booste.";
+        } else if (roll < 0.71) {
+            const agentBonus = rnd(200, 600);
+            state.cash += agentBonus;
+            state.team += 1;
+            report.event = `Agent signe un nouveau talent: +${fmt(agentBonus)} credits, equipe renforcee.`;
         }
     }
 
@@ -220,10 +260,12 @@
             dom.report.innerHTML = "<p>Configure ton empire puis lance un cycle.</p>";
             return;
         }
+        const netCol = report.net >= 0 ? "var(--good)" : "var(--bad)";
+        const netSign = report.net >= 0 ? "+" : "";
         dom.report.innerHTML = `
             <p><span class="label">Demande:</span> ${fmt(report.demand)} vues payantes</p>
-            <p><span class="label">Recettes:</span> +${fmt(report.revenue)} | Couts: -${fmt(report.costs)}</p>
-            <p><span class="label">Resultat:</span> ${report.net >= 0 ? "+" : ""}${fmt(report.net)}</p>
+            <p><span class="label">Recettes:</span> <span style="color:var(--good)">+${fmt(report.revenue)}</span> | Couts: <span style="color:var(--bad)">-${fmt(report.costs)}</span></p>
+            <p><span class="label">Resultat:</span> <strong style="color:${netCol}">${netSign}${fmt(report.net)}</strong></p>
             <p><span class="label">Evenement:</span> ${report.event}</p>
         `;
     }
@@ -232,15 +274,24 @@
         dom.dayLabel.textContent = `Jour ${Math.min(state.day, MAX_DAYS)} / ${MAX_DAYS}`;
         dom.phaseLabel.textContent = phaseText();
         dom.cash.textContent = `${fmt(state.cash)} c`;
+        dom.cash.style.color = state.cash < 1500 ? "var(--bad)" : state.cash < 3500 ? "var(--warn)" : "";
         dom.brand.textContent = `${Math.round(state.brand)}%`;
+        colorStat(dom.brand, state.brand);
         dom.compliance.textContent = `${Math.round(state.compliance)}%`;
+        colorStat(dom.compliance, state.compliance);
         dom.morale.textContent = `${Math.round(state.morale)}%`;
+        colorStat(dom.morale, state.morale);
         dom.audience.textContent = fmt(state.audience);
         dom.catalog.textContent = fmt(state.catalog);
         dom.team.textContent = fmt(state.team);
         dom.studio.textContent = fmt(state.studio);
         dom.pricingSelect.value = state.pricing;
-        dom.logList.innerHTML = state.logs.map((entry) => `<li>${entry}</li>`).join("");
+        dom.logList.innerHTML = state.logs.map((entry) => {
+            let cls = "";
+            if (/\+\d|viral|bonus|positif|signe|validee|assainis|proactive|fortune|hausse|popularite/.test(entry)) cls = "log-good";
+            else if (/penalite|signalement|fatigue|burnout|demissionn|takedown|panne|effondre|legal|shutdown/.test(entry)) cls = "log-bad";
+            return `<li class="${cls}">${entry}</li>`;
+        }).join("");
         renderRisks();
 
         dom.actionButtons.forEach((button) => {
@@ -364,6 +415,12 @@
     }
 
     function init() {
+        dom.actionButtons.forEach((btn) => {
+            const action = ACTIONS[btn.dataset.action];
+            if (action) {
+                btn.innerHTML = `${action.label}<small class="btn-cost">${fmt(action.cost)} c</small>`;
+            }
+        });
         bind();
         renderReport(null);
         render();

@@ -229,6 +229,54 @@
                 { label: "Conceder un paquet social", summary: "Apaise la rue", effects: { treasury: -300, approval: 6, stability: 4 } },
                 { label: "Maintenir la ligne dure", summary: "Autorite immediate", effects: { security: 3, approval: -6, stability: -2 } }
             ]
+        },
+        {
+            title: "Pandemie emergente",
+            text: "Un nouveau pathogene se propage rapidement. Le systeme de sante est sous pression.",
+            choices: [
+                { label: "Declencher le plan sanitaire national", summary: "Couteux mais efficace", effects: { treasury: -480, stability: 3, approval: 2, security: 2 } },
+                { label: "Gerer au fil de l'eau", summary: "Economise mais risque", effects: { treasury: -120, approval: -5, stability: -4 } }
+            ]
+        },
+        {
+            title: "Cyberattaque massive sur les infrastructures",
+            text: "Des hackers d'origine etrangere ciblent les systemes energetiques et bancaires.",
+            choices: [
+                { label: "Activer la cellule de crise cyber", summary: "Contre-mesures actives", effects: { treasury: -280, security: 5, stability: 2, science: 1 } },
+                { label: "Minimiser publiquement l'incident", summary: "Evite la panique mais laisse des failles", effects: { treasury: -80, security: -4, diplomacy: -2 } }
+            ]
+        },
+        {
+            title: "Crise migratoire aux frontieres",
+            text: "Des flux migratoires importants arrivent aux frontieres. La presse et l'opposition reagissent.",
+            choices: [
+                { label: "Politique d'integration structuree", summary: "Investissement a long terme", effects: { treasury: -360, stability: 2, approval: -2, diplomacy: 4 } },
+                { label: "Renforcer les controles frontaliers", summary: "Rassure l'opinion courte terme", effects: { treasury: -180, security: 3, approval: 3, diplomacy: -4 } }
+            ]
+        },
+        {
+            title: "Seisme majeur en zone habitee",
+            text: "Un seisme de magnitude elevee frappe une region densement peuplee du pays.",
+            choices: [
+                { label: "Mobiliser l'armee et les secours nationaux", summary: "Intervention directe et massive", effects: { treasury: -420, approval: 4, security: 2, stability: 2 } },
+                { label: "Coordonner avec les ONG internationales", summary: "Moins couteux mais moins de controle", effects: { treasury: -180, diplomacy: 3, approval: 1, stability: -1 } }
+            ]
+        },
+        {
+            title: "Greve generale nationale",
+            text: "Les syndicats lancent un arret de travail reconductible. L'economie ralentit.",
+            choices: [
+                { label: "Ouvrir des negociations tripartites", summary: "Dialogue et compromis", effects: { treasury: -240, approval: 4, stability: 5, gdp: -2 } },
+                { label: "Prendre un decret de requisition", summary: "Reprise forcee mais tensions durables", effects: { security: 2, approval: -7, stability: -3, gdp: 1 } }
+            ]
+        },
+        {
+            title: "Accord de libre-echange majeur propose",
+            text: "Un bloc regional propose un accord commercial ambitieux. L'industrie est partagee.",
+            choices: [
+                { label: "Signer l'accord integralement", summary: "Dynamise l'export et la diplomatie", effects: { treasury: 310, gdp: 4, diplomacy: 5, industry: -2 } },
+                { label: "Negocier des clauses de protection", summary: "Moins de gains mais preserves", effects: { treasury: 140, gdp: 2, diplomacy: 2, industry: 2 } }
+            ]
         }
     ];
 
@@ -931,6 +979,16 @@
         return clamp(Math.round(base + support - 42 - fatiguePenalty), 10, 95);
     }
 
+    function kpiColor(val, danger = 28, warn = 50) {
+        if (val <= danger) return "var(--kpi-bad)";
+        if (val <= warn)   return "var(--kpi-warn)";
+        return "var(--kpi-good)";
+    }
+
+    function setKpiColor(el, val, danger, warn) {
+        el.style.color = kpiColor(val, danger, warn);
+    }
+
     function renderTopBar() {
         const currentNation = nationById(state.playerNationId);
         const doctrine = doctrineById(state.doctrineId);
@@ -942,13 +1000,28 @@
         dom.dateLabel.textContent = `${MONTHS[state.monthIndex]} ${state.year} - Mois ${state.turn}/48 - ${doctrine.name}`;
 
         dom.kpiTreasury.textContent = formatNumber(s.treasury);
+        dom.kpiTreasury.style.color = s.treasury < 0 ? "var(--kpi-bad)" : s.treasury < 2000 ? "var(--kpi-warn)" : "";
+
         dom.kpiGdp.textContent = formatNumber(s.gdp);
+        dom.kpiGdp.style.color = s.gdp < 60 ? "var(--kpi-bad)" : s.gdp < 85 ? "var(--kpi-warn)" : "";
+
         dom.kpiApproval.textContent = `${Math.round(s.approval)}%`;
+        setKpiColor(dom.kpiApproval, s.approval, 28, 50);
+
         dom.kpiStability.textContent = `${Math.round(s.stability)}%`;
+        setKpiColor(dom.kpiStability, s.stability, 28, 50);
+
         dom.kpiMilitary.textContent = formatNumber(militaryPower);
+
         dom.kpiDiplomacy.textContent = `${Math.round(s.diplomacy)}`;
+        setKpiColor(dom.kpiDiplomacy, s.diplomacy, 20, 40);
+
         dom.kpiEcology.textContent = `${Math.round(s.ecology)}%`;
+        setKpiColor(dom.kpiEcology, s.ecology, 25, 48);
+
         dom.kpiSecurity.textContent = `${Math.round(s.security)}%`;
+        setKpiColor(dom.kpiSecurity, s.security, 28, 50);
+
         dom.kpiPopulation.textContent = `${s.population.toFixed(1)} M`;
         dom.kpiIndustry.textContent = `${Math.round(s.industry)}`;
         dom.kpiScience.textContent = `${Math.round(s.science)}`;
@@ -1186,7 +1259,12 @@
             dom.turnLog.innerHTML = "<li>Debut de mandat. Les institutions attendent tes ordres.</li>";
             return;
         }
-        dom.turnLog.innerHTML = state.log.map((entry) => `<li>${entry}</li>`).join("");
+        dom.turnLog.innerHTML = state.log.map((entry) => {
+            let cls = "";
+            if (/valide|adopte|succes|positif|\+[1-9]|renforce|accord|victoire|hausse|lance|plan|mois termine/.test(entry)) cls = "log-good";
+            else if (/manque|echoue|crise|incident|amende|sanction|hostile|deficit|perte|chute|effondre|greve|penalite|attaque/.test(entry)) cls = "log-bad";
+            return `<li class="${cls}">${entry}</li>`;
+        }).join("");
     }
 
     function renderObjectives() {

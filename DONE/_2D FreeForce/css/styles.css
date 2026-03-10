@@ -1,5 +1,5 @@
 /* ── FreeForce 2D — Styles ── */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
@@ -25,7 +25,7 @@ html, body {
 }
 #gameCanvas {
     display:block; width:100%; height:100%;
-    image-rendering:pixelated; image-rendering:crisp-edges;
+    image-rendering:pixelated;
     cursor:crosshair;
     filter:contrast(1.08) saturate(1.15);
 }
@@ -47,7 +47,6 @@ html, body {
     align-items:center; justify-content:center;
     z-index:100;
     background:rgba(0,0,0,0.88);
-    backdrop-filter:blur(2px);
 }
 .screen.active { display:flex; }
 
@@ -258,15 +257,26 @@ kbd {
 }
 .wi-title { font-size:7px; color:#885533; text-align:center; margin-bottom:14px; letter-spacing:1px; }
 .weapons-row { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+
 .wpn {
     display:flex; flex-direction:column; align-items:center;
     font-size:7px; color:var(--c); text-align:center; gap:4px;
     padding:10px 6px;
     background:rgba(255,255,255,0.03);
-    border:1px solid color-mix(in srgb, var(--c) 30%, transparent);
+    border:1px solid var(--c);
 }
 .wpn span { font-size:14px; }
 .wpn small { font-size:5px; color:#664422; letter-spacing:0.5px; }
+
+.wpn.wpn-pistol { --c:#ffff88; }
+.wpn.wpn-shotgun { --c:#ff8800; }
+.wpn.wpn-rocket { --c:#ff4400; }
+.wpn.wpn-laser { --c:#44ffff; }
+
+.score-diff.diff-facile { color:#44ff88; }
+.score-diff.diff-normal { color:#ffdd00; }
+.score-diff.diff-difficile { color:#ff8800; }
+.score-diff.diff-brutal { color:#ff2200; }
 
 /* ══ GAME OVER ══ */
 .gameover-panel {
@@ -289,3 +299,21 @@ kbd {
 .go-score { font-size:clamp(10px, 2vw, 14px); color:#ffdd00; text-shadow:0 0 12px #ff8800; }
 .go-best  { font-size:9px; }
 #gameover-overlay .menu-btn { width:240px; margin-top:4px; text-align:center; justify-content:center; }
+/* Hub back button */
+.hub-back-btn {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 9999;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.16);
+            background: rgba(6,10,18,.86);
+            color: #fff;
+            text-decoration: none;
+            font: 700 13px/1 Arial, sans-serif;
+            letter-spacing: .08em;
+            box-shadow: 0 10px 24px rgba(0,0,0,.3);
+        }
+
+

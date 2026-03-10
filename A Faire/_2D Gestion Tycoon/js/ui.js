@@ -1,21 +1,32 @@
 const moneyEl = document.getElementById("money");
 const incomeEl = document.getElementById("income");
+const grossIncomeEl = document.getElementById("grossIncomeValue");
+const upkeepEl = document.getElementById("upkeepValue");
 const scoreEl = document.getElementById("scoreValue");
 const totalLevelEl = document.getElementById("totalLevelValue");
 const multiplierEl = document.getElementById("multiplierValue");
+const prestigeEl = document.getElementById("prestigeValue");
+const prestigeGainEl = document.getElementById("prestigeGainValue");
 const playTimeEl = document.getElementById("playTimeValue");
 const statusTextEl = document.getElementById("statusText");
 const buildingsEl = document.getElementById("buildings");
+const researchEl = document.getElementById("research");
+const staffEl = document.getElementById("staff");
 const milestonesEl = document.getElementById("milestones");
+const activeEventsEl = document.getElementById("activeEvents");
 const notificationsEl = document.getElementById("notifications");
 const pauseBtn = document.getElementById("pauseBtn");
 const boostBtn = document.getElementById("cashBoostBtn");
+const prestigeBtn = document.getElementById("prestigeBtn");
 const governorToggleBtn = document.getElementById("governorToggleBtn");
 const governorProfileBtn = document.getElementById("governorProfileBtn");
 const speedButtons = Array.from(document.querySelectorAll(".speed-btn"));
 
 let buildingsSignature = "";
+let researchSignature = "";
+let staffSignature = "";
 let milestonesSignature = "";
+let activeEventsSignature = "";
 let notificationsSignature = "";
 
 function formatMoney(value) {
@@ -92,6 +103,117 @@ function renderBuildings() {
             }
         });
     });
+}
+
+function renderResearch() {
+    if (!researchEl || typeof window.getResearchState !== "function") return;
+
+    const research = window.getResearchState();
+    const nextSignature = JSON.stringify(
+        research.map((item) => `${item.id}|${item.level}|${item.cost}|${item.affordable}`)
+    );
+    if (nextSignature === researchSignature) return;
+
+    researchSignature = nextSignature;
+
+    researchEl.innerHTML = research
+        .map((item) => `
+            <article class="research-card">
+                <h3>${item.name} (Niv. ${item.level})</h3>
+                <p>${item.description}</p>
+                <button class="research-btn" type="button" data-research-id="${item.id}" ${item.affordable ? "" : "disabled"}>
+                    Rechercher (${formatMoney(item.cost)} EUR)
+                </button>
+            </article>
+        `)
+        .join("");
+
+    const buttons = researchEl.querySelectorAll(".research-btn[data-research-id]");
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const id = button.getAttribute("data-research-id");
+            if (id && typeof window.buyResearch === "function") {
+                window.buyResearch(id);
+            }
+        });
+    });
+}
+
+function renderStaff() {
+    if (!staffEl || typeof window.getStaffState !== "function") return;
+
+    const staff = window.getStaffState();
+    const nextSignature = JSON.stringify(
+        staff.map((item) => `${item.id}|${item.count}|${item.nextCost}|${item.upkeep}|${item.affordable}`)
+    );
+    if (nextSignature === staffSignature) return;
+
+    staffSignature = nextSignature;
+
+    staffEl.innerHTML = staff
+        .map((item) => `
+            <article class="staff-card">
+                <h3>${item.name} (${item.count})</h3>
+                <p>${item.description}</p>
+                <p class="meta">Charge: ${formatMoney(item.upkeep)} /sec</p>
+                <div class="staff-actions">
+                    <button class="staff-btn" type="button" data-staff-hire="${item.id}" ${item.affordable ? "" : "disabled"}>
+                        Recruter (${formatMoney(item.nextCost)} EUR)
+                    </button>
+                    <button class="staff-btn danger" type="button" data-staff-fire="${item.id}" ${item.count > 0 ? "" : "disabled"}>
+                        Licencier
+                    </button>
+                </div>
+            </article>
+        `)
+        .join("");
+
+    const hireButtons = staffEl.querySelectorAll(".staff-btn[data-staff-hire]");
+    hireButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+            const id = button.getAttribute("data-staff-hire");
+            if (!id || typeof window.hireStaff !== "function") return;
+            const burst = (event.ctrlKey || event.metaKey || event.shiftKey) ? 5 : 1;
+            window.hireStaff(id, burst);
+        });
+    });
+
+    const fireButtons = staffEl.querySelectorAll(".staff-btn[data-staff-fire]");
+    fireButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+            const id = button.getAttribute("data-staff-fire");
+            if (!id || typeof window.fireStaff !== "function") return;
+            const burst = (event.ctrlKey || event.metaKey || event.shiftKey) ? 3 : 1;
+            window.fireStaff(id, burst);
+        });
+    });
+}
+
+function renderActiveEvents() {
+    if (!activeEventsEl || typeof window.getActiveEventsState !== "function") return;
+
+    const events = window.getActiveEventsState();
+    const nextSignature = JSON.stringify(
+        events.map((item) => `${item.id}|${item.remainingSec}`)
+    );
+    if (nextSignature === activeEventsSignature) return;
+
+    activeEventsSignature = nextSignature;
+
+    if (events.length === 0) {
+        activeEventsEl.innerHTML = '<div class="event-entry">Aucun evenement actif.</div>';
+        return;
+    }
+
+    activeEventsEl.innerHTML = events
+        .map((item) => `
+            <div class="event-entry">
+                <strong>${item.label}</strong>
+                <p>${item.description || "Effet temporaire"}</p>
+                <span>${item.remainingSec}s</span>
+            </div>
+        `)
+        .join("");
 }
 
 function renderMilestones() {
@@ -175,6 +297,12 @@ function syncControls() {
         }
     }
 
+    if (prestigeBtn && typeof window.getPrestigeState === "function") {
+        const prestigeState = window.getPrestigeState();
+        prestigeBtn.textContent = `Prestige (+${prestigeState.possibleGain})`;
+        prestigeBtn.disabled = !prestigeState.canPrestige;
+    }
+
     if (typeof window.getTycoonGovernorState === "function") {
         const state = window.getTycoonGovernorState();
         if (governorToggleBtn) {
@@ -192,6 +320,12 @@ function updateStats() {
     if (incomeEl && typeof window.calculateIncome === "function") {
         incomeEl.textContent = formatMoney(window.calculateIncome());
     }
+    if (grossIncomeEl && typeof window.calculateGrossIncome === "function") {
+        grossIncomeEl.textContent = formatMoney(window.calculateGrossIncome());
+    }
+    if (upkeepEl && typeof window.getStaffUpkeepPerSecond === "function") {
+        upkeepEl.textContent = formatMoney(window.getStaffUpkeepPerSecond());
+    }
 
     const score = window.gameState && Number.isFinite(Number(window.gameState.score))
         ? Number(window.gameState.score)
@@ -203,6 +337,12 @@ function updateStats() {
 
     const multiplier = typeof window.getIncomeMultiplier === "function" ? window.getIncomeMultiplier() : 1;
     if (multiplierEl) multiplierEl.textContent = `x${multiplier.toFixed(2)}`;
+
+    if (typeof window.getPrestigeState === "function") {
+        const prestigeState = window.getPrestigeState();
+        if (prestigeEl) prestigeEl.textContent = formatMoney(prestigeState.points);
+        if (prestigeGainEl) prestigeGainEl.textContent = formatMoney(prestigeState.possibleGain);
+    }
 
     const playSeconds = gameData.stats && Number.isFinite(Number(gameData.stats.playSeconds))
         ? gameData.stats.playSeconds
@@ -225,7 +365,10 @@ function updateStats() {
 function updateUI() {
     updateStats();
     renderBuildings();
+    renderResearch();
+    renderStaff();
     renderMilestones();
+    renderActiveEvents();
     renderNotifications();
     syncControls();
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Hub - Warlike Gaming Corps</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/leaderboard.css">
 </head>
@@ -28,25 +28,26 @@
             <div class="search-wrap">
                 <span class="search-icon">&#128269;</span>
                 <input type="text" id="search-input" placeholder="Rechercher un jeu" autocomplete="off">
-                <button class="clear-btn" id="clear-search" title="Effacer">&#10005;</button>
+                <button class="clear-btn" id="clear-search" title="Effacer" type="button">&#10005;</button>
             </div>
             <div class="select-wrap">
-                <select id="sort-select">
+                <select id="sort-select" name="sort" aria-label="Trier les jeux">
                     <option value="default">Tri: Defaut</option>
-                    <option value="az">A -> Z</option>
-                    <option value="za">Z -> A</option>
+                    <option value="az">A -&gt; Z</option>
+                    <option value="za">Z -&gt; A</option>
                     <option value="rating">Top notes</option>
                     <option value="year">Plus recents</option>
                 </select>
             </div>
             <div class="filter-chips" id="filter-chips">
-                <button class="chip active" data-cat="all">All</button>
-                <button class="chip" data-cat="action">Action</button>
-                <button class="chip" data-cat="strategy">Strategy</button>
-                <button class="chip" data-cat="sports">Sports</button>
-                <button class="chip" data-cat="rpg">RPG</button>
-                <button class="chip" data-cat="simulation">Simulation</button>
-                <button class="chip" data-cat="adventure">Adventure</button>
+                <button class="chip active" data-cat="all" type="button">All</button>
+                <button class="chip" data-cat="action" type="button">Action</button>
+                <button class="chip" data-cat="strategy" type="button">Strategy</button>
+                <button class="chip" data-cat="sports" type="button">Sports</button>
+                <button class="chip" data-cat="rpg" type="button">RPG</button>
+                <button class="chip" data-cat="simulation" type="button">Simulation</button>
+                <button class="chip" data-cat="adventure" type="button">Adventure</button>
+                <button class="chip" data-cat="favorites" type="button">&#10084; Favoris</button>
             </div>
         </div>
     </section>
@@ -79,24 +80,24 @@
                     <strong>Tout se joue ici.</strong>
                     <p>Choisis un jeu dans la grille, puis clique sur Play Now.</p>
                 </div>
-                <iframe id="game-iframe" src="" allowfullscreen allow="autoplay" title="Game Viewer"></iframe>
+                <iframe id="game-iframe" src="about:blank" allowfullscreen allow="fullscreen" title="Game Viewer"></iframe>
             </div>
         </aside>
     </main>
 
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="modal">
-            <button class="modal-close" id="modal-close">&#10005;</button>
+            <button class="modal-close" id="modal-close" type="button">&#10005;</button>
             <div class="modal-badge" id="modal-badge"></div>
-            <h2 class="modal-title" id="modal-title"></h2>
+            <h2 class="modal-title" id="modal-title">Details du jeu</h2>
             <div class="modal-meta" id="modal-meta"></div>
             <p class="modal-desc" id="modal-desc"></p>
             <div class="modal-tags" id="modal-tags"></div>
 
             <div class="modal-tabs">
-                <button class="modal-tab active" data-tab="scores">Scores</button>
-                <button class="modal-tab" data-tab="comments">Reviews</button>
-                <button class="modal-tab" data-tab="changelog">Patch Notes</button>
+                <button class="modal-tab active" data-tab="scores" type="button">Scores</button>
+                <button class="modal-tab" data-tab="comments" type="button">Reviews</button>
+                <button class="modal-tab" data-tab="changelog" type="button">Patch Notes</button>
             </div>
 
             <div class="modal-tab-content active" id="tab-scores">
@@ -112,7 +113,7 @@
                 <div class="changelog-list" id="changelog-list"></div>
             </div>
 
-            <button class="modal-play-btn hidden" id="modal-play-btn">Play Now</button>
+            <button class="modal-play-btn hidden" id="modal-play-btn" type="button">Play Now</button>
         </div>
     </div>
 
@@ -147,8 +148,22 @@
             <textarea id="pg-comment-text" placeholder="Ton avis sur le jeu..." rows="3" maxlength="300"></textarea>
 
             <div class="pg-actions">
-                <button id="pg-skip-btn" class="pg-btn-skip">Passer</button>
-                <button id="pg-submit-btn" class="pg-btn-submit">Envoyer</button>
+                <button id="pg-skip-btn" class="pg-btn-skip" type="button">Passer</button>
+                <button id="pg-submit-btn" class="pg-btn-submit" type="button">Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pseudo modal -->
+    <div class="pseudo-overlay hidden" id="pseudo-overlay">
+        <div class="pseudo-window">
+            <p class="pseudo-label">Avant de jouer</p>
+            <h3>Entre ton pseudo</h3>
+            <p class="pseudo-hint">Il sera utilisé pour ton score sur le leaderboard.</p>
+            <input type="text" id="pseudo-input" placeholder="Ton pseudo..." maxlength="20" autocomplete="off">
+            <div class="pseudo-actions">
+                <button id="pseudo-cancel-btn" class="pseudo-btn-cancel" type="button">Annuler</button>
+                <button id="pseudo-confirm-btn" class="pseudo-btn-confirm" type="button">Jouer</button>
             </div>
         </div>
     </div>

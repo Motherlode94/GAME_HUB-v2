@@ -11,6 +11,9 @@
     --player: #5aa6ff;
     --btn: #f7b733;
     --btn-text: #1b1f23;
+    --kpi-good: #2cc58e;
+    --kpi-warn: #ffcf5d;
+    --kpi-bad: #e86460;
 }
 
 * {
@@ -353,6 +356,9 @@ select {
 .turn-log li {
     margin-bottom: 6px;
 }
+
+.log-good { color: var(--kpi-good); }
+.log-bad  { color: var(--kpi-bad); }
 
 .project-status {
     margin-top: 8px;

@@ -112,6 +112,48 @@
                 { version: "1.0.0", date: "2026-03-04", notes: ["Initial release with 11 building types", "Power & water resource system", "Day/night cycle and satisfaction mechanics", "Full mobile support with touch & pinch-to-zoom"] }
             ]
         },
+        {
+            id: 8,
+            title: "NFL Mini Run",
+            category: "sports",
+            year: 2026,
+            rating: 8.8,
+            description: "Sprint through defenders, chain touchdowns, grab power-ups, and survive longer each round in this arcade football run game.",
+            tags: ["sports", "arcade", "football", "mobile", "score attack"],
+            playUrl: "DONE/_2D NFL Sim/index.html",
+            changelog: [
+                { version: "0.2.0", date: "2026-02-28", notes: ["Added mobile joystick controls", "Added combos, formations, and power-ups"] },
+                { version: "0.1.0", date: "2026-02-28", notes: ["Initial playable prototype"] }
+            ]
+        },
+        {
+            id: 10,
+            title: "Be the King",
+            category: "strategy",
+            year: 2026,
+            rating: 8.5,
+            description: "Rule your medieval kingdom, manage resources, collect taxes, raise an army, and defend your throne against rival factions.",
+            tags: ["strategy", "kingdom", "medieval", "management", "ruler"],
+            strategyType: "Kingdom Manager",
+            fourX: { explore: 52, expand: 80, exploit: 88, exterminate: 70 },
+            playUrl: "DONE/_2D Be the Kings/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-10", notes: ["Initial release"] }
+            ]
+        },
+        {
+            id: 11,
+            title: "Football Manager 2D",
+            category: "sports",
+            year: 2026,
+            rating: 8.6,
+            description: "Take charge of your football club, set tactics, manage your squad, and lead your team through a full season to glory.",
+            tags: ["sports", "manager", "football", "team building", "tactics"],
+            playUrl: "DONE/_2D Football Manager/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-10", notes: ["Initial release"] }
+            ]
+        },
     ];
 
     function parseJson(value, fallback) {

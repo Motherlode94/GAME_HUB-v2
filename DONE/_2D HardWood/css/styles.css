@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════
    HARDWOOD — style.css
    Dark/Neon theme inspired by NBA 2K
 ═══════════════════════════════════════════ */
@@ -420,9 +420,9 @@ body::after {
 .action-btn .chance.bad           { color: var(--accent2); }
 .action-btn .hotkey               { position: absolute; top: 4px; right: 6px; font-size: .6em; color: rgba(255,255,255,.2); }
 
-.possession-bar { height: 4px; background: var(--bg3); display: flex; }
+.possession-bar { height: 4px; background: var(--bg3); display: flex; margin-top: 6px; width: 120px; }
 .poss-my        { background: var(--accent); transition: width .4s; }
-.poss-opp       { background: var(--accent2); transition: width .4s; }
+.poss-opp       { background: var(--accent2); transition: width .4s; flex: 1; }
 
 .on-court-list   { padding: 14px; border-top: 1px solid var(--border); }
 .on-court-title  { font-family: var(--font); font-size: .68em; letter-spacing: 3px; color: var(--muted); margin-bottom: 8px; }
@@ -522,3 +522,31 @@ h3.section-title { font-family: var(--font); font-size: 1.6em; font-weight: 700;
   #nav           { padding: 0 12px; gap: 0; overflow-x: auto; }
   .nav-tab       { padding: 8px 10px; font-size: .75em; }
 }
+
+/* ─── EXTRACTED INLINE STYLES ─── */
+#msMyScore    { color: var(--accent); }
+#msOppScore   { color: var(--accent2); }
+#resultBtns   { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.setup-btn-row { display: flex; gap: 12px; margin-top: 28px; }
+.btn-full     { flex: 1; }
+.momentum-label { font-family: var(--font); font-size: .68em; color: var(--muted); letter-spacing: 2px; text-align: center; }
+.match-log-empty { text-align: center; color: var(--muted); font-size: .8em; padding: 20px; }
+
+/* Hub back button */
+.hub-back-btn {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 9999;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(12,16,24,.82);
+    color: #fff;
+    text-decoration: none;
+    font: 700 13px/1 'Barlow Condensed', Arial, sans-serif;
+    letter-spacing: .08em;
+    box-shadow: 0 10px 24px rgba(0,0,0,.28);
+  }
+
+

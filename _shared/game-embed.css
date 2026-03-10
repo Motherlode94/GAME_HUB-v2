@@ -1,0 +1,43 @@
+/* Shared runtime polish for all embedded game pages in GameHub. */
+:root {
+  --hub-safe-top: env(safe-area-inset-top, 0px);
+  --hub-safe-left: env(safe-area-inset-left, 0px);
+  --hub-safe-right: env(safe-area-inset-right, 0px);
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+canvas,
+img,
+video,
+svg {
+  max-width: 100%;
+}
+
+.hub-back-btn,
+.hub-back {
+  top: calc(10px + var(--hub-safe-top)) !important;
+  left: calc(10px + var(--hub-safe-left)) !important;
+  max-width: calc(100vw - var(--hub-safe-left) - var(--hub-safe-right) - 20px);
+}
+
+@media (max-width: 760px) {
+  .hub-back-btn,
+  .hub-back {
+    transform: scale(0.94);
+    transform-origin: top left;
+  }
+}

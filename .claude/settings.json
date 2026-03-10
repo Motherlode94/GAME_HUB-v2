@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"c:/Users/WARLIKE NATION 3.0/Documents/PERSO/CODE/V_GAME/2D_GAMES/GAME_HUB-v2/css/game-shell.css\")",
+      "Bash(\"c:/Users/WARLIKE NATION 3.0/Documents/PERSO/CODE/V_GAME/2D_GAMES/GAME_HUB-v2/A Revoir/css/game-shell.css\")",
+      "Bash(\"c:/Users/WARLIKE NATION 3.0/Documents/PERSO/CODE/V_GAME/2D_GAMES/GAME_HUB-v2/A Faire/css/game-shell.css\")",
+      "Bash(mkdir -p \"c:/Users/WARLIKE NATION 3.0/Documents/PERSO/CODE/V_GAME/2D_GAMES/GAME_HUB-v2/A Faire/js\")",
+      "Bash(for f in js/config.js js/data.js js/storage.js js/scores.js js/game-shell.js)",
+      "Bash(do echo \"/* $f – stub */\")",
+      "Bash(\"$f\")",
+      "Bash(echo \"created $f\")",
+      "Bash(done)",
+      "Bash(xargs grep -L \"webkit-backdrop-filter\")"
+    ]
+  }
+}

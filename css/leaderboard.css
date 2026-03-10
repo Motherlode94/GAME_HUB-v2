@@ -199,7 +199,7 @@
 }
 
 .cl-notes li::before {
-    content: '→ ';
+    content: '-> ';
     color: rgba(230,57,70,0.7);
 }
 
@@ -212,7 +212,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(4px);
 }
 .postgame-overlay.hidden { display: none; }
 
@@ -285,7 +284,6 @@
     font-size: 1.6em;
     line-height: 1;
     transition: color 0.15s, transform 0.1s;
-    user-select: none;
 }
 .pg-star.hover, .pg-star.active { color: #f4c430; transform: scale(1.1); }
 
@@ -399,7 +397,7 @@ header > .header-lb-btn {
 }
 .header-lb-btn:hover { background: rgba(230,57,70,0.25); border-color: #e63946; color: #ff6b77; }
 
-/* ── Header dual buttons wrapper ── */
+/* Header dual buttons wrapper */
 .header-btns {
     position: absolute;
     right: 24px;
@@ -411,7 +409,7 @@ header > .header-lb-btn {
     align-items: stretch;
 }
 
-/* Buttons inside .header-btns are normal flow — no absolute positioning */
+/* Buttons inside .header-btns are normal flow; no absolute positioning */
 .header-btns .header-lb-btn,
 .header-btns .header-space-btn {
     position: static;

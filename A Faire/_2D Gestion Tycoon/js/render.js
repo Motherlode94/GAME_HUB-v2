@@ -41,7 +41,8 @@ function drawBuildingBody(ctx2d, building, x, y, width, height) {
     ctx2d.fillStyle = "#243241";
     ctx2d.beginPath();
     ctx2d.moveTo(x, y);
-    ctx2d.lineTo(x + width * 0.5, y - (30 + building.level * 2));
+    const visualLevel = Math.min(20, Math.max(0, building.level));
+    ctx2d.lineTo(x + width * 0.5, y - (30 + visualLevel * 2));
     ctx2d.lineTo(x + width, y);
     ctx2d.closePath();
     ctx2d.fill();
@@ -85,8 +86,9 @@ function drawBuildingLabel(ctx2d, building, x, y, width, height) {
 }
 
 function drawBuilding(ctx2d, building, pulse) {
-    const width = 92 + building.level * 5;
-    const height = 108 + building.level * 6;
+    const visualLevel = Math.min(20, Math.max(0, building.level));
+    const width = 92 + visualLevel * 4;
+    const height = 108 + visualLevel * 5;
     const x = building.x;
     const y = building.y;
 
@@ -109,13 +111,17 @@ function drawParticles(ctx2d) {
 }
 
 function drawOverlay(ctx2d, width) {
-    const income = typeof calculateIncome === "function" ? calculateIncome() : 0;
+    const incomeNet = typeof calculateIncome === "function" ? calculateIncome() : 0;
+    const incomeGross = typeof calculateGrossIncome === "function" ? calculateGrossIncome() : 0;
+    const upkeep = typeof getStaffUpkeepPerSecond === "function" ? getStaffUpkeepPerSecond() : 0;
     const totalLevel = typeof getTotalLevel === "function" ? getTotalLevel() : 0;
     const multiplier = typeof getIncomeMultiplier === "function" ? getIncomeMultiplier() : 1;
     const boost = typeof getBoostState === "function" ? getBoostState() : { cooldownRemaining: 0 };
+    const events = typeof getActiveEventsState === "function" ? getActiveEventsState() : [];
+    const prestige = typeof getPrestigeState === "function" ? getPrestigeState() : { points: 0 };
 
     ctx2d.fillStyle = "rgba(6, 16, 26, 0.65)";
-    ctx2d.fillRect(16, 12, 420, 84);
+    ctx2d.fillRect(16, 12, 470, 108);
 
     ctx2d.fillStyle = "#ecf5ff";
     ctx2d.font = "bold 20px Segoe UI";
@@ -123,20 +129,22 @@ function drawOverlay(ctx2d, width) {
     ctx2d.fillText(`Caisse: ${Math.floor(gameData.money).toLocaleString("fr-FR")} EUR`, 28, 40);
 
     ctx2d.font = "14px Segoe UI";
-    ctx2d.fillText(`Revenu: ${Math.floor(income).toLocaleString("fr-FR")} EUR/s`, 28, 62);
-    ctx2d.fillText(`Niveaux: ${totalLevel} | Mult: x${multiplier.toFixed(2)}`, 28, 82);
+    ctx2d.fillText(`Net: ${Math.floor(incomeNet).toLocaleString("fr-FR")} EUR/s`, 28, 62);
+    ctx2d.fillText(`Brut: ${Math.floor(incomeGross).toLocaleString("fr-FR")} | Charges: ${Math.floor(upkeep).toLocaleString("fr-FR")}`, 28, 82);
+    ctx2d.fillText(`Niveaux: ${totalLevel} | Mult: x${multiplier.toFixed(2)} | Prestige: ${prestige.points || 0}`, 28, 102);
 
     ctx2d.fillStyle = "rgba(6, 16, 26, 0.65)";
-    ctx2d.fillRect(width - 260, 12, 244, 84);
+    ctx2d.fillRect(width - 280, 12, 264, 108);
     ctx2d.fillStyle = "#d5edff";
-    ctx2d.fillText(`Vitesse: x${gameData.gameSpeed}`, width - 246, 40);
-    ctx2d.fillText(gameData.isPaused ? "Etat: Pause" : "Etat: Actif", width - 246, 62);
+    ctx2d.fillText(`Vitesse: x${gameData.gameSpeed}`, width - 266, 40);
+    ctx2d.fillText(gameData.isPaused ? "Etat: Pause" : "Etat: Actif", width - 266, 62);
+    ctx2d.fillText(`Evenements: ${events.length}`, width - 266, 84);
 
     if (boost.cooldownRemaining > 0) {
-        ctx2d.fillText(`Prime: ${boost.cooldownRemaining}s`, width - 246, 82);
+        ctx2d.fillText(`Prime: ${boost.cooldownRemaining}s`, width - 266, 104);
     } else {
         ctx2d.fillStyle = "#6ef2a0";
-        ctx2d.fillText("Prime: disponible", width - 246, 82);
+        ctx2d.fillText("Prime: disponible", width - 266, 104);
     }
 }
 

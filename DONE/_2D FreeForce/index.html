@@ -7,23 +7,7 @@
     <link rel="stylesheet" href="../_shared/game-embed.css">
     <title>FreeForce 2D</title>
     <link rel="stylesheet" href="css/styles.css">
-    <style>
-        .hub-back-btn {
-            position: fixed;
-            top: 14px;
-            left: 14px;
-            z-index: 9999;
-            padding: 10px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.16);
-            background: rgba(6,10,18,.86);
-            color: #fff;
-            text-decoration: none;
-            font: 700 13px/1 Arial, sans-serif;
-            letter-spacing: .08em;
-            box-shadow: 0 10px 24px rgba(0,0,0,.3);
-        }
-    </style>
+
 </head>
 <body>
 <a class="hub-back-btn" href="../../index.html">&larr; HUB</a>
@@ -41,16 +25,16 @@
             <div class="logo-sub">2D</div>
         </div>
         <nav class="menu-items" id="main-nav">
-            <button class="menu-btn active" data-action="play">
+            <button class="menu-btn active" data-action="play" type="button">
                 <span class="btn-icon">▶</span> JOUER
             </button>
-            <button class="menu-btn" data-action="scores">
+            <button class="menu-btn" data-action="scores" type="button">
                 <span class="btn-icon">★</span> MEILLEURS SCORES
             </button>
-            <button class="menu-btn" data-action="options">
+            <button class="menu-btn" data-action="options" type="button">
                 <span class="btn-icon">⚙</span> OPTIONS
             </button>
-            <button class="menu-btn" data-action="controls">
+            <button class="menu-btn" data-action="controls" type="button">
                 <span class="btn-icon">◎</span> CONTRÔLES / AIDE
             </button>
         </nav>
@@ -63,7 +47,7 @@
     <div class="menu-panel wide">
         <h2 class="screen-title">★ MEILLEURS SCORES</h2>
         <div class="scores-list" id="scores-list"></div>
-        <button class="back-btn" data-back="menu">◄ RETOUR</button>
+        <button class="back-btn" data-back="menu" type="button">◄ RETOUR</button>
     </div>
 </div>
 
@@ -76,9 +60,9 @@
             <div class="option-row">
                 <span class="opt-label">DIFFICULTÉ</span>
                 <div class="opt-control">
-                    <button class="arrow-btn" id="diff-left">◄</button>
+                    <button class="arrow-btn" id="diff-left" type="button">◄</button>
                     <span class="opt-value" id="diff-value">NORMAL</span>
-                    <button class="arrow-btn" id="diff-right">►</button>
+                    <button class="arrow-btn" id="diff-right" type="button">►</button>
                 </div>
             </div>
             <p class="opt-desc" id="diff-desc">Expérience équilibrée</p>
@@ -94,9 +78,9 @@
             <div class="option-row">
                 <span class="opt-label">VOLUME MUSIQUE</span>
                 <div class="opt-control">
-                    <button class="arrow-btn" id="vol-left">◄</button>
+                    <button class="arrow-btn" id="vol-left" type="button">◄</button>
                     <span class="opt-value bar" id="vol-value"></span>
-                    <button class="arrow-btn" id="vol-right">►</button>
+                    <button class="arrow-btn" id="vol-right" type="button">►</button>
                 </div>
             </div>
         </div>
@@ -105,14 +89,14 @@
             <div class="option-row">
                 <span class="opt-label">EFFETS SONORES</span>
                 <div class="opt-control">
-                    <button class="arrow-btn" id="sfx-left">◄</button>
+                    <button class="arrow-btn" id="sfx-left" type="button">◄</button>
                     <span class="opt-value bar" id="sfx-value"></span>
-                    <button class="arrow-btn" id="sfx-right">►</button>
+                    <button class="arrow-btn" id="sfx-right" type="button">►</button>
                 </div>
             </div>
         </div>
 
-        <button class="back-btn" data-back="menu">◄ RETOUR</button>
+        <button class="back-btn" data-back="menu" type="button">◄ RETOUR</button>
     </div>
 </div>
 
@@ -131,13 +115,13 @@
         <div class="weapons-info">
             <p class="wi-title">ARMES RAMASSABLES EN JEU</p>
             <div class="weapons-row">
-                <div class="wpn" style="--c:#ffff88"><span>◎</span>PISTOL<small>60 balles · rapide</small></div>
-                <div class="wpn" style="--c:#ff8800"><span>✦</span>SHOTGUN<small>24 balles · éventail ×5</small></div>
-                <div class="wpn" style="--c:#ff4400"><span>⬆</span>ROCKET<small>10 roquettes · AoE</small></div>
-                <div class="wpn" style="--c:#44ffff"><span>⚡</span>LASER<small>20 tirs · rapide ×2</small></div>
+                <div class="wpn wpn-pistol"><span>◎</span>PISTOL<small>60 balles · rapide</small></div>
+                <div class="wpn wpn-shotgun"><span>✦</span>SHOTGUN<small>24 balles · éventail ×5</small></div>
+                <div class="wpn wpn-rocket"><span>⬆</span>ROCKET<small>10 roquettes · AoE</small></div>
+                <div class="wpn wpn-laser"><span>⚡</span>LASER<small>20 tirs · rapide ×2</small></div>
             </div>
         </div>
-        <button class="back-btn" data-back="menu">◄ RETOUR</button>
+        <button class="back-btn" data-back="menu" type="button">◄ RETOUR</button>
     </div>
 </div>
 
@@ -147,141 +131,17 @@
         <div class="go-title">BRO DOWN!</div>
         <div class="go-score" id="go-score">SCORE : 0</div>
         <div class="go-best"  id="go-best"></div>
-        <button class="menu-btn" id="go-restart">▶ REJOUER</button>
-        <button class="menu-btn secondary" id="go-menu">⌂ MENU</button>
+        <button class="menu-btn" id="go-restart" type="button">▶ REJOUER</button>
+        <button class="menu-btn secondary" id="go-menu" type="button">⌂ MENU</button>
     </div>
 </div>
 
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
 
-<script>
-// ══ MENU LOGIC ════════════════════════════════════════
-
-const DIFF_LIST   = ['FACILE','NORMAL','DIFFICILE','BRUTAL'];
-const DIFF_DESC   = { FACILE:'Ennemis lents — idéal pour débuter', NORMAL:'Expérience équilibrée', DIFFICILE:'Spawn rapide, tirs précis', BRUTAL:'Bonne chance, bro…' };
-const DIFF_COLORS = { FACILE:'#44ff88', NORMAL:'#ffdd00', DIFFICILE:'#ff8800', BRUTAL:'#ff2200' };
-let diffIdx  = Math.max(0, DIFF_LIST.indexOf(localStorage.getItem('ff2d_diff')||'NORMAL'));
-let volLevel = parseInt(localStorage.getItem('ff2d_vol') || '5');
-let sfxLevel = parseInt(localStorage.getItem('ff2d_sfx') || '7');
-let navIdx   = 0;
-const NAV_BTNS = Array.from(document.querySelectorAll('#main-nav .menu-btn'));
-
-// ── Afficher un écran ──
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    if (id === 'menu') {
-        document.getElementById('menu-overlay').classList.add('active');
-        if (typeof gameState !== 'undefined') gameState = 'menu';
-    } else {
-        const el = document.getElementById('screen-' + id) || document.getElementById(id+'-overlay');
-        if (el) el.classList.add('active');
-    }
-}
-function hideAllMenus() {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-}
-window.hideAllMenus  = hideAllMenus;
-window.showGameOver  = function(sc, best) {
-    document.getElementById('go-score').textContent = 'SCORE : ' + Number(sc).toLocaleString();
-    const isBest = sc >= best;
-    document.getElementById('go-best').textContent = isBest ? '★ NOUVEAU RECORD !' : 'MEILLEUR : ' + Number(best).toLocaleString();
-    document.getElementById('go-best').style.color  = isBest ? '#00ffaa' : '#888';
-    showScreen('gameover');
-};
-
-// ── Nav principale ──
-function setNav(i) {
-    navIdx = (i + NAV_BTNS.length) % NAV_BTNS.length;
-    NAV_BTNS.forEach((b,j) => b.classList.toggle('active', j === navIdx));
-}
-NAV_BTNS.forEach((btn, i) => {
-    btn.addEventListener('mouseenter', () => setNav(i));
-    btn.addEventListener('click', () => {
-        const a = btn.dataset.action;
-        if (a === 'play') { hideAllMenus(); if (typeof startGame === 'function') startGame(); }
-        else { showScreen(a); if (a === 'scores') renderScores(); }
-    });
-});
-
-// ── Boutons retour ──
-document.querySelectorAll('[data-back]').forEach(btn =>
-    btn.addEventListener('click', () => showScreen(btn.dataset.back)));
-
-// ── Game Over boutons ──
-document.getElementById('go-restart').addEventListener('click', () => {
-    hideAllMenus();
-    if (typeof restartGame === 'function') restartGame();
-});
-document.getElementById('go-menu').addEventListener('click', () => showScreen('menu'));
-
-// ── Difficulté ──
-function updateDiff() {
-    const d = DIFF_LIST[diffIdx];
-    const el = document.getElementById('diff-value');
-    el.textContent = d; el.style.color = DIFF_COLORS[d];
-    document.getElementById('diff-desc').textContent = DIFF_DESC[d];
-    document.querySelectorAll('#diff-dots .dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === diffIdx);
-        dot.style.background  = i === diffIdx ? DIFF_COLORS[d] : '';
-        dot.style.boxShadow   = i === diffIdx ? `0 0 8px ${DIFF_COLORS[d]}` : '';
-    });
-    localStorage.setItem('ff2d_diff', d);
-    if (typeof difficulty !== 'undefined') { difficulty = d; }
-}
-document.getElementById('diff-left') .addEventListener('click', () => { diffIdx = (diffIdx-1+DIFF_LIST.length)%DIFF_LIST.length; updateDiff(); });
-document.getElementById('diff-right').addEventListener('click', () => { diffIdx = (diffIdx+1)%DIFF_LIST.length; updateDiff(); });
-updateDiff();
-
-// ── Volume ──
-function barStr(n, max=10) { return '▐'.repeat(n) + '░'.repeat(max-n); }
-function updateVol() { document.getElementById('vol-value').textContent = barStr(volLevel); localStorage.setItem('ff2d_vol', volLevel); }
-function updateSfx() { document.getElementById('sfx-value').textContent = barStr(sfxLevel); localStorage.setItem('ff2d_sfx', sfxLevel); }
-document.getElementById('vol-left') .addEventListener('click', () => { volLevel = Math.max(0, volLevel-1); updateVol(); });
-document.getElementById('vol-right').addEventListener('click', () => { volLevel = Math.min(10, volLevel+1); updateVol(); });
-document.getElementById('sfx-left') .addEventListener('click', () => { sfxLevel = Math.max(0, sfxLevel-1); updateSfx(); });
-document.getElementById('sfx-right').addEventListener('click', () => { sfxLevel = Math.min(10, sfxLevel+1); updateSfx(); });
-updateVol(); updateSfx();
-
-// ── Scores ──
-function renderScores() {
-    const list    = document.getElementById('scores-list');
-    const history = JSON.parse(localStorage.getItem('ff2d_scores')||'[]');
-    if (!history.length) { list.innerHTML = '<p class="no-scores">AUCUN SCORE — JOUE D\'ABORD !</p>'; return; }
-    list.innerHTML = history.map((e,i) => `
-        <div class="score-row${i===0?' top':''}">
-            <span class="score-rank">${i===0?'★':(i+1)+'.'}</span>
-            <span class="score-num">${Number(e.score).toLocaleString()}</span>
-            <span class="score-diff" style="color:${DIFF_COLORS[e.difficulty]||'#aaa'}">${e.difficulty||'NORMAL'}</span>
-            <span class="score-date">${e.date||''}</span>
-        </div>`).join('');
-}
-
-// ── Clavier ──
-document.addEventListener('keydown', e => {
-    const active = document.querySelector('.screen.active');
-    if (!active) return;
-    const id = active.id;
-
-    if (id === 'menu-overlay') {
-        if (e.key==='ArrowDown')  { setNav(navIdx+1); e.preventDefault(); }
-        if (e.key==='ArrowUp')    { setNav(navIdx-1); e.preventDefault(); }
-        if (e.key==='Enter'||e.key===' ') { NAV_BTNS[navIdx].click(); e.preventDefault(); }
-    }
-    if (id==='screen-options') {
-        if (e.key==='ArrowLeft')  document.getElementById('diff-left').click();
-        if (e.key==='ArrowRight') document.getElementById('diff-right').click();
-        if (e.key==='Escape')     showScreen('menu');
-    }
-    if (['screen-scores','screen-controls'].includes(id)) {
-        if (e.key==='Escape'||e.key==='Backspace') showScreen('menu');
-    }
-    if (id==='gameover-overlay') {
-        if (e.key===' ') document.getElementById('go-restart').click();
-        if (e.key==='Escape') showScreen('menu');
-    }
-});
-</script>
+<script src="js/menu.js"></script>
 
 </body>
 </html>
+
+

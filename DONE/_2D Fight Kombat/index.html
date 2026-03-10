@@ -8,23 +8,7 @@
     <title>Jeu de Combat 2D</title>
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .hub-back-btn {
-            position: fixed;
-            top: 14px;
-            left: 14px;
-            z-index: 9999;
-            padding: 10px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.18);
-            background: rgba(14,8,8,.84);
-            color: #fff;
-            text-decoration: none;
-            font: 700 13px/1 Arial, sans-serif;
-            letter-spacing: .08em;
-            box-shadow: 0 10px 24px rgba(0,0,0,.32);
-        }
-    </style>
+
 </head>
 <body>
     <a class="hub-back-btn" href="../../index.html">&larr; HUB</a>
@@ -36,18 +20,18 @@
             <div class="pm-grid">
                 <div class="pm-col p1">
                     <h3>Joueur 1</h3>
-                    <input id="p1-name" type="text" maxlength="16" placeholder="Nom du joueur 1" required>
-                    <select id="p1-character"></select>
+                    <input id="p1-name" type="text" maxlength="16" placeholder="Nom du joueur 1" aria-label="Nom du joueur 1">
+                    <select id="p1-character" aria-label="Personnage joueur 1"></select>
                     <p class="char-preview" id="p1-preview"></p>
                 </div>
                 <div class="pm-col p2">
                     <h3>Joueur 2</h3>
-                    <input id="p2-name" type="text" maxlength="16" placeholder="Nom du joueur 2" required>
-                    <select id="p2-character"></select>
+                    <input id="p2-name" type="text" maxlength="16" placeholder="Nom du joueur 2" aria-label="Nom du joueur 2">
+                    <select id="p2-character" aria-label="Personnage joueur 2"></select>
                     <p class="char-preview" id="p2-preview"></p>
                 </div>
             </div>
-            <button id="start-match-btn">Lancer le combat</button>
+            <button id="start-match-btn" type="button">Lancer le combat</button>
             <p id="setup-error" aria-live="polite"></p>
         </div>
         <div id="canvas-container">
@@ -65,3 +49,5 @@
 
 </body>
 </html>
+
+

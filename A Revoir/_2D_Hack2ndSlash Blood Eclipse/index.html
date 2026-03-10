@@ -6,12 +6,12 @@
     <title>Blood Eclipse - Awakened Hunter</title>
     <link rel="stylesheet" href="css/style.css">
 
-    <link rel='stylesheet' href='../css/game-shell.css'>
+    <link rel='stylesheet' href='../../css/game-shell.css'>
 </head>
 <body>
     <!-- Bouton Retour au Catalogue -->
     <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
-        <span class="back-icon">â†</span>
+        <span class="back-icon">←</span>
         <span class="back-text">Retour</span>
     </button>
 
@@ -34,15 +34,15 @@
             </div>
             <div id="stats-panel">
                 <div>Score: <span id="score">0</span></div>
-                <div>Ennemis tuÃ©s: <span id="kills">0</span></div>
+                <div>Ennemis tués: <span id="kills">0</span></div>
             </div>
             <div id="weapon-display">
-                <div class="weapon-label">âš”ï¸ ARME</div>
+                <div class="weapon-label">⚔️ ARME</div>
                 <div id="current-weapon">Lame Spirituelle</div>
             </div>
             <div id="controls-info">
-                <p><strong>ContrÃ´les:</strong></p>
-                <p>ZQSD ou FlÃ¨ches - DÃ©placer</p>
+                <p><strong>Contrôles:</strong></p>
+                <p>ZQSD ou Flèches - Déplacer</p>
                 <p>Espace - Attaquer</p>
                 <p><em>Les power-ups se ramassent automatiquement</em></p>
             </div>
@@ -51,9 +51,9 @@
         
         <div id="game-over" class="modal hidden">
             <div class="modal-content">
-                <h2>ðŸ’€ Game Over ðŸ’€</h2>
+                <h2>💀 Game Over 💀</h2>
                 <p>Score final: <span id="final-score">0</span></p>
-                <p>Ennemis tuÃ©s: <span id="final-kills">0</span></p>
+                <p>Ennemis tués: <span id="final-kills">0</span></p>
                 <p>Niveau atteint: <span id="final-level">1</span></p>
                 <button id="restart-btn">Recommencer</button>
             </div>
@@ -61,16 +61,16 @@
         
         <div id="level-up" class="modal hidden">
             <div class="modal-content">
-                <h2>âœ¨ Niveau supÃ©rieur ! âœ¨</h2>
-                <p>Vous Ãªtes maintenant niveau <span id="new-level">2</span></p>
-                <p class="level-up-bonus">+15 PV max | +3 dÃ©gÃ¢ts | Pleine santÃ© restaurÃ©e</p>
+                <h2>✨ Niveau supérieur ! ✨</h2>
+                <p>Vous êtes maintenant niveau <span id="new-level">2</span></p>
+                <p class="level-up-bonus">+15 PV max | +3 dégâts | Pleine santé restaurée</p>
                 <button id="continue-btn">Continuer la chasse</button>
             </div>
         </div>
         
         <div id="boss-warning" class="modal hidden">
             <div class="modal-content boss-warning-content">
-                <h2 class="boss-warning-title">âš ï¸ ATTENTION âš ï¸</h2>
+                <h2 class="boss-warning-title">⚠️ ATTENTION ⚠️</h2>
                 <p class="boss-warning-text">UN BOSS APPROCHE...</p>
                 <div class="warning-bar-wrapper">
                     <div id="warning-bar" class="warning-bar"></div>
@@ -82,10 +82,10 @@
     <!-- ============================= -->
     <!-- SCRIPTS DU CATALOGUE -->
     <!-- ============================= -->
-    <script src="../js/config.js"></script>
-    <script src="../js/data.js"></script>
-    <script src="../js/storage.js"></script>
-    <script src="../js/scores.js"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/data.js"></script>
+    <script src="../../js/storage.js"></script>
+    <script src="../../js/scores.js"></script>
 
     <!-- ============================= -->
     <!-- SCRIPTS - ORDRE IMPORTANT ! -->
@@ -101,7 +101,7 @@
     <script src="js/entities.js"></script>
     <script src="js/particle.js"></script>
     
-    <!-- 4. SystÃ¨mes de jeu -->
+    <!-- 4. Systèmes de jeu -->
     <script src="js/powerup.js"></script>
     <script src="js/enemy.js"></script>
     <script src="js/boss.js"></script>
@@ -122,13 +122,14 @@
             const backBtn = document.getElementById('back-to-catalog');
             if (backBtn) {
                 backBtn.addEventListener('click', () => {
-                    window.location.href = '../index.html';
+                    window.location.href = '../../index.html';
                 });
             }
         });
     </script>
 
-<script src='../js/game-shell.js'></script>
+<script src='../../js/game-shell.js'></script>
 </body>
 </html>
+
 

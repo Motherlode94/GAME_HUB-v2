@@ -137,7 +137,6 @@ body::before {
     position: sticky;
     top: 0;
     z-index: 50;
-    backdrop-filter: blur(14px);
     background: rgba(6, 11, 17, 0.78);
     border-top: 1px solid rgba(255,255,255,0.05);
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -259,7 +258,7 @@ body::before {
 
 .hub-layout {
     display: grid;
-    grid-template-columns: 1.35fr 1fr;
+    grid-template-columns: 1fr 1.45fr;
     gap: 18px;
     padding: 18px 0 26px;
     align-items: start;
@@ -701,7 +700,7 @@ body::before {
 
 #game-iframe {
     width: 100%;
-    height: min(68vh, 820px);
+    height: min(80vh, 960px);
     border: 0;
     display: none;
     background: #000;
@@ -712,7 +711,7 @@ body::before {
 }
 
 .viewer-empty {
-    min-height: min(68vh, 820px);
+    min-height: min(80vh, 960px);
     display: grid;
     place-content: center;
     gap: 10px;
@@ -733,7 +732,6 @@ body::before {
     place-items: center;
     padding: 20px;
     background: rgba(4, 8, 14, 0.72);
-    backdrop-filter: blur(8px);
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--tr);
@@ -984,7 +982,6 @@ body::before {
     place-items: center;
     padding: 18px;
     background: rgba(4, 8, 14, 0.8);
-    backdrop-filter: blur(6px);
 }
 
 .postgame-overlay.hidden { display: none; }
@@ -1128,6 +1125,126 @@ body::before {
 #session-finish-btn { background: var(--accent); color: #fff; }
 #session-cancel-btn { background: rgba(255,255,255,0.1); color: #fff; }
 
+/* Pseudo modal */
+.pseudo-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 280;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(4, 8, 14, 0.82);
+}
+
+.pseudo-overlay.hidden { display: none; }
+
+.pseudo-window {
+    width: min(400px, 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: linear-gradient(145deg, rgba(16, 28, 44, 0.98), rgba(10, 18, 29, 0.98));
+    padding: 22px;
+    box-shadow: var(--shadow-lg);
+    animation: cardIn 0.2s ease both;
+}
+
+.pseudo-label {
+    color: var(--accent-cyan);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 4px;
+}
+
+.pseudo-window h3 {
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+}
+
+.pseudo-hint {
+    color: #9ab0c9;
+    font-size: 0.82rem;
+    margin-bottom: 14px;
+}
+
+#pseudo-input {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    padding: 11px 14px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--tr), box-shadow var(--tr);
+}
+
+#pseudo-input:focus {
+    border-color: rgba(26, 212, 255, 0.62);
+    box-shadow: 0 0 0 3px rgba(26, 212, 255, 0.14);
+}
+
+.pseudo-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.pseudo-btn-cancel {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.pseudo-btn-confirm {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+}
+
+.pseudo-btn-confirm:hover { filter: brightness(1.12); }
+
+/* Favorite button */
+.card-fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(8, 14, 22, 0.72);
+    color: #6a8099;
+    font-size: 0.95rem;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: color var(--tr), background var(--tr), transform var(--tr);
+}
+
+.card-fav-btn:hover {
+    transform: scale(1.15);
+    color: #ff6b8a;
+    background: rgba(255, 107, 138, 0.18);
+}
+
+.card-fav-btn.active {
+    color: #ff4d72;
+    background: rgba(255, 77, 114, 0.22);
+    border-color: rgba(255, 77, 114, 0.5);
+}
+
 footer {
     text-align: center;
     color: #89a1bd;
@@ -1156,7 +1273,7 @@ footer {
 
     #game-iframe,
     .viewer-empty {
-        min-height: 62vh;
+        min-height: 76vh;
     }
 }
 

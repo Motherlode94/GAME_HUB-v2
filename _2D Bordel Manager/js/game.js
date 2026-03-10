@@ -126,6 +126,16 @@
         return Math.round(value).toLocaleString("fr-FR");
     }
 
+    function statColor(val, danger = 22, warn = 45) {
+        if (val <= danger) return "var(--bad)";
+        if (val <= warn)   return "var(--warn)";
+        return "var(--good)";
+    }
+
+    function colorStat(el, val) {
+        el.style.color = statColor(val);
+    }
+
     function scoreValue() {
         const quality = (state.reputation * 95) + (state.compliance * 88) + (state.morale * 72) + (state.security * 80);
         const assets = (state.rooms * 230) + (state.staff * 130) + (state.day * 250);
@@ -193,11 +203,13 @@
             return;
         }
 
+        const netCol = data.net >= 0 ? "var(--good)" : "var(--bad)";
+        const netSign = data.net >= 0 ? "+" : "";
         dom.report.innerHTML = `
             <p><span class="k">Demande:</span> ${fmt(data.demand)} clients</p>
             <p><span class="k">Servis:</span> ${fmt(data.served)} | Refuses: ${fmt(data.refused)}</p>
-            <p><span class="k">Recettes:</span> +${fmt(data.revenue)} | Depenses: -${fmt(data.costs)}</p>
-            <p><span class="k">Resultat net:</span> ${data.net >= 0 ? "+" : ""}${fmt(data.net)}</p>
+            <p><span class="k">Recettes:</span> <span style="color:var(--good)">+${fmt(data.revenue)}</span> | Depenses: <span style="color:var(--bad)">-${fmt(data.costs)}</span></p>
+            <p><span class="k">Resultat net:</span> <strong style="color:${netCol}">${netSign}${fmt(data.net)}</strong></p>
             <p><span class="k">Evenement:</span> ${data.eventText}</p>
         `;
     }
@@ -206,16 +218,26 @@
         dom.dayLabel.textContent = `Jour ${Math.min(state.day, MAX_DAYS)} / ${MAX_DAYS}`;
         setStatusText();
         dom.cash.textContent = `${fmt(state.cash)} c`;
+        dom.cash.style.color = state.cash < 1200 ? "var(--bad)" : state.cash < 3000 ? "var(--warn)" : "";
         dom.reputation.textContent = `${Math.round(state.reputation)}%`;
+        colorStat(dom.reputation, state.reputation);
         dom.compliance.textContent = `${Math.round(state.compliance)}%`;
+        colorStat(dom.compliance, state.compliance);
         dom.morale.textContent = `${Math.round(state.morale)}%`;
+        colorStat(dom.morale, state.morale);
         dom.security.textContent = `${Math.round(state.security)}%`;
+        colorStat(dom.security, state.security);
         dom.served.textContent = fmt(state.totalClients);
         dom.rooms.textContent = fmt(state.rooms);
         dom.staff.textContent = fmt(state.staff);
         dom.priceTier.value = state.priceTier;
 
-        dom.logList.innerHTML = state.logs.slice(0, 20).map((line) => `<li>${line}</li>`).join("");
+        dom.logList.innerHTML = state.logs.slice(0, 20).map((line) => {
+            let cls = "";
+            if (/\+\d|bonus|positif|validee|operationnelle|programme|engage|supplementaire|VIP|felicitation|mention|fortune/.test(line)) cls = "log-good";
+            else if (/amende|incident|panne|greve|demissionn|plainte|critique|fermeture|suspend|negatif|effondre/.test(line)) cls = "log-bad";
+            return `<li class="${cls}">${line}</li>`;
+        }).join("");
         renderRisks();
 
         const disabled = state.gameOver;
@@ -230,27 +252,57 @@
         const roll = Math.random();
         let eventText = "Nuit stable sans incident majeur.";
 
-        if (roll < 0.14) {
+        if (roll < 0.10) {
             const fine = rnd(450, 1600);
             state.cash -= fine;
             state.compliance -= rnd(3, 8);
             state.reputation -= rnd(1, 4);
             state.incidents += 1;
             eventText = `Controle municipal surprise: amende de ${fmt(fine)} credits.`;
-        } else if (roll < 0.26) {
+        } else if (roll < 0.19) {
             const bonus = rnd(220, 820);
             state.cash += bonus;
             state.reputation += rnd(1, 4);
             eventText = `Avis positif viral sur reseaux: +${fmt(bonus)} credits.`;
-        } else if (roll < 0.35) {
+        } else if (roll < 0.27) {
             state.security -= rnd(3, 7);
             state.morale -= rnd(2, 6);
             state.incidents += 1;
             eventText = "Incident de quartier: tension a la sortie, equipe secouee.";
-        } else if (roll < 0.43) {
+        } else if (roll < 0.34) {
             state.morale += rnd(2, 6);
             state.compliance += rnd(1, 5);
             eventText = "Inspection interne bien geree, procedure staff validee.";
+        } else if (roll < 0.41) {
+            const vip = rnd(380, 900);
+            state.cash += vip;
+            state.reputation += rnd(1, 3);
+            eventText = `Soiree VIP privee: affluence exceptionnelle. +${fmt(vip)} credits.`;
+        } else if (roll < 0.47) {
+            if (state.staff > 2) { state.staff -= 1; }
+            state.morale -= rnd(4, 8);
+            state.incidents += 1;
+            eventText = "Un membre du personnel demissionne sans preavis.";
+        } else if (roll < 0.53) {
+            const fine2 = rnd(200, 700);
+            state.cash -= fine2;
+            state.compliance -= rnd(2, 6);
+            state.incidents += 1;
+            eventText = `Plainte de voisinage traitee: penalite ${fmt(fine2)} credits.`;
+        } else if (roll < 0.59) {
+            const repairCost = rnd(300, 800);
+            state.cash -= repairCost;
+            if (state.rooms > 1) state.rooms -= 1;
+            state.incidents += 1;
+            eventText = `Panne technique: fermeture d'une chambre. -${fmt(repairCost)} credits.`;
+        } else if (roll < 0.65) {
+            const fortune = rnd(500, 1200);
+            state.cash += fortune;
+            eventText = `Client genereux laisse un gros pourboire: +${fmt(fortune)} credits.`;
+        } else if (roll < 0.70) {
+            state.reputation += rnd(2, 5);
+            state.marketing += 10;
+            eventText = "Mention favorable dans un forum specialise. Reputation en hausse.";
         }
 
         baseData.eventText = eventText;
@@ -375,6 +427,12 @@
     }
 
     function init() {
+        dom.actionButtons.forEach((btn) => {
+            const action = ACTIONS[btn.dataset.action];
+            if (action) {
+                btn.innerHTML = `${action.label}<small class="btn-cost">${fmt(action.cost)} c</small>`;
+            }
+        });
         bind();
         renderReport(null);
         render();

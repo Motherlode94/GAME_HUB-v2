@@ -108,6 +108,41 @@ const GAMES = [
             { version: "0.2.0", date: "2026-02-28", notes: ["Added mobile joystick controls", "Added combos, formations, and power-ups"] },
             { version: "0.1.0", date: "2026-02-28", notes: ["Initial playable prototype"] }
         ]
+    },
+    {
+        id: 9,
+        title: "City Builder",
+        category: "simulation",
+        year: 2026,
+        rating: 8.7,
+        description: "Build and manage your own city. Place roads, houses, shops, and services while balancing power, water, budget, and citizen satisfaction.",
+        tags: ["simulation", "city builder", "management", "economy", "mobile"],
+        playUrl: "DONE/_2D City Builder/index.html",
+        changelog: [{ version: "1.0.0", date: "2026-03-04", notes: ["Initial release"] }]
+    },
+    {
+        id: 10,
+        title: "Be the King",
+        category: "strategy",
+        year: 2026,
+        rating: 8.5,
+        description: "Rule your medieval kingdom, manage resources, collect taxes, raise an army, and defend your throne against rival factions.",
+        tags: ["strategy", "kingdom", "medieval", "management", "ruler"],
+        strategyType: "Kingdom Manager",
+        fourX: { explore: 52, expand: 80, exploit: 88, exterminate: 70 },
+        playUrl: "DONE/_2D Be the Kings/index.html",
+        changelog: [{ version: "1.0.0", date: "2026-03-10", notes: ["Initial release"] }]
+    },
+    {
+        id: 11,
+        title: "Football Manager 2D",
+        category: "sports",
+        year: 2026,
+        rating: 8.6,
+        description: "Take charge of your football club, set tactics, manage your squad, and lead your team through a full season to glory.",
+        tags: ["sports", "manager", "football", "team building", "tactics"],
+        playUrl: "DONE/_2D Football Manager/index.html",
+        changelog: [{ version: "1.0.0", date: "2026-03-10", notes: ["Initial release"] }]
     }
 ];
 
@@ -169,6 +204,19 @@ let currentGameId  = null;
 
 // Pseudo persistant par session (demandé une seule fois avant le 1er jeu)
 let playerName = sessionStorage.getItem('wgc_playerName') || '';
+
+// Favoris (persistant dans localStorage)
+function getFavorites() {
+    try { return JSON.parse(localStorage.getItem('wgc_favorites') || '[]'); } catch { return []; }
+}
+function toggleFavorite(gameId) {
+    const favs = getFavorites();
+    const idx = favs.indexOf(gameId);
+    if (idx === -1) favs.push(gameId); else favs.splice(idx, 1);
+    localStorage.setItem('wgc_favorites', JSON.stringify(favs));
+    return idx === -1; // true = ajouté
+}
+function isFavorite(gameId) { return getFavorites().includes(gameId); }
 
 // ── DOM ────────────────────────────────────────
 const grid        = document.getElementById('games-grid');
@@ -328,7 +376,12 @@ function renderStrategyCompare(filteredGames) {
 
 function getFiltered() {
     let list = [...GAMES];
-    if (activeCategory !== 'all') list = list.filter(g => g.category === activeCategory);
+    if (activeCategory === 'favorites') {
+        const favs = getFavorites();
+        list = list.filter(g => favs.includes(g.id));
+    } else if (activeCategory !== 'all') {
+        list = list.filter(g => g.category === activeCategory);
+    }
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
         list = list.filter(g =>
@@ -362,6 +415,7 @@ function renderGrid() {
     resultsInfo.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${GAMES.length}</strong> games`;
     grid.innerHTML = filtered.map((game, i) => `
         <div class="game-card${game.playUrl ? ' game-card--playable' : ''}${game.category === 'strategy' ? ' game-card--strategy' : ''}" data-id="${game.id}" style="animation-delay:${i * 0.05}s">
+            <button class="card-fav-btn${isFavorite(game.id) ? ' active' : ''}" data-fav-id="${game.id}" title="Ajouter aux favoris">&#10084;</button>
             ${game.coverImage ? `
                 <div class="card-media">
                     <img src="${escapeAttr(game.coverImage)}" alt="${escapeAttr(game.title)} cover" loading="lazy">
@@ -384,6 +438,15 @@ function renderGrid() {
     `).join('');
     grid.querySelectorAll('.game-card').forEach(card => {
         card.addEventListener('click', () => openModal(parseInt(card.dataset.id, 10)));
+    });
+    grid.querySelectorAll('.card-fav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = parseInt(btn.dataset.favId, 10);
+            const added = toggleFavorite(id);
+            btn.classList.toggle('active', added);
+            if (activeCategory === 'favorites') renderGrid();
+        });
     });
 }
 
@@ -542,14 +605,14 @@ function updateViewerControls() {
 }
 
 function openGame(game) {
-    // Ask for pseudo once per session if not already set
     if (!playerName) {
-        const input = prompt('Entre ton pseudo avant de jouer (sera utilisé pour ton score) :');
-        if (!input || !input.trim()) return; // cancelled → don't launch
-        playerName = input.trim().slice(0, 20);
-        sessionStorage.setItem('wgc_playerName', playerName);
+        showPseudoModal(game);
+        return;
     }
+    launchGame(game);
+}
 
+function launchGame(game) {
     lastPlayedGame = game;
     persistActiveSession(game);
     syncSessionBanner();
@@ -560,9 +623,45 @@ function openGame(game) {
     gameIframe.src = new URL(game.playUrl, window.location.href).toString();
     updateViewerControls();
 
-    // Keep the player in context by scrolling the embedded viewer into view.
     modalGameOverlay.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// ── Pseudo modal ───────────────────────────────
+const pseudoOverlay    = document.getElementById('pseudo-overlay');
+const pseudoInput      = document.getElementById('pseudo-input');
+const pseudoConfirmBtn = document.getElementById('pseudo-confirm-btn');
+const pseudoCancelBtn  = document.getElementById('pseudo-cancel-btn');
+let pendingGame = null;
+
+function showPseudoModal(game) {
+    pendingGame = game;
+    pseudoInput.value = playerName;
+    pseudoOverlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => pseudoInput.focus(), 50);
+}
+
+function closePseudoModal() {
+    pseudoOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+    pendingGame = null;
+}
+
+pseudoConfirmBtn.addEventListener('click', () => {
+    const val = pseudoInput.value.trim();
+    if (!val) { pseudoInput.style.borderColor = '#e63946'; setTimeout(() => pseudoInput.style.borderColor = '', 1500); return; }
+    playerName = val.slice(0, 20);
+    sessionStorage.setItem('wgc_playerName', playerName);
+    closePseudoModal();
+    if (pendingGame) launchGame(pendingGame);
+});
+
+pseudoCancelBtn.addEventListener('click', closePseudoModal);
+
+pseudoInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') pseudoConfirmBtn.click();
+    if (e.key === 'Escape') closePseudoModal();
+});
 
 function closeGame() {
     modalGameOverlay.classList.remove('active');

@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GodSworm - Divine Strategy</title>
   <link rel="stylesheet" href="css/style.css">
   
@@ -73,11 +73,11 @@
 
     <!-- Wrapper pour panels + canvas -->
     <div id="gameWrapper">
-      <!-- Panels Ã  gauche -->
+      <!-- Panels à gauche -->
       <div id="leftPanels">
         <!-- Divine Presence -->
         <div id="divinePresencePanel" class="panel">
-          <h3>âš¡ Divine Presence</h3>
+          <h3>⚡ Divine Presence</h3>
           <p>God: <span id="godName">Wyrd</span></p>
           <p>Faith: <span id="faith">100 / 300</span></p>
           <div class="faithBarContainer">
@@ -93,7 +93,7 @@
 
         <!-- Divine Powers -->
         <div id="divinePowersPanel" class="panel">
-          <h3>âš”ï¸ Commands</h3>
+          <h3>⚔️ Commands</h3>
           
           <div class="power ready">
             [B] Open Build Menu
@@ -117,11 +117,11 @@
       <!-- Canvas au centre -->
       <canvas id="gameCanvas" width="1920" height="1080"></canvas>
 
-      <!-- Panel Ã  droite -->
+      <!-- Panel à droite -->
       <div id="rightPanels">
         <!-- Statistics -->
         <div id="statisticsPanel" class="panel">
-          <h3>ðŸ“Š Statistics</h3>
+          <h3>📊 Statistics</h3>
           <p>Power Level: <span id="powerLevel">0</span></p>
           <p>Smites Used: <span id="totalSmites">0</span></p>
           <p>Blessings: <span id="totalBlessings">0</span></p>
@@ -133,7 +133,7 @@
 
     <!-- Controls -->
     <div id="controls">
-      <kbd>Click</kbd> SÃ©lectionner | 
+      <kbd>Click</kbd> Sélectionner | 
       <kbd>Shift+Click</kbd> Multi-select |
       <kbd>Ctrl+Click</kbd> Meme type |
       <kbd>Right-Click</kbd> Action | 
@@ -150,51 +150,51 @@
     <!-- MENU DE CONSTRUCTION (en overlay) -->
     <div id="buildingMenu" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
       <div class="panel" style="width: 650px; max-height: 80vh; overflow-y: auto;">
-        <h3>ðŸ—ï¸ Construction Menu</h3>
+        <h3>🏗️ Construction Menu</h3>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
           
           <button class="buildButton" data-building="town_hall">
-            ðŸ›ï¸ Town Hall<br>
+            🏛️ Town Hall<br>
             <span style="font-size: 10px;">Gold: 300 | Wood: 200</span>
           </button>
           
           <button class="buildButton" data-building="barracks">
-            ðŸ° Barracks<br>
+            🏰 Barracks<br>
             <span style="font-size: 10px;">Gold: 80 | Wood: 60</span>
           </button>
           
           <button class="buildButton" data-building="archery_range">
-            ðŸŽ¯ Archery Range<br>
+            🎯 Archery Range<br>
             <span style="font-size: 10px;">Gold: 70 | Wood: 50</span>
           </button>
           
           <button class="buildButton" data-building="shrine">
-            â›©ï¸ Shrine<br>
+            ⛩️ Shrine<br>
             <span style="font-size: 10px;">Gold: 50 | Wood: 30</span>
           </button>
           
           <button class="buildButton" data-building="temple">
-            ðŸ›ï¸ Temple<br>
+            🏛️ Temple<br>
             <span style="font-size: 10px;">Gold: 150 | Wood: 100</span>
           </button>
           
           <button class="buildButton" data-building="farm">
-            ðŸŒ¾ Farm<br>
+            🌾 Farm<br>
             <span style="font-size: 10px;">Gold: 40 | Wood: 30</span>
           </button>
           
           <button class="buildButton" data-building="lumber_mill">
-            ðŸª“ Lumber Mill<br>
+            🪓 Lumber Mill<br>
             <span style="font-size: 10px;">Gold: 60 | Wood: 40</span>
           </button>
           
           <button class="buildButton" data-building="mine">
-            â›ï¸ Mine<br>
+            ⛏️ Mine<br>
             <span style="font-size: 10px;">Gold: 80 | Wood: 50</span>
           </button>
           
           <button class="buildButton" data-building="fortress">
-            ðŸ¯ Fortress<br>
+            🏯 Fortress<br>
             <span style="font-size: 10px;">Gold: 200 | Wood: 150</span>
           </button>
           
@@ -218,7 +218,16 @@
   <script src="js/ui.js"></script>
   <script src="js/game.js"></script>
 
-<script src='../js/game-shell.js'></script>
+<script src='../../js/game-shell.js'></script>
+<script>
+    (function () {
+        var btn = document.getElementById('back-to-catalog');
+        if (btn) btn.addEventListener('click', function () {
+            window.location.href = '../../index.html';
+        });
+    })();
+</script>
 </body>
 </html>
+
 

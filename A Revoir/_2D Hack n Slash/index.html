@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hack and Slash 2D Ultime â€” Mode Endless</title>
+  <title>Hack and Slash 2D Ultime — Mode Endless</title>
 
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
       <!-- Meta SEO (optionnel mais propre) -->
   <meta name="description" content="Hack and Slash 2D arcade en mode Endless avec combos, armes et boss." />
 
-    <link rel='stylesheet' href='../css/game-shell.css'>
+    <link rel='stylesheet' href='../../css/game-shell.css'>
 </head>
 
 <body>
       <div id="app">
         <!-- Bouton Retour Global -->
         <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
-            <span class="back-icon">â†</span>
+            <span class="back-icon">←</span>
             <span class="back-text">Retour</span>
         </button>
   <main id="gameContainer" role="application" aria-label="Jeu Hack and Slash 2D">
@@ -35,26 +35,26 @@
       <div id="score">Score : <span>0</span></div>
       <div id="level">Niveau : <span>1</span></div>
 
-      <!-- Vie + XP (prÃªt pour animation JS) -->
+      <!-- Vie + XP (prêt pour animation JS) -->
       <div id="health">
-        <div class="hearts" aria-label="Points de vie">â¤ï¸ â¤ï¸ â¤ï¸</div>
+        <div class="hearts" aria-label="Points de vie">❤️ ❤️ ❤️</div>
         <div class="xp-bar">
           <div class="xp-fill" style="width: 0%"></div>
         </div>
       </div>
     </section>
 
-    <!-- Aide contrÃ´les -->
-    <aside class="controls" aria-label="ContrÃ´les du jeu">
-      <h3>ContrÃ´les</h3>
-      <p>FlÃ¨ches / ZQSD : DÃ©placement</p>
+    <!-- Aide contrôles -->
+    <aside class="controls" aria-label="Contrôles du jeu">
+      <h3>Contrôles</h3>
+      <p>Flèches / ZQSD : Déplacement</p>
       <p>Espace / J : Attaque</p>
-      <p>E / K : Attaque spÃ©ciale</p>
+      <p>E / K : Attaque spéciale</p>
       <p>MAJ / L : Dash</p>
-      <p>1â€“4 : Armes (Ã‰pÃ©e / Hache / Lance / BÃ¢ton)</p>
+      <p>1–4 : Armes (Épée / Hache / Lance / Bâton)</p>
     </aside>
 
-    <!-- Ã‰cran Game Over -->
+    <!-- Écran Game Over -->
     <section id="gameOver" role="dialog" aria-hidden="true">
       <h1>Game Over</h1>
       <p>Score final : <span id="finalScore">0</span></p>
@@ -63,7 +63,7 @@
       <button type="button" onclick="resetGame()">Rejouer</button>
     </section>
 
-    <!-- Ã‰cran Victoire -->
+    <!-- Écran Victoire -->
     <section id="win" role="dialog" aria-hidden="true">
       <h1>Victoire !</h1>
       <p>Niveau final : <span id="finalLevelWin">15</span></p>
@@ -77,27 +77,28 @@
     <!-- ============================= -->
     <!-- SCRIPTS DU CATALOGUE -->
     <!-- ============================= -->
-    <script src="../js/config.js"></script>
-    <script src="../js/data.js"></script>
-    <script src="../js/storage.js"></script>
-    <script src="../js/scores.js"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/data.js"></script>
+    <script src="../../js/storage.js"></script>
+    <script src="../../js/scores.js"></script>
 
   <!-- JS du jeu -->
   <script src="game.js" defer></script>
 
-  <!-- Script du bouton retour (SÃ‰PARÃ‰) -->
+  <!-- Script du bouton retour (SÉPARÉ) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const backBtn = document.getElementById('back-to-catalog');
       if (backBtn) {
         backBtn.addEventListener('click', () => {
-          window.location.href = '../index.html';
+          window.location.href = '../../index.html';
         });
       }
     });
   </script>
 
-<script src='../js/game-shell.js'></script>
+<script src='../../js/game-shell.js'></script>
 </body>
 </html>
+
 

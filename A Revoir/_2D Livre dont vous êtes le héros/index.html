@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aventure MÃ©diÃ©vale - QuÃªte du Royaume Perdu</title>
+    <title>Aventure Médiévale - Quête du Royaume Perdu</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- Medieval fonts for better atmosphere -->
     <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>âš”ï¸</text></svg>">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
     
     
-    <link rel='stylesheet' href='../css/game-shell.css'>
+    <link rel='stylesheet' href='../../css/game-shell.css'>
 </head>
 <body>
     <!-- Bouton Retour au Catalogue -->
     <button id="back-to-catalog" class="btn-back" aria-label="Retour au catalogue de jeux">
-        <span class="back-icon">â†</span>
+        <span class="back-icon">←</span>
         <span class="back-text">Retour au Catalogue</span>
     </button>
 
@@ -38,7 +38,7 @@
     <div id="game-container">
         <!-- Game Header -->
         <div id="game-header">
-            <h1 id="game-title"><i class="fas fa-crown"></i> Aventure MÃ©diÃ©vale</h1>
+            <h1 id="game-title"><i class="fas fa-crown"></i> Aventure Médiévale</h1>
             <div id="game-controls">
                 <button id="music-toggle" class="control-btn" title="Musique">
                     <i class="fas fa-volume-mute"></i>
@@ -52,26 +52,26 @@
         <!-- Game Stats -->
         <div id="stats">
             <div class="stat-item">
-                <span class="stat-icon">â¤ï¸</span>
-                <span id="health">SantÃ©: 100</span>
+                <span class="stat-icon">❤️</span>
+                <span id="health">Santé: 100</span>
             </div>
             <div class="stat-item">
-                <span class="stat-icon">ðŸ’°</span>
+                <span class="stat-icon">💰</span>
                 <span id="gold">Or: 0</span>
             </div>
             <div class="stat-item">
-                <span class="stat-icon">âš”ï¸</span>
+                <span class="stat-icon">⚔️</span>
                 <span id="weapon">Arme: Aucune</span>
             </div>
             <div class="stat-item">
-                <span class="stat-icon">ðŸ›¡ï¸</span>
+                <span class="stat-icon">🛡️</span>
                 <span id="armor">Armure: Aucune</span>
             </div>
         </div>
         
         <!-- Game Text Display -->
         <div id="text-container">
-            <div id="text">Bienvenue, brave aventurier ! Votre quÃªte commence dans la sombre forÃªt d'Elrendor...</div>
+            <div id="text">Bienvenue, brave aventurier ! Votre quête commence dans la sombre forêt d'Elrendor...</div>
         </div>
         
         <!-- Player Inventory (collapsible) -->
@@ -104,17 +104,17 @@
             <p id="game-instruction">
                 <i class="fas fa-info-circle"></i> Choisissez votre destin avec sagesse...
             </p>
-            <p id="version">Version 1.0 Â· QuÃªte du Royaume Perdu</p>
+            <p id="version">Version 1.0 · Quête du Royaume Perdu</p>
         </div>
     </div>
     
     <!-- Achievement Toast -->
     <div id="achievement-toast" class="hidden">
         <div class="toast-content">
-            <span class="toast-icon">ðŸ†</span>
+            <span class="toast-icon">🏆</span>
             <div class="toast-text">
-                <strong>SuccÃ¨s dÃ©bloquÃ© !</strong>
-                <span id="achievement-text">DÃ©but de l'aventure</span>
+                <strong>Succès débloqué !</strong>
+                <span id="achievement-text">Début de l'aventure</span>
             </div>
         </div>
     </div>
@@ -122,10 +122,10 @@
     <!-- ============================= -->
     <!-- SCRIPTS DU CATALOGUE -->
     <!-- ============================= -->
-    <script src="../js/config.js"></script>
-    <script src="../js/data.js"></script>
-    <script src="../js/storage.js"></script>
-    <script src="../js/scores.js"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/data.js"></script>
+    <script src="../../js/storage.js"></script>
+    <script src="../../js/scores.js"></script>
     
     <!-- Script du jeu -->
     <script src="js/script.js"></script>
@@ -136,14 +136,15 @@
             const backBtn = document.getElementById('back-to-catalog');
             if (backBtn) {
                 backBtn.addEventListener('click', () => {
-                    // Chemin corrigÃ© selon la structure de votre projet
-                    window.location.href = '../index.html';
+                    // Chemin corrigé selon la structure de votre projet
+                    window.location.href = '../../index.html';
                 });
             }
         });
     </script>
 
-<script src='../js/game-shell.js'></script>
+<script src='../../js/game-shell.js'></script>
 </body>
 </html>
+
 
