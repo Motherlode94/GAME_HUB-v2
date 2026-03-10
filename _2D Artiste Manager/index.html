@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎭 ArtVibe Manager</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== TITLE ===== -->
+<div class="screen active" id="title-screen">
+  <div class="title-logo">🎭 ArtVibe</div>
+  <div class="title-sub">Manager d'Artistes</div>
+  <div class="title-tagline">Construis l'empire culturel de demain</div>
+  <div class="title-cards" id="title-cards"></div>
+  <button class="btn-cta" onclick="startGame()">▶ Lancer l'Agence</button>
+  <div class="title-meta">Gérez musiciens · peintres · comédiens · photographes · poètes</div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="screen" id="main-screen">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand">🎭 <span id="agency-name">ArtVibe Agency</span></div>
+    <div class="topbar-stats">
+      <div class="tstat gold">💰 <span id="stat-money">50000</span>€</div>
+      <div class="tstat blue">📅 Semaine <span id="stat-week">1</span></div>
+      <div class="tstat purple">⭐ Réputation : <span id="stat-rep">10</span></div>
+      <div class="tstat green">👥 <span id="stat-artists">0</span> artistes</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-tab" onclick="openTab('dashboard')" id="tab-dashboard">📊 Tableau</button>
+      <button class="btn-tab" onclick="openTab('roster')"    id="tab-roster"   >🎨 Artistes</button>
+      <button class="btn-tab" onclick="openTab('projects')"  id="tab-projects" >🎬 Projets</button>
+      <button class="btn-tab" onclick="openTab('market')"    id="tab-market"   >🏪 Marché</button>
+      <button class="btn-tab" onclick="openTab('events')"    id="tab-events"   >🎤 Événements</button>
+    </div>
+    <button class="btn-nextweek" onclick="nextWeek()">⏩ Semaine suivante</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content-area" id="content-area">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="tab-pane active" id="pane-dashboard">
+      <div class="dash-grid">
+        <div class="dash-card wide">
+          <div class="dash-card-title">📣 Journal de l'agence</div>
+          <div class="news-feed" id="news-feed">
+            <div class="news-item">🎭 Bienvenue chez ArtVibe Agency ! Recrutez vos premiers artistes.</div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">💰 Finances</div>
+          <div class="finance-grid" id="finance-grid"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">🏆 Top artistes</div>
+          <div id="top-artists-list"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">📊 Projets actifs</div>
+          <div id="active-projects-dash"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">⭐ Réputation</div>
+          <div class="rep-meter" id="rep-meter">
+            <div class="rep-fill" id="rep-fill"></div>
+          </div>
+          <div id="rep-label" style="text-align:center;font-size:.8rem;margin-top:.5rem;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ROSTER ── -->
+    <div class="tab-pane" id="pane-roster">
+      <div class="pane-header">
+        <h2>🎨 Mes Artistes</h2>
+        <button class="btn-action green" onclick="openTab('market')">+ Recruter</button>
+      </div>
+      <div class="artist-filters">
+        <button class="filter-btn active" onclick="filterArtists('all')">Tous</button>
+        <button class="filter-btn" onclick="filterArtists('musician')">🎵 Musiciens</button>
+        <button class="filter-btn" onclick="filterArtists('painter')">🎨 Peintres</button>
+        <button class="filter-btn" onclick="filterArtists('comedian')">🎭 Comédiens</button>
+        <button class="filter-btn" onclick="filterArtists('photographer')">📷 Photographes</button>
+        <button class="filter-btn" onclick="filterArtists('poet')">✍️ Poètes</button>
+      </div>
+      <div class="artists-grid" id="artists-grid"></div>
+      <div class="empty-roster" id="empty-roster">
+        <div style="font-size:3rem">🎭</div>
+        <p>Aucun artiste pour le moment.</p>
+        <p>Rendez-vous sur le <strong>Marché</strong> pour recruter !</p>
+      </div>
+    </div>
+
+    <!-- ── PROJECTS ── -->
+    <div class="tab-pane" id="pane-projects">
+      <div class="pane-header">
+        <h2>🎬 Projets</h2>
+        <button class="btn-action green" onclick="openNewProjectModal()">+ Nouveau projet</button>
+      </div>
+      <div class="projects-columns">
+        <div class="proj-col">
+          <div class="proj-col-title">🔧 En cours</div>
+          <div id="proj-active"></div>
+        </div>
+        <div class="proj-col">
+          <div class="proj-col-title">✅ Terminés</div>
+          <div id="proj-done"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MARCHÉ ── -->
+    <div class="tab-pane" id="pane-market">
+      <div class="pane-header">
+        <h2>🏪 Marché des Artistes</h2>
+        <button class="btn-action" onclick="refreshMarket()">🔄 Actualiser (gratuit)</button>
+      </div>
+      <div class="market-note">Recrutez des talents disponibles cette semaine</div>
+      <div class="market-grid" id="market-grid"></div>
+    </div>
+
+    <!-- ── EVENTS ── -->
+    <div class="tab-pane" id="pane-events">
+      <div class="pane-header">
+        <h2>🎤 Événements disponibles</h2>
+      </div>
+      <div class="market-note">Participez aux événements pour booster la notoriété de vos artistes</div>
+      <div class="events-grid" id="events-grid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== GAME OVER ===== -->
+<div class="screen" id="end-screen">
+  <div class="end-box">
+    <div class="end-title">🎭 Bilan Final</div>
+    <div class="end-sub" id="end-sub"></div>
+    <div class="end-stats" id="end-stats"></div>
+    <div class="end-artists" id="end-artists"></div>
+    <button class="btn-cta" onclick="restartGame()" style="margin-top:1.5rem">🔄 Recommencer</button>
+  </div>
+</div>
+
+<!-- MODAL : Profil artiste -->
+<div class="modal-overlay" id="artist-modal">
+  <div class="modal-box large">
+    <button class="modal-close" onclick="closeArtistModal()">✕</button>
+    <div id="artist-modal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL : Nouveau projet -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeProjectModal()">✕</button>
+    <h3 class="modal-title">🎬 Nouveau projet</h3>
+    <div id="project-modal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL : Événement -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEventModal()">✕</button>
+    <div id="event-modal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL : Notification hebdo -->
+<div class="modal-overlay" id="weekly-modal">
+  <div class="modal-box">
+    <h3 class="modal-title">📰 Bilan de la semaine <span id="wm-week"></span></h3>
+    <div id="weekly-content"></div>
+    <button class="btn-cta" onclick="closeWeeklyModal()" style="width:100%;margin-top:1rem">Continuer →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/game.js"></script>
+</body>
+</html>

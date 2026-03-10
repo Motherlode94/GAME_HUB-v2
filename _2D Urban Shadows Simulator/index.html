@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Urban Shadows</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- TITRE -->
+<div id="screen-title">
+  <canvas id="bg-canvas"></canvas>
+  <div class="title-panel">
+    <div class="t-kicker">TACTICAL SIM · 4 PHASES</div>
+    <h1>URBAN<br>SHADOWS</h1>
+    <p class="t-sub">Clique sur la carte pour agir</p>
+    <input id="name-input" placeholder="NOM DE CODE…" maxlength="16" autocomplete="off">
+    <button id="btn-start">DÉMARRER L'OPÉRATION</button>
+    <div class="t-phases">
+      <span class="tp police">01 POLICE</span>
+      <span class="tp prison">02 PRISON</span>
+      <span class="tp gang">03 GANG</span>
+      <span class="tp ninja">04 NINJA</span>
+    </div>
+  </div>
+</div>
+
+<!-- JEU -->
+<div id="screen-game" class="hidden">
+  <!-- Canvas plein écran interactif -->
+  <canvas id="map"></canvas>
+
+  <!-- HUD TOP minimal -->
+  <header id="hud-top">
+    <div class="h-left">
+      <div id="h-phase" class="h-phase">POLICE</div>
+      <div id="h-day"   class="h-day">J 01</div>
+    </div>
+    <div class="h-stats">
+      <div class="hs" id="hs-hp" title="Santé">
+        <svg viewBox="0 0 12 12"><path d="M6 10S1 6.5 1 4a2.5 2.5 0 0 1 5-1 2.5 2.5 0 0 1 5 1c0 2.5-5 6-5 6z" fill="currentColor"/></svg>
+        <div class="hs-bar"><div id="bar-hp" class="hs-fill hp"></div></div>
+        <span id="val-hp"></span>
+      </div>
+      <div class="hs" id="hs-heat" title="Pression">
+        <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/></svg>
+        <div class="hs-bar"><div id="bar-heat" class="hs-fill heat"></div></div>
+        <span id="val-heat"></span>
+      </div>
+      <div class="hs" id="hs-stealth" title="Furtivité">
+        <svg viewBox="0 0 12 12"><path d="M6 2C3 2 1 6 1 6s2 4 5 4 5-4 5-4-2-4-5-4z" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="6" cy="6" r="1.5" fill="currentColor"/></svg>
+        <div class="hs-bar"><div id="bar-stealth" class="hs-fill stealth"></div></div>
+        <span id="val-stealth"></span>
+      </div>
+      <div class="hs" id="hs-inf" title="Influence">
+        <svg viewBox="0 0 12 12"><circle cx="4" cy="4.5" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="8" cy="4.5" r="1.8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M1.5 10c0-1.5 1-2.5 2.5-2.5M10.5 10c0-1.5-1-2.5-2.5-2.5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
+        <div class="hs-bar"><div id="bar-inf" class="hs-fill inf"></div></div>
+        <span id="val-inf"></span>
+      </div>
+      <div class="hs hs-cash">
+        <span>¥</span><span id="val-cash"></span>
+      </div>
+      <div class="hs hs-score">
+        <span>★</span><span id="val-score"></span>
+      </div>
+    </div>
+    <div class="h-right">
+      <div class="ap-wrap">
+        <span class="ap-label">AP</span>
+        <div id="ap-dots"></div>
+      </div>
+      <button id="btn-endday">FIN JOURNÉE ▶</button>
+    </div>
+  </header>
+
+  <!-- HUD BAS : phase track + sauvegarde -->
+  <footer id="hud-bot">
+    <div id="phase-track"></div>
+    <div class="h-bbtns">
+      <button id="btn-save" class="b-sm">SAVE</button>
+      <button id="btn-load" class="b-sm">LOAD</button>
+      <button id="btn-log"  class="b-sm">LOG</button>
+      <button id="btn-next" class="b-next hidden">▶ PHASE SUV.</button>
+    </div>
+  </footer>
+
+  <!-- OBJECTIFS sidebar droite (toggle) -->
+  <div id="obj-panel">
+    <div class="op-title">OBJECTIFS</div>
+    <div id="obj-list"></div>
+  </div>
+
+  <!-- LOG panel -->
+  <div id="log-panel" class="hidden">
+    <div class="lp-head">JOURNAL <button id="btn-log-close">✕</button></div>
+    <ul id="log-list"></ul>
+  </div>
+
+  <!-- Tooltip survol zone -->
+  <div id="zone-tip" class="hidden"></div>
+</div>
+
+<!-- OVERLAY ÉVÉNEMENT -->
+<div id="ov-event" class="overlay hidden">
+  <div class="ov-card">
+    <div id="ev-kicker" class="ov-kicker">ÉVÉNEMENT</div>
+    <div id="ev-title"  class="ov-h"></div>
+    <div id="ev-body"   class="ov-p"></div>
+    <div id="ev-btns"   class="ov-choices"></div>
+  </div>
+</div>
+
+<!-- OVERLAY FIN -->
+<div id="ov-end" class="overlay hidden">
+  <div class="ov-card end-card">
+    <div id="end-kicker" class="ov-kicker"></div>
+    <div id="end-title"  class="ov-h"></div>
+    <div id="end-body"   class="ov-p"></div>
+    <div class="end-score-wrap">
+      <div class="end-score-lbl">SCORE FINAL</div>
+      <div id="end-score" class="end-score-val"></div>
+    </div>
+    <button id="btn-restart">REJOUER</button>
+  </div>
+</div>
+
+<!-- PHASE TRANSITION -->
+<div id="pt" class="hidden">
+  <div id="pt-sub"></div>
+  <div id="pt-name"></div>
+  <div class="pt-bar"><div id="pt-fill"></div></div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<script src="js/game.js"></script>
+</body>
+</html>
