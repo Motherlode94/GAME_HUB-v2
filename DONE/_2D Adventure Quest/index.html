@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#08111b">
+    <link rel="stylesheet" href="../_shared/game-embed.css">
+<title>Adventure Quest - Echoes of the Citadel</title>
+<style>
+  :root {
+    --bg:#05070d;
+    --panel:rgba(8,13,22,0.86);
+    --line:rgba(255,255,255,0.16);
+    --text:#edf4ff;
+    --sub:#9ab4d5;
+    --ok:#29d39e;
+    --warn:#ffd166;
+    --bad:#ff5f6d;
+    --accent:#42a8ff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family:Arial, sans-serif;
+    background:radial-gradient(circle at 15% -10%, rgba(66,168,255,0.24), transparent 45%),
+               radial-gradient(circle at 90% 110%, rgba(255,95,109,0.2), transparent 40%),
+               var(--bg);
+    color:var(--text);
+    touch-action:none;
+  }
+  canvas {
+    width:100vw;
+    height:100vh;
+    display:block;
+    image-rendering:pixelated;
+    cursor:crosshair;
+  }
+  .hub-back {
+    position:fixed;
+    top:10px;
+    left:10px;
+    z-index:30;
+    text-decoration:none;
+    color:var(--text);
+    background:rgba(10,16,27,0.9);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 12px;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.06em;
+  }
+  .hud {
+    position:fixed;
+    left:10px;
+    top:52px;
+    z-index:20;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+    min-width:280px;
+    pointer-events:none;
+    backdrop-filter:blur(8px);
+  }
+  .hud h1 {
+    font-size:14px;
+    letter-spacing:.08em;
+    margin-bottom:8px;
+  }
+  .row {
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:6px;
+    font-size:12px;
+    color:var(--sub);
+  }
+  .pill {
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:3px 8px;
+    background:rgba(255,255,255,0.04);
+  }
+  .quest {
+    margin-top:8px;
+    font-size:12px;
+    line-height:1.45;
+    color:#d9e9ff;
+    max-width:460px;
+  }
+  .tip {
+    margin-top:6px;
+    font-size:11px;
+    color:#8fa7c6;
+  }
+  .message {
+    position:fixed;
+    left:50%;
+    top:10px;
+    transform:translateX(-50%);
+    z-index:25;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 12px;
+    font-size:12px;
+    background:rgba(8,13,22,0.9);
+    opacity:0;
+    transition:opacity .18s ease;
+    pointer-events:none;
+  }
+  .message.show { opacity:1; }
+
+  .mobile {
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:18;
+    display:none;
+  }
+  .joy {
+    position:absolute;
+    left:14px;
+    bottom:14px;
+    width:126px;
+    height:126px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.18);
+    background:rgba(4,8,16,0.52);
+    pointer-events:auto;
+    touch-action:none;
+  }
+  .joy-knob {
+    position:absolute;
+    width:56px;
+    height:56px;
+    left:35px;
+    top:35px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(66,168,255,0.32);
+  }
+  .btn {
+    position:absolute;
+    right:14px;
+    bottom:18px;
+    width:92px;
+    height:92px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,0.28);
+    background:rgba(255,95,109,0.3);
+    color:#fff;
+    font-weight:700;
+    letter-spacing:.08em;
+    pointer-events:auto;
+    touch-action:none;
+  }
+  .btn:active { transform:scale(.97); }
+
+  .end {
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(2,5,10,0.72);
+    z-index:40;
+  }
+  .end.open { display:flex; }
+  .end-card {
+    width:min(92vw, 460px);
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:rgba(8,13,22,0.96);
+    padding:22px;
+    text-align:center;
+  }
+  .end-card h2 {
+    font-size:26px;
+    margin-bottom:8px;
+    letter-spacing:.06em;
+  }
+  .end-card p { color:var(--sub); font-size:14px; margin-bottom:10px; }
+  .score {
+    font-size:40px;
+    color:var(--warn);
+    margin:8px 0 16px;
+    font-weight:700;
+  }
+  .actions {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .actions button,
+  .actions a {
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:rgba(255,255,255,0.08);
+    color:#fff;
+    padding:10px 14px;
+    text-decoration:none;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  @media (pointer:coarse), (max-width:920px) {
+    .mobile { display:block; }
+    .hud { min-width:0; width:calc(100vw - 20px); max-width:calc(100vw - 20px); }
+    .quest { max-width:none; }
+  }
+</style>
+</head>
+<body>
+<a class="hub-back" href="../../index.html">&larr; HUB</a>
+<div class="hud">
+  <h1>Adventure Quest: Echoes of the Citadel</h1>
+  <div class="row">
+    <span class="pill" id="hpPill">HP 100</span>
+    <span class="pill" id="timePill">Time 0s</span>
+    <span class="pill" id="scorePill">Score 0</span>
+    <span class="pill" id="relicPill">Relic 0/1</span>
+  </div>
+  <div class="quest" id="questText">Quest: Speak with the Elder at the village center.</div>
+  <div class="tip">Controls: WASD/Arrows to move, E to interact, Shift to sprint. Mobile: joystick + ACT.</div>
+</div>
+<div class="message" id="msg"></div>
+<canvas id="game" width="1280" height="720"></canvas>
+
+<div class="mobile" id="mobileUi">
+  <div class="joy" id="joy"><div class="joy-knob" id="joyKnob"></div></div>
+  <button class="btn" id="actBtn" type="button">ACT</button>
+</div>
+
+<div class="end" id="endPanel">
+  <div class="end-card">
+    <h2 id="endTitle">Mission Complete</h2>
+    <p id="endSub">You returned safely with the relic.</p>
+    <div class="score" id="endScore">0</div>
+    <div class="actions">
+      <button id="retryBtn" type="button">Replay</button>
+      <a href="../../index.html">Back to Hub</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  const hpPill = document.getElementById('hpPill');
+  const timePill = document.getElementById('timePill');
+  const scorePill = document.getElementById('scorePill');
+  const relicPill = document.getElementById('relicPill');
+  const questText = document.getElementById('questText');
+  const msg = document.getElementById('msg');
+  const endPanel = document.getElementById('endPanel');
+  const endTitle = document.getElementById('endTitle');
+  const endSub = document.getElementById('endSub');
+  const endScore = document.getElementById('endScore');
+  const retryBtn = document.getElementById('retryBtn');
+
+  const joy = document.getElementById('joy');
+  const joyKnob = document.getElementById('joyKnob');
+  const actBtn = document.getElementById('actBtn');
+
+  const WORLD = { w: 2400, h: 1600 };
+  const CAMERA = { x: 0, y: 0 };
+
+  const blocks = [
+    { x: 0, y: 0, w: WORLD.w, h: 120 },
+    { x: 0, y: WORLD.h - 120, w: WORLD.w, h: 120 },
+    { x: 0, y: 0, w: 120, h: WORLD.h },
+    { x: WORLD.w - 120, y: 0, w: 120, h: WORLD.h },
+    { x: 440, y: 420, w: 520, h: 120 },
+    { x: 1320, y: 300, w: 110, h: 540 },
+    { x: 760, y: 1080, w: 660, h: 110 },
+    { x: 1540, y: 910, w: 500, h: 120 },
+    { x: 360, y: 890, w: 180, h: 500 },
+    { x: 1740, y: 1180, w: 420, h: 100 }
+  ];
+
+  const zones = [
+    { x: 120, y: 120, w: 700, h: 560, c: '#16452f', n: 'Village Woods' },
+    { x: 850, y: 120, w: 840, h: 620, c: '#3f3f2b', n: 'Dry Pass' },
+    { x: 1220, y: 760, w: 920, h: 720, c: '#1e253f', n: 'Citadel Ruins' },
+    { x: 170, y: 860, w: 850, h: 610, c: '#1c3b4f', n: 'Lake Path' }
+  ];
+
+  const state = {
+    player: { x: 280, y: 300, r: 16, hp: 100, speed: 170, sprint: 1.6 },
+    keys: {},
+    joy: { active: false, id: null, dx: 0, dy: 0 },
+    startedAt: performance.now(),
+    elapsed: 0,
+    score: 0,
+    hasKey: false,
+    hasRelic: false,
+    gateOpen: false,
+    objective: 0,
+    gameOver: false,
+    won: false,
+    elderTalked: false,
+    lastHitAt: 0,
+    interactDown: false
+  };
+
+  const actors = {
+    elder: { x: 520, y: 300, r: 18, name: 'Elder' },
+    gate: { x: 1410, y: 845, w: 110, h: 18 },
+    key: { x: 960, y: 220, r: 12, taken: false },
+    relic: { x: 1980, y: 1320, r: 14, taken: false },
+    guards: [
+      { x: 1180, y: 420, r: 14, t: 0, a: 106, b: 290, speed: 1.2, axis: 'x' },
+      { x: 1860, y: 1050, r: 14, t: 1.5, a: 980, b: 1380, speed: 1.05, axis: 'y' },
+      { x: 880, y: 1220, r: 14, t: 0.4, a: 760, b: 1380, speed: 0.95, axis: 'x' }
+    ]
+  };
+
+  const quests = [
+    'Quest: Speak with the Elder at the village center.',
+    'Quest: Find the Citadel Key in the Dry Pass.',
+    'Quest: Open the gate and recover the Lost Relic.',
+    'Quest: Return to the Elder with the Relic.'
+  ];
+
+  function reset() {
+    state.player.x = 280;
+    state.player.y = 300;
+    state.player.hp = 100;
+    state.startedAt = performance.now();
+    state.elapsed = 0;
+    state.score = 0;
+    state.hasKey = false;
+    state.hasRelic = false;
+    state.gateOpen = false;
+    state.objective = 0;
+    state.gameOver = false;
+    state.won = false;
+    state.elderTalked = false;
+    state.lastHitAt = 0;
+    actors.key.taken = false;
+    actors.relic.taken = false;
+    endPanel.classList.remove('open');
+    showMsg('New adventure started.');
+  }
+
+  function showMsg(text) {
+    msg.textContent = text;
+    msg.classList.add('show');
+    clearTimeout(showMsg.t);
+    showMsg.t = setTimeout(() => msg.classList.remove('show'), 1600);
+  }
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+  function dist(a, b, c, d) {
+    const dx = a - c;
+    const dy = b - d;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function circleHitsRect(cx, cy, r, rect) {
+    const nx = clamp(cx, rect.x, rect.x + rect.w);
+    const ny = clamp(cy, rect.y, rect.y + rect.h);
+    return dist(cx, cy, nx, ny) <= r;
+  }
+
+  function movePlayer(dt) {
+    const p = state.player;
+    let vx = 0;
+    let vy = 0;
+
+    if (state.keys['w'] || state.keys['arrowup']) vy -= 1;
+    if (state.keys['s'] || state.keys['arrowdown']) vy += 1;
+    if (state.keys['a'] || state.keys['arrowleft']) vx -= 1;
+    if (state.keys['d'] || state.keys['arrowright']) vx += 1;
+
+    if (state.joy.active) {
+      vx += state.joy.dx;
+      vy += state.joy.dy;
+    }
+
+    const mag = Math.hypot(vx, vy) || 1;
+    vx /= mag;
+    vy /= mag;
+
+    const run = (state.keys['shift'] ? state.player.sprint : 1);
+    const sp = state.player.speed * run;
+    const nx = p.x + vx * sp * dt;
+    const ny = p.y + vy * sp * dt;
+
+    // Axis collision pass
+    p.x = clamp(nx, 120 + p.r, WORLD.w - 120 - p.r);
+    for (const b of blocks) {
+      if (circleHitsRect(p.x, p.y, p.r, b)) {
+        if (vx > 0) p.x = b.x - p.r;
+        if (vx < 0) p.x = b.x + b.w + p.r;
+      }
+    }
+
+    p.y = clamp(ny, 120 + p.r, WORLD.h - 120 - p.r);
+    for (const b of blocks) {
+      if (circleHitsRect(p.x, p.y, p.r, b)) {
+        if (vy > 0) p.y = b.y - p.r;
+        if (vy < 0) p.y = b.y + b.h + p.r;
+      }
+    }
+
+    if (!state.gateOpen && circleHitsRect(p.x, p.y, p.r, actors.gate)) {
+      if (vy > 0) p.y = actors.gate.y - p.r;
+      if (vy < 0) p.y = actors.gate.y + actors.gate.h + p.r;
+    }
+  }
+
+  function updateGuards(dt) {
+    for (const g of actors.guards) {
+      g.t += dt * g.speed;
+      const t = (Math.sin(g.t) + 1) * 0.5;
+      if (g.axis === 'x') g.x = g.a + (g.b - g.a) * t;
+      else g.y = g.a + (g.b - g.a) * t;
+
+      if (dist(g.x, g.y, state.player.x, state.player.y) < g.r + state.player.r + 3) {
+        if (performance.now() - state.lastHitAt > 900) {
+          state.lastHitAt = performance.now();
+          state.player.hp = Math.max(0, state.player.hp - 12);
+          showMsg('Guard hit! HP -12');
+          if (state.player.hp <= 0) {
+            lose();
+          }
+        }
+      }
+    }
+  }
+
+  function handleInteract() {
+    if (state.gameOver) return;
+
+    const p = state.player;
+
+    if (dist(p.x, p.y, actors.elder.x, actors.elder.y) < 52) {
+      if (state.objective === 0) {
+        state.elderTalked = true;
+        state.objective = 1;
+        showMsg('Elder: Find the key in Dry Pass.');
+      } else if (state.objective === 3 && state.hasRelic) {
+        win();
+      } else {
+        showMsg('Elder: Keep going, hero.');
+      }
+      return;
+    }
+
+    if (state.objective >= 1 && !actors.key.taken && dist(p.x, p.y, actors.key.x, actors.key.y) < 42) {
+      actors.key.taken = true;
+      state.hasKey = true;
+      state.score += 140;
+      state.objective = 2;
+      showMsg('You found the Citadel Key!');
+      return;
+    }
+
+    if (state.objective >= 2 && state.hasKey && !state.gateOpen && dist(p.x, p.y, actors.gate.x + actors.gate.w / 2, actors.gate.y + 8) < 62) {
+      state.gateOpen = true;
+      state.score += 120;
+      showMsg('Gate unlocked. The ruins are open.');
+      return;
+    }
+
+    if (state.gateOpen && !actors.relic.taken && dist(p.x, p.y, actors.relic.x, actors.relic.y) < 42) {
+      actors.relic.taken = true;
+      state.hasRelic = true;
+      state.score += 220;
+      state.objective = 3;
+      showMsg('Lost Relic recovered! Return to Elder.');
+      return;
+    }
+  }
+
+  function lose() {
+    state.gameOver = true;
+    state.won = false;
+    endTitle.textContent = 'Mission Failed';
+    endSub.textContent = 'You were defeated before completing the quest.';
+    endScore.textContent = String(finalScore());
+    endPanel.classList.add('open');
+    postScore(finalScore());
+  }
+
+  function win() {
+    state.gameOver = true;
+    state.won = true;
+    endTitle.textContent = 'Mission Complete';
+    endSub.textContent = 'You brought back the relic and saved the village.';
+    endScore.textContent = String(finalScore());
+    endPanel.classList.add('open');
+    showMsg('Victory!');
+    postScore(finalScore());
+  }
+
+  function finalScore() {
+    const timeBonus = Math.max(0, 700 - Math.floor(state.elapsed));
+    const hpBonus = state.player.hp * 5;
+    return state.score + timeBonus + hpBonus;
+  }
+
+  function postScore(score) {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'gameScore', gameId: 13, score: score }, '*');
+    }
+  }
+
+  function updateHud() {
+    hpPill.textContent = 'HP ' + state.player.hp;
+    hpPill.style.color = state.player.hp < 30 ? 'var(--bad)' : 'var(--text)';
+
+    timePill.textContent = 'Time ' + Math.floor(state.elapsed) + 's';
+    scorePill.textContent = 'Score ' + finalScore();
+    relicPill.textContent = 'Relic ' + (state.hasRelic ? '1/1' : '0/1');
+
+    questText.textContent = quests[state.objective] || quests[0];
+  }
+
+  function updateCamera() {
+    CAMERA.x = clamp(state.player.x - canvas.width * 0.5, 0, WORLD.w - canvas.width);
+    CAMERA.y = clamp(state.player.y - canvas.height * 0.5, 0, WORLD.h - canvas.height);
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = '#0a1320';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.translate(-CAMERA.x, -CAMERA.y);
+
+    for (const z of zones) {
+      ctx.fillStyle = z.c;
+      ctx.fillRect(z.x, z.y, z.w, z.h);
+    }
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < WORLD.w; x += 80) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD.h); ctx.stroke();
+    }
+    for (let y = 0; y < WORLD.h; y += 80) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD.w, y); ctx.stroke();
+    }
+
+    // Walls
+    ctx.fillStyle = '#25324a';
+    for (const b of blocks) ctx.fillRect(b.x, b.y, b.w, b.h);
+
+    // Gate
+    if (!state.gateOpen) {
+      ctx.fillStyle = '#6e2f39';
+      ctx.fillRect(actors.gate.x, actors.gate.y, actors.gate.w, actors.gate.h);
+    }
+
+    // Elder
+    drawEntity(actors.elder.x, actors.elder.y, actors.elder.r, '#ffd166');
+    drawLabel(actors.elder.x, actors.elder.y - 28, 'Elder');
+
+    // Key
+    if (!actors.key.taken) {
+      drawEntity(actors.key.x, actors.key.y, actors.key.r, '#84d8ff');
+      drawLabel(actors.key.x, actors.key.y - 24, 'Key');
+    }
+
+    // Relic
+    if (!actors.relic.taken) {
+      drawEntity(actors.relic.x, actors.relic.y, actors.relic.r, '#d5b4ff');
+      drawLabel(actors.relic.x, actors.relic.y - 24, 'Relic');
+    }
+
+    // Guards
+    for (const g of actors.guards) {
+      drawEntity(g.x, g.y, g.r, '#ff5f6d');
+    }
+
+    // Player
+    drawEntity(state.player.x, state.player.y, state.player.r, '#2fd6a8');
+
+    // Vignette pulse at low hp
+    if (state.player.hp < 35) {
+      const a = 0.12 + 0.06 * Math.sin(performance.now() * 0.01);
+      ctx.fillStyle = 'rgba(255, 70, 80, ' + a.toFixed(3) + ')';
+      ctx.fillRect(CAMERA.x, CAMERA.y, canvas.width, canvas.height);
+    }
+
+    ctx.restore();
+  }
+
+  function drawEntity(x, y, r, color) {
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.stroke();
+  }
+
+  function drawLabel(x, y, t) {
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(10,15,24,0.86)';
+    ctx.fillRect(x - 36, y - 11, 72, 18);
+    ctx.fillStyle = '#dce9ff';
+    ctx.fillText(t, x, y + 2);
+  }
+
+  function update(dt) {
+    if (state.gameOver) return;
+
+    state.elapsed = (performance.now() - state.startedAt) / 1000;
+
+    movePlayer(dt);
+    updateGuards(dt);
+
+    if (state.score < 8000) {
+      state.score += dt * 3.4;
+    }
+
+    updateCamera();
+    updateHud();
+  }
+
+  function loop(ts) {
+    const dt = Math.min(0.033, (ts - loop.last) / 1000 || 0.016);
+    loop.last = ts;
+    update(dt);
+    drawBackground();
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('keydown', (e) => {
+    state.keys[e.key.toLowerCase()] = true;
+    if (e.key === 'E' || e.key === 'e') {
+      if (!state.interactDown) {
+        state.interactDown = true;
+        handleInteract();
+      }
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    state.keys[e.key.toLowerCase()] = false;
+    if (e.key === 'E' || e.key === 'e') {
+      state.interactDown = false;
+    }
+  });
+
+  canvas.addEventListener('mousedown', handleInteract);
+  actBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleInteract(); }, { passive:false });
+  actBtn.addEventListener('mousedown', (e) => { e.preventDefault(); handleInteract(); });
+
+  retryBtn.addEventListener('click', reset);
+
+  // Touch joystick
+  joy.addEventListener('touchstart', onJoyStart, { passive:false });
+  joy.addEventListener('touchmove', onJoyMove, { passive:false });
+  joy.addEventListener('touchend', onJoyEnd, { passive:false });
+  joy.addEventListener('touchcancel', onJoyEnd, { passive:false });
+
+  function onJoyStart(e) {
+    const t = e.changedTouches[0];
+    state.joy.id = t.identifier;
+    state.joy.active = true;
+    updateJoyFromTouch(t);
+    e.preventDefault();
+  }
+
+  function onJoyMove(e) {
+    if (!state.joy.active) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier === state.joy.id) {
+        updateJoyFromTouch(t);
+        break;
+      }
+    }
+    e.preventDefault();
+  }
+
+  function onJoyEnd(e) {
+    for (const t of e.changedTouches) {
+      if (t.identifier === state.joy.id) {
+        state.joy.active = false;
+        state.joy.id = null;
+        state.joy.dx = 0;
+        state.joy.dy = 0;
+        joyKnob.style.left = '35px';
+        joyKnob.style.top = '35px';
+      }
+    }
+    e.preventDefault();
+  }
+
+  function updateJoyFromTouch(t) {
+    const rect = joy.getBoundingClientRect();
+    const cx = rect.left + rect.width * 0.5;
+    const cy = rect.top + rect.height * 0.5;
+    let dx = t.clientX - cx;
+    let dy = t.clientY - cy;
+    const lim = 38;
+    const m = Math.hypot(dx, dy);
+    if (m > lim) {
+      dx = dx / m * lim;
+      dy = dy / m * lim;
+    }
+
+    joyKnob.style.left = (35 + dx) + 'px';
+    joyKnob.style.top = (35 + dy) + 'px';
+    state.joy.dx = dx / lim;
+    state.joy.dy = dy / lim;
+  }
+
+  function resize() {
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

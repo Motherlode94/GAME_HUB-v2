@@ -44,10 +44,13 @@ body {
     font-family: var(--font-mono);
     color: var(--text-primary);
     cursor: default;
+    touch-action: manipulation;
+    overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
 }
 
 canvas { display:block; }
+#gameCanvas { width:100vw; height:100vh; touch-action:none; }
 
 /* ── SCANLINES ─────────────────────────────────────────────────── */
 .scanlines {
@@ -476,4 +479,122 @@ body::after {
 @keyframes blink {
     0%,100% { opacity:1; }
     50%      { opacity:0.35; }
+}
+
+.mobile-controls {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    display: none;
+    gap: 8px;
+    z-index: 900;
+}
+.mobile-controls button {
+    min-width: 46px;
+    min-height: 42px;
+    border: 1px solid var(--border-mid);
+    background: rgba(6,12,28,0.9);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+@media (max-width: 1024px), (pointer: coarse) {
+    .hub-back-btn {
+        top: 8px !important;
+        left: 8px !important;
+        padding: 8px 10px !important;
+        font-size: 10px !important;
+    }
+
+    .screen {
+        padding: 16px;
+    }
+
+    #mainMenu {
+        justify-content: flex-start;
+        padding-top: 90px;
+    }
+
+    .menu-title {
+        font-size: 34px;
+        letter-spacing: 9px;
+        text-align: center;
+    }
+
+    .menu-subtitle {
+        margin-bottom: 28px;
+        text-align: center;
+        letter-spacing: 3px;
+    }
+
+    .menu-btn {
+        width: min(88vw, 360px);
+        height: 54px;
+        font-size: 16px;
+    }
+
+    .menu-btn.primary {
+        height: 60px;
+    }
+
+    .menu-footer {
+        position: static;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .menu-deco,
+    .corner {
+        display: none;
+    }
+
+    #mapSelect {
+        justify-content: flex-start;
+        overflow-y: auto;
+        padding-top: 80px;
+        gap: 14px;
+    }
+
+    .screen-back {
+        top: 10px;
+        left: 10px;
+        padding: 10px 12px;
+        font-size: 11px;
+    }
+
+    .screen-title {
+        margin-top: 8px;
+        letter-spacing: 3px;
+        text-align: center;
+    }
+
+    .map-grid {
+        width: min(96vw, 820px);
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 0 4px 18px;
+    }
+
+    .map-card {
+        width: 100%;
+    }
+
+    .difficulty-bar {
+        flex-wrap: wrap;
+        margin: 6px 0 8px !important;
+    }
+
+    .difficulty-btn {
+        min-height: 36px;
+        padding: 7px 12px !important;
+    }
+
+    .mobile-controls {
+        display: flex;
+    }
 }

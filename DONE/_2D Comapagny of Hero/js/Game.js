@@ -56,6 +56,8 @@ window.onload = function() {
     var DRAG_THRESH  = 6;
     var isPanning    = false;
     var panLastX     = 0, panLastY = 0;
+    var touchMode    = null; // 'drag' | 'pan'
+    var pinchLastDist = 0;
 
     // -----------------------------------------------------------------------
     //  SYSTÈMES
@@ -187,6 +189,39 @@ window.onload = function() {
         if (navGrid) {
             var cp = navGrid.capturePoints.filter(function(c){ return c.isHQ && c.owner === 'allied'; })[0];
             if (cp) camera.snapTo(cp.x, cp.y - baseOffsetY);
+        }
+    }
+
+    function _initMobileControls() {
+        var wrap = document.getElementById('mobileControls');
+        if (!wrap) return;
+
+        var zoomInBtn = document.getElementById('mobileZoomIn');
+        var zoomOutBtn = document.getElementById('mobileZoomOut');
+        var homeBtn = document.getElementById('mobileHome');
+
+        function _zoom(deltaY) {
+            if (!camera) return;
+            camera.applyZoom(deltaY, canvas.width / 2, canvas.height / 2);
+        }
+
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                _zoom(-120);
+            });
+        }
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                _zoom(120);
+            });
+        }
+        if (homeBtn) {
+            homeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                _centerCameraOnAlliedBase();
+            });
         }
     }
 
@@ -472,6 +507,8 @@ window.onload = function() {
     // -----------------------------------------------------------------------
     //  CHARGEMENT — exposé au menu via _startGame
     // -----------------------------------------------------------------------
+    _initMobileControls();
+
     var mapRenderer = null;
     window._startGame = function(mapId, difficultyId) {
         mapId = mapId || 1;
@@ -866,6 +903,140 @@ window.onload = function() {
         return { dx:(idx%cols-(cols-1)/2)*45, dy:(Math.floor(idx/cols)-(Math.ceil(total/cols)-1)/2)*45 };
     }
 
+    function _screenFromClient(clientX, clientY) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: (clientX - rect.left) * (canvas.width / rect.width),
+            y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+    }
+
+    function _screenFromEvent(e) {
+        return _screenFromClient(e.clientX, e.clientY);
+    }
+
+    function _screenFromTouch(touch) {
+        return _screenFromClient(touch.clientX, touch.clientY);
+    }
+
+    function _setPointerFromClient(clientX, clientY) {
+        var p = _screenFromClient(clientX, clientY);
+        mouseX = p.x;
+        mouseY = p.y;
+        return p;
+    }
+
+    function _centerPointerForTouchDevice() {
+        mouseX = canvas.width / 2;
+        mouseY = canvas.height / 2;
+    }
+
+    function _issueMoveOrRallyAtWorld(worldX, worldY, queue) {
+        if (!navGrid || !camera) return;
+
+        if (buildMode) {
+            _cancelBuild();
+            return;
+        }
+
+        var selected = _selectedSquads();
+        if (selected.length > 0) {
+            selected.forEach(function(sq, i) {
+                var off = _formationOffset(i, selected.length);
+                var destX = worldX + off.dx;
+                var destY = worldY + off.dy;
+                var path = navGrid.findPath(sq.x, sq.y, destX, destY);
+                if (!path.length) path = navGrid.findPath(sq.x, sq.y, worldX, worldY);
+
+                if (queue && sq.path && sq.path.length && sq.pathIndex < sq.path.length) {
+                    var tail = sq.path[sq.path.length - 1];
+                    var path2 = navGrid.findPath(tail.x, tail.y, destX, destY);
+                    if (!path2.length) path2 = navGrid.findPath(tail.x, tail.y, worldX, worldY);
+                    if (path2.length) {
+                        sq.path = sq.path.concat(path2.slice(1));
+                        return;
+                    }
+                }
+
+                sq.retreating = false;
+                sq.inCombat = false;
+                sq.target = null;
+                sq.path = path;
+                sq.pathIndex = 0;
+            });
+        } else if (prodUI && prodUI.selectedBuilding) {
+            prodUI.selectedBuilding.rallyX = worldX;
+            prodUI.selectedBuilding.rallyY = worldY;
+        }
+    }
+
+    function _issueMoveOrRallyAtScreen(sx, sy, queue) {
+        if (!camera) return;
+        var world = camera.screenToWorld(sx, sy);
+        _issueMoveOrRallyAtWorld(world.x, world.y, queue);
+    }
+
+    function _startDragSelectionAt(sx, sy) {
+        dragStartX = dragCurrentX = sx;
+        dragStartY = dragCurrentY = sy;
+        isDragging = false;
+    }
+
+    function _handleTapSelectionAt(sx, sy, shiftKey, allowTouchMoveFallback) {
+        if (!camera) return;
+
+        if (buildMode) {
+            var wBuild = camera.screenToWorld(sx, sy);
+            _placeBuilding(wBuild.x, wBuild.y);
+            isDragging = false;
+            return;
+        }
+
+        if (gameOver && objectivesPanel && objectivesPanel.isEndButtonClick(sx, sy)) {
+            gameOver = false;
+            victorySystem = null;
+            squads = [];
+            buildings = [];
+            if (typeof showScreen === 'function') showScreen('mainMenu');
+            return;
+        }
+
+        var btn = prodUI ? prodUI.handleClick(sx, sy) : null;
+        if (btn) {
+            if (btn.action === 'produce' && btn.canAfford) _tryProduce(btn.prod, shiftKey ? 5 : 1);
+            else if (btn.action === 'construct' && btn.canAfford && btn.canBuild) _startBuildMode(btn.cons);
+            else if (btn.action === 'ability' && btn.canUse) btn.squad.activateAbility(btn.abilityId, squads);
+            return;
+        }
+
+        var previouslySelected = _selectedSquads();
+        var bldg = _buildingAtScreen(sx, sy);
+        if (bldg) {
+            _deselectAll();
+            if (prodUI) prodUI.selectBuilding(bldg);
+            return;
+        }
+
+        var clicked = _squadAtScreen(sx, sy);
+        if (shiftKey) {
+            if (clicked) clicked.selected = !clicked.selected;
+            return;
+        }
+
+        _deselectAll();
+        if (clicked) {
+            clicked.selected = true;
+            if (prodUI) prodUI.selectBuilding(null);
+            return;
+        }
+
+        if (allowTouchMoveFallback && (previouslySelected.length > 0 || (prodUI && prodUI.selectedBuilding))) {
+            previouslySelected.forEach(function(sq) { sq.selected = true; });
+            _issueMoveOrRallyAtScreen(sx, sy, false);
+            if (prodUI && previouslySelected.length > 0) prodUI.selectBuilding(null);
+        }
+    }
+
     // -----------------------------------------------------------------------
     //  PRODUCTION
     // -----------------------------------------------------------------------
@@ -960,151 +1131,208 @@ window.onload = function() {
     //  SOURIS
     // -----------------------------------------------------------------------
     document.addEventListener('mousemove', function(e) {
-        mouseX=e.clientX; mouseY=e.clientY;
-        dragCurrentX=e.clientX; dragCurrentY=e.clientY;
+        var p = _setPointerFromClient(e.clientX, e.clientY);
+        dragCurrentX = p.x;
+        dragCurrentY = p.y;
 
         if (isPanning && camera) {
-            var pdx = e.clientX - panLastX;
-            var pdy = e.clientY - panLastY;
-            camera.panByScreenDelta(pdx, pdy);
-            panLastX = e.clientX;
-            panLastY = e.clientY;
+            camera.panByScreenDelta(p.x - panLastX, p.y - panLastY);
+            panLastX = p.x;
+            panLastY = p.y;
         }
 
         if (buildMode && camera) {
-            var w=camera.screenToWorld(e.clientX,e.clientY);
-            buildGhostX=w.x; buildGhostY=w.y;
+            var w = camera.screenToWorld(p.x, p.y);
+            buildGhostX = w.x;
+            buildGhostY = w.y;
         }
 
-        if (!isDragging&&e.buttons===1) {
-            var dx=e.clientX-dragStartX,dy=e.clientY-dragStartY;
-            if (Math.sqrt(dx*dx+dy*dy)>DRAG_THRESH) isDragging=true;
+        if (!isDragging && e.buttons === 1) {
+            var dx = p.x - dragStartX;
+            var dy = p.y - dragStartY;
+            if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESH) isDragging = true;
         }
     });
 
     canvas.addEventListener('mousedown', function(e) {
         if (!camera) return;
 
-        if (e.button===1) {
+        var p = _setPointerFromClient(e.clientX, e.clientY);
+        if (e.button === 1) {
             isPanning = true;
-            panLastX = e.clientX;
-            panLastY = e.clientY;
+            panLastX = p.x;
+            panLastY = p.y;
             canvas.style.cursor = 'grabbing';
             e.preventDefault();
             return;
         }
 
-        if (e.button!==0) return;
-        dragStartX=dragCurrentX=e.clientX;
-        dragStartY=dragCurrentY=e.clientY;
-        isDragging=false;
+        if (e.button !== 0) return;
+        _startDragSelectionAt(p.x, p.y);
     });
 
     canvas.addEventListener('mouseup', function(e) {
-        if (e.button===1) {
+        if (!camera) return;
+
+        var p = _setPointerFromClient(e.clientX, e.clientY);
+        if (e.button === 1) {
             isPanning = false;
             canvas.style.cursor = buildMode ? 'cell' : 'crosshair';
             return;
         }
+        if (e.button !== 0) return;
 
-        if (e.button!==0||!camera) return;
-
-        // Mode placement bâtiment
-        if (buildMode) {
-            var w=camera.screenToWorld(e.clientX,e.clientY);
-            _placeBuilding(w.x,w.y);
-            isDragging=false; return;
-        }
-
-        // Bouton "Retour au menu" en fin de partie
-        if (gameOver && objectivesPanel && objectivesPanel.isEndButtonClick(e.clientX, e.clientY)) {
-            gameOver=false; victorySystem=null; squads=[]; buildings=[];
-            if (typeof showScreen==='function') showScreen('mainMenu');
+        if (isDragging) {
+            var inRect = _squadsInRect(dragStartX, dragStartY, dragCurrentX, dragCurrentY);
+            if (!e.shiftKey) _deselectAll();
+            inRect.forEach(function(s) { s.selected = true; });
+            if (inRect.length > 0 && prodUI) prodUI.selectBuilding(null);
+            isDragging = false;
             return;
         }
 
-        if (isDragging) {
-            var inRect=_squadsInRect(dragStartX,dragStartY,dragCurrentX,dragCurrentY);
-            if (!e.shiftKey) _deselectAll();
-            inRect.forEach(function(s){s.selected=true;});
-            if (inRect.length>0&&prodUI) prodUI.selectBuilding(null);
-        } else {
-            // Clic sur bouton ProductionUI ou Ability Panel
-            var btn=prodUI ? prodUI.handleClick(e.clientX,e.clientY) : null;
-            if (btn) {
-                if      (btn.action==='produce'  &&btn.canAfford) _tryProduce(btn.prod, e.shiftKey ? 5 : 1);
-                else if (btn.action==='construct'&&btn.canAfford&&btn.canBuild) _startBuildMode(btn.cons);
-                else if (btn.action==='ability'  &&btn.canUse)    btn.squad.activateAbility(btn.abilityId, squads);
-                isDragging=false; return;
-            }
-
-            var bldg=_buildingAtScreen(e.clientX,e.clientY);
-            if (bldg) {
-                _deselectAll();
-                if (prodUI) prodUI.selectBuilding(bldg);
-                isDragging=false; return;
-            }
-            var clicked=_squadAtScreen(e.clientX,e.clientY);
-            if (e.shiftKey) { if (clicked) clicked.selected=!clicked.selected; }
-            else {
-                _deselectAll();
-                if (clicked) { clicked.selected=true; if(prodUI)prodUI.selectBuilding(null); }
-            }
-        }
-        isDragging=false;
+        _handleTapSelectionAt(p.x, p.y, !!e.shiftKey, false);
+        isDragging = false;
     });
 
     canvas.addEventListener('mouseleave', function() {
-        if (!isPanning) return;
         isPanning = false;
         canvas.style.cursor = buildMode ? 'cell' : 'crosshair';
     });
 
     canvas.addEventListener('contextmenu', function(e) {
         e.preventDefault();
-        if (!navGrid||!camera) return;
-
-        // Annuler le mode de placement
-        if (buildMode) { _cancelBuild(); return; }
-
-        var world    = camera.screenToWorld(e.clientX,e.clientY);
-        var selected = _selectedSquads();
-
-        if (selected.length>0) {
-            selected.forEach(function(sq,i){
-                var off=_formationOffset(i,selected.length);
-                var destX=world.x+off.dx, destY=world.y+off.dy;
-                var path=navGrid.findPath(sq.x,sq.y,destX,destY);
-                if (!path.length) path=navGrid.findPath(sq.x,sq.y,world.x,world.y);
-
-                // Shift + clic droit : ajoute un ordre à la file (waypoint chain).
-                if (e.shiftKey && sq.path && sq.path.length && sq.pathIndex < sq.path.length) {
-                    var tail = sq.path[sq.path.length-1];
-                    var path2 = navGrid.findPath(tail.x, tail.y, destX, destY);
-                    if (!path2.length) path2 = navGrid.findPath(tail.x, tail.y, world.x, world.y);
-                    if (path2.length) {
-                        sq.path = sq.path.concat(path2.slice(1));
-                        return;
-                    }
-                }
-
-                // Ordre standard : remplace l'ordre en cours.
-                sq.retreating=false;
-                sq.inCombat=false; sq.target=null;
-                sq.path=path; sq.pathIndex=0;
-            });
-        } else if (prodUI&&prodUI.selectedBuilding) {
-            // Rally point
-            prodUI.selectedBuilding.rallyX=world.x;
-            prodUI.selectedBuilding.rallyY=world.y;
-        }
+        if (!camera) return;
+        var p = _screenFromEvent(e);
+        _issueMoveOrRallyAtScreen(p.x, p.y, !!e.shiftKey);
     });
 
     canvas.addEventListener('wheel', function(e) {
         e.preventDefault();
         if (!camera) return;
-        camera.applyZoom(e.deltaY,e.clientX,e.clientY);
-    },{passive:false});
+        var p = _screenFromEvent(e);
+        camera.applyZoom(e.deltaY, p.x, p.y);
+    }, { passive:false });
+
+    canvas.addEventListener('touchstart', function(e) {
+        if (!camera || !e.touches || !e.touches.length) return;
+
+        if (e.touches.length === 1) {
+            touchMode = 'drag';
+            var p1 = _screenFromTouch(e.touches[0]);
+            mouseX = p1.x;
+            mouseY = p1.y;
+            _startDragSelectionAt(p1.x, p1.y);
+            pinchLastDist = 0;
+        } else {
+            touchMode = 'pan';
+            isDragging = false;
+            isPanning = true;
+            var midClientX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            var midClientY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            var mid = _setPointerFromClient(midClientX, midClientY);
+            panLastX = mid.x;
+            panLastY = mid.y;
+            pinchLastDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            canvas.style.cursor = 'grabbing';
+        }
+
+        e.preventDefault();
+    }, { passive:false });
+
+    canvas.addEventListener('touchmove', function(e) {
+        if (!camera || !e.touches || !e.touches.length) return;
+
+        if (e.touches.length === 1 && touchMode !== 'pan') {
+            touchMode = 'drag';
+            var p1 = _screenFromTouch(e.touches[0]);
+            mouseX = p1.x;
+            mouseY = p1.y;
+            dragCurrentX = p1.x;
+            dragCurrentY = p1.y;
+
+            if (buildMode && camera) {
+                var w1 = camera.screenToWorld(p1.x, p1.y);
+                buildGhostX = w1.x;
+                buildGhostY = w1.y;
+            }
+
+            if (!isDragging) {
+                var dx = p1.x - dragStartX;
+                var dy = p1.y - dragStartY;
+                if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESH) isDragging = true;
+            }
+        } else if (e.touches.length >= 2) {
+            touchMode = 'pan';
+            isPanning = true;
+            isDragging = false;
+
+            var midClientX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            var midClientY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            var mid = _setPointerFromClient(midClientX, midClientY);
+            camera.panByScreenDelta(mid.x - panLastX, mid.y - panLastY);
+            panLastX = mid.x;
+            panLastY = mid.y;
+            canvas.style.cursor = 'grabbing';
+
+            var dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            if (pinchLastDist > 0 && Math.abs(dist - pinchLastDist) > 2) {
+                camera.applyZoom(dist > pinchLastDist ? -80 : 80, mid.x, mid.y);
+            }
+            pinchLastDist = dist;
+        }
+
+        e.preventDefault();
+    }, { passive:false });
+
+    canvas.addEventListener('touchend', function(e) {
+        if (!camera) return;
+
+        if (!e.touches || e.touches.length === 0) {
+            if (touchMode === 'drag' && e.changedTouches && e.changedTouches.length) {
+                var pEnd = _screenFromTouch(e.changedTouches[0]);
+                if (isDragging) {
+                    var inRect = _squadsInRect(dragStartX, dragStartY, dragCurrentX, dragCurrentY);
+                    _deselectAll();
+                    inRect.forEach(function(s) { s.selected = true; });
+                    if (inRect.length > 0 && prodUI) prodUI.selectBuilding(null);
+                } else {
+                    _handleTapSelectionAt(pEnd.x, pEnd.y, false, true);
+                }
+            }
+
+            isDragging = false;
+            isPanning = false;
+            touchMode = null;
+            pinchLastDist = 0;
+            canvas.style.cursor = buildMode ? 'cell' : 'crosshair';
+            _centerPointerForTouchDevice();
+        } else if (e.touches.length === 1) {
+            touchMode = 'drag';
+            var pRemain = _screenFromTouch(e.touches[0]);
+            _startDragSelectionAt(pRemain.x, pRemain.y);
+            isPanning = false;
+            pinchLastDist = 0;
+            canvas.style.cursor = buildMode ? 'cell' : 'crosshair';
+        }
+
+        e.preventDefault();
+    }, { passive:false });
+
+    canvas.addEventListener('touchcancel', function() {
+        isDragging = false;
+        isPanning = false;
+        touchMode = null;
+        pinchLastDist = 0;
+        canvas.style.cursor = buildMode ? 'cell' : 'crosshair';
+        _centerPointerForTouchDevice();
+    }, { passive:false });
 
     // -----------------------------------------------------------------------
     //  CLAVIER

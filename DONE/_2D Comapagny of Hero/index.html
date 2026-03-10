@@ -2,7 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08111b">
+    <link rel="stylesheet" href="../_shared/game-embed.css">
     <title>Tactical War</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -157,6 +159,11 @@
 </div>
 
 <canvas id="gameCanvas"></canvas>
+<div id="mobileControls" class="mobile-controls">
+    <button id="mobileZoomOut" type="button" title="Zoom out">-</button>
+    <button id="mobileZoomIn" type="button" title="Zoom in">+</button>
+    <button id="mobileHome" type="button" title="Center HQ">HQ</button>
+</div>
 
 <script src="js/Camera.js"></script>
 <script src="js/NavTile.js"></script>
@@ -241,6 +248,11 @@ function showControls() {
         'Clic molette   : Pan camera (maintenir + glisser)\n' +
         'ZQSD           : Deplacer la camera\n' +
         'Molette        : Zoom\n' +
+        '\nMOBILE:\n' +
+        '1 doigt        : Selection / boite de selection\n' +
+        '2 doigts       : Pan camera + pinch zoom\n' +
+        'Tap terrain    : Deplacer unites selectionnees\n' +
+        'Boutons +/-/HQ : Zoom et recentrage\n\n' +
         'G              : Grille de navigation\n' +
         'F1             : Afficher secteurs\n' +
         'Shift+R        : Revele le brouillard (debug)\n' +

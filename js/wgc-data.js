@@ -36,6 +36,9 @@
             rating: 8.6,
             description: "A minimalist tactical RTS where you build a base, manage resources, train squads, and survive escalating attack waves.",
             tags: ["strategy", "rts", "base building", "survival", "waves"],
+            strategyType: "RTS Survival",
+            fourX: { explore: 58, expand: 76, exploit: 85, exterminate: 83 },
+            coverImage: "DONE/_2D Comapagny of Hero/assets/map02.png",
             playUrl: "DONE/_2D Broken Array/index.html",
             changelog: [
                 { version: "1.0.0", date: "2026-02-28", notes: ["Initial release"] }
@@ -49,6 +52,9 @@
             rating: 8.8,
             description: "A World War II real-time strategy game focused on squad control, map pressure, and tactical battlefield positioning.",
             tags: ["strategy", "rts", "wwii", "squads", "tactics"],
+            strategyType: "Tactical RTS",
+            fourX: { explore: 64, expand: 71, exploit: 74, exterminate: 91 },
+            coverImage: "DONE/_2D Comapagny of Hero/assets/map01.png",
             playUrl: "DONE/_2D Comapagny of Hero/index.html",
             changelog: [
                 { version: "0.1.0", date: "2026-02-28", notes: ["Initial playable build"] }
@@ -118,6 +124,90 @@
             playUrl: "DONE/_2D City Builder/index.html",
             changelog: [
                 { version: "1.0.0", date: "2026-03-04", notes: ["Initial release with 11 building types", "Power & water resource system", "Day/night cycle and satisfaction mechanics", "Full mobile support with touch & pinch-to-zoom"] }
+            ]
+        },
+        {
+            id: 10,
+            title: "Be the King",
+            category: "strategy",
+            year: 2026,
+            rating: 8.9,
+            description: "Lead your kingdom from Antiquity to the modern age, expand territory on a tactical world map, and balance economy, science, diplomacy, and war.",
+            tags: ["strategy", "kingdom", "empire", "4x", "map"],
+            strategyType: "Grand Strategy 4X",
+            fourX: { explore: 88, expand: 91, exploit: 86, exterminate: 78 },
+            playUrl: "DONE/_2D Be the Kings/index.html",
+            changelog: [
+                { version: "2.0.0", date: "2026-03-09", notes: ["Moved to DONE catalog", "Improved map/building persistence on load", "Added quick map build interactions"] }
+            ]
+        },
+        {
+            id: 11,
+            title: "AM3 President Simulator 2D",
+            category: "strategy",
+            year: 2026,
+            rating: 9.1,
+            description: "Run a modern nation on a 2D world map: choose monthly policies, handle diplomacy by country, and keep stability through a full presidential term.",
+            tags: ["strategy", "president", "politics", "diplomacy", "world map", "simulation"],
+            strategyType: "Geo-Political Strategy",
+            fourX: { explore: 82, expand: 69, exploit: 89, exterminate: 47 },
+            playUrl: "DONE/_2D President Simulator/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-09", notes: ["Initial release", "Interactive world map by nation", "Monthly policy and diplomacy systems", "Score reporting to hub"] }
+            ]
+        },
+        {
+            id: 12,
+            title: "Urban Shadows Simulator",
+            category: "strategy",
+            year: 2026,
+            rating: 9.0,
+            description: "A 4-phase simulator campaign: Police, Prison, Gang, and Ninja Assassin. Manage stats, execute actions, and clear each objective to progress.",
+            tags: ["strategy", "simulation", "police", "prison", "gang", "ninja", "campaign"],
+            strategyType: "Campaign Strategy",
+            fourX: { explore: 76, expand: 72, exploit: 81, exterminate: 79 },
+            playUrl: "DONE/_2D Urban Shadows Simulator/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-09", notes: ["Initial release", "4-phase progression campaign", "Action-based daily simulation", "2D city tactical map", "Score reporting to hub"] }
+            ]
+        },
+        {
+            id: 13,
+            title: "Adventure Quest: Echoes of the Citadel",
+            category: "adventure",
+            year: 2026,
+            rating: 8.7,
+            description: "Explore a large 2D world, complete quest phases, avoid patrol guards, recover the relic, and return to the village alive.",
+            tags: ["adventure", "quest", "exploration", "mobile", "story"],
+            playUrl: "DONE/_2D Adventure Quest/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-09", notes: ["Initial release", "Quest progression with Elder/Key/Gate/Relic", "Desktop and mobile controls", "Score reporting to hub"] }
+            ]
+        },
+        {
+            id: 14,
+            title: "Bordel Manager 2D",
+            category: "simulation",
+            year: 2026,
+            rating: 8.8,
+            description: "Run an adult venue management sim focused on finance, team morale, legal compliance, reputation, and nightly operations.",
+            tags: ["simulation", "management", "economy", "business", "mobile"],
+            playUrl: "DONE/_2D Bordel Manager/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-09", notes: ["Initial release", "Nightly operation simulation", "Compliance/security/reputation systems", "Desktop + mobile support", "Score reporting to hub"] }
+            ]
+        },
+        {
+            id: 15,
+            title: "Porn Empire Mobile",
+            category: "simulation",
+            year: 2026,
+            rating: 8.9,
+            description: "Build and scale an adult media studio empire with daily production, legal compliance, team morale, audience growth, and monetization strategy.",
+            tags: ["simulation", "tycoon", "business", "adult", "mobile"],
+            playUrl: "DONE/_2D Porn Empire Mobile/index.html",
+            changelog: [
+                { version: "1.0.0", date: "2026-03-10", notes: ["Initial release", "Mobile-first controls", "Daily management loop", "Risk/event system", "Score reporting to hub"] }
             ]
         },
     ];

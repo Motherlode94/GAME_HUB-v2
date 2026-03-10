@@ -1,9 +1,9 @@
-// ══════════════════════════════════════════════════════════════
-//  2D BASKET SIM — script.js  (v2 — Enhanced)
-//  • Physics: realistic spin, multi-bounce, backboard angles
-//  • Modes: Classic | Precision (10 shots) | Survival (lives + moving hoop)
-//  • Visuals: flame trail, animated net, flash on score, screen shake++
-// ══════════════════════════════════════════════════════════════
+﻿// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+//  2D BASKET SIM â€” script.js  (v2 â€” Enhanced)
+//  â€¢ Physics: realistic spin, multi-bounce, backboard angles
+//  â€¢ Modes: Classic | Precision (10 shots) | Survival (lives + moving hoop)
+//  â€¢ Visuals: flame trail, animated net, flash on score, screen shake++
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const canvas = document.getElementById("gameCanvas");
 const ctx    = canvas.getContext("2d");
@@ -13,7 +13,7 @@ canvas.height = 520;
 const W = canvas.width;
 const H = canvas.height;
 
-// ── Audio ──────────────────────────────────────────────────────
+// â”€â”€ Audio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let audioCtx = null;
 function getAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -54,7 +54,7 @@ function soundBackboard(){ playTone(180,.12,"square",.2); }
 function soundCombo(n)  { playTone(440 + n*55,.09,"sine",.28); }
 function soundLifeLost(){ playTone(150,.3,"sawtooth",.35); playTone(100,.4,"sawtooth",.3,.25); }
 
-// ── Particles ──────────────────────────────────────────────────
+// â”€â”€ Particles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const particles = [];
 
 function spawnParticles(x, y, color, count = 10, speed = 4) {
@@ -186,7 +186,7 @@ function drawStar(ctx, cx, cy, spikes, outerR, innerR, rotation) {
     ctx.fill();
 }
 
-// ── Floating score texts ───────────────────────────────────────
+// â”€â”€ Floating score texts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const floatTexts = [];
 function spawnFloatText(x, y, text, color = "#FF8C00", size = 22) {
     floatTexts.push({ x, y, text, color, life: 1, vy: -1.8, size });
@@ -213,7 +213,7 @@ function drawFloatTexts() {
     ctx.strokeStyle = "";
 }
 
-// ── Highscores ─────────────────────────────────────────────────
+// â”€â”€ Highscores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getScores(mode = "classic") {
     try { return JSON.parse(localStorage.getItem(`basket_scores_${mode}`)) || []; }
     catch { return []; }
@@ -236,11 +236,11 @@ function renderTitleScores() {
     ).join("");
 }
 
-// ── Game constants ──────────────────────────────────────────────
+// â”€â”€ Game constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const GRAVITY   = 0.38;
 const GAME_TIME = 30;
 
-// ── Hoop config (can move in survival) ─────────────────────────
+// â”€â”€ Hoop config (can move in survival) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const BASE_HOOP = { x: 650, y: 220 };
 let hoopConfig = {};
 function resetHoop(x, y) {
@@ -264,7 +264,7 @@ function resetHoop(x, y) {
     hoopConfig.backboard.y = hoopConfig.y - 40;
 }
 
-// ── Ball spawn ──────────────────────────────────────────────────
+// â”€â”€ Ball spawn â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const SPAWN_SPOTS = [
     { x: 100, y: 420 },
     { x: 180, y: 440 },
@@ -273,7 +273,7 @@ const SPAWN_SPOTS = [
     { x: 320, y: 430 },
 ];
 
-// ── Game state ──────────────────────────────────────────────────
+// â”€â”€ Game state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let ball, score, highscore, combo, maxCombo;
 let shotsTaken, basketsMade, swishCount, timeLeft, timerInterval;
 let gameRunning, gameStarted, lastTime;
@@ -287,7 +287,7 @@ let selectedMode = "classic";
 let lives = 3;
 let precisionShotsLeft = 10;
 
-// ── Mode selection ──────────────────────────────────────────────
+// â”€â”€ Mode selection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function selectMode(mode) {
     selectedMode = mode;
     document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("active"));
@@ -295,7 +295,7 @@ function selectMode(mode) {
     renderTitleScores();
 }
 
-// ── Reset ───────────────────────────────────────────────────────
+// â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function resetBall() {
     const spot = SPAWN_SPOTS[currentSpot % SPAWN_SPOTS.length];
     ball = {
@@ -376,16 +376,16 @@ function resetGame() {
     }
 
     const tag = document.getElementById("modeTag");
-    if (tag) tag.textContent = { classic:"⏱ CLASSIQUE", precision:"🎯 PRÉCISION", survival:"💀 SURVIE" }[selectedMode] || "";
+    if (tag) tag.textContent = { classic:"â± CLASSIQUE", precision:"ðŸŽ¯ PRÃ‰CISION", survival:"ðŸ’€ SURVIE" }[selectedMode] || "";
 }
 
 function getModeStartMsg() {
-    if (selectedMode === "precision") return `🎯 ${precisionShotsLeft} tirs — vise parfait !`;
-    if (selectedMode === "survival")  return "💀 3 ratés et c'est fini !";
+    if (selectedMode === "precision") return `ðŸŽ¯ ${precisionShotsLeft} tirs â€” vise parfait !`;
+    if (selectedMode === "survival")  return "ðŸ’€ 3 ratÃ©s et c'est fini !";
     return "Clique pour tirer !";
 }
 
-// ── UI helpers ──────────────────────────────────────────────────
+// â”€â”€ UI helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setMsg(text) {
     const el = document.getElementById("msgLine");
     if (el) el.textContent = text;
@@ -406,7 +406,7 @@ function updateHUD() {
     document.getElementById("hTimer").textContent = timeLeft;
     const livEl = document.getElementById("hLives");
     if (livEl) {
-        livEl.textContent = "❤️".repeat(lives) + "🖤".repeat(Math.max(0, 3-lives));
+        livEl.textContent = "â¤ï¸".repeat(lives) + "ðŸ–¤".repeat(Math.max(0, 3-lives));
         livEl.className = "hud-val lives-val" + (lives <= 1 ? " lives-danger" : "");
     }
 }
@@ -419,24 +419,32 @@ function updateStreakDisplay() {
     ).join("");
 }
 
-// ── Mouse ───────────────────────────────────────────────────────
-canvas.addEventListener("mousemove", e => {
-    const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
-    if (!ball.isMoving && gameRunning) aiming = true;
-});
-canvas.addEventListener("mouseleave", () => { aiming = false; });
+// â”€â”€ Mouse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Input pointer (desktop + mobile)
+let activePointerId = null;
 
-canvas.addEventListener("click", e => {
+function getCanvasCoords(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
+}
+
+function updateAimFromClientPoint(clientX, clientY) {
+    const p = getCanvasCoords(clientX, clientY);
+    mouseX = p.x;
+    mouseY = p.y;
+}
+
+function shootTowardClientPoint(clientX, clientY) {
     if (!gameRunning || ball.isMoving) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const mx   = e.clientX - rect.left;
-    const my   = e.clientY - rect.top;
-
-    const dx  = mx - ball.x;
-    const dy  = my - ball.y;
+    const p = getCanvasCoords(clientX, clientY);
+    const dx  = p.x - ball.x;
+    const dy  = p.y - ball.y;
     const mag = Math.hypot(dx, dy);
     if (mag < 4) return;
 
@@ -444,7 +452,7 @@ canvas.addEventListener("click", e => {
     ball.vx = (dx / mag) * power;
     ball.vy = (dy / mag) * power;
 
-    // Spin based on horizontal component — more realistic
+    // Spin based on horizontal component (more realistic)
     ball.spin = ball.vx * 0.14 + (Math.random()-.5) * 0.05;
 
     ball.isMoving = true;
@@ -458,9 +466,53 @@ canvas.addEventListener("click", e => {
 
     updateHUD();
     try { getAudio(); } catch(e) {}
-});
+}
 
-// ── Survival hoop movement ──────────────────────────────────────
+if (window.PointerEvent) {
+    canvas.addEventListener("pointerdown", e => {
+        if (!gameRunning || ball.isMoving) return;
+        activePointerId = e.pointerId;
+        updateAimFromClientPoint(e.clientX, e.clientY);
+        aiming = true;
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        e.preventDefault();
+    });
+
+    canvas.addEventListener("pointermove", e => {
+        if (e.pointerType === "mouse" || activePointerId === e.pointerId) {
+            updateAimFromClientPoint(e.clientX, e.clientY);
+            if (!ball.isMoving && gameRunning) aiming = true;
+        }
+    });
+
+    canvas.addEventListener("pointerup", e => {
+        if (activePointerId !== null && e.pointerId !== activePointerId) return;
+        shootTowardClientPoint(e.clientX, e.clientY);
+        activePointerId = null;
+        aiming = false;
+        e.preventDefault();
+    });
+
+    canvas.addEventListener("pointercancel", () => {
+        activePointerId = null;
+        aiming = false;
+    });
+
+    canvas.addEventListener("pointerleave", e => {
+        if (e.pointerType === "mouse") aiming = false;
+    });
+} else {
+    // Fallback for old browsers
+    canvas.addEventListener("mousemove", e => {
+        updateAimFromClientPoint(e.clientX, e.clientY);
+        if (!ball.isMoving && gameRunning) aiming = true;
+    });
+    canvas.addEventListener("mouseleave", () => { aiming = false; });
+    canvas.addEventListener("click", e => {
+        shootTowardClientPoint(e.clientX, e.clientY);
+    });
+}
+
 function updateHoopMovement(dt) {
     if (selectedMode !== "survival") return;
     if (basketsMade < 3) return; // starts moving after 3 baskets
@@ -487,7 +539,7 @@ function updateHoopMovement(dt) {
     hoopConfig.backboard.y = hoopConfig.y - 40;
 }
 
-// ── Game loop ───────────────────────────────────────────────────
+// â”€â”€ Game loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let animId = null;
 function gameLoop(timestamp) {
     if (!gameStarted) return;
@@ -506,7 +558,7 @@ function update(dt) {
     hoopConfig.netPhase += dt * 0.1;
 
     if (ball.isMoving) {
-        // ── Physics ──────────────────────────────────────────
+        // â”€â”€ Physics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         ball.vy += GRAVITY * dt;
         ball.x  += ball.vx * dt;
         ball.y  += ball.vy * dt;
@@ -533,24 +585,26 @@ function update(dt) {
             soundBounce();
         }
 
-        // Floor — reset
+        // Floor â€” reset
         if (ball.y - ball.radius > H) {
             handleMiss(); return;
         }
 
-        // ── Backboard collision ───────────────────────────────
+        // â”€â”€ Backboard collision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const bb = hoopConfig.backboard;
         if (
             ball.x + ball.radius > bb.x &&
             ball.x - ball.radius < bb.x + bb.w &&
             ball.y + ball.radius > bb.y &&
-            ball.y - ball.radius < bb.y + bb.h
+            ball.y - ball.radius < bb.y + bb.h &&
+            ball.vx > 0
         ) {
             // Realistic: angle of incidence = angle of reflection + friction
             const nx = -1; // normal faces left
             const dot = ball.vx * nx;
             ball.vx = (ball.vx - 2 * dot * nx) * 0.55;
-            ball.x  = bb.x - ball.radius;
+            ball.vx = -Math.abs(ball.vx);
+            ball.x  = bb.x - ball.radius - 0.5;
             // Impart spin from contact
             ball.spin = ball.vy * 0.1;
             ball.vy  *= 0.8;
@@ -559,11 +613,12 @@ function update(dt) {
             soundBackboard();
         }
 
-        // ── Rim collisions ────────────────────────────────────
+        // â”€â”€ Rim collisions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         checkRimCollision(hoopConfig.rimLeft,  hoopConfig.y);
         checkRimCollision(hoopConfig.rimRight, hoopConfig.y);
+        resolveRightRimBackboardTrap();
 
-        // ── Scoring ───────────────────────────────────────────
+        // â”€â”€ Scoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const cx = ball.x, cy = ball.y;
         const margin = 6;
 
@@ -619,6 +674,27 @@ function checkRimCollision(rimX, rimY) {
     }
 }
 
+// Prevents rare pocket lock between right rim and backboard.
+function resolveRightRimBackboardTrap() {
+    const bb = hoopConfig.backboard;
+    const pocketLeft  = hoopConfig.rimRight + hoopConfig.rimRadius;
+    const pocketRight = bb.x - ball.radius;
+    const inPocketX   = ball.x > pocketLeft && ball.x < pocketRight + 1;
+    const nearRimY    = Math.abs(ball.y - hoopConfig.y) < ball.radius + hoopConfig.rimRadius + 2;
+    const speed       = Math.hypot(ball.vx, ball.vy);
+
+    if (inPocketX && nearRimY && speed < 2.6) {
+        ball.x = hoopConfig.rimRight - (ball.radius + hoopConfig.rimRadius + 1);
+        ball.y = Math.min(ball.y, hoopConfig.y - (ball.radius + hoopConfig.rimRadius + 1));
+        ball.vx = -Math.max(2.2, Math.abs(ball.vx) + 1.1);
+        ball.vy = -Math.max(2.4, Math.abs(ball.vy) + 0.8);
+        ball.spin *= 0.6;
+        ball.rimHits++;
+        soundBounce();
+        spawnParticles(ball.x, ball.y, "#ffb347", 6, 2.5);
+    }
+}
+
 function handleScore() {
     ball.scored   = true;
     ball.isMoving = false;
@@ -635,11 +711,11 @@ function handleScore() {
     else if (approxDist > 280) pts = 2;
 
     let totalPts = pts * combo;
-    let label    = pts === 3 ? "🔥 3 PTS !" : pts === 2 ? "2 PTS" : "1 PT";
+    let label    = pts === 3 ? "ðŸ”¥ 3 PTS !" : pts === 2 ? "2 PTS" : "1 PT";
 
     if (isSwish) {
         totalPts = Math.round(totalPts * 1.5);
-        label = "🌟 SWISH ! " + label;
+        label = "ðŸŒŸ SWISH ! " + label;
         swishCount++;
         spawnSwishTrail(ball.x, hoopConfig.y);
         spawnFloatText(ball.x, hoopConfig.y - 55, "SWISH !", "#00e5ff", 26);
@@ -664,7 +740,7 @@ function handleScore() {
     if (combo > 2) spawnFloatText(ball.x, hoopConfig.y - 65, `COMBO x${combo} !`, "#ff4400", 26);
 
     streakHistory.push(isSwish ? "swish" : true);
-    setMsg(isSwish ? `🌟 SWISH ! +${totalPts} pts` : combo > 3 ? `🔥 COMBO x${combo} ! +${totalPts} pts` : `PANIER ! +${totalPts} pts`);
+    setMsg(isSwish ? `ðŸŒŸ SWISH ! +${totalPts} pts` : combo > 3 ? `ðŸ”¥ COMBO x${combo} ! +${totalPts} pts` : `PANIER ! +${totalPts} pts`);
 
     // Screen flash
     flashTimer = 18;
@@ -701,7 +777,7 @@ function handleMiss() {
     soundMiss();
 
     spawnParticles(ball.x, ball.y, "#e63946", 10, 4);
-    spawnFloatText(ball.x, ball.y - 20, "RATÉ", "#e63946", 24);
+    spawnFloatText(ball.x, ball.y - 20, "RATÃ‰", "#e63946", 24);
     streakHistory.push(false);
     shakeTimer  = 5;
     shakeAmount = 2;
@@ -709,7 +785,7 @@ function handleMiss() {
     if (selectedMode === "survival") {
         lives = Math.max(0, lives - 1);
         soundLifeLost();
-        spawnFloatText(W/2, 80, lives > 0 ? `❤️ ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}` : "💀 GAME OVER !", "#e63946", 20);
+        spawnFloatText(W/2, 80, lives > 0 ? `â¤ï¸ ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}` : "ðŸ’€ GAME OVER !", "#e63946", 20);
         if (lives <= 0) {
             updateHUD();
             setTimeout(() => endGame(), 800);
@@ -717,8 +793,8 @@ function handleMiss() {
         }
     }
 
-    const msgMap = { survival: `💀 Raté ! ${lives} vie${lives!==1?'s':''} restante${lives!==1?'s':''}`, precision: "Raté !", classic: "Raté ! Réessaie..." };
-    setMsg(msgMap[selectedMode] || "Raté !");
+    const msgMap = { survival: `ðŸ’€ RatÃ© ! ${lives} vie${lives!==1?'s':''} restante${lives!==1?'s':''}`, precision: "RatÃ© !", classic: "RatÃ© ! RÃ©essaie..." };
+    setMsg(msgMap[selectedMode] || "RatÃ© !");
     updateHUD();
     updateStreakDisplay();
     currentSpot++;
@@ -731,7 +807,7 @@ function handleMiss() {
     setTimeout(() => { resetBall(); aiming = false; }, 400);
 }
 
-// ── Draw ─────────────────────────────────────────────────────────
+// â”€â”€ Draw â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function draw() {
     ctx.save();
 
@@ -1074,7 +1150,7 @@ function drawBall() {
     ctx.restore();
 }
 
-// ── Game flow ─────────────────────────────────────────────────────
+// â”€â”€ Game flow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function endGame() {
     gameRunning = false;
     clearInterval(timerInterval);
@@ -1085,7 +1161,7 @@ function endGame() {
     if (score > 0) saveScore(score, selectedMode);
 
     const accuracy = shotsTaken > 0 ? Math.round((basketsMade / shotsTaken) * 100) : 0;
-    const titleMap = { classic: "BUZZER BEATER !", precision: "FIN DE SÉRIE !", survival: "GAME OVER !" };
+    const titleMap = { classic: "BUZZER BEATER !", precision: "FIN DE SÃ‰RIE !", survival: "GAME OVER !" };
 
     document.getElementById("goTitle").textContent     = titleMap[selectedMode] || "GAME OVER !";
     document.getElementById("goScore").textContent     = score;
@@ -1136,6 +1212,6 @@ function goMenu() {
 function showHowTo() { document.getElementById("howToScreen").classList.remove("hidden"); }
 function hideHowTo() { document.getElementById("howToScreen").classList.add("hidden"); }
 
-// ── Init ─────────────────────────────────────────────────────────
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 resetHoop();
 renderTitleScores();

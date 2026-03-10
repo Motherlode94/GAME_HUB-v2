@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a0f1f">
+    <link rel="stylesheet" href="../_shared/game-embed.css">
+    <title>Bordel Manager 2D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <a class="hub-back-btn" href="../../index.html" aria-label="Retour au catalogue">&larr; CATALOGUE</a>
+
+    <main class="shell">
+        <header class="top">
+            <div>
+                <p class="eyebrow">SIMULATION ADULTE</p>
+                <h1>BORDEL MANAGER 2D</h1>
+                <p class="subtitle">Gestion d'une maison close legalisee: finance, securite, conformite, reputation.</p>
+            </div>
+            <div class="phase-card">
+                <span id="day-label">Jour 1 / 30</span>
+                <strong id="status-label">Ouvert</strong>
+            </div>
+        </header>
+
+        <section class="stats-grid">
+            <article class="stat"><span>Caisse</span><strong id="cash">0</strong></article>
+            <article class="stat"><span>Reputation</span><strong id="reputation">0</strong></article>
+            <article class="stat"><span>Conformite</span><strong id="compliance">0</strong></article>
+            <article class="stat"><span>Moral equipe</span><strong id="morale">0</strong></article>
+            <article class="stat"><span>Securite</span><strong id="security">0</strong></article>
+            <article class="stat"><span>Clients servis</span><strong id="served">0</strong></article>
+            <article class="stat"><span>Chambres</span><strong id="rooms">0</strong></article>
+            <article class="stat"><span>Personnel</span><strong id="staff">0</strong></article>
+        </section>
+
+        <section class="control-panel">
+            <div class="control-head">
+                <h2>Gestion quotidienne</h2>
+                <label class="price-wrap">Tarif
+                    <select id="price-tier">
+                        <option value="low">Populaire</option>
+                        <option value="standard" selected>Standard</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </label>
+            </div>
+            <div class="action-grid">
+                <button data-action="recruit">Recruter personnel</button>
+                <button data-action="renovate">Renover chambre</button>
+                <button data-action="marketing">Campagne marketing</button>
+                <button data-action="wellness">Bien-etre equipe</button>
+                <button data-action="compliance">Controle conformite</button>
+                <button data-action="securityHire">Renforcer securite</button>
+            </div>
+
+            <div class="risk-board" id="risk-board"></div>
+
+            <button id="next-day" class="next-btn">Lancer la nuit</button>
+            <p class="notice">
+                Mode simulation management. Focus sur gestion et conformite, sans contenu explicite.
+            </p>
+        </section>
+
+        <section class="bottom-grid">
+            <article class="panel">
+                <h3>Rapport de nuit</h3>
+                <div id="night-report" class="report">
+                    <p>Prepare ton etablissement puis clique sur <strong>Lancer la nuit</strong>.</p>
+                </div>
+            </article>
+            <article class="panel">
+                <h3>Journal</h3>
+                <ul id="log-list" class="log-list"></ul>
+            </article>
+        </section>
+    </main>
+
+    <div id="end-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card">
+            <h2 id="end-title">Fin de partie</h2>
+            <p id="end-text">-</p>
+            <button id="restart-btn">Recommencer</button>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

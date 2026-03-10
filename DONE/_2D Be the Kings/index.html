@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08111b">
+    <link rel="stylesheet" href="../_shared/game-embed.css">
+    <title>Be the King</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hub-back-btn {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 9999;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(6, 10, 18, 0.88);
+            color: #fff;
+            text-decoration: none;
+            font: 700 12px/1 Arial, sans-serif;
+            letter-spacing: 0.08em;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+<a class="hub-back-btn" href="../../index.html" aria-label="Retour au catalogue">&larr; CATALOGUE</a>
+
+<div id="title-screen" class="screen active">
+    <div class="title-bg"></div>
+    <div class="title-content">
+        <span class="crown-icon">&#x1F451;</span>
+        <h1 class="game-title">Be the King</h1>
+        <p class="game-subtitle">De l'Antiquite a l'ere moderne</p>
+        <div class="title-menu">
+            <button class="btn-title" onclick="Game.showNewGame()">Nouvelle partie</button>
+            <button class="btn-title btn-secondary" onclick="Game.loadGame()">Charger partie</button>
+            <button class="btn-title btn-secondary" onclick="Game.clearSave()">Effacer sauvegarde</button>
+        </div>
+    </div>
+</div>
+
+<div id="new-game-screen" class="screen">
+    <div class="panel-dark">
+        <h2 class="section-title">Fondation de l'empire</h2>
+
+        <div class="creation-grid">
+            <div class="creation-field">
+                <label for="nation-name">Nom de votre nation</label>
+                <input id="nation-name" type="text" maxlength="28" placeholder="L'Empire de...">
+            </div>
+
+            <div class="creation-field">
+                <label for="ruler-name">Nom du souverain</label>
+                <input id="ruler-name" type="text" maxlength="22" placeholder="Votre nom...">
+            </div>
+
+            <div class="creation-field">
+                <label>Gouvernement</label>
+                <div class="gov-choices">
+                    <div class="gov-card selected" data-gov="monarchie" onclick="Game.selectGov(this)">
+                        <span class="gov-icon">&#x1F451;</span>
+                        <strong>Monarchie</strong>
+                        <small>+10% Or, +5 Stabilite</small>
+                    </div>
+                    <div class="gov-card" data-gov="republique" onclick="Game.selectGov(this)">
+                        <span class="gov-icon">&#x2696;&#xFE0F;</span>
+                        <strong>Republique</strong>
+                        <small>+10% Science, +5% Culture</small>
+                    </div>
+                    <div class="gov-card" data-gov="theocratie" onclick="Game.selectGov(this)">
+                        <span class="gov-icon">&#x1F3DB;&#xFE0F;</span>
+                        <strong>Theocratie</strong>
+                        <small>+15% Culture, +10 Stabilite</small>
+                    </div>
+                    <div class="gov-card" data-gov="militaire" onclick="Game.selectGov(this)">
+                        <span class="gov-icon">&#x2694;&#xFE0F;</span>
+                        <strong>Etat militaire</strong>
+                        <small>+15% Armee, +5% Production</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="creation-field">
+                <label>Difficulte</label>
+                <div class="difficulty-row">
+                    <button class="btn-diff" data-diff="facile" onclick="Game.selectDiff(this)">Facile</button>
+                    <button class="btn-diff selected" data-diff="normal" onclick="Game.selectDiff(this)">Normal</button>
+                    <button class="btn-diff" data-diff="difficile" onclick="Game.selectDiff(this)">Difficile</button>
+                    <button class="btn-diff" data-diff="brutal" onclick="Game.selectDiff(this)">Brutal</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="creation-actions">
+            <button class="btn-back" onclick="Game.showTitle()">Retour</button>
+            <button class="btn-start" onclick="Game.startGame()">Lancer la partie</button>
+        </div>
+    </div>
+</div>
+
+<div id="game-screen" class="screen">
+    <header id="top-bar">
+        <div class="top-left">
+            <div class="era-badge" id="era-badge">Antiquite</div>
+            <div class="year-display" id="year-display">4000 av.JC</div>
+            <div class="year-display">Tour <span id="turn-number">1</span></div>
+        </div>
+
+        <div class="resources-bar">
+            <div class="resource" data-kind="gold"><span class="res-icon">&#x1F4B0;</span><span class="res-val" id="res-gold">0</span><span class="res-rate" id="rate-gold">(+0)</span></div>
+            <div class="resource" data-kind="food"><span class="res-icon">&#x1F33E;</span><span class="res-val" id="res-food">0</span><span class="res-rate" id="rate-food">(+0)</span></div>
+            <div class="resource" data-kind="prod"><span class="res-icon">&#x2692;&#xFE0F;</span><span class="res-val" id="res-prod">0</span><span class="res-rate" id="rate-prod">(+0)</span></div>
+            <div class="resource" data-kind="science"><span class="res-icon">&#x1F52C;</span><span class="res-val" id="res-science">0</span><span class="res-rate" id="rate-science">(+0)</span></div>
+            <div class="resource" data-kind="culture"><span class="res-icon">&#x1F3AD;</span><span class="res-val" id="res-culture">0</span><span class="res-rate" id="rate-culture">(+0)</span></div>
+            <div class="resource" data-kind="military"><span class="res-icon">&#x2694;&#xFE0F;</span><span class="res-val" id="res-military">0</span></div>
+        </div>
+
+        <div class="top-right">
+            <div class="stability-meter">
+                <span>Stabilite</span>
+                <div class="meter-bar"><div class="meter-fill" id="stability-fill" style="width:70%"></div></div>
+                <span id="stability-val">70%</span>
+            </div>
+            <div class="happiness-meter">
+                <span>Bonheur</span>
+                <div class="meter-bar"><div class="meter-fill happy" id="happiness-fill" style="width:60%"></div></div>
+                <span id="happiness-val">60%</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="main-area">
+        <nav id="tab-nav">
+            <button class="tab" data-tab="overview" onclick="UI.switchTab('overview')"><span class="tab-icon">&#x1F3DB;&#xFE0F;</span>Nation</button>
+            <button class="tab active" data-tab="map" onclick="UI.switchTab('map')"><span class="tab-icon">&#x1F5FA;&#xFE0F;</span>Carte</button>
+            <button class="tab" data-tab="build" onclick="UI.switchTab('build')"><span class="tab-icon">&#x1F3D7;&#xFE0F;</span>Batir</button>
+            <button class="tab" data-tab="research" onclick="UI.switchTab('research')"><span class="tab-icon">&#x1F52C;</span>Science</button>
+            <button class="tab" data-tab="military" onclick="UI.switchTab('military')"><span class="tab-icon">&#x2694;&#xFE0F;</span>Armee</button>
+            <button class="tab" data-tab="diplomacy" onclick="UI.switchTab('diplomacy')"><span class="tab-icon">&#x1F91D;</span>Diplo</button>
+            <button class="tab" data-tab="politics" onclick="UI.switchTab('politics')"><span class="tab-icon">&#x1F4DC;</span>Lois</button>
+            <button class="tab" data-tab="population" onclick="UI.switchTab('population')"><span class="tab-icon">&#x1F465;</span>Peuple</button>
+        </nav>
+
+        <section id="tab-content">
+            <button id="window-close" class="window-close" onclick="UI.switchTab('map')" title="Fermer">X</button>
+            <div class="tab-panel" id="panel-overview">
+                <h3 class="panel-title">Vue d'ensemble</h3>
+                <div class="overview-grid">
+                    <div class="info-card nation-card">
+                        <h3>Nation</h3>
+                        <div class="nation-stats">
+                            <div><span class="stat-label">Nom</span><strong id="ov-nation-name">-</strong></div>
+                            <div><span class="stat-label">Souverain</span><strong id="ov-ruler">-</strong></div>
+                            <div><span class="stat-label">Gouvernement</span><strong id="ov-gov">-</strong></div>
+                            <div><span class="stat-label">Population</span><strong id="ov-pop">-</strong></div>
+                            <div><span class="stat-label">Territoire</span><strong id="ov-territory">-</strong></div>
+                            <div><span class="stat-label">Prestige</span><strong id="ov-prestige">-</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Batiments</h3>
+                        <div id="ov-buildings"><em>Aucun.</em></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Recherche en cours</h3>
+                        <div id="ov-research"><em>Aucune.</em></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Armee</h3>
+                        <div id="ov-army"><em>Aucune unite.</em></div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Conseillers</h3>
+                        <div id="ov-advisors">-</div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Diplomatie</h3>
+                        <div id="ov-diplo">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel active" id="panel-map">
+                <h3 class="panel-title">Carte du monde</h3>
+                <div class="map-layout">
+                    <div class="map-canvas-wrap">
+                        <div class="map-atmosphere">
+                            <span class="mist-layer mist-a"></span>
+                            <span class="mist-layer mist-b"></span>
+                            <span class="mist-layer mist-c"></span>
+                        </div>
+                        <canvas id="map-canvas"></canvas>
+                        <div class="map-controls">
+                            <button class="map-btn" onclick="WorldMap.zoomIn()">+</button>
+                            <button class="map-btn" onclick="WorldMap.zoomOut()">-</button>
+                            <button class="map-btn" onclick="WorldMap.centerHome()">&#x2302;</button>
+                        </div>
+                        <div class="map-quick-actions">
+                            <button class="map-action-btn" onclick="UI.openMapBuildWindow()">Construire</button>
+                            <button class="map-action-btn" onclick="UI.switchTab('build')">Menu complet</button>
+                            <button id="memo-toggle" class="map-action-btn is-active" onclick="Game.toggleMemoriapolis()">Memoriapolis: ON</button>
+                        </div>
+                        <div id="map-coords" class="map-coords">Selectionnez une case...</div>
+                        <div id="map-build-window" class="map-window hidden">
+                            <div class="map-window-header">
+                                <strong>Construction rapide</strong>
+                                <button class="map-window-close" onclick="UI.closeMapBuildWindow()">x</button>
+                            </div>
+                            <div id="map-build-target" class="map-window-target">Selectionnez une case sur votre territoire.</div>
+                            <div class="map-window-filter">
+                                <button class="cat-btn active" onclick="UI.filterMapBuild('all', event)">Tous</button>
+                                <button class="cat-btn" onclick="UI.filterMapBuild('nourriture', event)">Nourriture</button>
+                                <button class="cat-btn" onclick="UI.filterMapBuild('economie', event)">Economie</button>
+                                <button class="cat-btn" onclick="UI.filterMapBuild('science', event)">Science</button>
+                                <button class="cat-btn" onclick="UI.filterMapBuild('militaire', event)">Militaire</button>
+                            </div>
+                            <div id="map-buildings-list" class="map-build-list"></div>
+                        </div>
+                    </div>
+                    <aside class="map-sidebar">
+                        <h4>Informations de case</h4>
+                        <div id="map-tile-info">Touchez une case pour voir ses details et actions.</div>
+                        <div class="map-legend">
+                            <h5>Legende rapide</h5>
+                            <div class="legend-grid">
+                                <div class="legend-item"><span class="legend-swatch s-plain"></span>Plaine</div>
+                                <div class="legend-item"><span class="legend-swatch s-forest"></span>Foret</div>
+                                <div class="legend-item"><span class="legend-swatch s-mountain"></span>Montagne</div>
+                                <div class="legend-item"><span class="legend-swatch s-water"></span>Cote/Ocean</div>
+                            </div>
+                            <div class="legend-note">Astuce: selectionne une case puis utilise "Construire" pour batir dessus.</div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-build">
+                <h3 class="panel-title">Construction</h3>
+                <div class="build-categories">
+                    <button class="cat-btn active" onclick="UI.filterBuildings('all', event)">Tous</button>
+                    <button class="cat-btn" onclick="UI.filterBuildings('nourriture', event)">Nourriture</button>
+                    <button class="cat-btn" onclick="UI.filterBuildings('economie', event)">Economie</button>
+                    <button class="cat-btn" onclick="UI.filterBuildings('science', event)">Science</button>
+                    <button class="cat-btn" onclick="UI.filterBuildings('militaire', event)">Militaire</button>
+                    <button class="cat-btn" onclick="UI.filterBuildings('culture', event)">Culture</button>
+                    <button class="cat-btn" onclick="UI.filterBuildings('infrastructure', event)">Infra</button>
+                    <button class="cat-btn" onclick="UI.filterBuildings('religion', event)">Religion</button>
+                </div>
+                <div id="buildings-list" class="buildings-grid"></div>
+            </div>
+
+            <div class="tab-panel" id="panel-research">
+                <h3 class="panel-title">Recherche</h3>
+                <div id="research-era-nav" class="research-era-nav"></div>
+                <p class="stat-label" style="margin-bottom: 12px;">Technologies debloquees: <strong id="tech-count">0</strong></p>
+                <div id="tech-tree" class="tech-tree"></div>
+            </div>
+
+            <div class="tab-panel" id="panel-military">
+                <h3 class="panel-title">Armee</h3>
+                <div class="military-layout">
+                    <div class="army-roster">
+                        <h4>Forces actuelles</h4>
+                        <div id="army-list"></div>
+                        <div class="army-total">Puissance: <span id="army-power">0</span> | Defense: <span id="army-defense">0</span> | Niveau militaire: <span id="army-level">1</span>/10</div>
+                    </div>
+
+                    <div class="recruit-panel">
+                        <h4>Recrutement</h4>
+                        <div class="build-categories recruit-filter" style="margin-bottom: 10px;">
+                            <button class="cat-btn active" onclick="UI.filterUnits('all', event)">Tous</button>
+                            <button class="cat-btn" onclick="UI.filterUnits('melee', event)">Meelee</button>
+                            <button class="cat-btn" onclick="UI.filterUnits('ranged', event)">Distance</button>
+                            <button class="cat-btn" onclick="UI.filterUnits('cavalry', event)">Cavalerie</button>
+                            <button class="cat-btn" onclick="UI.filterUnits('siege', event)">Siege</button>
+                            <button class="cat-btn" onclick="UI.filterUnits('air', event)">Aerien</button>
+                            <button class="cat-btn" onclick="UI.filterUnits('special', event)">Special</button>
+                        </div>
+                        <div id="recruit-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-diplomacy">
+                <h3 class="panel-title">Diplomatie</h3>
+                <div id="nations-list" class="nations-grid"></div>
+            </div>
+
+            <div class="tab-panel" id="panel-politics">
+                <h3 class="panel-title">Politique</h3>
+                <div class="politics-layout">
+                    <div id="policy-sliders" class="policy-sliders"></div>
+                    <div class="decrees-panel">
+                        <h4>Decrets</h4>
+                        <div id="decrees-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="panel-population">
+                <h3 class="panel-title">Population</h3>
+                <div class="pop-layout">
+                    <div id="pop-overview" class="pop-overview"></div>
+                    <div id="social-classes" class="social-classes"></div>
+                </div>
+                <div id="culture-art-panel" class="culture-art-panel"></div>
+            </div>
+        </section>
+    </div>
+
+    <footer id="bottom-bar">
+        <div class="turn-controls">
+            <button class="btn-turn" onclick="Game.nextTurn()">Tour suivant</button>
+            <button id="mode-toggle" class="btn-footer" onclick="Game.toggleRealtime()">Mode: Tour par tour</button>
+            <button id="speed-toggle" class="btn-footer" onclick="Game.cycleRealtimeSpeed()">Vitesse: x0.5</button>
+            <div id="turn-info" class="turn-info">Chaque tour applique ressources, IA et evenements.</div>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn-footer" onclick="Game.saveGame()">Sauvegarder</button>
+            <button class="btn-footer" onclick="Game.loadGame()">Charger</button>
+            <button class="btn-footer btn-danger" onclick="Game.confirmQuit()">Quitter</button>
+        </div>
+    </footer>
+</div>
+
+<div id="event-modal" class="modal hidden">
+    <div class="modal-overlay" onclick="UI.closeModal()"></div>
+    <div class="modal-box">
+        <div class="modal-header">
+            <span id="modal-icon" class="modal-icon">&#x1F4E2;</span>
+            <h3 id="modal-title">Evenement</h3>
+        </div>
+        <p id="modal-desc" class="modal-desc">-</p>
+        <div id="modal-choices" class="modal-choices"></div>
+    </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/game.js"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08111b">
+    <link rel="stylesheet" href="../_shared/game-embed.css">
+    <title>AM3 - President Simulator 2D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Teko:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="hub-back-btn" href="../../index.html" aria-label="Retour au catalogue">&larr; CATALOGUE</a>
+
+<div class="app-shell">
+    <section id="setup-screen" class="setup-screen">
+        <div class="setup-card">
+            <h1>AM3 President Simulator 2D</h1>
+            <p>Version etendue: politique, lois, armee, monuments, intemperies, diplomatie et crises globales.</p>
+            <label for="start-nation">Choisis ta nation de depart</label>
+            <select id="start-nation"></select>
+            <label for="start-doctrine">Doctrine de mandat</label>
+            <select id="start-doctrine"></select>
+            <button id="start-game-btn" class="primary-btn">Lancer la partie</button>
+            <p class="hint">Objectif: tenir 48 mois de mandat en gardant ton pays stable et puissant.</p>
+        </div>
+    </section>
+
+    <section id="game-ui" class="game-ui hidden">
+        <header class="top-bar">
+            <div>
+                <h2 id="nation-name">-</h2>
+                <p id="date-label">Janvier 2026</p>
+            </div>
+            <div class="kpi-grid">
+                <div class="kpi"><span>Tresor</span><strong id="kpi-treasury">0</strong></div>
+                <div class="kpi"><span>PIB</span><strong id="kpi-gdp">0</strong></div>
+                <div class="kpi"><span>Popularite</span><strong id="kpi-approval">0%</strong></div>
+                <div class="kpi"><span>Stabilite</span><strong id="kpi-stability">0%</strong></div>
+                <div class="kpi"><span>Armee</span><strong id="kpi-military">0</strong></div>
+                <div class="kpi"><span>Diplomatie</span><strong id="kpi-diplomacy">0</strong></div>
+                <div class="kpi"><span>Ecologie</span><strong id="kpi-ecology">0%</strong></div>
+                <div class="kpi"><span>Securite</span><strong id="kpi-security">0%</strong></div>
+                <div class="kpi"><span>Population</span><strong id="kpi-population">0</strong></div>
+                <div class="kpi"><span>Industrie</span><strong id="kpi-industry">0</strong></div>
+                <div class="kpi"><span>Science</span><strong id="kpi-science">0</strong></div>
+                <div class="kpi"><span>Score</span><strong id="kpi-score">0</strong></div>
+            </div>
+        </header>
+
+        <main class="main-grid">
+            <aside class="panel left-panel">
+                <section class="panel-section">
+                    <div class="section-head">
+                        <h3>Decision du mois</h3>
+                        <span class="badge" id="policy-usage">Politique: en attente</span>
+                    </div>
+                    <p class="panel-help">Choisis une politique nationale (obligatoire pour passer au mois suivant).</p>
+                    <div id="policy-cards" class="cards-grid"></div>
+                </section>
+
+                <section class="panel-section">
+                    <div class="section-head">
+                        <h3>Parlement et lois</h3>
+                        <span class="badge" id="law-usage">Vote: disponible</span>
+                    </div>
+                    <div id="law-cards" class="cards-grid compact"></div>
+                </section>
+
+                <section class="panel-section">
+                    <div class="section-head">
+                        <h3>Monuments nationaux</h3>
+                        <span class="badge" id="project-badge">Projet: aucun</span>
+                    </div>
+                    <div id="project-status" class="project-status">Aucun chantier national en cours.</div>
+                    <div id="monument-cards" class="cards-grid compact"></div>
+                </section>
+
+                <div class="actions-row">
+                    <button id="end-turn-btn" class="primary-btn">Valider le mois</button>
+                    <button id="save-btn" class="ghost-btn">Sauvegarder</button>
+                    <button id="load-btn" class="ghost-btn">Charger</button>
+                </div>
+
+                <div class="turn-log-wrap">
+                    <div class="section-head">
+                        <h4>Objectifs trimestriels</h4>
+                        <span id="objective-due" class="badge">Evaluation: M3</span>
+                    </div>
+                    <div id="objective-list" class="cards-grid compact"></div>
+                </div>
+
+                <div class="turn-log-wrap">
+                    <h4>Journal gouvernemental</h4>
+                    <ul id="turn-log" class="turn-log"></ul>
+                </div>
+            </aside>
+
+            <section class="panel map-panel">
+                <div class="map-header">
+                    <h3>Carte du monde par nations</h3>
+                    <div class="map-badges">
+                        <span id="weather-badge" class="badge">Meteo: calme</span>
+                        <span id="diplomacy-usage" class="badge">Action diplo: disponible</span>
+                        <span id="military-usage" class="badge">Operation militaire: disponible</span>
+                    </div>
+                </div>
+                <div class="map-wrap">
+                    <svg id="world-map" viewBox="0 0 1200 620" role="img" aria-label="Carte mondiale interactive">
+                        <rect x="0" y="0" width="1200" height="620" class="ocean" />
+
+                        <polygon data-nation="canada" points="94,89 248,66 341,92 335,142 215,171 107,152" />
+                        <polygon data-nation="usa" points="121,168 285,162 359,206 327,253 204,267 114,232" />
+                        <polygon data-nation="mexico" points="221,267 299,260 328,304 276,343 211,315" />
+                        <polygon data-nation="brazil" points="353,326 448,312 489,392 439,487 359,460 322,382" />
+                        <polygon data-nation="argentina" points="411,489 456,494 471,577 421,611 386,553" />
+
+                        <polygon data-nation="uk" points="566,144 592,141 598,168 579,184 560,170" />
+                        <polygon data-nation="france" points="597,177 648,178 661,214 629,239 592,224" />
+                        <polygon data-nation="germany" points="653,152 698,156 707,197 676,224 649,202" />
+                        <polygon data-nation="russia" points="718,95 1022,81 1096,152 1008,212 842,232 739,196" />
+                        <polygon data-nation="egypt" points="693,251 732,252 746,302 708,323 680,296" />
+                        <polygon data-nation="nigeria" points="650,318 704,314 716,356 671,384 636,352" />
+
+                        <polygon data-nation="india" points="824,264 889,253 913,313 872,359 819,336" />
+                        <polygon data-nation="china" points="904,207 1038,202 1071,281 1019,336 903,319 879,251" />
+                        <polygon data-nation="japan" points="1094,220 1123,242 1110,290 1084,272" />
+                        <polygon data-nation="indonesia" points="902,379 992,384 1019,414 960,439 884,424" />
+                        <polygon data-nation="australia" points="984,456 1119,456 1141,539 1023,578 958,522" />
+                    </svg>
+                </div>
+                <div class="map-legend">
+                    <span><i class="legend friendly"></i>relation positive</span>
+                    <span><i class="legend neutral"></i>relation neutre</span>
+                    <span><i class="legend hostile"></i>relation hostile</span>
+                    <span><i class="legend player"></i>ta nation</span>
+                </div>
+            </section>
+
+            <aside class="panel right-panel">
+                <section class="panel-section first">
+                    <h3 id="selected-title">Selection nation</h3>
+                    <p id="selected-desc" class="selected-desc">Clique une nation sur la carte pour negocier.</p>
+                    <div class="nation-stats" id="selected-stats"></div>
+                    <div class="diplo-actions">
+                        <button data-action="trade" class="diplo-btn">Accord commercial</button>
+                        <button data-action="aid" class="diplo-btn">Aide economique</button>
+                        <button data-action="climate" class="diplo-btn">Pacte climat</button>
+                        <button data-action="alliance" class="diplo-btn">Traite d'alliance</button>
+                        <button data-action="intel" class="diplo-btn">Partage de renseignement</button>
+                        <button data-action="sanction" class="diplo-btn">Sanctions</button>
+                        <button data-action="pressure" class="diplo-btn">Pression militaire</button>
+                    </div>
+                    <p class="hint">Une seule action diplomatique par mois.</p>
+                </section>
+
+                <section class="panel-section">
+                    <h3>Etat-major et armee</h3>
+                    <div id="army-overview" class="army-overview"></div>
+                    <h4>Recrutement</h4>
+                    <div id="recruit-cards" class="cards-grid compact"></div>
+                    <h4>Operations</h4>
+                    <div id="operation-cards" class="cards-grid compact"></div>
+                    <p class="hint">Une operation militaire par mois.</p>
+                </section>
+
+                <section class="panel-section">
+                    <h3>Conseil strategique</h3>
+                    <div id="risk-overview" class="risk-overview"></div>
+                    <p class="hint">Indice eleve = secteur fragile a traiter en priorite.</p>
+                </section>
+            </aside>
+        </main>
+    </section>
+</div>
+
+<div id="event-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+        <h3 id="event-title">Evenement</h3>
+        <p id="event-text">-</p>
+        <div id="event-choices" class="event-choices"></div>
+    </div>
+</div>
+
+<div id="gameover-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+        <h3 id="gameover-title">Fin de mandat</h3>
+        <p id="gameover-text">-</p>
+        <div class="actions-row">
+            <button id="restart-btn" class="primary-btn">Rejouer</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/game.js"></script>
+</body>
+</html>

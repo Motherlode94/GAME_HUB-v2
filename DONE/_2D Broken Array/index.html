@@ -2,11 +2,17 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#08111b">
+    <link rel="stylesheet" href="../_shared/game-embed.css">
 <title>Broken Array</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#060810; overflow:hidden; font-family:'Courier New',monospace; cursor:crosshair; }
-  #gameCanvas { display:block; }
+  body {
+    background:#060810; overflow:hidden; font-family:'Courier New',monospace; cursor:crosshair;
+    touch-action:none; overscroll-behavior:none; -webkit-user-select:none; user-select:none;
+  }
+  #gameCanvas { display:block; width:100vw; height:100vh; touch-action:none; }
   #hud { position:fixed; inset:0; pointer-events:none; z-index:10; }
 
   /* ─────────────────────────────────────────────────────
@@ -262,6 +268,72 @@
   #creditsModal p { font-size:10px; color:rgba(255,255,255,.35); line-height:2; letter-spacing:.06em; margin-bottom:20px; }
   #creditsModal .close-btn { background:none; border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.5); padding:7px 20px; font-family:'Courier New',monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; border-radius:2px; }
   #creditsModal .close-btn:hover { color:#fff; border-color:rgba(255,255,255,.35); }
+
+  @media (max-width: 1024px), (pointer: coarse) {
+    .hub-back-btn {
+      top:8px; left:8px; padding:8px 10px; font-size:9px; letter-spacing:.05em;
+    }
+
+    #controlsToggle {
+      top:42px; left:8px; padding:6px 9px; font-size:9px;
+    }
+
+    #controls {
+      top:72px; left:8px; min-width:140px; max-width:52vw; line-height:1.6;
+      font-size:9px; padding:8px 9px;
+    }
+
+    #topbar {
+      top:8px; left:8px; right:8px; transform:none; justify-content:center;
+      gap:9px; padding:6px 10px;
+    }
+
+    #resources {
+      top:44px; left:8px; right:auto; gap:8px; padding:6px 10px;
+    }
+
+    #missionPanel {
+      top:84px !important;
+      left:8px !important;
+      width:160px !important;
+      max-height:32vh !important;
+    }
+
+    #eventLog {
+      display:none !important;
+    }
+
+    #buildPanel {
+      left:8px; bottom:8px; width:44vw; max-width:188px; max-height:38vh; padding:8px;
+    }
+
+    .build-btn, .prod-btn, .menu-btn, .banner-btn {
+      min-height:36px;
+    }
+
+    #prodPanel, #selPanel {
+      bottom:8px; min-width:0; width:46vw; max-width:210px; padding:8px 10px;
+    }
+
+    #minimapWrap {
+      right:8px; bottom:8px; padding:4px;
+    }
+
+    #minimap {
+      width:108px; height:108px;
+    }
+
+    #banner {
+      min-width:0; width:92vw; padding:24px 18px;
+    }
+
+    .menu-card {
+      min-width:0; width:92vw; padding:36px 20px 28px;
+    }
+
+    .menu-title { font-size:26px; letter-spacing:.12em; }
+    .menu-subtitle { margin-bottom:26px; }
+  }
 </style>
 </head>
 <body>
@@ -275,13 +347,14 @@
 ">? Contrôles</button>
 
 <div id="controls">
-  <div>LMB — Sél. / Glisser</div>
-  <div>RMB — Déplacer unités</div>
-  <div>MMB — Déplacer caméra</div>
-  <div>Scroll — Zoom</div>
-  <div>WASD — Caméra</div>
-  <div>A — Tout sél.</div>
-  <div>Esc — Désél.</div>
+  <div>PC: LMB - Select / Drag</div>
+  <div>PC: RMB - Move units</div>
+  <div>PC: MMB - Pan camera</div>
+  <div>PC: Wheel - Zoom</div>
+  <div>Mobile: 1 finger - Select / Drag</div>
+  <div>Mobile: 2 fingers - Pan + Zoom</div>
+  <div>Mobile: Tap ground - Move selected</div>
+  <div>WASD / A / Esc - Quick commands</div>
 </div>
 
 <canvas id="gameCanvas"></canvas>

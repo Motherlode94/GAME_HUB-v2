@@ -174,6 +174,7 @@ let playerName = sessionStorage.getItem('wgc_playerName') || '';
 const grid        = document.getElementById('games-grid');
 const noResults   = document.getElementById('no-results');
 const resultsInfo = document.getElementById('results-info');
+const strategyCompare = document.getElementById('strategy-compare');
 const gameCount   = document.getElementById('game-count');
 const searchInput = document.getElementById('search-input');
 const clearBtn    = document.getElementById('clear-search');
@@ -187,6 +188,8 @@ const modalGameOverlay = document.getElementById('modal-game-overlay');
 const modalGameClose   = document.getElementById('modal-game-close');
 const modalGameTitle   = document.getElementById('modal-game-title');
 const gameIframe       = document.getElementById('game-iframe');
+const viewerEmpty      = document.getElementById('viewer-empty');
+const viewerPopoutBtn  = document.getElementById('viewer-popout');
 
 // Post-game panel
 const postgamePanel  = document.getElementById('postgame-panel');
@@ -203,6 +206,126 @@ const sessionFinishBtn   = document.getElementById('session-finish-btn');
 const sessionCancelBtn   = document.getElementById('session-cancel-btn');
 
 // ── Grid ───────────────────────────────────────
+const FOUR_X_AXES = [
+    { key: 'explore', label: 'Explore', short: 'EXP' },
+    { key: 'expand', label: 'Expand', short: 'XPD' },
+    { key: 'exploit', label: 'Exploit', short: 'XPL' },
+    { key: 'exterminate', label: 'Exterminate', short: 'XTR' }
+];
+
+function clampPercent(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return 0;
+    return Math.max(0, Math.min(100, Math.round(numeric)));
+}
+
+function getFourXProfile(game) {
+    if (!game || game.category !== 'strategy') return null;
+    const source = game.fourX || {};
+    return {
+        explore: clampPercent(source.explore),
+        expand: clampPercent(source.expand),
+        exploit: clampPercent(source.exploit),
+        exterminate: clampPercent(source.exterminate)
+    };
+}
+
+function getFourXAverage(profile) {
+    if (!profile) return 0;
+    const total = FOUR_X_AXES.reduce((sum, axis) => sum + profile[axis.key], 0);
+    return Math.round(total / FOUR_X_AXES.length);
+}
+
+function getStrongestAxis(profile) {
+    if (!profile) return { key: '', label: '', value: 0 };
+    let best = FOUR_X_AXES[0];
+    for (let i = 1; i < FOUR_X_AXES.length; i++) {
+        if (profile[FOUR_X_AXES[i].key] > profile[best.key]) {
+            best = FOUR_X_AXES[i];
+        }
+    }
+    return { key: best.key, label: best.label, value: profile[best.key] };
+}
+
+function renderFourXSummary(game) {
+    const profile = getFourXProfile(game);
+    if (!profile) return '';
+
+    const strongest = getStrongestAxis(profile);
+    const profileType = game.strategyType || 'Strategy 4X';
+
+    return `
+        <div class="card-4x">
+            <div class="card-4x-header">
+                <span class="card-4x-badge">4X</span>
+                <span class="card-4x-type">${escapeHtml(profileType)}</span>
+            </div>
+            <div class="card-4x-meta">
+                <span>Dominant: ${escapeHtml(strongest.label)} ${strongest.value}</span>
+                <span>4X Avg: ${getFourXAverage(profile)}</span>
+            </div>
+            <div class="card-4x-mini">
+                ${FOUR_X_AXES.map(axis => `<span>${axis.short}<em>${profile[axis.key]}</em></span>`).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function renderStrategyCompare(filteredGames) {
+    if (!strategyCompare) return;
+
+    const strategyGames = filteredGames.filter(game => game.category === 'strategy');
+    if (!strategyGames.length) {
+        strategyCompare.innerHTML = '';
+        strategyCompare.classList.add('hidden');
+        return;
+    }
+
+    const ranked = strategyGames
+        .map((game) => {
+            const profile = getFourXProfile(game);
+            return {
+                game,
+                profile,
+                avg: getFourXAverage(profile),
+                strongest: getStrongestAxis(profile)
+            };
+        })
+        .sort((a, b) => b.avg - a.avg);
+
+    strategyCompare.innerHTML = `
+        <div class="strategy-compare-head">
+            <div>
+                <p class="strategy-compare-kicker">Comparateur Strategy</p>
+                <h3>Vue 4X des jeux strategy visibles</h3>
+            </div>
+            <span class="strategy-compare-count">${ranked.length} jeu${ranked.length > 1 ? 'x' : ''}</span>
+        </div>
+        <div class="strategy-compare-list">
+            ${ranked.map((entry) => `
+                <article class="strategy-compare-card">
+                    <div class="strategy-compare-top">
+                        <h4>${escapeHtml(entry.game.title)}</h4>
+                        <span class="strategy-compare-score">${entry.avg}</span>
+                    </div>
+                    <p class="strategy-compare-type">${escapeHtml(entry.game.strategyType || 'Strategy')} - Focus ${escapeHtml(entry.strongest.label)}</p>
+                    <div class="strategy-compare-bars">
+                        ${FOUR_X_AXES.map(axis => `
+                            <div class="sx-bar-row">
+                                <span>${axis.label}</span>
+                                <div class="sx-bar-track"><i style="width:${entry.profile[axis.key]}%"></i></div>
+                                <strong>${entry.profile[axis.key]}</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                </article>
+            `).join('')}
+        </div>
+    `;
+
+    strategyCompare.classList.remove('hidden');
+}
+
 function getFiltered() {
     let list = [...GAMES];
     if (activeCategory !== 'all') list = list.filter(g => g.category === activeCategory);
@@ -230,26 +353,37 @@ function renderGrid() {
         grid.innerHTML = '';
         noResults.classList.remove('hidden');
         resultsInfo.innerHTML = '';
+        renderStrategyCompare([]);
         return;
     }
+
     noResults.classList.add('hidden');
+    renderStrategyCompare(filtered);
     resultsInfo.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${GAMES.length}</strong> games`;
     grid.innerHTML = filtered.map((game, i) => `
-        <div class="game-card${game.playUrl ? ' game-card--playable' : ''}" data-id="${game.id}" style="animation-delay:${i*0.05}s">
-            <div class="card-header">
-                <span class="card-category">${game.category}</span>
-                <span class="card-rating">${game.rating.toFixed(1)}</span>
-            </div>
-            <h3>${game.title}</h3>
-            <p>${game.description}</p>
-            <div class="card-footer">
-                <span class="card-year">${game.year}</span>
-                ${game.playUrl ? `<span class="card-play">&#9654; Play</span>` : `<span class="card-more">Details &rarr;</span>`}
+        <div class="game-card${game.playUrl ? ' game-card--playable' : ''}${game.category === 'strategy' ? ' game-card--strategy' : ''}" data-id="${game.id}" style="animation-delay:${i * 0.05}s">
+            ${game.coverImage ? `
+                <div class="card-media">
+                    <img src="${escapeAttr(game.coverImage)}" alt="${escapeAttr(game.title)} cover" loading="lazy">
+                </div>
+            ` : ''}
+            <div class="card-content">
+                <div class="card-header">
+                    <span class="card-category">${game.category}</span>
+                    <span class="card-rating">${game.rating.toFixed(1)}</span>
+                </div>
+                <h3>${game.title}</h3>
+                <p>${game.description}</p>
+                ${renderFourXSummary(game)}
+                <div class="card-footer">
+                    <span class="card-year">${game.year}</span>
+                    ${game.playUrl ? `<span class="card-play">&#9654; Play</span>` : `<span class="card-more">Details &rarr;</span>`}
+                </div>
             </div>
         </div>
     `).join('');
     grid.querySelectorAll('.game-card').forEach(card => {
-        card.addEventListener('click', () => openModal(parseInt(card.dataset.id)));
+        card.addEventListener('click', () => openModal(parseInt(card.dataset.id, 10)));
     });
 }
 
@@ -399,10 +533,12 @@ function syncSessionBanner() {
     sessionBanner.classList.remove('hidden');
 }
 
-function launchGameInNewTab(game) {
-    const url = new URL(game.playUrl, window.location.href).toString();
-    const opened = window.open(url, '_blank');
-    if (!opened) window.location.href = url;
+function updateViewerControls() {
+    if (!viewerPopoutBtn) return;
+    const hasGame = !!(lastPlayedGame && lastPlayedGame.playUrl);
+    viewerPopoutBtn.disabled = !hasGame;
+    viewerPopoutBtn.style.opacity = hasGame ? '1' : '0.5';
+    viewerPopoutBtn.style.cursor = hasGame ? 'pointer' : 'not-allowed';
 }
 
 function openGame(game) {
@@ -418,15 +554,22 @@ function openGame(game) {
     persistActiveSession(game);
     syncSessionBanner();
 
-    // Avoid iframe usage because deployed environments report CSP frame-src warnings.
-    launchGameInNewTab(game);
+    modalGameTitle.textContent = game.title;
+    modalGameOverlay.classList.add('active');
+    if (viewerEmpty) viewerEmpty.classList.add('hidden');
+    gameIframe.src = new URL(game.playUrl, window.location.href).toString();
+    updateViewerControls();
+
+    // Keep the player in context by scrolling the embedded viewer into view.
+    modalGameOverlay.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function closeGame() {
-    modalGameOverlay.classList.remove('open');
-    modalGameOverlay.classList.add('hidden');
+    modalGameOverlay.classList.remove('active');
     gameIframe.src = '';
-    document.body.style.overflow = '';
+    if (viewerEmpty) viewerEmpty.classList.remove('hidden');
+    modalGameTitle.textContent = 'Selectionne un jeu pour commencer';
+    updateViewerControls();
 
     if (lastPlayedGame) {
         showPostGame(lastPlayedGame);
@@ -482,7 +625,7 @@ pgStars.forEach(star => {
 if (sessionFinishBtn) {
     sessionFinishBtn.addEventListener('click', () => {
         if (!lastPlayedGame) return;
-        showPostGame(lastPlayedGame);
+        closeGame();
     });
 }
 
@@ -491,6 +634,7 @@ if (sessionCancelBtn) {
         clearActiveSession();
         lastPlayedGame = null;
         syncSessionBanner();
+        updateViewerControls();
     });
 }
 
@@ -566,11 +710,16 @@ chips.forEach(chip => {
 modalClose.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
 modalGameClose.addEventListener('click', closeGame);
-modalGameOverlay.addEventListener('click', e => { if (e.target === modalGameOverlay) closeGame(); });
+if (viewerPopoutBtn) {
+    viewerPopoutBtn.addEventListener('click', () => {
+        if (!lastPlayedGame || !lastPlayedGame.playUrl) return;
+        window.open(new URL(lastPlayedGame.playUrl, window.location.href).toString(), '_blank');
+    });
+}
 document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (!postgamePanel.classList.contains('hidden')) closePostGame();
-    else if (modalGameOverlay.classList.contains('open')) closeGame();
+    else if (modalGameOverlay.classList.contains('active')) closeGame();
     else closeModal();
 });
 
@@ -578,7 +727,15 @@ document.addEventListener('keydown', e => {
 function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
 function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
+}
+function escapeAttr(str) {
+    return escapeHtml(str);
 }
 function flashInput(input, msg) {
     input.style.borderColor = '#e63946';
@@ -614,6 +771,7 @@ if (activeGameId) {
 
 window.addEventListener('focus', syncSessionBanner);
 syncSessionBanner();
+updateViewerControls();
 
 renderGrid();
 }); // end DOMContentLoaded

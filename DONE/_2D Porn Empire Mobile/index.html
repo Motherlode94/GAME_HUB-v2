@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#180f26">
+    <link rel="stylesheet" href="../_shared/game-embed.css">
+    <title>Porn Empire Mobile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <a class="hub-back-btn" href="../../index.html" aria-label="Retour au catalogue">&larr; CATALOGUE</a>
+
+    <main class="app">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">ADULT STUDIO TYCOON</p>
+                <h1>PORN EMPIRE MOBILE</h1>
+                <p class="subtitle">Construis un empire de contenus adultes: production, marketing, legal, equipe, reputation.</p>
+            </div>
+            <div class="phase">
+                <span id="day-label">Jour 1 / 35</span>
+                <strong id="phase-label">Lancement</strong>
+            </div>
+        </header>
+
+        <section class="kpis">
+            <article class="kpi"><span>Caisse</span><strong id="cash">0</strong></article>
+            <article class="kpi"><span>Marque</span><strong id="brand">0</strong></article>
+            <article class="kpi"><span>Conformite</span><strong id="compliance">0</strong></article>
+            <article class="kpi"><span>Moral</span><strong id="morale">0</strong></article>
+            <article class="kpi"><span>Audience</span><strong id="audience">0</strong></article>
+            <article class="kpi"><span>Catalogue</span><strong id="catalog">0</strong></article>
+            <article class="kpi"><span>Equipe</span><strong id="team">0</strong></article>
+            <article class="kpi"><span>Studios</span><strong id="studio">0</strong></article>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2>Pilotage quotidien</h2>
+                <label>Mode monétisation
+                    <select id="pricing-select">
+                        <option value="reach">Reach massif</option>
+                        <option value="balanced" selected>Equilibre</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="actions">
+                <button data-action="talent">Scout talent</button>
+                <button data-action="shoot">Tourner production</button>
+                <button data-action="marketing">Push marketing</button>
+                <button data-action="legal">Audit legal</button>
+                <button data-action="wellness">Recuperation equipe</button>
+                <button data-action="upgrade">Upgrade studio</button>
+            </div>
+
+            <div id="risk-board" class="risk-board"></div>
+
+            <button id="next-day-btn" class="next-day-btn">Publier et passer au jour suivant</button>
+            <p class="note">Simulation management adulte sans contenu explicite.</p>
+        </section>
+
+        <section class="grid-bottom">
+            <article class="panel">
+                <h3>Bilan du jour</h3>
+                <div id="day-report" class="report">
+                    <p>Configure ton studio et lance une journée.</p>
+                </div>
+            </article>
+            <article class="panel">
+                <h3>Journal du label</h3>
+                <ul id="log-list" class="log-list"></ul>
+            </article>
+        </section>
+    </main>
+
+    <div id="end-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-card">
+            <h2 id="end-title">Fin de run</h2>
+            <p id="end-text">-</p>
+            <button id="restart-btn">Rejouer</button>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
