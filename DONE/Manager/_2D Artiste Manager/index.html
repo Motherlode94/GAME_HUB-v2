@@ -12,7 +12,7 @@
 <div class="screen active" id="title-screen">
   <div class="title-logo">🎭 ArtVibe</div>
   <div class="title-sub">Manager d'Artistes</div>
-  <div class="title-tagline">Construis l'empire culturel de demain</div>
+  <div class="title-tagline">Du Garage à la Major Internationale</div>
   <div class="title-cards" id="title-cards"></div>
   <button class="btn-cta" onclick="startGame()">▶ Lancer l'Agence</button>
   <div class="title-actions">
@@ -22,6 +22,7 @@
     <button class="btn-action red" onclick="deleteSave()">Supprimer save</button>
   </div>
   <div class="title-meta">Gérez musiciens · peintres · comédiens · photographes · poètes</div>
+  <div class="title-meta" style="margin-top:.3rem;opacity:.5">Démarrez dans un garage et bâtissez une Major Internationale</div>
 </div>
 
 <!-- ===== MAIN ===== -->
@@ -32,9 +33,10 @@
     <div class="topbar-brand">🎭 <span id="agency-name">ArtVibe Agency</span></div>
     <div class="topbar-stats">
       <div class="tstat gold">💰 <span id="stat-money">50000</span>€</div>
-      <div class="tstat blue">📅 Semaine <span id="stat-week">1</span></div>
-      <div class="tstat purple">⭐ Réputation : <span id="stat-rep">10</span></div>
-      <div class="tstat green">👥 <span id="stat-artists">0</span> artistes</div>
+      <div class="tstat blue">📅 Sem. <span id="stat-week">1</span></div>
+      <div class="tstat purple">⭐ <span id="stat-rep">10</span></div>
+      <div class="tstat green">👥 <span id="stat-artists">0/3</span></div>
+      <div class="tstat gold" id="stat-tier-wrap">🏠 <span id="stat-tier">Garage</span></div>
     </div>
     <div class="topbar-actions">
       <button class="btn-tab" onclick="openTab('dashboard')" id="tab-dashboard">📊 Tableau</button>
@@ -42,9 +44,13 @@
       <button class="btn-tab" onclick="openTab('projects')"  id="tab-projects" >🎬 Projets</button>
       <button class="btn-tab" onclick="openTab('market')"    id="tab-market"   >🏪 Marché</button>
       <button class="btn-tab" onclick="openTab('events')"    id="tab-events"   >🎤 Événements</button>
-      <button class="btn-tab" onclick="manualSave()">💾 Save</button>
-      <button class="btn-tab" onclick="exportSave()">Export</button>
-      <button class="btn-tab" onclick="importSave()">Import</button>
+      <button class="btn-tab" onclick="openTab('label')"     id="tab-label"    >🏢 Label</button>
+      <button class="btn-tab" onclick="openTab('rivals')"    id="tab-rivals"   >⚔️ Rivaux</button>
+      <button class="btn-tab" onclick="openTab('contacts')"  id="tab-contacts" >🤝 Contacts</button>
+      <button class="btn-tab" onclick="openTab('worldmap')"  id="tab-worldmap" >🌍 Monde</button>
+      <button class="btn-tab" onclick="manualSave()">💾</button>
+      <button class="btn-tab" onclick="exportSave()">📤</button>
+      <button class="btn-tab" onclick="importSave()">📥</button>
     </div>
     <button class="btn-nextweek" onclick="nextWeek()">⏩ Semaine suivante</button>
   </div>
@@ -58,7 +64,7 @@
         <div class="dash-card wide">
           <div class="dash-card-title">📣 Journal de l'agence</div>
           <div class="news-feed" id="news-feed">
-            <div class="news-item">🎭 Bienvenue chez ArtVibe Agency ! Recrutez vos premiers artistes.</div>
+            <div class="news-item">🎭 Bienvenue chez ArtVibe Agency ! Partez d'un garage et construisez un empire.</div>
           </div>
         </div>
         <div class="dash-card">
@@ -87,6 +93,18 @@
         <div class="dash-card">
           <div class="dash-card-title">🏆 Objectifs</div>
           <div id="milestones-dash"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">⚔️ Rivaux (aperçu)</div>
+          <div id="rivals-preview-dash"></div>
+          <button class="btn-action" style="margin-top:.7rem;font-size:.75rem;width:100%" onclick="openTab('rivals')">Voir tous les rivaux →</button>
+        </div>
+        <div class="dash-card" id="scandals-alert-dash" style="display:none;border-color:var(--red)">
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">🚌 Tournées en cours</div>
+          <div id="tours-preview-dash"></div>
+          <button class="btn-action" style="margin-top:.7rem;font-size:.75rem;width:100%" onclick="openTab('projects')">Voir les projets →</button>
         </div>
       </div>
     </div>
@@ -117,12 +135,25 @@
     <div class="tab-pane" id="pane-projects">
       <div class="pane-header">
         <h2>🎬 Projets</h2>
-        <button class="btn-action green" onclick="openNewProjectModal()">+ Nouveau projet</button>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn-action green" onclick="openNewProjectModal()">+ Nouveau projet</button>
+          <button class="btn-action blue" onclick="openTourModal()">🚌 Tournée</button>
+          <button class="btn-action" style="background:rgba(168,85,247,.15);border-color:#a855f7;color:#a855f7" onclick="openCollabModal()">🤝 Collab</button>
+          <button class="btn-action gold" onclick="openContractModal()">✍️ Deals</button>
+        </div>
       </div>
       <div class="projects-columns">
         <div class="proj-col">
           <div class="proj-col-title">🔧 En cours</div>
           <div id="proj-active"></div>
+        </div>
+        <div class="proj-col">
+          <div class="proj-col-title">🚌 Tournées actives</div>
+          <div id="proj-tours"></div>
+        </div>
+        <div class="proj-col">
+          <div class="proj-col-title">💼 Contrats actifs</div>
+          <div id="proj-contracts"></div>
         </div>
         <div class="proj-col">
           <div class="proj-col-title">✅ Terminés</div>
@@ -135,7 +166,7 @@
     <div class="tab-pane" id="pane-market">
       <div class="pane-header">
         <h2>🏪 Marché des Artistes</h2>
-        <button class="btn-action" onclick="refreshMarket()">🔄 Actualiser (gratuit)</button>
+        <button class="btn-action" onclick="refreshMarket();renderMarket();">🔄 Actualiser</button>
       </div>
       <div class="market-note">Recrutez des talents disponibles cette semaine</div>
       <div class="market-grid" id="market-grid"></div>
@@ -146,8 +177,28 @@
       <div class="pane-header">
         <h2>🎤 Événements disponibles</h2>
       </div>
-      <div class="market-note">Participez aux événements pour booster la notoriété de vos artistes</div>
+      <div class="market-note">Participez aux événements pour booster vos artistes</div>
       <div class="events-grid" id="events-grid"></div>
+    </div>
+
+    <!-- ── LABEL ── -->
+    <div class="tab-pane" id="pane-label">
+      <!-- Rendered by renderLabelTab() -->
+    </div>
+
+    <!-- ── RIVAUX ── -->
+    <div class="tab-pane" id="pane-rivals">
+      <!-- Rendered by renderRivalsTabV2() -->
+    </div>
+
+    <!-- ── CONTACTS ── -->
+    <div class="tab-pane" id="pane-contacts">
+      <!-- Rendered by renderContactsTab() -->
+    </div>
+
+    <!-- ── CARTE MONDE ── -->
+    <div class="tab-pane" id="pane-worldmap">
+      <!-- Rendered by renderWorldMapTab() -->
     </div>
 
   </div>
@@ -172,6 +223,15 @@
   </div>
 </div>
 
+<!-- MODAL : Cadeaux / Faveurs -->
+<div class="modal-overlay" id="favor-modal">
+  <div class="modal-box large">
+    <button class="modal-close" onclick="closeFavorModal()">✕</button>
+    <h3 class="modal-title">🎁 Cadeaux & Faveurs</h3>
+    <div id="favor-modal-content"></div>
+  </div>
+</div>
+
 <!-- MODAL : Nouveau projet -->
 <div class="modal-overlay" id="project-modal">
   <div class="modal-box">
@@ -189,6 +249,14 @@
   </div>
 </div>
 
+<!-- MODAL : Offre Rival -->
+<div class="modal-overlay" id="rival-offer-modal">
+  <div class="modal-box">
+    <h3 class="modal-title" style="color:var(--red)">🎯 Offre de débauchage !</h3>
+    <div id="rival-offer-content"></div>
+  </div>
+</div>
+
 <!-- MODAL : Notification hebdo -->
 <div class="modal-overlay" id="weekly-modal">
   <div class="modal-box">
@@ -198,9 +266,53 @@
   </div>
 </div>
 
+<!-- MODAL : Ville (Carte Monde) -->
+<div class="modal-overlay" id="city-modal">
+  <div class="modal-box large">
+    <button class="modal-close" onclick="closeCityModal()">✕</button>
+    <h3 class="modal-title">📍 Événement Local</h3>
+    <div id="city-modal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL : Tournée -->
+<div class="modal-overlay" id="tour-modal">
+  <div class="modal-box large">
+    <button class="modal-close" onclick="closeTourModal()">✕</button>
+    <h3 class="modal-title">🚌 Lancer une Tournée</h3>
+    <div id="tour-modal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL : Deals / Contrats -->
+<div class="modal-overlay" id="contract-modal">
+  <div class="modal-box large">
+    <button class="modal-close" onclick="closeContractModal()">✕</button>
+    <h3 class="modal-title">✍️ Deals & Contrats</h3>
+    <div id="contract-modal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL : Collaboration -->
+<div class="modal-overlay" id="collab-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeCollabModal()">✕</button>
+    <h3 class="modal-title">🤝 Collaboration Inter-Arts</h3>
+    <div id="collab-modal-content"></div>
+  </div>
+</div>
+
+<!-- MODAL : Négociation Salaire -->
+<div class="modal-overlay" id="salary-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeSalaryModal()">✕</button>
+    <h3 class="modal-title">💰 Négociation de Salaire</h3>
+    <div id="salary-modal-content"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="js/game.js"></script>
 </body>
 </html>
-
