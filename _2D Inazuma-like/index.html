@@ -3,98 +3,177 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Inazuma Mini Soccer (Vanilla)</title>
+  <title>Inazuma Mini Soccer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
+  <!-- hudScore hidden (still updated by game.js) -->
+  <span id="hudScore" style="display:none">0 - 0</span>
 </head>
 <body>
   <div class="app">
+
     <header class="topbar">
       <div class="brand">
         <div class="logo-badge">⚡</div>
         <div>
           <div class="title">Inazuma Mini Soccer</div>
-          <div class="subtitle">Arcade • Special Moves • Canvas</div>
+          <div class="subtitle">Arcade · Special Moves · Canvas</div>
         </div>
       </div>
-
       <div class="controls">
-        <button id="btnPlay" class="btn primary">Jouer</button>
-        <button id="btnPause" class="btn">Pause</button>
-        <button id="btnReset" class="btn danger">Reset</button>
+        <button id="btnPlay"  class="btn primary">▶ Jouer</button>
+        <button id="btnPause" class="btn">⏸ Pause</button>
+        <button id="btnReset" class="btn danger">↺ Reset</button>
       </div>
     </header>
 
     <main class="stage">
+
       <div class="hud">
-        <div class="hud-left">
-          <div class="chip"><span>Score</span> <strong id="hudScore">0 - 0</strong></div>
-          <div class="chip"><span>Temps</span> <strong id="hudTime">02:00</strong></div>
+
+        <!-- Score -->
+        <div class="hud-score-block">
+          <div class="score-teams">
+            <div class="team-side team-you">
+              <div class="team-dot cyan"></div>
+              <span class="team-name">TOI</span>
+              <span id="hudScoreLeft"  class="score-num">0</span>
+            </div>
+            <span class="score-sep">–</span>
+            <div class="team-side team-ai">
+              <span id="hudScoreRight" class="score-num">0</span>
+              <span class="team-name">IA</span>
+              <div class="team-dot red"></div>
+            </div>
+          </div>
+          <div class="chrono">
+            <span class="chrono-icon">⏱</span>
+            <strong id="hudTime" class="chrono-val">02:00</strong>
+          </div>
         </div>
 
-        <div class="hud-center">
-          <div class="meter">
-            <div class="meter-label">Stamina</div>
-            <div class="meter-bar"><div id="hudStamina" class="meter-fill"></div></div>
+        <!-- Barres -->
+        <div class="hud-bars">
+          <div class="bar-row">
+            <span class="bar-label">Stamina</span>
+            <div class="bar-track"><div id="hudStamina" class="bar-fill green"></div></div>
           </div>
-          <div class="meter">
-            <div class="meter-label">Puissance tir</div>
-            <div class="meter-bar"><div id="hudPower" class="meter-fill alt"></div></div>
+          <div class="bar-row">
+            <span class="bar-label">Tir</span>
+            <div class="bar-track"><div id="hudPower" class="bar-fill orange"></div></div>
+          </div>
+          <div class="bar-row special-row">
+            <span class="bar-label">⚡ Spécial</span>
+            <div class="bar-track"><div id="hudSpecial" class="bar-fill purple"></div></div>
+            <span id="hudSpecialReady" class="special-ready hidden">PRÊT</span>
           </div>
         </div>
 
-        <div class="hud-right">
-          <div class="chip hotkey">
-            <strong>Déplacement</strong>
-            <span>ZQSD / WASD</span>
+        <!-- Touches -->
+        <div class="hud-keys">
+          <div class="key-group">
+            <div class="key-cross">
+              <span></span><kbd>Z</kbd><span></span>
+              <kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd>
+            </div>
+            <div class="key-caption">Déplacer</div>
           </div>
-          <div class="chip hotkey">
-            <strong>Tir/Passe</strong>
-            <span>E (maintenir = charger)</span>
+          <div class="key-group">
+            <kbd class="kbd-wide">E</kbd>
+            <div class="key-caption">Tap=passe · Hold=tir</div>
           </div>
-          <div class="chip hotkey">
-            <strong>Sprint</strong>
-            <span>Shift</span>
+          <div class="key-group">
+            <kbd class="kbd-wide">⇧ Shift</kbd>
+            <div class="key-caption">Sprint</div>
           </div>
-          <div class="chip hotkey">
-            <strong>Special</strong>
-            <span>Espace</span>
+          <div class="key-group">
+            <kbd class="kbd-space">Espace</kbd>
+            <div class="key-caption special-caption">⚡ Special</div>
           </div>
         </div>
-      </div>
+
+      </div><!-- /hud -->
 
       <div class="canvas-wrap">
         <canvas id="game" width="1100" height="650"></canvas>
         <div id="toast" class="toast hidden"></div>
+
         <div id="overlay" class="overlay">
           <div class="panel">
-            <div class="panel-title">⚡ Inazuma Mini Soccer</div>
+            <div class="panel-glow"></div>
+            <div class="panel-badge">⚡</div>
+            <div class="panel-title">Inazuma Mini Soccer</div>
             <p class="panel-text">
-              Marque des buts, charge tes tirs, et déclenche un <strong>Special Move</strong> (Espace).
-              <br/>Mode arcade, IA simple, pur Vanilla JS.
+              Dribble, charge tes tirs et déclenche un <strong>Special Move</strong> dévastateur.<br>
+              Mode arcade — pur Vanilla JS.
             </p>
             <div class="panel-actions">
-              <button id="btnOverlayPlay" class="btn primary big">Lancer le match</button>
-              <button id="btnOverlayHelp" class="btn big">Aide</button>
+              <button id="btnOverlayPlay" class="btn primary big">▶&nbsp;&nbsp;Lancer le match</button>
+              <button id="btnOverlayHelp" class="btn big">? Aide</button>
             </div>
             <div id="help" class="help hidden">
-              <ul>
-                <li><strong>E</strong> : tap = passe / relâcher après charge = tir</li>
-                <li><strong>Shift</strong> : sprint (consomme stamina)</li>
-                <li><strong>Espace</strong> : dash + tir surpuissant (coûte stamina)</li>
-                <li>Astuce: charge ton tir face au but + special = tirs “anime”</li>
-              </ul>
+              <div class="help-grid">
+                <div class="help-item"><kbd>E tap</kbd><span>Passe au coéquipier</span></div>
+                <div class="help-item"><kbd>E hold</kbd><span>Charge → tir cadré</span></div>
+                <div class="help-item"><kbd>Shift</kbd><span>Sprint</span></div>
+                <div class="help-item"><kbd>Espace</kbd><span>Dash + tir surpuissant</span></div>
+              </div>
+              <div class="help-tip">💡 Le ballon reste collé devant toi en dribble — approche-toi du but, charge et tire !</div>
             </div>
           </div>
         </div>
       </div>
+
     </main>
 
-    <footer class="footer">
-      <span>Vanilla HTML/CSS/JS • Sans import/export • Canvas</span>
-    </footer>
+    <footer class="footer">Vanilla HTML/CSS/JS &nbsp;·&nbsp; Sans import/export &nbsp;·&nbsp; Canvas 2D</footer>
   </div>
 
   <script src="js/game.js"></script>
+  <script>
+    // Sync split score + special bar from game.js
+    (function() {
+      const hudScore = document.getElementById("hudScore");
+      const left  = document.getElementById("hudScoreLeft");
+      const right = document.getElementById("hudScoreRight");
+      let prevL = "0", prevR = "0";
+      function popEl(el) {
+        el.classList.remove("pop");
+        void el.offsetWidth;
+        el.classList.add("pop");
+        setTimeout(() => el.classList.remove("pop"), 500);
+      }
+      if (hudScore && left && right) {
+        new MutationObserver(() => {
+          const t = hudScore.textContent || "0 - 0";
+          const p = t.split("-").map(s => s.trim());
+          if (p.length === 2) {
+            if (p[0] !== prevL) { prevL = p[0]; left.textContent  = p[0]; popEl(left);  }
+            if (p[1] !== prevR) { prevR = p[1]; right.textContent = p[1]; popEl(right); }
+          }
+        }).observe(hudScore, { characterData: true, subtree: true, childList: true });
+      }
+
+      // Special bar: mirrors stamina (100% = ready, no cooldown)
+      // Since game.js doesn't expose specialCooldown to DOM, we read the "⚡ PRÊT" state
+      // via the hudStamina as a proxy — simply always show full special when stamina >= 45%
+      const stBar = document.getElementById("hudStamina");
+      const spBar = document.getElementById("hudSpecial");
+      const spReady = document.getElementById("hudSpecialReady");
+      if (stBar && spBar) {
+        new MutationObserver(() => {
+          const pct = parseFloat(stBar.style.width) || 0;
+          spBar.style.width = Math.min(100, (pct / 45) * 100) + "%";
+          if (pct >= 45) {
+            spReady.classList.remove("hidden");
+          } else {
+            spReady.classList.add("hidden");
+          }
+        }).observe(stBar, { attributes: true, attributeFilter: ["style"] });
+      }
+    })();
+  </script>
 </body>
 </html>
-

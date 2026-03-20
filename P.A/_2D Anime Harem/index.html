@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✿ Harem Saga ✿</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="particles"></div>
+<div class="notif" id="notif"></div>
+
+<!-- ===== TITLE ===== -->
+<div class="screen active" id="title-screen">
+  <div class="title-bg-layers">
+    <div class="title-layer title-sky"></div>
+    <div class="title-layer title-clouds"></div>
+    <div class="title-layer title-trees"></div>
+    <div class="title-layer title-petals-big"></div>
+  </div>
+  <div class="title-content">
+    <div class="title-emblem">✿</div>
+    <div class="title-logo">Harem Saga</div>
+    <div class="title-sub">— Simulateur de Rencontres Anime —</div>
+    <div class="title-preview" id="title-preview"></div>
+    <div class="title-lore">
+      L'académie Sakura Hills… un nouveau chapitre s'ouvre.<br>
+      Trente jours pour écrire une histoire qui ne s'oubliera jamais.
+    </div>
+    <button class="btn-start" onclick="startGame()">▶ Commencer l'Aventure</button>
+    <div class="title-meta">4 héroïnes · 8 lieux · 30 jours · Récits exclusifs · Fins multiples</div>
+  </div>
+</div>
+
+<!-- ===== MAIN GAME ===== -->
+<div class="screen" id="main-screen">
+
+  <div class="hud">
+    <div class="hud-left">
+      <div class="hud-block">
+        <span class="hud-label">JOUR</span>
+        <span class="hud-value gold" id="hud-day">1</span>
+        <span class="hud-label">/30</span>
+      </div>
+      <div class="hud-block">
+        <span class="hud-label">AP</span>
+        <span id="hud-ap-dots"></span>
+      </div>
+      <div class="hud-block">
+        <span class="hud-label">¥</span>
+        <span class="hud-value gold" id="hud-money">2000</span>
+      </div>
+      <div class="hud-block">
+        <span id="weather-icon">☀️</span>
+        <span class="hud-label" id="weather-label">Ensoleillé</span>
+      </div>
+    </div>
+    <div class="hud-center">
+      <span class="hud-char-name" id="hud-char-name">— Sélectionne un personnage —</span>
+      <div class="hud-aff-mini" id="hud-aff-mini" style="display:none">
+        <div class="hud-aff-bar"><div class="hud-aff-fill" id="hud-aff-fill"></div></div>
+        <span class="hud-stage-label" id="hud-stage-label"></span>
+      </div>
+    </div>
+    <div class="hud-right">
+      <span class="hud-loc-badge" id="hud-loc-badge">🏫 École</span>
+      <span class="hud-room-badge" id="hud-room-badge">Salle</span>
+      <span class="hud-arc-badge" id="hud-arc-badge" style="display:none"></span>
+    </div>
+  </div>
+
+  <div class="game-area">
+
+    <!-- GAUCHE -->
+    <aside class="panel panel-left">
+      <div class="panel-title">✿ Personnages</div>
+      <div id="chars-list"></div>
+      <hr class="sep">
+      <div class="panel-title">📓 Souvenirs</div>
+      <div class="memory-log" id="memory-log">
+        <div class="memory-item muted">Aucun souvenir encore…</div>
+      </div>
+    </aside>
+
+    <!-- SCÈNE -->
+    <main class="scene-area">
+      <!-- Couches de fond -->
+      <div class="bg-layer" id="bg-sky"></div>
+      <div class="bg-layer" id="bg-far"></div>
+      <div class="bg-layer" id="bg-mid"></div>
+      <div class="bg-layer" id="bg-near"></div>
+      <div class="bg-layer" id="bg-overlay"></div>
+      <!-- Météo -->
+      <div class="weather-layer" id="weather-layer"></div>
+      <!-- Heure -->
+      <div class="time-overlay" id="time-overlay"></div>
+      <!-- Label lieu -->
+      <div class="location-label" id="location-label">
+        <span id="loc-icon">🏫</span> <span id="loc-name">Académie Sakura Hills</span>
+      </div>
+      <!-- Personnage -->
+      <div class="char-stage">
+        <div class="char-shadow" id="char-shadow"></div>
+        <div class="sprite-wrap" id="sprite-wrap"></div>
+        <div class="emotion-bubble" id="emotion-bubble" style="opacity:0"></div>
+      </div>
+      <!-- Dialogue -->
+      <div class="dialogue-container">
+        <div class="dialogue-box" id="dialogue-box">
+          <div class="dlg-header">
+            <div class="dlg-speaker-dot" id="dlg-dot"></div>
+            <div class="dialogue-speaker" id="dlg-speaker">Narrateur</div>
+            <div class="dlg-arc-tag" id="dlg-arc-tag" style="display:none"></div>
+          </div>
+          <div class="dialogue-text" id="dlg-text">
+            Le soleil se lève sur l'académie Sakura Hills… Une brise légère fait tourbillonner les pétales de cerisier. Une nouvelle page de ta vie commence aujourd'hui.
+          </div>
+          <div class="dlg-footer">▾</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- DROITE -->
+    <aside class="panel panel-right">
+      <div class="panel-title">🎯 Actions</div>
+      <button class="action-btn btn-pink"   id="btn-talk"    onclick="doAction('talk')"    disabled><span class="ab-icon">💬</span> Parler       <span class="cost">1 AP</span></button>
+      <button class="action-btn"            id="btn-listen"  onclick="doAction('listen')"  disabled><span class="ab-icon">👂</span> Écouter      <span class="cost">1 AP</span></button>
+      <button class="action-btn"            id="btn-flirt"   onclick="doAction('flirt')"   disabled><span class="ab-icon">😘</span> Flirter      <span class="cost">1 AP</span></button>
+      <button class="action-btn"            id="btn-gift"    onclick="doAction('gift')"    disabled><span class="ab-icon">🎁</span> Offrir cadeau<span class="cost">300¥</span></button>
+      <button class="action-btn btn-gold"   id="btn-date"    onclick="doAction('date')"    disabled><span class="ab-icon">💕</span> Rendez-vous  <span class="cost">600¥</span></button>
+      <button class="action-btn btn-purple" id="btn-confess" onclick="doAction('confess')" disabled style="display:none"><span class="ab-icon">💌</span> Avouer      <span class="cost">✦</span></button>
+      <button class="action-btn"            id="btn-profile" onclick="showProfile()"       disabled><span class="ab-icon">📋</span> Profil & Histoire</button>
+
+      <hr class="sep">
+      <div class="panel-title">📍 Lieux</div>
+      <button class="loc-btn active" id="loc-school"  onclick="setLocation('school')" >🏫 École</button>
+      <button class="loc-btn"        id="loc-park"    onclick="setLocation('park')"   >🌸 Parc Sakura</button>
+      <button class="loc-btn"        id="loc-cafe"    onclick="setLocation('cafe')"   >☕ Café Lumière</button>
+      <button class="loc-btn"        id="loc-library" onclick="setLocation('library')" >📚 Bibliothèque</button>
+      <button class="loc-btn"        id="loc-rooftop" onclick="setLocation('rooftop')" >🌆 Toit de l'école</button>
+      <button class="loc-btn"        id="loc-home"    onclick="setLocation('home')"   >🏠 Appartement</button>
+      <button class="loc-btn"        id="loc-beach"   onclick="setLocation('beach')"  >🏖️ Plage d'Azur</button>
+      <button class="loc-btn"        id="loc-shrine"  onclick="setLocation('shrine')" >⛩️ Sanctuaire</button>
+      <hr class="sep">
+      <div class="panel-title">🏠 Pièces</div>
+      <div class="room-list" id="room-list"></div>
+
+      <hr class="sep">
+      <div class="panel-title">👥 Présences</div>
+      <div class="presence-list" id="presence-list"></div>
+
+      <hr class="sep">
+      <div class="panel-title">💼 Divers</div>
+      <button class="action-btn" id="btn-work"  onclick="doWork()" ><span class="ab-icon">💼</span> Petit boulot <span class="cost">1 AP</span></button>
+      <button class="action-btn" id="btn-study" onclick="doStudy()"><span class="ab-icon">📖</span> Étudier      <span class="cost">1 AP</span></button>
+      <button class="btn-nextday" onclick="nextDay()">🌙 Passer au lendemain</button>
+    </aside>
+
+  </div>
+</div>
+
+<!-- ===== FIN ===== -->
+<div class="screen" id="end-screen">
+  <div class="end-bg-layers">
+    <div class="end-sky"></div>
+    <div class="end-petals"></div>
+  </div>
+  <div class="end-content">
+    <div class="end-emblem">✿</div>
+    <div class="end-title">Fin de l'Histoire</div>
+    <div class="end-sub" id="end-sub"></div>
+    <div class="results-grid" id="results-grid"></div>
+    <div class="end-epilogue" id="end-epilogue"></div>
+    <button class="btn-start" onclick="restartGame()" style="margin-top:2rem">🔄 Revivre l'Aventure</button>
+  </div>
+</div>
+
+<!-- MODAL ÉVÉNEMENT -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal-box event-modal-box">
+    <div class="modal-chapter-tag" id="m-chapter-tag"></div>
+    <div class="modal-title"    id="m-title"></div>
+    <div class="modal-subtitle" id="m-subtitle"></div>
+    <div class="modal-sprite-large" id="m-sprite"></div>
+    <div class="modal-scene-bg" id="m-scene-bg"></div>
+    <div class="modal-text"     id="m-text"></div>
+    <div class="modal-choices"  id="m-choices"></div>
+    <button class="btn-primary modal-continue-btn" id="m-close" onclick="closeModal()" style="display:none">
+      Continuer l'histoire ✿
+    </button>
+  </div>
+</div>
+
+<!-- MODAL PROFIL -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal-box profile-modal-box">
+    <button class="modal-x-close" onclick="closeProfile()">✕</button>
+    <div class="profile-header">
+      <div class="profile-sprite-area" id="p-sprite"></div>
+      <div class="profile-info">
+        <div class="profile-name"      id="p-name"></div>
+        <div class="profile-archetype" id="p-archetype"></div>
+        <div class="stage-badge"       id="p-stage"></div>
+        <div class="profile-quote"     id="p-quote"></div>
+      </div>
+    </div>
+    <div class="profile-tabs">
+      <button class="ptab active" onclick="switchProfileTab('bio',this)"      >📖 Biographie</button>
+      <button class="ptab"        onclick="switchProfileTab('stats',this)"    >📊 Stats</button>
+      <button class="ptab"        onclick="switchProfileTab('story',this)"    >🎭 Histoire</button>
+      <button class="ptab"        onclick="switchProfileTab('memories',this)" >💭 Souvenirs</button>
+    </div>
+    <div class="profile-tab-content" id="profile-tab-content"></div>
+    <button class="btn-primary" onclick="closeProfile()" style="width:100%;margin-top:1rem">Fermer</button>
+  </div>
+</div>
+
+<script src="js/game.js"></script>
+</body>
+</html>
