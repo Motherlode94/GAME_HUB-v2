@@ -325,6 +325,45 @@
         }
     ];
 
+    const BUDGET_PRESETS = {
+        balanced: { social: 25, defense: 25, economy: 25, ecology: 25 },
+        social:   { social: 42, defense: 20, economy: 22, ecology: 16 },
+        defense:  { social: 18, defense: 44, economy: 24, ecology: 14 },
+        growth:   { social: 16, defense: 20, economy: 48, ecology: 16 },
+        green:    { social: 20, defense: 14, economy: 22, ecology: 44 }
+    };
+
+    const CABINET_MEMBERS = [
+        {
+            id: "fin",
+            name: "M. Delorme",
+            role: "Ministre de l'Economie",
+            directive: "Stabilisation budgetaire",
+            effects: { treasury: 260, debtPressure: -2, approval: -1 }
+        },
+        {
+            id: "int",
+            name: "Mme Kader",
+            role: "Ministre de l'Interieur",
+            directive: "Plan cohesion territoriale",
+            effects: { stability: 3, security: 2, treasury: -150, approval: 1 }
+        },
+        {
+            id: "def",
+            name: "Gen. Morvan",
+            role: "Ministre de la Defense",
+            directive: "Posture de dissuasion",
+            effects: { security: 4, armyReadiness: 4, diplomacy: -1, treasury: -190 }
+        },
+        {
+            id: "sci",
+            name: "Dr. Neri",
+            role: "Ministre Innovation & Climat",
+            directive: "Programme techno-climat",
+            effects: { science: 3, ecology: 4, treasury: -180, diplomacy: 1 }
+        }
+    ];
+
     const OBJECTIVE_POOL = [
         {
             id: "fiscal_buffer",
@@ -497,6 +536,7 @@
         policyUsage: document.getElementById("policy-usage"),
         lawUsage: document.getElementById("law-usage"),
         weatherBadge: document.getElementById("weather-badge"),
+        worldMap: document.getElementById("world-map"),
         diploButtons: Array.from(document.querySelectorAll(".diplo-btn")),
         mapNations: Array.from(document.querySelectorAll("#world-map [data-nation]")),
         armyOverview: document.getElementById("army-overview"),
@@ -513,6 +553,12 @@
         objectiveDue: document.getElementById("objective-due"),
         objectiveList: document.getElementById("objective-list"),
         riskOverview: document.getElementById("risk-overview"),
+        newsFeed: document.getElementById("news-feed"),
+        cabinetCards: document.getElementById("cabinet-cards"),
+        cabinetUsage: document.getElementById("cabinet-usage"),
+        socialBlocks: document.getElementById("social-blocks"),
+        mandateTimeline: document.getElementById("mandate-timeline"),
+        electionPulse: document.getElementById("election-pulse"),
         kpiTreasury: document.getElementById("kpi-treasury"),
         kpiGdp: document.getElementById("kpi-gdp"),
         kpiApproval: document.getElementById("kpi-approval"),
@@ -524,8 +570,24 @@
         kpiPopulation: document.getElementById("kpi-population"),
         kpiIndustry: document.getElementById("kpi-industry"),
         kpiScience: document.getElementById("kpi-science"),
-        kpiScore: document.getElementById("kpi-score")
+        kpiScore: document.getElementById("kpi-score"),
+        budgetBadge: document.getElementById("budget-badge"),
+        budgetStack: document.getElementById("budget-stack"),
+        budgetSocial: document.getElementById("budget-social"),
+        budgetDefense: document.getElementById("budget-defense"),
+        budgetEconomy: document.getElementById("budget-economy"),
+        budgetEcology: document.getElementById("budget-ecology"),
+        budgetSocialVal: document.getElementById("budget-social-val"),
+        budgetDefenseVal: document.getElementById("budget-defense-val"),
+        budgetEconomyVal: document.getElementById("budget-economy-val"),
+        budgetEcologyVal: document.getElementById("budget-ecology-val"),
+        budgetPresetButtons: Array.from(document.querySelectorAll(".budget-preset"))
     };
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    let mapFxLayer = null;
+    const nationCenterCache = {};
+    let fxSerial = 0;
 
     let state = createInitialState();
 
@@ -543,11 +605,14 @@
             usedDiplomacy: false,
             usedMilitaryAction: false,
             usedLawVote: false,
+            usedCabinetAction: false,
             policyOptions: [],
             selectedPolicyId: null,
             lawOptions: [],
             pendingEvent: null,
             stats: null,
+            budgetPlan: deepClone(BUDGET_PRESETS.balanced),
+            cabinetTrust: { fin: 58, int: 56, def: 60, sci: 57 },
             relations: {},
             foreign: {},
             lawsEnacted: [],
@@ -579,6 +644,7 @@
                 lastReport: "Aucun bilan trimestriel."
             },
             weather: { lastLabel: "Calme", lastSeverity: 0, alerts: 0 },
+            news: [],
             log: []
         };
     }
@@ -736,13 +802,36 @@
         return Math.max(0, Math.round(score));
     }
 
+    function inferNewsTone(text) {
+        const lower = String(text || "").toLowerCase();
+        if (/reussie|valide|adopte|accord|surplus|favorable|contenu|acheve|renforce/.test(lower)) return "good";
+        if (/crise|echec|hostile|deficit|attaque|tension|effondrement|banqueroute|secheresse|incendie|cyclone/.test(lower)) return "bad";
+        if (/alerte|incident|sanction|pression|manif|intemperie/.test(lower)) return "warn";
+        return "neutral";
+    }
+
+    function addNews(text, tone = "neutral") {
+        state.news.unshift({ turn: state.turn, text, tone });
+        state.news = state.news.slice(0, 20);
+    }
+
     function addLog(text) {
         state.log.unshift(`[M${state.turn}] ${text}`);
         state.log = state.log.slice(0, 36);
+        addNews(text, inferNewsTone(text));
     }
 
     function normalizeState() {
         if (!state.stats) return;
+        if (!state.budgetPlan || typeof state.budgetPlan !== "object") {
+            state.budgetPlan = deepClone(BUDGET_PRESETS.balanced);
+        }
+        if (!state.cabinetTrust || typeof state.cabinetTrust !== "object") {
+            state.cabinetTrust = { fin: 58, int: 56, def: 60, sci: 57 };
+        }
+        if (!Array.isArray(state.news)) {
+            state.news = [];
+        }
         if (!state.objectives) {
             state.objectives = { activeIds: [], nextEvaluationTurn: 3, successCount: 0, failCount: 0, lastReport: "Aucun bilan trimestriel." };
         }
@@ -752,6 +841,14 @@
         if (typeof state.objectives.lastReport !== "string") {
             state.objectives.lastReport = "Aucun bilan trimestriel.";
         }
+
+        state.budgetPlan.social = clamp(Number(state.budgetPlan.social) || 25, 5, 100);
+        state.budgetPlan.defense = clamp(Number(state.budgetPlan.defense) || 25, 5, 100);
+        state.budgetPlan.economy = clamp(Number(state.budgetPlan.economy) || 25, 5, 100);
+        state.budgetPlan.ecology = clamp(Number(state.budgetPlan.ecology) || 25, 5, 100);
+        CABINET_MEMBERS.forEach((member) => {
+            state.cabinetTrust[member.id] = clamp(Number(state.cabinetTrust[member.id]) || 55, 0, 100);
+        });
 
         const s = state.stats;
         s.treasury = clamp(s.treasury, -9000, 220000);
@@ -989,6 +1086,98 @@
         el.style.color = kpiColor(val, danger, warn);
     }
 
+    function getBudgetShares() {
+        const plan = state.budgetPlan || BUDGET_PRESETS.balanced;
+        const rawTotal = (plan.social || 0) + (plan.defense || 0) + (plan.economy || 0) + (plan.ecology || 0);
+        if (rawTotal <= 0) {
+            return { social: 0.25, defense: 0.25, economy: 0.25, ecology: 0.25, totalPoints: 0 };
+        }
+        const total = rawTotal;
+        return {
+            social: (plan.social || 0) / total,
+            defense: (plan.defense || 0) / total,
+            economy: (plan.economy || 0) / total,
+            ecology: (plan.ecology || 0) / total,
+            totalPoints: rawTotal
+        };
+    }
+
+    function budgetDominantKey(shares) {
+        const entries = [
+            ["social", shares.social],
+            ["defense", shares.defense],
+            ["economy", shares.economy],
+            ["ecology", shares.ecology]
+        ].sort((a, b) => b[1] - a[1]);
+        return entries[0][0];
+    }
+
+    function budgetDominantLabel(key) {
+        const labels = {
+            social: "social",
+            defense: "defense",
+            economy: "croissance",
+            ecology: "ecologie"
+        };
+        return labels[key] || "equilibre";
+    }
+
+    function setBudgetValue(key, value) {
+        if (!state.started || state.pendingEvent || state.gameOver) return;
+        if (!state.budgetPlan) state.budgetPlan = deepClone(BUDGET_PRESETS.balanced);
+        state.budgetPlan[key] = clamp(Number(value) || 25, 5, 100);
+        renderBudgetBoard();
+    }
+
+    function applyBudgetPreset(presetId) {
+        if (!state.started || state.pendingEvent || state.gameOver) return;
+        const preset = BUDGET_PRESETS[presetId];
+        if (!preset) return;
+        state.budgetPlan = deepClone(preset);
+        addLog(`Budget ajuste: cap ${budgetDominantLabel(budgetDominantKey(getBudgetShares()))}.`);
+        renderAll();
+    }
+
+    function renderBudgetBoard() {
+        if (!state.started || !state.stats) return;
+        if (!state.budgetPlan) state.budgetPlan = deepClone(BUDGET_PRESETS.balanced);
+
+        const shares = getBudgetShares();
+        const socialPct = Math.round(shares.social * 100);
+        const defensePct = Math.round(shares.defense * 100);
+        const economyPct = Math.round(shares.economy * 100);
+        const ecologyPct = Math.round(shares.ecology * 100);
+        const dominant = budgetDominantKey(shares);
+
+        dom.budgetBadge.textContent = `Cap: ${budgetDominantLabel(dominant)} (${shares.totalPoints} pts)`;
+
+        dom.budgetSocial.value = Math.round(state.budgetPlan.social);
+        dom.budgetDefense.value = Math.round(state.budgetPlan.defense);
+        dom.budgetEconomy.value = Math.round(state.budgetPlan.economy);
+        dom.budgetEcology.value = Math.round(state.budgetPlan.ecology);
+
+        dom.budgetSocialVal.textContent = `${Math.round(state.budgetPlan.social)} pts (${socialPct}%)`;
+        dom.budgetDefenseVal.textContent = `${Math.round(state.budgetPlan.defense)} pts (${defensePct}%)`;
+        dom.budgetEconomyVal.textContent = `${Math.round(state.budgetPlan.economy)} pts (${economyPct}%)`;
+        dom.budgetEcologyVal.textContent = `${Math.round(state.budgetPlan.ecology)} pts (${ecologyPct}%)`;
+
+        const segs = dom.budgetStack ? Array.from(dom.budgetStack.children) : [];
+        if (segs.length === 4) {
+            segs[0].style.width = `${socialPct}%`;
+            segs[1].style.width = `${defensePct}%`;
+            segs[2].style.width = `${economyPct}%`;
+            segs[3].style.width = `${ecologyPct}%`;
+        }
+
+        const controlsDisabled = !!(state.pendingEvent || state.gameOver);
+        [dom.budgetSocial, dom.budgetDefense, dom.budgetEconomy, dom.budgetEcology].forEach((input) => {
+            if (input) input.disabled = controlsDisabled;
+        });
+        dom.budgetPresetButtons.forEach((button) => {
+            button.disabled = controlsDisabled;
+        });
+    }
+
     function renderTopBar() {
         const currentNation = nationById(state.playerNationId);
         const doctrine = doctrineById(state.doctrineId);
@@ -1184,7 +1373,191 @@
         });
     }
 
+    function nationShapeById(nationId) {
+        return dom.mapNations.find((shape) => shape.dataset.nation === nationId) || null;
+    }
+
+    function ensureMapFxLayer() {
+        if (!dom.worldMap) return null;
+        if (mapFxLayer && mapFxLayer.isConnected) return mapFxLayer;
+        mapFxLayer = document.createElementNS(SVG_NS, "g");
+        mapFxLayer.setAttribute("class", "map-fx-layer");
+        dom.worldMap.appendChild(mapFxLayer);
+        return mapFxLayer;
+    }
+
+    function nationCenter(nationId) {
+        if (nationCenterCache[nationId]) return nationCenterCache[nationId];
+        const shape = nationShapeById(nationId);
+        if (!shape) return null;
+        const box = shape.getBBox();
+        const center = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+        nationCenterCache[nationId] = center;
+        return center;
+    }
+
+    function cleanupFxNode(node, fallbackMs) {
+        setTimeout(() => {
+            if (node && node.isConnected) node.remove();
+        }, fallbackMs);
+    }
+
+    function spawnImpactFx(nationId, kind = "neutral", scale = 1) {
+        const center = nationCenter(nationId);
+        const layer = ensureMapFxLayer();
+        if (!center || !layer) return;
+
+        const ring = document.createElementNS(SVG_NS, "circle");
+        ring.setAttribute("class", `map-fx-ring fx-${kind}`);
+        ring.setAttribute("cx", center.x);
+        ring.setAttribute("cy", center.y);
+        ring.setAttribute("r", String(16 + (10 * scale)));
+        ring.style.setProperty("--fx-id", String(++fxSerial));
+
+        const core = document.createElementNS(SVG_NS, "circle");
+        core.setAttribute("class", `map-fx-core fx-${kind}`);
+        core.setAttribute("cx", center.x);
+        core.setAttribute("cy", center.y);
+        core.setAttribute("r", String(3 + (2 * scale)));
+        core.style.setProperty("--fx-id", String(++fxSerial));
+
+        layer.appendChild(ring);
+        layer.appendChild(core);
+
+        if (ring.animate) {
+            ring.animate(
+                [
+                    { transform: "scale(0.35)", opacity: 0.95, strokeWidth: 3.6 },
+                    { transform: "scale(1)", opacity: 0.45, strokeWidth: 2.2 },
+                    { transform: "scale(1.45)", opacity: 0, strokeWidth: 0.6 }
+                ],
+                { duration: 820 + (scale * 220), easing: "ease-out", fill: "forwards" }
+            );
+        }
+
+        if (core.animate) {
+            core.animate(
+                [
+                    { transform: "scale(0.7)", opacity: 0.85 },
+                    { transform: "scale(1.35)", opacity: 1 },
+                    { transform: "scale(0.85)", opacity: 0 }
+                ],
+                { duration: 640 + (scale * 140), easing: "ease-out", fill: "forwards" }
+            );
+        }
+
+        cleanupFxNode(ring, 1300 + (scale * 300));
+        cleanupFxNode(core, 1200 + (scale * 250));
+    }
+
+    function spawnArcFx(fromNationId, toNationId, kind = "neutral") {
+        const from = nationCenter(fromNationId);
+        const to = nationCenter(toNationId);
+        const layer = ensureMapFxLayer();
+        if (!from || !to || !layer) return;
+
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const distance = Math.max(60, Math.hypot(dx, dy));
+        const cx = (from.x + to.x) / 2;
+        const cy = (from.y + to.y) / 2 - Math.min(140, (distance * 0.22));
+        const d = `M ${from.x} ${from.y} Q ${cx} ${cy} ${to.x} ${to.y}`;
+
+        const arc = document.createElementNS(SVG_NS, "path");
+        arc.setAttribute("class", `map-fx-arc fx-${kind}`);
+        arc.setAttribute("d", d);
+        layer.appendChild(arc);
+
+        const len = Math.max(30, arc.getTotalLength ? arc.getTotalLength() : distance);
+        arc.style.strokeDasharray = `${len}`;
+        arc.style.strokeDashoffset = `${len}`;
+
+        if (arc.animate) {
+            arc.animate(
+                [
+                    { strokeDashoffset: len, opacity: 0.95 },
+                    { strokeDashoffset: 0, opacity: 0.95, offset: 0.72 },
+                    { strokeDashoffset: -(len * 0.18), opacity: 0 }
+                ],
+                { duration: 940, easing: "ease-out", fill: "forwards" }
+            );
+        }
+
+        spawnImpactFx(fromNationId, kind === "war" ? "hostile" : kind, 0.72);
+        setTimeout(() => spawnImpactFx(toNationId, kind, kind === "war" ? 1.25 : 0.95), 250);
+        cleanupFxNode(arc, 1300);
+    }
+
+    function spawnWeatherFx(nationId, severity = 3) {
+        const center = nationCenter(nationId);
+        const layer = ensureMapFxLayer();
+        if (!center || !layer) return;
+        const burst = Math.min(7, 2 + Math.round(severity / 2));
+
+        for (let i = 0; i < burst; i += 1) {
+            const driftX = randInt(-34, 34);
+            const driftY = randInt(-24, 24);
+            const cloud = document.createElementNS(SVG_NS, "circle");
+            cloud.setAttribute("class", "map-fx-weather");
+            cloud.setAttribute("cx", center.x + driftX);
+            cloud.setAttribute("cy", center.y + driftY);
+            cloud.setAttribute("r", String(randInt(5, 10)));
+            layer.appendChild(cloud);
+
+            if (cloud.animate) {
+                cloud.animate(
+                    [
+                        { transform: "scale(0.6)", opacity: 0.8 },
+                        { transform: "scale(1.15)", opacity: 0.42 },
+                        { transform: "scale(1.55)", opacity: 0 }
+                    ],
+                    { duration: 820 + randInt(0, 300), easing: "ease-out", fill: "forwards" }
+                );
+            }
+
+            cleanupFxNode(cloud, 1300);
+        }
+    }
+
+    function mostHostileNationId() {
+        const ids = Object.keys(state.relations).filter((id) => id !== state.playerNationId);
+        if (!ids.length) return null;
+        ids.sort((a, b) => (state.relations[a] || 0) - (state.relations[b] || 0));
+        return ids[0];
+    }
+
+    function militaryFxTargetNation() {
+        if (state.selectedNationId && state.selectedNationId !== state.playerNationId) return state.selectedNationId;
+        return mostHostileNationId();
+    }
+
+    function playDiplomacyFx(actionId, targetNationId) {
+        if (!targetNationId || targetNationId === state.playerNationId) return;
+
+        if (["trade", "aid", "climate", "alliance", "intel"].includes(actionId)) {
+            spawnArcFx(state.playerNationId, targetNationId, "friendly");
+            return;
+        }
+        if (actionId === "sanction") {
+            spawnArcFx(state.playerNationId, targetNationId, "warning");
+            return;
+        }
+        if (actionId === "pressure") {
+            spawnArcFx(state.playerNationId, targetNationId, "war");
+            spawnImpactFx(targetNationId, "hostile", 1.3);
+        }
+    }
+
+    function playMilitaryFx(success) {
+        const targetNationId = militaryFxTargetNation();
+        if (!targetNationId) return;
+        spawnArcFx(state.playerNationId, targetNationId, "war");
+        spawnImpactFx(targetNationId, success ? "warning" : "hostile", success ? 1 : 1.5);
+        spawnImpactFx(state.playerNationId, "player", 0.8);
+    }
+
     function renderMap() {
+        ensureMapFxLayer();
         dom.mapNations.forEach((shape) => {
             const nationId = shape.dataset.nation;
             const isPlayer = nationId === state.playerNationId;
@@ -1247,6 +1620,7 @@
         dom.militaryUsage.textContent = state.usedMilitaryAction ? "Operation militaire: utilisee" : "Operation militaire: disponible";
         dom.policyUsage.textContent = state.selectedPolicyId ? "Politique: selectionnee" : "Politique: en attente";
         dom.lawUsage.textContent = state.usedLawVote ? "Vote: utilise" : "Vote: disponible";
+        dom.cabinetUsage.textContent = state.usedCabinetAction ? "Directive: utilisee" : "Directive: disponible";
 
         const weatherText = state.weather.lastSeverity > 0
             ? `${state.weather.lastLabel} (sev. ${state.weather.lastSeverity.toFixed(1)})`
@@ -1265,6 +1639,104 @@
             else if (/manque|echoue|crise|incident|amende|sanction|hostile|deficit|perte|chute|effondre|greve|penalite|attaque/.test(entry)) cls = "log-bad";
             return `<li class="${cls}">${entry}</li>`;
         }).join("");
+    }
+
+    function renderNewsFeed() {
+        if (!state.started) return;
+        if (!state.news.length) {
+            dom.newsFeed.innerHTML = '<div class="news-item"><span class="meta">M1</span>Briefing initial du mandat.</div>';
+            return;
+        }
+
+        dom.newsFeed.innerHTML = state.news.slice(0, 10).map((item) => {
+            const toneClass = item.tone === "good" ? "good" : item.tone === "bad" ? "bad" : item.tone === "warn" ? "warn" : "";
+            return `
+                <article class="news-item ${toneClass}">
+                    <span class="meta">M${item.turn}</span>
+                    ${item.text}
+                </article>
+            `;
+        }).join("");
+    }
+
+    function averageCabinetTrust() {
+        const values = CABINET_MEMBERS.map((member) => state.cabinetTrust[member.id] || 50);
+        return values.reduce((sum, v) => sum + v, 0) / values.length;
+    }
+
+    function renderCabinet() {
+        if (!state.started || !state.stats) return;
+        dom.cabinetCards.innerHTML = CABINET_MEMBERS.map((member) => {
+            const trust = Math.round(state.cabinetTrust[member.id] || 50);
+            const disabled = state.usedCabinetAction || state.pendingEvent || state.gameOver;
+            return `
+                <article class="cabinet-card">
+                    <div class="cabinet-head">
+                        <h4>${member.name}</h4>
+                        <span class="trust-tag">Confiance ${trust}%</span>
+                    </div>
+                    <div class="cabinet-role">${member.role}</div>
+                    <div class="cabinet-impact">${member.directive}: ${describeEffects(member.effects)}</div>
+                    <button class="card-btn" data-cabinet-id="${member.id}" ${disabled ? "disabled" : ""}>Activer directive</button>
+                </article>
+            `;
+        }).join("");
+
+        dom.cabinetCards.querySelectorAll("[data-cabinet-id]").forEach((button) => {
+            button.addEventListener("click", () => executeCabinetDirective(button.dataset.cabinetId));
+        });
+    }
+
+    function computeSocialBlocks() {
+        const s = state.stats;
+        const shares = getBudgetShares();
+        const youth = clamp((s.science * 0.44) + (s.ecology * 0.23) + (s.approval * 0.2) + (shares.ecology * 100 * 0.13) - (s.debtPressure * 0.17), 0, 100);
+        const workers = clamp((s.stability * 0.3) + (s.approval * 0.26) + (shares.social * 100 * 0.24) + (s.industry * 0.2) - (s.debtPressure * 0.14), 0, 100);
+        const business = clamp((s.gdp * 0.32) + (s.industry * 0.26) + (s.diplomacy * 0.14) + (shares.economy * 100 * 0.2) - (s.debtPressure * 0.2), 0, 100);
+        const rural = clamp((s.ecology * 0.32) + (s.security * 0.22) + (s.stability * 0.24) + (shares.social * 100 * 0.12) + (shares.ecology * 100 * 0.1), 0, 100);
+        return [
+            { label: "Jeunes", value: youth },
+            { label: "Travailleurs", value: workers },
+            { label: "Entreprises", value: business },
+            { label: "Territoires", value: rural }
+        ];
+    }
+
+    function renderSocialBlocks() {
+        if (!state.started || !state.stats) return;
+        const rows = computeSocialBlocks();
+        dom.socialBlocks.innerHTML = rows.map((row) => `
+            <div class="social-row">
+                <span class="label">${row.label}</span>
+                <div class="social-track"><i style="width:${Math.round(row.value)}%"></i></div>
+                <span class="social-val">${Math.round(row.value)}</span>
+            </div>
+        `).join("");
+    }
+
+    function computeElectionProjection() {
+        const s = state.stats;
+        const progress = clamp((state.turn - 1) / 48, 0, 1);
+        const trust = averageCabinetTrust();
+        const score = (s.approval * 0.44) + (s.stability * 0.28) + (s.gdp * 0.12) + (s.diplomacy * 0.08) + (trust * 0.08);
+        const pressure = (s.debtPressure * 0.22) + ((1 - progress) * 4);
+        return clamp(score - pressure, 0, 100);
+    }
+
+    function renderMandateTimeline() {
+        if (!state.started || !state.stats) return;
+        const progressPct = clamp(Math.round(((state.turn - 1) / 48) * 100), 0, 100);
+        const milestones = [12, 24, 36, 48];
+        dom.mandateTimeline.innerHTML = `
+            <div class="timeline-track"><i style="width:${progressPct}%"></i></div>
+            <div class="timeline-marks">
+                ${milestones.map((mark) => `<div class="timeline-mark ${state.turn >= mark ? "done" : ""}">M${mark}</div>`).join("")}
+            </div>
+        `;
+
+        const projection = computeElectionProjection();
+        dom.electionPulse.textContent = `Projection election: ${Math.round(projection)}%`;
+        dom.electionPulse.style.color = projection >= 58 ? "var(--kpi-good)" : projection >= 42 ? "var(--kpi-warn)" : "var(--kpi-bad)";
     }
 
     function renderObjectives() {
@@ -1354,6 +1826,7 @@
     function renderAll() {
         if (!state.started || !state.stats) return;
         renderTopBar();
+        renderBudgetBoard();
         renderPolicyCards();
         renderLawCards();
         renderMonuments();
@@ -1364,6 +1837,10 @@
         renderObjectives();
         renderRiskOverview();
         renderLog();
+        renderNewsFeed();
+        renderCabinet();
+        renderSocialBlocks();
+        renderMandateTimeline();
     }
 
     function voteLaw(lawId) {
@@ -1448,8 +1925,9 @@
 
         const power = computeArmyPower();
         const score = state.stats.security + state.army.readiness + (state.army.training * 0.7) + (power / 8) + randInt(-25, 25);
+        const success = score >= operation.difficulty;
 
-        if (score >= operation.difficulty) {
+        if (success) {
             applyStatEffects(operation.success.effects);
             addLog(`Operation reussie: ${operation.title}.`);
         } else {
@@ -1459,6 +1937,7 @@
 
         state.usedMilitaryAction = true;
         state.army.warFatigue += 1.8;
+        playMilitaryFx(success);
         normalizeState();
         renderAll();
     }
@@ -1488,7 +1967,27 @@
         state.usedDiplomacy = true;
         const target = nationById(state.selectedNationId);
         addLog(`Diplomatie: ${action.label} avec ${target ? target.name : "nation cible"}.`);
+        playDiplomacyFx(actionId, state.selectedNationId);
 
+        normalizeState();
+        renderAll();
+    }
+
+    function executeCabinetDirective(cabinetId) {
+        if (!state.started || state.gameOver || state.pendingEvent) return;
+        if (state.usedCabinetAction) return;
+        const member = CABINET_MEMBERS.find((item) => item.id === cabinetId);
+        if (!member) return;
+
+        applyStatEffects(member.effects);
+        state.usedCabinetAction = true;
+
+        CABINET_MEMBERS.forEach((item) => {
+            const drift = item.id === cabinetId ? 3 : -1;
+            state.cabinetTrust[item.id] = clamp((state.cabinetTrust[item.id] || 50) + drift + randInt(-1, 1), 0, 100);
+        });
+
+        addLog(`Cabinet: directive activee par ${member.name} (${member.directive}).`);
         normalizeState();
         renderAll();
     }
@@ -1524,6 +2023,11 @@
         const s = state.stats;
         const avgRelations = averageRelations();
         const armyCost = computeArmyUpkeep();
+        const shares = getBudgetShares();
+        const socialBias = shares.social - 0.25;
+        const defenseBias = shares.defense - 0.25;
+        const economyBias = shares.economy - 0.25;
+        const ecologyBias = shares.ecology - 0.25;
         state.army.lastUpkeep = armyCost;
 
         const revenue =
@@ -1532,14 +2036,19 @@
             (s.diplomacy * 3.4) +
             (state.modifiers.taxEfficiency * 620) +
             (state.modifiers.tradeBonus * 540) +
-            (avgRelations * 2.6);
+            (avgRelations * 2.6) +
+            (shares.economy * 460) +
+            (shares.ecology * 90);
 
         const expenses =
             (s.population * 2.0) +
             armyCost +
             ((100 - s.security) * 4.2) +
             (state.modifiers.socialProtection * 140) +
-            (s.debtPressure * 8);
+            (s.debtPressure * 8) +
+            (shares.social * 360) +
+            (shares.defense * 280) +
+            (shares.ecology * 120);
 
         const net = Math.round(revenue - expenses + randInt(-180, 180));
         s.treasury += net;
@@ -1551,16 +2060,26 @@
             (state.modifiers.tradeBonus * 8) +
             (state.modifiers.innovationBoost * 7) -
             (s.debtPressure / 30) +
+            (economyBias * 9.5) -
+            (socialBias * 1.2) -
+            (ecologyBias * 1.6) +
             randInt(-3, 3);
 
         s.gdp += growth;
         s.approval += (net > 0 ? 1.4 : -1.8) + ((s.stability - 50) / 45) - (Math.max(0, -s.treasury) / 1600);
+        s.approval += (socialBias * 8) + (ecologyBias * 2.5) - (defenseBias * 1.8);
         s.stability += ((s.security - 50) / 30) + ((s.approval - 50) / 40) + (avgRelations / 120) + randInt(-2, 2);
+        s.stability += (socialBias * 5.5) + (defenseBias * 2.4);
         s.diplomacy += (avgRelations / 100) + (state.modifiers.judiciaryTrust * 4) + randInt(-1, 1);
+        s.diplomacy += (ecologyBias * 4.3) - (defenseBias * 2.8);
         s.science += (state.modifiers.innovationBoost * 2.4) + randInt(-1, 1);
+        s.science += (economyBias * 2.4) + (ecologyBias * 1.5);
         s.industry += (state.modifiers.tradeBonus * 1.6) + randInt(-1, 1);
+        s.industry += (economyBias * 5.8) - (ecologyBias * 2.9);
         s.security += (state.modifiers.lawAndOrder * 2.2) + (computeArmyPower() / 1400) + randInt(-2, 1);
+        s.security += (defenseBias * 9) + (socialBias * 0.8);
         s.ecology += (-1.3 + (state.modifiers.energyTransition * 2.5) + randInt(-1, 1));
+        s.ecology += (ecologyBias * 9.2) - (economyBias * 4.2) - (defenseBias * 2.7);
 
         const popGrowth = 0.07 + (state.modifiers.healthSystem * 0.16) + ((s.approval - 50) / 1000);
         s.population += s.population * (popGrowth / 100);
@@ -1572,31 +2091,35 @@
         }
 
         state.army.readiness += (s.security > 55 ? 0.6 : -0.8) - (state.army.warFatigue / 120);
+        state.army.readiness += (defenseBias * 5.8);
         state.army.training += 0.25;
+        state.army.training += (defenseBias * 1.8);
         state.army.warFatigue -= 0.5;
 
         const trend = net >= 0 ? "surplus" : "deficit";
-        addLog(`Budget: ${trend} ${formatNumber(net)} credits.`);
+        addLog(`Budget: ${trend} ${formatNumber(net)} credits (S${Math.round(shares.social * 100)} D${Math.round(shares.defense * 100)} E${Math.round(shares.economy * 100)} C${Math.round(shares.ecology * 100)}).`);
     }
 
     function processWeatherSystem() {
         const nation = nationById(state.playerNationId);
         const season = monthSeason(state.monthIndex);
         const s = state.stats;
+        const shares = getBudgetShares();
 
         const chance =
             0.22 +
             (nation.climateRisk / 220) +
             (Math.max(0, 62 - s.ecology) / 220) -
             (state.modifiers.climateShield * 0.22) -
-            (state.modifiers.healthSystem * 0.06);
+            (state.modifiers.healthSystem * 0.06) -
+            (shares.ecology * 0.07);
 
         if (Math.random() < chance) {
             const candidates = WEATHER_EVENTS.filter((event) => event.seasons.includes(season));
             const weather = candidates[randInt(0, candidates.length - 1)];
             const rawSeverity = weather.base + randInt(-1, 2) + (Math.max(0, 60 - s.ecology) / 22);
             const severity = Math.max(2.4, rawSeverity);
-            const mitigation = 1 + state.modifiers.climateShield + (state.modifiers.healthSystem * 0.5) + (s.security / 260);
+            const mitigation = 1 + state.modifiers.climateShield + (state.modifiers.healthSystem * 0.5) + (s.security / 260) + (shares.ecology * 0.35);
             const multiplier = Math.max(0.38, severity / mitigation / 5);
 
             const scaledEffects = {};
@@ -1608,6 +2131,7 @@
             state.weather.lastLabel = `${weather.name} (${season})`;
             state.weather.lastSeverity = severity;
             state.weather.alerts += 1;
+            spawnWeatherFx(state.playerNationId, severity);
 
             addLog(`Intemperie: ${weather.name} frappe le pays (sev. ${severity.toFixed(1)}).`);
             return;
@@ -1617,6 +2141,7 @@
             applyStatEffects({ treasury: 90, approval: 1, gdp: 1 });
             state.weather.lastLabel = `Conditions favorables (${season})`;
             state.weather.lastSeverity = 0;
+            spawnImpactFx(state.playerNationId, "friendly", 0.8);
             addLog("Meteo stable: bonnes conditions de production.");
             return;
         }
@@ -1648,10 +2173,14 @@
                 if (defenseScore >= enemyPressure) {
                     applyStatEffects({ diplomacy: 2, security: 1, approval: 1 });
                     state.army.readiness += 2;
+                    spawnArcFx(nationId, state.playerNationId, "warning");
+                    spawnImpactFx(state.playerNationId, "player", 0.85);
                     addLog(`Incident frontalier contenu face a ${nationById(nationId).name}.`);
                 } else {
                     applyStatEffects({ treasury: -360, stability: -5, approval: -4, security: -4, population: -0.03 });
                     state.army.warFatigue += 3;
+                    spawnArcFx(nationId, state.playerNationId, "war");
+                    spawnImpactFx(state.playerNationId, "hostile", 1.6);
                     addLog(`Crise frontaliere: fortes tensions avec ${nationById(nationId).name}.`);
                 }
             }
@@ -1674,6 +2203,22 @@
         if (s.ecology < 20 && Math.random() < 0.36) {
             applyStatEffects({ population: -0.04, approval: -2, gdp: -2, treasury: -180 });
             addLog("Crise environnementale locale: pertes agricoles et sanitaires.");
+        }
+    }
+
+    function processCabinetCycle() {
+        const trust = averageCabinetTrust();
+        if (!state.usedCabinetAction) {
+            applyStatEffects({ stability: -1, approval: -1 });
+            addLog("Cabinet: absence de directive, inertie gouvernementale.");
+        }
+
+        if (trust >= 68) {
+            applyStatEffects({ stability: 1, diplomacy: 1 });
+            addLog("Cabinet: coordination elevee entre ministeres.");
+        } else if (trust <= 36) {
+            applyStatEffects({ stability: -2, approval: -1 });
+            addLog("Cabinet: tensions internes, execution ralentie.");
         }
     }
 
@@ -1706,6 +2251,7 @@
         processWeatherSystem();
         processGeopolitics();
         processDomesticPressure();
+        processCabinetCycle();
 
         const completedTurn = state.turn;
         if (completedTurn >= state.objectives.nextEvaluationTurn) {
@@ -1724,6 +2270,7 @@
         state.usedDiplomacy = false;
         state.usedMilitaryAction = false;
         state.usedLawVote = false;
+        state.usedCabinetAction = false;
 
         pickPolicyOptions();
         pickLawOptions();
@@ -1862,6 +2409,8 @@
         merged.army.units = Object.assign(base.army.units, (incoming.army && incoming.army.units) || {});
         merged.objectives = Object.assign(base.objectives, incoming.objectives || {});
         merged.weather = Object.assign(base.weather, incoming.weather || {});
+        merged.cabinetTrust = Object.assign(base.cabinetTrust, incoming.cabinetTrust || {});
+        merged.news = Array.isArray(incoming.news) ? incoming.news.slice(0, 20) : [];
         merged.doctrineId = incoming.doctrineId || base.doctrineId;
 
         if (!merged.stats && merged.playerNationId) {
@@ -1943,6 +2492,7 @@
     function selectNationOnMap(nationId) {
         if (!state.started) return;
         state.selectedNationId = nationId;
+        spawnImpactFx(nationId, nationId === state.playerNationId ? "player" : "neutral", 0.72);
         renderSelectedNation();
         renderMap();
     }
@@ -2013,11 +2563,20 @@
             }
         });
 
+        dom.budgetSocial.addEventListener("input", () => setBudgetValue("social", dom.budgetSocial.value));
+        dom.budgetDefense.addEventListener("input", () => setBudgetValue("defense", dom.budgetDefense.value));
+        dom.budgetEconomy.addEventListener("input", () => setBudgetValue("economy", dom.budgetEconomy.value));
+        dom.budgetEcology.addEventListener("input", () => setBudgetValue("ecology", dom.budgetEcology.value));
+        dom.budgetPresetButtons.forEach((button) => {
+            button.addEventListener("click", () => applyBudgetPreset(button.dataset.budgetPreset));
+        });
+
         dom.restartBtn.addEventListener("click", resetToSetup);
     }
 
     function init() {
         initializeStartSelect();
+        ensureMapFxLayer();
         bindEvents();
     }
 

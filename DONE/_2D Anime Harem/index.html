@@ -65,6 +65,7 @@
     </div>
     <div class="hud-right">
       <span class="hud-loc-badge" id="hud-loc-badge">🏫 École</span>
+      <span class="hud-room-badge" id="hud-room-badge">Salle</span>
       <span class="hud-arc-badge" id="hud-arc-badge" style="display:none"></span>
     </div>
   </div>
@@ -141,6 +142,13 @@
       <button class="loc-btn"        id="loc-home"    onclick="setLocation('home')"   >🏠 Appartement</button>
       <button class="loc-btn"        id="loc-beach"   onclick="setLocation('beach')"  >🏖️ Plage d'Azur</button>
       <button class="loc-btn"        id="loc-shrine"  onclick="setLocation('shrine')" >⛩️ Sanctuaire</button>
+      <hr class="sep">
+      <div class="panel-title">🏠 Pièces</div>
+      <div class="room-list" id="room-list"></div>
+
+      <hr class="sep">
+      <div class="panel-title">👥 Présences</div>
+      <div class="presence-list" id="presence-list"></div>
 
       <hr class="sep">
       <div class="panel-title">💼 Divers</div>

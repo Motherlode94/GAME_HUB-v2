@@ -63,6 +63,52 @@
 
                 <section class="panel-section">
                     <div class="section-head">
+                        <h3>Budget national</h3>
+                        <span class="badge" id="budget-badge">Cap: equilibre</span>
+                    </div>
+                    <div class="budget-stack" id="budget-stack">
+                        <span class="seg-social"></span>
+                        <span class="seg-defense"></span>
+                        <span class="seg-economy"></span>
+                        <span class="seg-ecology"></span>
+                    </div>
+                    <div class="budget-grid">
+                        <label class="budget-row" for="budget-social">
+                            <span>Social</span>
+                            <strong id="budget-social-val">25 pts</strong>
+                        </label>
+                        <input id="budget-social" type="range" min="5" max="100" value="25">
+
+                        <label class="budget-row" for="budget-defense">
+                            <span>Defense</span>
+                            <strong id="budget-defense-val">25 pts</strong>
+                        </label>
+                        <input id="budget-defense" type="range" min="5" max="100" value="25">
+
+                        <label class="budget-row" for="budget-economy">
+                            <span>Economie</span>
+                            <strong id="budget-economy-val">25 pts</strong>
+                        </label>
+                        <input id="budget-economy" type="range" min="5" max="100" value="25">
+
+                        <label class="budget-row" for="budget-ecology">
+                            <span>Ecologie</span>
+                            <strong id="budget-ecology-val">25 pts</strong>
+                        </label>
+                        <input id="budget-ecology" type="range" min="5" max="100" value="25">
+                    </div>
+                    <div class="budget-presets">
+                        <button class="card-btn budget-preset" data-budget-preset="balanced">Equilibre</button>
+                        <button class="card-btn budget-preset" data-budget-preset="social">Cap social</button>
+                        <button class="card-btn budget-preset" data-budget-preset="defense">Cap defense</button>
+                        <button class="card-btn budget-preset" data-budget-preset="growth">Cap croissance</button>
+                        <button class="card-btn budget-preset" data-budget-preset="green">Cap vert</button>
+                    </div>
+                    <p class="hint">Le budget influence automatiquement l'economie, la securite, l'ecologie et la popularite chaque mois.</p>
+                </section>
+
+                <section class="panel-section">
+                    <div class="section-head">
                         <h3>Parlement et lois</h3>
                         <span class="badge" id="law-usage">Vote: disponible</span>
                     </div>
@@ -82,6 +128,14 @@
                     <button id="end-turn-btn" class="primary-btn">Valider le mois</button>
                     <button id="save-btn" class="ghost-btn">Sauvegarder</button>
                     <button id="load-btn" class="ghost-btn">Charger</button>
+                </div>
+
+                <div class="turn-log-wrap">
+                    <div class="section-head">
+                        <h4>Fil info AM3</h4>
+                        <span class="badge">Live</span>
+                    </div>
+                    <div id="news-feed" class="news-feed"></div>
                 </div>
 
                 <div class="turn-log-wrap">
@@ -170,6 +224,26 @@
                     <h3>Conseil strategique</h3>
                     <div id="risk-overview" class="risk-overview"></div>
                     <p class="hint">Indice eleve = secteur fragile a traiter en priorite.</p>
+                </section>
+
+                <section class="panel-section">
+                    <div class="section-head">
+                        <h3>Cabinet presidentiel</h3>
+                        <span id="cabinet-usage" class="badge">Directive: disponible</span>
+                    </div>
+                    <div id="cabinet-cards" class="cards-grid compact"></div>
+                    <p class="hint">Une directive de cabinet maximum par mois.</p>
+                </section>
+
+                <section class="panel-section">
+                    <h3>Barometre social</h3>
+                    <div id="social-blocks" class="social-blocks"></div>
+                </section>
+
+                <section class="panel-section">
+                    <h3>Timeline mandat</h3>
+                    <div id="mandate-timeline" class="mandate-timeline"></div>
+                    <p id="election-pulse" class="hint">Projection election: -</p>
                 </section>
             </aside>
         </main>

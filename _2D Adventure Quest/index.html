@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -12,7 +12,10 @@
 <body>
 <a class="hub-back" href="../index.html">&larr; HUB</a>
 <div class="hud">
-  <h1>Adventure Quest: Echoes of the Citadel</h1>
+  <div class="hud-head">
+    <p class="hud-kicker">Adventure Ops</p>
+    <h1>Echoes of the Citadel</h1>
+  </div>
   <div class="hud-bars">
     <div class="hud-bar-row">
       <span class="hud-bar-lbl">HP</span>
@@ -24,14 +27,28 @@
       <div class="hud-bar-track"><div class="hud-bar-fill hud-bar-sp-fill" id="spBar"></div></div>
     </div>
   </div>
+  <div class="hud-ribbon">
+    <div class="hud-card" id="hudCardObjective">
+      <span>Objective</span>
+      <strong id="hudObjective">1/4</strong>
+    </div>
+    <div class="hud-card" id="hudCardThreat">
+      <span>Threat</span>
+      <strong id="hudThreat">LOW</strong>
+    </div>
+    <div class="hud-card" id="hudCardTempo">
+      <span>Tempo</span>
+      <strong id="hudTempo">FAST</strong>
+    </div>
+  </div>
   <div class="row">
-    <span class="pill" id="timePill">0s</span>
-    <span class="pill" id="scorePill">Score 0</span>
-    <span class="pill" id="relicPill">Relic 0/1</span>
+    <span class="pill" data-k="T" id="timePill">0s</span>
+    <span class="pill" data-k="S" id="scorePill">Score 0</span>
+    <span class="pill" data-k="R" id="relicPill">Relic 0/1</span>
   </div>
   <div class="quest" id="questText">Quest: Speak with the Elder at the village center.</div>
   <div class="zone-label" id="zoneName">Village Woods</div>
-  <div class="tip">WASD / Arrows · E Interact · Shift Sprint</div>
+  <div class="tip">WASD / Arrows - E Interact - Shift Sprint</div>
 </div>
 <div class="interact-hint" id="interactHint"></div>
 <div class="message" id="msg"></div>
@@ -62,6 +79,12 @@
   const hpBar      = document.getElementById('hpBar');
   const hpVal      = document.getElementById('hpVal');
   const spBar      = document.getElementById('spBar');
+  const hudObjective = document.getElementById('hudObjective');
+  const hudThreat = document.getElementById('hudThreat');
+  const hudTempo = document.getElementById('hudTempo');
+  const hudCardObjective = document.getElementById('hudCardObjective');
+  const hudCardThreat = document.getElementById('hudCardThreat');
+  const hudCardTempo = document.getElementById('hudCardTempo');
   const timePill   = document.getElementById('timePill');
   const scorePill  = document.getElementById('scorePill');
   const relicPill  = document.getElementById('relicPill');
@@ -321,9 +344,10 @@
   }
 
   function finalScore() {
+    const baseScore = Math.floor(state.score);
     const timeBonus = Math.max(0, 700 - Math.floor(state.elapsed));
     const hpBonus = state.player.hp * 5;
-    return state.score + timeBonus + hpBonus;
+    return baseScore + timeBonus + hpBonus;
   }
 
   function postScore(score) {
@@ -354,6 +378,39 @@
     return null;
   }
 
+  function getObjectiveStep() {
+    if (state.won || state.hasRelic) return 4;
+    if (state.hasKey) return 3;
+    if (state.elderTalked) return 2;
+    return 1;
+  }
+
+  function getThreatLevel() {
+    let nearest = Infinity;
+    for (const g of actors.guards) {
+      const d = dist(g.x, g.y, state.player.x, state.player.y);
+      if (d < nearest) nearest = d;
+    }
+
+    let score = 0;
+    if (nearest < 95) score += 2;
+    else if (nearest < 180) score += 1;
+    if (state.player.hp < 35) score += 2;
+    else if (state.player.hp < 60) score += 1;
+    if (performance.now() - state.lastHitAt < 1800) score += 1;
+
+    if (score >= 3) return 'HIGH';
+    if (score >= 1) return 'MED';
+    return 'LOW';
+  }
+
+  function fmtClock(totalSeconds) {
+    const sec = Math.max(0, Math.floor(totalSeconds));
+    const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+    const ss = String(sec % 60).padStart(2, '0');
+    return mm + ':' + ss;
+  }
+
   function updateHud() {
     const hp = state.player.hp;
     hpBar.style.width = hp + '%';
@@ -365,9 +422,25 @@
     hpVal.textContent = hp;
     spBar.style.width = Math.round(state.player.stamina * 100) + '%';
 
+    const score = finalScore();
+    const objectiveStep = getObjectiveStep();
+    const threatLevel = getThreatLevel();
+    const tempoLabel = state.elapsed < 120 ? 'FAST' : state.elapsed < 240 ? 'STD' : 'SLOW';
+
     timePill.textContent = Math.floor(state.elapsed) + 's';
-    scorePill.textContent = 'Score ' + finalScore();
-    relicPill.textContent = state.hasRelic ? '🏺 Relic 1/1' : 'Relic 0/1';
+    scorePill.textContent = 'Score ' + score.toLocaleString('fr-FR');
+    relicPill.textContent = state.hasRelic ? 'Relic 1/1' : 'Relic 0/1';
+
+    hudObjective.textContent = objectiveStep + '/4';
+    hudThreat.textContent = threatLevel;
+    hudTempo.textContent = tempoLabel + ' ' + fmtClock(state.elapsed);
+
+    hudCardObjective.classList.toggle('is-done', objectiveStep >= 4);
+    hudCardThreat.classList.remove('is-low', 'is-med', 'is-high');
+    hudCardThreat.classList.add(threatLevel === 'HIGH' ? 'is-high' : threatLevel === 'MED' ? 'is-med' : 'is-low');
+    hudCardTempo.classList.remove('is-fast', 'is-slow');
+    if (tempoLabel === 'FAST') hudCardTempo.classList.add('is-fast');
+    if (tempoLabel === 'SLOW') hudCardTempo.classList.add('is-slow');
 
     questText.textContent = (quests[state.objective] || quests[0]).replace('Quest: ', '');
     zoneLabel.textContent = getCurrentZone();

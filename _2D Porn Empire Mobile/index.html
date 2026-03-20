@@ -17,31 +17,47 @@
     <main class="app">
         <header class="hero">
             <div>
-                <p class="eyebrow">ADULT STUDIO TYCOON</p>
+                <p class="eyebrow">CREATOR BUSINESS TYCOON</p>
                 <h1>PORN EMPIRE MOBILE</h1>
-                <p class="subtitle">Construis un empire de contenus adultes: production, marketing, legal, equipe, reputation.</p>
+                <p class="subtitle">Scale. Reach. Brand. Legal.</p>
             </div>
             <div class="phase">
                 <span id="day-label">Jour 1 / 35</span>
                 <strong id="phase-label">Lancement</strong>
+                <small id="strategy-label">Angle: Equilibre</small>
             </div>
         </header>
 
         <section class="kpis">
-            <article class="kpi"><span>Caisse</span><strong id="cash">0</strong></article>
-            <article class="kpi"><span>Marque</span><strong id="brand">0</strong></article>
-            <article class="kpi"><span>Conformite</span><strong id="compliance">0</strong></article>
-            <article class="kpi"><span>Moral</span><strong id="morale">0</strong></article>
-            <article class="kpi"><span>Audience</span><strong id="audience">0</strong></article>
-            <article class="kpi"><span>Catalogue</span><strong id="catalog">0</strong></article>
-            <article class="kpi"><span>Equipe</span><strong id="team">0</strong></article>
-            <article class="kpi"><span>Studios</span><strong id="studio">0</strong></article>
+            <article class="kpi" data-icon="CAS"><span>Caisse</span><strong id="cash">0</strong></article>
+            <article class="kpi" data-icon="BRD"><span>Brand</span><strong id="brand">0</strong></article>
+            <article class="kpi" data-icon="LEG"><span>Legal</span><strong id="compliance">0</strong></article>
+            <article class="kpi" data-icon="MOR"><span>Moral</span><strong id="morale">0</strong></article>
+            <article class="kpi" data-icon="AUD"><span>Audience</span><strong id="audience">0</strong></article>
+            <article class="kpi" data-icon="CAT"><span>Catalog</span><strong id="catalog">0</strong></article>
+            <article class="kpi" data-icon="STF"><span>Equipe</span><strong id="team">0</strong></article>
+            <article class="kpi" data-icon="STD"><span>Studios</span><strong id="studio">0</strong></article>
+        </section>
+
+        <section class="hud-ribbon" aria-label="HUD rapide">
+            <article class="hud-pill">
+                <span>Pricing</span>
+                <strong id="hud-pricing">Equilibre</strong>
+            </article>
+            <article class="hud-pill">
+                <span>Angle</span>
+                <strong id="hud-strategy">Equilibre</strong>
+            </article>
+            <article class="hud-pill">
+                <span>Issues</span>
+                <strong id="hud-issues">0</strong>
+            </article>
         </section>
 
         <section class="panel">
             <div class="panel-head">
                 <h2>Pilotage quotidien</h2>
-                <label>Mode monétisation
+                <label>Mode monetisation
                     <select id="pricing-select">
                         <option value="reach">Reach massif</option>
                         <option value="balanced" selected>Equilibre</option>
@@ -59,17 +75,34 @@
                 <button data-action="upgrade">Upgrade studio</button>
             </div>
 
+            <div class="strategy-modes" id="strategy-modes" role="group" aria-label="Angle de croissance">
+                <button type="button" class="strategy-mode active" data-strategy="balanced">
+                    <strong>Equilibre</strong>
+                    <span>Stable</span>
+                </button>
+                <button type="button" class="strategy-mode" data-strategy="brand">
+                    <strong>Brand First</strong>
+                    <span>Value</span>
+                </button>
+                <button type="button" class="strategy-mode" data-strategy="viral">
+                    <strong>Viral Push</strong>
+                    <span>Reach</span>
+                </button>
+            </div>
+
+            <div class="objective-strip" id="objective-strip"></div>
+
             <div id="risk-board" class="risk-board"></div>
 
             <button id="next-day-btn" class="next-day-btn">Publier et passer au jour suivant</button>
-            <p class="note">Simulation management adulte sans contenu explicite.</p>
+            <p class="note">Management only. No explicit content.</p>
         </section>
 
         <section class="grid-bottom">
             <article class="panel">
-                <h3>Bilan du jour</h3>
+                <h3>Dashboard Jour</h3>
                 <div id="day-report" class="report">
-                    <p>Configure ton studio et lance une journée.</p>
+                    <p>Ready. Clique <strong>Publier</strong>.</p>
                 </div>
             </article>
             <article class="panel">

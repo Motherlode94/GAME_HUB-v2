@@ -17,25 +17,41 @@
     <main class="shell">
         <header class="top">
             <div>
-                <p class="eyebrow">SIMULATION ADULTE</p>
+                <p class="eyebrow">TYCOON OPERATIONS</p>
                 <h1>BORDEL MANAGER 2D</h1>
-                <p class="subtitle">Gestion d'une maison close legalisee: finance, securite, conformite, reputation.</p>
+                <p class="subtitle">Ops. Cash. Legal. Reputation.</p>
             </div>
             <div class="phase-card">
                 <span id="day-label">Jour 1 / 30</span>
                 <strong id="status-label">Ouvert</strong>
+                <small id="stance-label">Cap: Equilibre</small>
             </div>
         </header>
 
         <section class="stats-grid">
-            <article class="stat"><span>Caisse</span><strong id="cash">0</strong></article>
-            <article class="stat"><span>Reputation</span><strong id="reputation">0</strong></article>
-            <article class="stat"><span>Conformite</span><strong id="compliance">0</strong></article>
-            <article class="stat"><span>Moral equipe</span><strong id="morale">0</strong></article>
-            <article class="stat"><span>Securite</span><strong id="security">0</strong></article>
-            <article class="stat"><span>Clients servis</span><strong id="served">0</strong></article>
-            <article class="stat"><span>Chambres</span><strong id="rooms">0</strong></article>
-            <article class="stat"><span>Personnel</span><strong id="staff">0</strong></article>
+            <article class="stat" data-icon="CAS"><span>Caisse</span><strong id="cash">0</strong></article>
+            <article class="stat" data-icon="REP"><span>Rep</span><strong id="reputation">0</strong></article>
+            <article class="stat" data-icon="LEG"><span>Legal</span><strong id="compliance">0</strong></article>
+            <article class="stat" data-icon="MOR"><span>Moral</span><strong id="morale">0</strong></article>
+            <article class="stat" data-icon="SEC"><span>Securite</span><strong id="security">0</strong></article>
+            <article class="stat" data-icon="SRV"><span>Servis</span><strong id="served">0</strong></article>
+            <article class="stat" data-icon="ROM"><span>Chambres</span><strong id="rooms">0</strong></article>
+            <article class="stat" data-icon="STF"><span>Staff</span><strong id="staff">0</strong></article>
+        </section>
+
+        <section class="hud-ribbon" aria-label="HUD rapide">
+            <article class="hud-pill">
+                <span>Tarif</span>
+                <strong id="hud-price">Standard</strong>
+            </article>
+            <article class="hud-pill">
+                <span>Cap</span>
+                <strong id="hud-stance">Equilibre</strong>
+            </article>
+            <article class="hud-pill">
+                <span>Alertes</span>
+                <strong id="hud-alerts">0</strong>
+            </article>
         </section>
 
         <section class="control-panel">
@@ -58,19 +74,34 @@
                 <button data-action="securityHire">Renforcer securite</button>
             </div>
 
+            <div class="strategy-modes" id="strategy-modes" role="group" aria-label="Cap strategique">
+                <button type="button" class="strategy-mode active" data-stance="balanced">
+                    <strong>Equilibre</strong>
+                    <span>Stable</span>
+                </button>
+                <button type="button" class="strategy-mode" data-stance="discreet">
+                    <strong>Discret</strong>
+                    <span>Safe</span>
+                </button>
+                <button type="button" class="strategy-mode" data-stance="nightlife">
+                    <strong>Nightlife</strong>
+                    <span>Aggro</span>
+                </button>
+            </div>
+
+            <div class="objective-strip" id="objective-strip"></div>
+
             <div class="risk-board" id="risk-board"></div>
 
             <button id="next-day" class="next-btn">Lancer la nuit</button>
-            <p class="notice">
-                Mode simulation management. Focus sur gestion et conformite, sans contenu explicite.
-            </p>
+            <p class="notice">Management only. No explicit content.</p>
         </section>
 
         <section class="bottom-grid">
             <article class="panel">
-                <h3>Rapport de nuit</h3>
+                <h3>Dashboard Nuit</h3>
                 <div id="night-report" class="report">
-                    <p>Prepare ton etablissement puis clique sur <strong>Lancer la nuit</strong>.</p>
+                    <p>Ready. Clique <strong>Lancer la nuit</strong>.</p>
                 </div>
             </article>
             <article class="panel">
