@@ -311,6 +311,77 @@ select {
     padding: 8px 10px;
 }
 
+.budget-stack {
+    margin-top: 10px;
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.budget-stack > span {
+    display: block;
+    height: 100%;
+    min-width: 2px;
+}
+
+.seg-social {
+    background: linear-gradient(90deg, #4fc3ff, #78d8ff);
+}
+
+.seg-defense {
+    background: linear-gradient(90deg, #ffa55a, #ffc078);
+}
+
+.seg-economy {
+    background: linear-gradient(90deg, #ffd25e, #ffe18f);
+}
+
+.seg-ecology {
+    background: linear-gradient(90deg, #4ccf8f, #8ce8b9);
+}
+
+.budget-grid {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+}
+
+.budget-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #d4e3ee;
+}
+
+.budget-row strong {
+    font-size: 0.76rem;
+    color: #f7fcff;
+}
+
+.budget-grid input[type="range"] {
+    width: 100%;
+    accent-color: #88c6ff;
+    margin: 0;
+}
+
+.budget-presets {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.budget-presets .budget-preset {
+    margin-top: 0;
+    padding: 7px 8px;
+    font-size: 0.78rem;
+}
+
 .objective-card {
     border-left: 3px solid rgba(255, 255, 255, 0.26);
 }
@@ -342,6 +413,41 @@ select {
 
 .turn-log-wrap {
     margin-top: 12px;
+}
+
+.news-feed {
+    margin-top: 8px;
+    max-height: 180px;
+    overflow: auto;
+    display: grid;
+    gap: 7px;
+}
+
+.news-item {
+    border-radius: 10px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.8rem;
+}
+
+.news-item.good {
+    border-left: 3px solid var(--friendly);
+}
+
+.news-item.warn {
+    border-left: 3px solid var(--neutral);
+}
+
+.news-item.bad {
+    border-left: 3px solid var(--hostile);
+}
+
+.news-item .meta {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 2px;
 }
 
 .turn-log {
@@ -450,6 +556,95 @@ select {
     filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
 }
 
+.map-fx-layer {
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+.map-fx-ring,
+.map-fx-core,
+.map-fx-arc,
+.map-fx-weather {
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.map-fx-ring {
+    fill: none;
+    stroke: #ffcf5d;
+    stroke-width: 2.2;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 7px rgba(255, 207, 93, 0.5));
+}
+
+.map-fx-core {
+    fill: #ffcf5d;
+    opacity: 0.88;
+    filter: drop-shadow(0 0 10px rgba(255, 207, 93, 0.55));
+}
+
+.map-fx-arc {
+    fill: none;
+    stroke: #ffcf5d;
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 8px rgba(255, 207, 93, 0.6));
+}
+
+.map-fx-weather {
+    fill: rgba(196, 231, 255, 0.52);
+    stroke: rgba(196, 231, 255, 0.95);
+    stroke-width: 1;
+    opacity: 0.75;
+    filter: drop-shadow(0 0 6px rgba(196, 231, 255, 0.5));
+}
+
+.fx-friendly.map-fx-ring,
+.fx-friendly.map-fx-core,
+.fx-friendly.map-fx-arc {
+    stroke: #2cc58e;
+    fill: #2cc58e;
+    filter: drop-shadow(0 0 8px rgba(44, 197, 142, 0.58));
+}
+
+.fx-warning.map-fx-ring,
+.fx-warning.map-fx-core,
+.fx-warning.map-fx-arc {
+    stroke: #ffcf5d;
+    fill: #ffcf5d;
+    filter: drop-shadow(0 0 8px rgba(255, 207, 93, 0.58));
+}
+
+.fx-hostile.map-fx-ring,
+.fx-hostile.map-fx-core,
+.fx-hostile.map-fx-arc,
+.fx-war.map-fx-ring,
+.fx-war.map-fx-core,
+.fx-war.map-fx-arc {
+    stroke: #ff6b63;
+    fill: #ff6b63;
+    filter: drop-shadow(0 0 9px rgba(232, 100, 96, 0.68));
+}
+
+.fx-player.map-fx-ring,
+.fx-player.map-fx-core,
+.fx-player.map-fx-arc {
+    stroke: #5aa6ff;
+    fill: #5aa6ff;
+    filter: drop-shadow(0 0 8px rgba(90, 166, 255, 0.62));
+}
+
+.fx-neutral.map-fx-ring,
+.fx-neutral.map-fx-core,
+.fx-neutral.map-fx-arc {
+    stroke: #d0e4f7;
+    fill: #d0e4f7;
+    filter: drop-shadow(0 0 7px rgba(208, 228, 247, 0.52));
+}
+
 .map-legend {
     display: flex;
     flex-wrap: wrap;
@@ -548,6 +743,125 @@ select {
 .risk-value {
     text-align: right;
     font-weight: 700;
+}
+
+.cabinet-card {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    padding: 9px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.cabinet-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+}
+
+.cabinet-head h4 {
+    margin: 0;
+    font-size: 0.92rem;
+    font-family: "Space Grotesk", sans-serif;
+    letter-spacing: 0;
+}
+
+.cabinet-role {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.76rem;
+}
+
+.trust-tag {
+    font-size: 0.72rem;
+    border-radius: 999px;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cabinet-impact {
+    margin-top: 6px;
+    font-size: 0.74rem;
+    color: #b7d8f0;
+}
+
+.social-blocks {
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+}
+
+.social-row {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) 44px;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.79rem;
+}
+
+.social-row .label {
+    color: #c8d8e6;
+}
+
+.social-track {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+}
+
+.social-track > i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #e86460, #ffcf5d, #2cc58e);
+}
+
+.social-val {
+    text-align: right;
+    font-weight: 700;
+}
+
+.mandate-timeline {
+    margin-top: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.timeline-track {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+}
+
+.timeline-track > i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #5aa6ff, #2cc58e);
+}
+
+.timeline-marks {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.timeline-mark {
+    font-size: 0.7rem;
+    text-align: center;
+    border-radius: 8px;
+    padding: 4px 3px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.timeline-mark.done {
+    border-color: rgba(44, 197, 142, 0.45);
+    background: rgba(44, 197, 142, 0.12);
 }
 
 .modal {

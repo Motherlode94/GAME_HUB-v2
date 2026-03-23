@@ -15,6 +15,109 @@ const LOCATIONS = {
   shrine:  { name:'Sanctuaire',     icon:'⛩️', label:'Sanctuaire Tenshino',  bgClass:'shrine',  timeOfDay:'night' },
 };
 
+const LOCATION_ROOMS = {
+  school: [
+    { id:'classroom',    name:'Salle de classe' },
+    { id:'courtyard',    name:'Cour centrale' },
+    { id:'clubroom',     name:'Salle de club' },
+    { id:'gym',          name:'Gymnase' },
+    { id:'rooftop_gate', name:'Accès toit' },
+  ],
+  park: [
+    { id:'entrance',    name:'Entrée du parc' },
+    { id:'cherry_path', name:'Allée sakura' },
+    { id:'pond',        name:'Étang' },
+    { id:'picnic',      name:'Pelouse pique-nique' },
+  ],
+  cafe: [
+    { id:'counter',  name:'Comptoir' },
+    { id:'terrace',  name:'Terrasse' },
+    { id:'kitchen',  name:'Cuisine' },
+    { id:'backroom', name:'Réserve' },
+  ],
+  library: [
+    { id:'hall',         name:'Hall principal' },
+    { id:'reading_room', name:'Salle de lecture' },
+    { id:'archives',     name:'Archives' },
+    { id:'upper_floor',  name:'Étage silencieux' },
+  ],
+  rooftop: [
+    { id:'door',       name:'Porte d accès' },
+    { id:'fence',      name:'Rambarde' },
+    { id:'bench',      name:'Coin banc' },
+    { id:'water_tank', name:'Citerne' },
+  ],
+  home: [
+    { id:'entry',   name:'Entrée' },
+    { id:'living',  name:'Salon' },
+    { id:'kitchen', name:'Cuisine' },
+    { id:'bedroom', name:'Chambre' },
+    { id:'balcony', name:'Balcon' },
+  ],
+  beach: [
+    { id:'promenade', name:'Promenade' },
+    { id:'shore',     name:'Rive' },
+    { id:'pier',      name:'Ponton' },
+    { id:'snack',     name:'Kiosque' },
+  ],
+  shrine: [
+    { id:'torii',     name:'Porte torii' },
+    { id:'courtyard', name:'Cour' },
+    { id:'ema_wall',  name:'Mur des vœux' },
+    { id:'main_hall', name:'Salle principale' },
+  ],
+};
+
+const SLOT_LABELS = {
+  morning:'Matin',
+  afternoon:'Après-midi',
+  evening:'Soir',
+  night:'Nuit',
+};
+
+const SLOT_LOCATION_POOL = {
+  morning:   ['school','library','park','school','home'],
+  afternoon: ['school','cafe','park','library','home'],
+  evening:   ['cafe','park','rooftop','home','shrine'],
+  night:     ['home','rooftop','shrine','beach','cafe'],
+};
+
+const WEATHER_LOCATION_BOOSTS = {
+  rain:  ['home','library','cafe'],
+  storm: ['home','cafe','library'],
+  snow:  ['home','library'],
+  sunny: ['park','school','beach'],
+  cherry:['park','shrine','cafe'],
+  cloudy:['school','library'],
+};
+
+const CHARACTER_ACTIVITY_BY_SLOT = {
+  sakura: {
+    morning:'Sakura classe ses notes de recettes.',
+    afternoon:'Sakura prépare quelque chose de sucré.',
+    evening:'Sakura cherche un endroit calme pour parler.',
+    night:'Sakura écrit dans son carnet personnel.',
+  },
+  akira: {
+    morning:'Akira vérifie son matériel avant les cours.',
+    afternoon:'Akira bouge entre entraînement et musique.',
+    evening:'Akira se pose à l écart pour souffler.',
+    night:'Akira compose en silence.',
+  },
+  yuki: {
+    morning:'Yuki lit déjà depuis un moment.',
+    afternoon:'Yuki observe et note chaque détail.',
+    evening:'Yuki aime les espaces peu fréquentés.',
+    night:'Yuki médite avant de rentrer.',
+  },
+  nana: {
+    morning:'Nana est déjà en mouvement.',
+    afternoon:'Nana enchaîne activités et rencontres.',
+    evening:'Nana cherche encore une dernière énergie.',
+    night:'Nana termine la journée en debrief.',
+  },
+};
+
 const WEATHERS = [
   { id:'sunny',   icon:'☀️',  label:'Ensoleillé', bonus:0  },
   { id:'cloudy',  icon:'☁️',  label:'Nuageux',    bonus:0  },
@@ -887,6 +990,7 @@ function initState() {
   G = {
     day:1, ap:3, money:2000,
     selId:null, location:'school',
+    room:'classroom',
     weather: WEATHERS[0],
     seenEvents:{},
     workDone:false, studyDone:false,
@@ -894,14 +998,100 @@ function initState() {
     typing:false,
     currentProfile: null,
     currentProfileTab: 'bio',
+    charPresence:{},
+    presenceMap:{},
   };
-  chars.forEach(c=>{ G.seenEvents[c.id]={}; });
+  chars.forEach(c=>{
+    c.affection = Number.isFinite(c.affection) ? c.affection : 0;
+    G.seenEvents[c.id]={};
+  });
+  if(!getRoomMeta(G.location, G.room)) G.room=defaultRoomForLocation(G.location);
 }
 
 // ── HELPERS ──────────────────────────────────────────────────
 function getChar(id){ return chars.find(c=>c.id===id); }
 function getStage(aff){ for(let i=STAGES.length-1;i>=0;i--) if(aff>=STAGES[i].min) return i; return 0; }
 function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function hashSeed(seed){
+  let h=2166136261;
+  for(let i=0;i<seed.length;i++){
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h>>>0);
+}
+function pickDeterministic(list, seed){
+  if(!list || !list.length) return null;
+  return list[hashSeed(seed) % list.length];
+}
+function getTimeSlot(){
+  if(G.ap>=3) return 'morning';
+  if(G.ap===2) return 'afternoon';
+  if(G.ap===1) return 'evening';
+  return 'night';
+}
+function getRoomMeta(locationId, roomId){
+  const rooms=LOCATION_ROOMS[locationId]||[];
+  return rooms.find(r=>r.id===roomId)||null;
+}
+function defaultRoomForLocation(locationId){
+  const rooms=LOCATION_ROOMS[locationId]||[];
+  return rooms.length?rooms[0].id:null;
+}
+function getRoomName(locationId, roomId){
+  const room=getRoomMeta(locationId, roomId);
+  return room?room.name:'-';
+}
+function isCharacterInCurrentRoom(charId){
+  const pos=G.charPresence?.[charId];
+  return !!(pos && pos.location===G.location && pos.room===G.room);
+}
+function getLocationPoolForChar(c, slot){
+  const pool=[...(SLOT_LOCATION_POOL[slot]||Object.keys(LOCATIONS))];
+  pool.push(c.fav_loc, c.fav_loc);
+  if(c.id==='sakura') pool.push('cafe','home','library');
+  if(c.id==='akira') pool.push('rooftop','school','cafe');
+  if(c.id==='yuki') pool.push('library','shrine','home');
+  if(c.id==='nana') pool.push('park','school','beach');
+  pool.push(...(WEATHER_LOCATION_BOOSTS[G.weather?.id]||[]));
+  if(G.day%7===0) pool.push('shrine');
+  if(G.day%5===0) pool.push('home');
+  return pool.filter(loc=>LOCATIONS[loc]);
+}
+function buildPresenceReason(c, slot){
+  const base=(CHARACTER_ACTIVITY_BY_SLOT[c.id]||{})[slot] || `${c.name.split(' ')[0]} profite du moment.`;
+  if(G.weather?.id==='rain') return `${base} La pluie ralentit le rythme.`;
+  if(G.weather?.id==='snow') return `${base} La neige rend le lieu plus calme.`;
+  if(G.weather?.id==='cherry') return `${base} Les pétales attirent du monde.`;
+  return base;
+}
+function resolveNpcPresence(){
+  const slot=getTimeSlot();
+  const nextMap={};
+  const nextChars={};
+
+  Object.keys(LOCATION_ROOMS).forEach(loc=>{
+    nextMap[loc]={};
+    (LOCATION_ROOMS[loc]||[]).forEach(room=>{ nextMap[loc][room.id]=[]; });
+  });
+
+  chars.forEach(c=>{
+    const seed=`${c.id}|${G.day}|${slot}|${G.weather.id}`;
+    const loc=pickDeterministic(getLocationPoolForChar(c, slot), seed+'|loc') || c.fav_loc;
+    const rooms=LOCATION_ROOMS[loc]||[];
+    const roomMeta=pickDeterministic(rooms, seed+'|room') || rooms[0];
+    const roomId=roomMeta?roomMeta.id:defaultRoomForLocation(loc);
+    nextChars[c.id]={ location:loc, room:roomId, reason:buildPresenceReason(c, slot), slot };
+    if(nextMap[loc] && nextMap[loc][roomId]) nextMap[loc][roomId].push(c.id);
+  });
+
+  G.charPresence=nextChars;
+  G.presenceMap=nextMap;
+  if(!getRoomMeta(G.location, G.room)) G.room=defaultRoomForLocation(G.location);
+}
+function syncPresenceAfterTimeChange(previousSlot){
+  if(previousSlot!==getTimeSlot()) resolveNpcPresence();
+}
 
 function showNotif(msg, color='var(--pink)'){
   const el=document.getElementById('notif');
@@ -1253,6 +1443,8 @@ function renderHUD(){
   // Lieu
   const loc=LOCATIONS[G.location];
   document.getElementById('hud-loc-badge').textContent=loc.icon+' '+loc.name;
+  const room=getRoomMeta(G.location, G.room);
+  document.getElementById('hud-room-badge').textContent=room?`Pièce: ${room.name}`:'Pièce: -';
   // Char
   const c=G.selId?getChar(G.selId):null;
   if(c){
@@ -1289,8 +1481,19 @@ function renderChars(){
     const pct=Math.round(c.affection);
     const arc=getCurrentArc(c);
     const hasNew=Object.values(G.seenEvents[c.id]||{}).some(v=>v===false);
+    const pos=G.charPresence?.[c.id];
+    const sameLoc=!!(pos && pos.location===G.location);
+    const sameRoom=!!(sameLoc && pos.room===G.room);
+    const whereText = !pos
+      ? 'Position inconnue'
+      : sameRoom
+        ? 'Ici'
+        : sameLoc
+          ? `Dans ${getRoomName(pos.location, pos.room)}`
+          : `${LOCATIONS[pos.location].icon} ${LOCATIONS[pos.location].name}`;
+    const presenceClass = sameRoom ? ' here' : sameLoc ? ' near' : ' away';
     const div=document.createElement('div');
-    div.className='char-card'+(c.id===G.selId?' active':'');
+    div.className='char-card'+(c.id===G.selId?' active':'')+presenceClass;
     div.style.setProperty('--char-color',c.color);
     div.style.borderTopColor=c.color;
     div.style.borderTopWidth='2px';
@@ -1304,6 +1507,7 @@ function renderChars(){
       <div class="aff-row"><span>Affection</span><span>${pct}/100</span></div>
       <div class="aff-bar"><div class="aff-fill" style="width:${pct}%;background:linear-gradient(90deg,${c.accent},${c.color})"></div></div>
       <div class="char-stage-label" style="color:${STAGES[stg].color}">${STAGES[stg].label}</div>
+      <div class="char-presence">${whereText}</div>
       ${arc?`<div class="char-arc-tag">✦ ${arc.name}</div>`:''}
     `;
     list.appendChild(div);
@@ -1317,7 +1521,8 @@ function renderScene(){
   document.getElementById('loc-name').textContent=loc.label;
   const sw=document.getElementById('sprite-wrap');
   const sh=document.getElementById('char-shadow');
-  if(G.selId){
+  const selectedPresent=G.selId && isCharacterInCurrentRoom(G.selId);
+  if(selectedPresent){
     sw.innerHTML=buildSprite(G.selId,165);
     sh.style.display='block';
     sw.classList.remove('float');
@@ -1330,11 +1535,12 @@ function renderScene(){
 
 function renderActions(){
   const sel=!!G.selId;
-  document.getElementById('btn-talk').disabled=   !sel||G.ap<=0;
-  document.getElementById('btn-listen').disabled= !sel||G.ap<=0;
-  document.getElementById('btn-flirt').disabled=  !sel||G.ap<=0;
-  document.getElementById('btn-gift').disabled=   !sel||G.money<300;
-  document.getElementById('btn-date').disabled=   !sel||G.money<600;
+  const selectedPresent=sel && isCharacterInCurrentRoom(G.selId);
+  document.getElementById('btn-talk').disabled=   !selectedPresent||G.ap<=0;
+  document.getElementById('btn-listen').disabled= !selectedPresent||G.ap<=0;
+  document.getElementById('btn-flirt').disabled=  !selectedPresent||G.ap<=0;
+  document.getElementById('btn-gift').disabled=   !selectedPresent||G.money<300;
+  document.getElementById('btn-date').disabled=   !selectedPresent||G.money<600;
   document.getElementById('btn-profile').disabled=!sel;
   document.getElementById('btn-work').disabled=   G.ap<=0||G.workDone;
   document.getElementById('btn-study').disabled=  G.ap<=0||G.studyDone;
@@ -1346,9 +1552,71 @@ function renderActions(){
   const confBtn=document.getElementById('btn-confess');
   if(G.selId){
     const c=getChar(G.selId);
-    if(c.affection>=90){ confBtn.style.display='flex'; confBtn.disabled=G.ap<=0; }
+    if(c.affection>=90){ confBtn.style.display='flex'; confBtn.disabled=!selectedPresent||G.ap<=0; }
     else confBtn.style.display='none';
   } else confBtn.style.display='none';
+}
+
+function renderRooms(){
+  const list=document.getElementById('room-list');
+  if(!list) return;
+  const rooms=LOCATION_ROOMS[G.location]||[];
+  const map=(G.presenceMap&&G.presenceMap[G.location])||{};
+  list.innerHTML='';
+
+  if(!rooms.length){
+    list.innerHTML='<div class="presence-empty">Aucune pièce disponible.</div>';
+    return;
+  }
+
+  rooms.forEach(room=>{
+    const occupants=(map[room.id]||[]).length;
+    const btn=document.createElement('button');
+    btn.className='room-btn'+(room.id===G.room?' active':'');
+    btn.innerHTML=`<span>${room.name}</span><span class="room-count">${occupants}</span>`;
+    btn.onclick=()=>setRoom(room.id);
+    list.appendChild(btn);
+  });
+}
+
+function renderPresence(){
+  const list=document.getElementById('presence-list');
+  if(!list) return;
+  const map=(G.presenceMap&&G.presenceMap[G.location])||{};
+  const ids=(map[G.room]||[]);
+  list.innerHTML='';
+
+  if(!ids.length){
+    list.innerHTML=`<div class="presence-empty">Aucun PNJ dans cette pièce (${SLOT_LABELS[getTimeSlot()]}).</div>`;
+  } else {
+    ids.forEach(id=>{
+      const c=getChar(id);
+      const pos=G.charPresence[id];
+      if(!c||!pos) return;
+      const item=document.createElement('button');
+      item.className='presence-item'+(G.selId===id?' active':'');
+      item.innerHTML=`
+        <div class="presence-top">
+          <span class="presence-name" style="color:${c.color}">${c.emoji} ${c.name.split(' ')[0]}</span>
+          <span class="presence-chip">${SLOT_LABELS[pos.slot]}</span>
+        </div>
+        <div class="presence-note">${pos.reason}</div>
+      `;
+      item.onclick=()=>selectChar(id);
+      list.appendChild(item);
+    });
+  }
+
+  if(G.selId && !isCharacterInCurrentRoom(G.selId)){
+    const c=getChar(G.selId);
+    const pos=G.charPresence[G.selId];
+    if(c&&pos){
+      const hint=document.createElement('div');
+      hint.className='presence-hint';
+      hint.innerHTML=`${c.emoji} ${c.name.split(' ')[0]} est à ${LOCATIONS[pos.location].name}, ${getRoomName(pos.location,pos.room)}.`;
+      list.appendChild(hint);
+    }
+  }
 }
 
 function renderMemories(){
@@ -1363,15 +1631,38 @@ function renderMemories(){
   ).join('');
 }
 
-function renderAll(){ renderHUD(); renderChars(); renderScene(); renderActions(); renderMemories(); }
+function renderAll(){ renderHUD(); renderChars(); renderScene(); renderActions(); renderRooms(); renderPresence(); renderMemories(); }
 
 // ── SÉLECTION PERSONNAGE ─────────────────────────────────────
 function selectChar(id){
   G.selId=id;
   const c=getChar(id);
-  const dlgs=c.dialogues[G.location];
-  const line=dlgs[Math.floor(Math.random()*dlgs.length)];
+  const pos=G.charPresence[id];
+
+  if(pos && pos.location===G.location && pos.room!==G.room){
+    G.room=pos.room;
+    showNotif(`Tu rejoins ${c.name.split(' ')[0]} dans ${getRoomName(pos.location,pos.room)}.`,'var(--blue)');
+  }
+
   renderAll();
+
+  if(!pos){
+    narratorSay(`${c.name.split(' ')[0]} est introuvable pour le moment.`);
+    return;
+  }
+
+  if(pos.location!==G.location){
+    narratorSay(`${c.name.split(' ')[0]} n'est pas ici. Elle est à ${LOCATIONS[pos.location].name}, ${getRoomName(pos.location,pos.room)}.`);
+    return;
+  }
+
+  if(pos.room!==G.room){
+    narratorSay(`${c.name.split(' ')[0]} est dans ${getRoomName(pos.location,pos.room)}.`);
+    return;
+  }
+
+  const dlgs=c.dialogues[G.location]||c.dialogues.school||[];
+  const line=dlgs[Math.floor(Math.random()*dlgs.length)]||'...';
   typeText(c.name, line, c.color);
   setTimeout(()=>checkEvents(id),400);
 }
@@ -1380,7 +1671,7 @@ function selectChar(id){
 function gainAffection(id, base){
   const c=getChar(id);
   const weather=G.weather.bonus||0;
-  const locBonus=G.location===c.fav_loc?3:0;
+  const locBonus=(G.location===c.fav_loc && isCharacterInCurrentRoom(id))?3:0;
   const total=base+weather+locBonus;
   const oldStage=getStage(c.affection);
   c.affection=Math.min(100,c.affection+total);
@@ -1396,6 +1687,14 @@ function spendAP(n=1){ G.ap=Math.max(0,G.ap-n); }
 // ── ACTIONS ──────────────────────────────────────────────────
 function doAction(type){
   const c=getChar(G.selId); if(!c) return;
+  if(!isCharacterInCurrentRoom(c.id)){
+    const pos=G.charPresence[c.id];
+    if(pos) showNotif(`${c.emoji} ${c.name.split(' ')[0]} est dans ${getRoomName(pos.location,pos.room)}.`,'var(--blue)');
+    else showNotif(`${c.emoji} ${c.name.split(' ')[0]} n'est pas disponible.`,'var(--blue)');
+    return;
+  }
+
+  const previousSlot=getTimeSlot();
 
   switch(type){
     case 'talk':{
@@ -1458,25 +1757,32 @@ function doAction(type){
       break;
     }
   }
+  syncPresenceAfterTimeChange(previousSlot);
   renderAll();
   setTimeout(()=>checkEvents(c.id),500);
 }
 
 function doWork(){
-  if(G.ap<=0||G.workDone) return; spendAP(); G.workDone=true;
+  if(G.ap<=0||G.workDone) return;
+  const previousSlot=getTimeSlot();
+  spendAP(); G.workDone=true;
   const msg=WORK_MSGS[Math.floor(Math.random()*WORK_MSGS.length)];
   const earn=rand(280,450); G.money+=earn;
   narratorSay(msg);
   showNotif(`💼 +${earn}¥ gagné !`,'var(--gold)');
+  syncPresenceAfterTimeChange(previousSlot);
   renderAll();
 }
 
 function doStudy(){
-  if(G.ap<=0||G.studyDone) return; spendAP(); G.studyDone=true;
+  if(G.ap<=0||G.studyDone) return;
+  const previousSlot=getTimeSlot();
+  spendAP(); G.studyDone=true;
   const msg=STUDY_MSGS[Math.floor(Math.random()*STUDY_MSGS.length)];
   narratorSay(msg);
   showNotif(`📖 Tu as étudié. La connaissance est une richesse.`,'var(--blue)');
   if(G.selId){ const c=getChar(G.selId); gainAffection(c.id,2); }
+  syncPresenceAfterTimeChange(previousSlot);
   renderAll();
 }
 
@@ -1633,32 +1939,67 @@ function switchProfileTab(tab, btn){
 function closeProfile(){ document.getElementById('profile-modal').classList.remove('show'); }
 
 // ── LIEU ─────────────────────────────────────────────────────
+function setRoom(roomId){
+  if(!getRoomMeta(G.location, roomId)) return;
+  if(G.room===roomId) return;
+  G.room=roomId;
+  renderAll();
+  const roomName=getRoomName(G.location, roomId);
+  narratorSay(`Tu entres dans ${roomName.toLowerCase()}.`);
+  if(G.selId && !isCharacterInCurrentRoom(G.selId)){
+    const c=getChar(G.selId);
+    if(c) showNotif(`${c.emoji} ${c.name.split(' ')[0]} n'est pas dans cette pièce.`,'var(--blue)');
+  }
+}
+
 function setLocation(loc){
   G.location=loc;
-  renderScene(); renderActions(); renderHUD();
+  if(!getRoomMeta(loc, G.room)) G.room=defaultRoomForLocation(loc);
+
+  if(G.selId){
+    const pos=G.charPresence[G.selId];
+    if(pos && pos.location===loc && pos.room!==G.room) G.room=pos.room;
+  }
+
+  renderAll();
   const locData=LOCATIONS[loc];
+
   if(G.selId){
     const c=getChar(G.selId);
+    const pos=G.charPresence[c.id];
+    if(!pos || pos.location!==loc){
+      typeText('Narrateur', `${c.name.split(' ')[0]} n'est pas dans ce lieu pour le moment.`, 'rgba(200,180,255,.9)');
+      return;
+    }
+
     const dlgs=c.dialogues[loc]||c.dialogues.school;
     const line=dlgs[Math.floor(Math.random()*dlgs.length)];
     const favBonus=loc===c.fav_loc?' ✿ (son endroit préféré !)':'';
     typeText(c.name,line+favBonus,c.color);
-    if(loc===c.fav_loc){ gainAffection(c.id,2); showNotif(`${c.emoji} ${c.name} adore cet endroit !`,c.color); renderAll(); }
+
+    if(loc===c.fav_loc && isCharacterInCurrentRoom(c.id)){
+      gainAffection(c.id,2);
+      showNotif(`${c.emoji} ${c.name} adore cet endroit !`,c.color);
+      renderAll();
+    }
   } else {
     narratorSay(`Tu arrives ${locData.label}. ${loc==='shrine'?'Le parfum de l\'encens flotte dans l\'air.':loc==='rooftop'?'La ville s\'étale sous tes yeux.':loc==='beach'?'Le bruit des vagues efface tout le reste.':'L\'atmosphère particulière de ce lieu t\'enveloppe.'}`);
   }
 }
 
-// ── JOUR SUIVANT ─────────────────────────────────────────────
 function nextDay(){
   G.day++; G.ap=3; G.workDone=false; G.studyDone=false;
   if(G.day>30){ showEndScreen(); return; }
   randomizeWeather();
-  // Déplacement aléatoire occasionnel
+
   if(Math.random()<0.25){
     const locs=Object.keys(LOCATIONS);
     G.location=locs[Math.floor(Math.random()*locs.length)];
   }
+
+  if(!getRoomMeta(G.location, G.room)) G.room=defaultRoomForLocation(G.location);
+  resolveNpcPresence();
+
   const dayMsgs=[
     `Jour ${G.day}. ${G.weather.icon} La ville se réveille sous un ciel ${G.weather.label.toLowerCase()}.`,
     `Matin du jour ${G.day}. ${G.weather.icon} Les rues sentent ${G.weather.id==='rain'?'la pluie et la terre mouillée.':'le café frais et les fleurs de cerisier.'}`,
@@ -1670,7 +2011,6 @@ function nextDay(){
   renderAll();
 }
 
-// ── FIN ──────────────────────────────────────────────────────
 function showEndScreen(){
   const grid=document.getElementById('results-grid');
   grid.innerHTML='';
@@ -1721,12 +2061,13 @@ function startGame(){
   initState();
   showScreen('main-screen');
   randomizeWeather();
+  resolveNpcPresence();
   renderAll();
   narratorSay('Le soleil se lève sur l\'académie Sakura Hills… Une brise légère fait tourbillonner les pétales. Trente jours. Quatre histoires possibles. Laquelle vas-tu choisir ?');
 }
-function restartGame(){ initState(); showScreen('title-screen'); renderTitlePreview(); }
+function restartGame(){ initState(); resolveNpcPresence(); showScreen('title-screen'); renderTitlePreview(); }
 
 // ── INIT ─────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded',()=>{
-  spawnParticles(); initState(); renderTitlePreview();
+  spawnParticles(); initState(); resolveNpcPresence(); renderTitlePreview();
 });

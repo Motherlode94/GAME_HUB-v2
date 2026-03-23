@@ -10,9 +10,36 @@
         premium: { label: "Premium", ticket: 360, demandMult: 0.83, brandShift: 2 }
     };
 
+    const STRATEGIES = {
+        balanced: {
+            label: "Equilibre",
+            demandMult: 1,
+            ticketShift: 0,
+            brandShift: 0,
+            complianceShift: 0,
+            moraleShift: 0
+        },
+        brand: {
+            label: "Brand First",
+            demandMult: 0.84,
+            ticketShift: 38,
+            brandShift: 1.8,
+            complianceShift: 0.9,
+            moraleShift: 0.7
+        },
+        viral: {
+            label: "Viral Push",
+            demandMult: 1.28,
+            ticketShift: -22,
+            brandShift: -1.5,
+            complianceShift: -1.4,
+            moraleShift: -1.1
+        }
+    };
+
     const ACTIONS = {
         talent: {
-            label: "Scout talent",
+            label: "Talent",
             cost: 470,
             apply(state) {
                 state.team += 1;
@@ -22,7 +49,7 @@
             }
         },
         shoot: {
-            label: "Tourner production",
+            label: "Shoot",
             cost: 520,
             apply(state) {
                 const qualityGain = 1 + Math.round(state.studio * 0.4) + Math.round(state.team / 4);
@@ -33,7 +60,7 @@
             }
         },
         marketing: {
-            label: "Push marketing",
+            label: "Ads",
             cost: 360,
             apply(state) {
                 state.promo += 18;
@@ -42,7 +69,7 @@
             }
         },
         legal: {
-            label: "Audit legal",
+            label: "Audit",
             cost: 310,
             apply(state) {
                 state.compliance += 10;
@@ -51,7 +78,7 @@
             }
         },
         wellness: {
-            label: "Recuperation equipe",
+            label: "Wellness",
             cost: 280,
             apply(state) {
                 state.morale += 10;
@@ -60,7 +87,7 @@
             }
         },
         upgrade: {
-            label: "Upgrade studio",
+            label: "Upgrade",
             cost: 980,
             apply(state) {
                 state.studio += 1;
@@ -74,6 +101,7 @@
     const dom = {
         dayLabel: document.getElementById("day-label"),
         phaseLabel: document.getElementById("phase-label"),
+        strategyLabel: document.getElementById("strategy-label"),
         cash: document.getElementById("cash"),
         brand: document.getElementById("brand"),
         compliance: document.getElementById("compliance"),
@@ -82,7 +110,12 @@
         catalog: document.getElementById("catalog"),
         team: document.getElementById("team"),
         studio: document.getElementById("studio"),
+        hudPricing: document.getElementById("hud-pricing"),
+        hudStrategy: document.getElementById("hud-strategy"),
+        hudIssues: document.getElementById("hud-issues"),
         riskBoard: document.getElementById("risk-board"),
+        objectiveStrip: document.getElementById("objective-strip"),
+        strategyButtons: Array.from(document.querySelectorAll("[data-strategy]")),
         pricingSelect: document.getElementById("pricing-select"),
         actionButtons: Array.from(document.querySelectorAll("[data-action]")),
         nextDayBtn: document.getElementById("next-day-btn"),
@@ -110,6 +143,7 @@
             promo: 0,
             issues: 0,
             pricing: "balanced",
+            strategy: "balanced",
             gameOver: false,
             logs: ["Le label adulte ouvre son premier cycle de production."]
         };
@@ -142,7 +176,20 @@
         s.logs = s.logs.slice(0, 24);
     }
 
+    function getObjectives() {
+        return [
+            { label: "Cash", value: state.cash, target: 28000, suffix: "c", isCash: true },
+            { label: "Audience", value: state.audience, target: 180000, suffix: "", isCash: true },
+            { label: "Conformite", value: state.compliance, target: 74, suffix: "%", isCash: false }
+        ];
+    }
+
+    function completedGoalsCount() {
+        return getObjectives().filter((goal) => goal.value >= goal.target).length;
+    }
+
     function scoreValue() {
+        const objectiveBonus = completedGoalsCount() * 2200;
         return Math.max(0, Math.round(
             state.cash +
             state.audience * 0.4 +
@@ -151,7 +198,8 @@
             state.compliance * 86 +
             state.morale * 72 +
             state.day * 220 -
-            state.issues * 340
+            state.issues * 340 +
+            objectiveBonus
         ));
     }
 
@@ -255,24 +303,54 @@
         `).join("");
     }
 
+    function renderObjectives() {
+        if (!dom.objectiveStrip) return;
+        const goals = getObjectives();
+        dom.objectiveStrip.innerHTML = goals.map((goal) => {
+            const progress = clamp((goal.value / goal.target) * 100, 0, 100);
+            const done = goal.value >= goal.target;
+            const currentRaw = goal.isCash ? fmt(goal.value) : Math.round(goal.value);
+            const targetRaw = goal.isCash ? fmt(goal.target) : Math.round(goal.target);
+            const current = goal.suffix ? `${currentRaw}${goal.suffix}` : `${currentRaw}`;
+            const target = goal.suffix ? `${targetRaw}${goal.suffix}` : `${targetRaw}`;
+            return `
+                <article class="objective">
+                    <div class="objective-head">
+                        <strong>${goal.label}</strong>
+                        <span class="objective-tag ${done ? "done" : ""}">${done ? "ok" : "en cours"}</span>
+                    </div>
+                    <div class="objective-track"><i style="width:${Math.round(progress)}%"></i></div>
+                    <div class="objective-meta">${current} / ${target}</div>
+                </article>
+            `;
+        }).join("");
+    }
+
     function renderReport(report) {
         if (!report) {
-            dom.report.innerHTML = "<p>Configure ton empire puis lance un cycle.</p>";
+            dom.report.innerHTML = "<p>Ready. Clique <strong>Publier</strong>.</p>";
             return;
         }
         const netCol = report.net >= 0 ? "var(--good)" : "var(--bad)";
         const netSign = report.net >= 0 ? "+" : "";
         dom.report.innerHTML = `
-            <p><span class="label">Demande:</span> ${fmt(report.demand)} vues payantes</p>
-            <p><span class="label">Recettes:</span> <span style="color:var(--good)">+${fmt(report.revenue)}</span> | Couts: <span style="color:var(--bad)">-${fmt(report.costs)}</span></p>
-            <p><span class="label">Resultat:</span> <strong style="color:${netCol}">${netSign}${fmt(report.net)}</strong></p>
-            <p><span class="label">Evenement:</span> ${report.event}</p>
+            <div class="report-grid">
+                <div class="report-cell"><span class="label">DEM</span><strong>${fmt(report.demand)}</strong></div>
+                <div class="report-cell"><span class="label">NET</span><strong style="color:${netCol}">${netSign}${fmt(report.net)}</strong></div>
+                <div class="report-cell"><span class="label">REV</span><strong style="color:var(--good)">+${fmt(report.revenue)}</strong></div>
+                <div class="report-cell"><span class="label">COST</span><strong style="color:var(--bad)">-${fmt(report.costs)}</strong></div>
+            </div>
+            <p class="report-event"><span class="label">EVT</span> ${report.event}</p>
         `;
     }
 
     function render() {
+        const strategy = STRATEGIES[state.strategy] || STRATEGIES.balanced;
         dom.dayLabel.textContent = `Jour ${Math.min(state.day, MAX_DAYS)} / ${MAX_DAYS}`;
         dom.phaseLabel.textContent = phaseText();
+        if (dom.strategyLabel) {
+            dom.strategyLabel.textContent = `Angle: ${strategy.label}`;
+        }
         dom.cash.textContent = `${fmt(state.cash)} c`;
         dom.cash.style.color = state.cash < 1500 ? "var(--bad)" : state.cash < 3500 ? "var(--warn)" : "";
         dom.brand.textContent = `${Math.round(state.brand)}%`;
@@ -286,15 +364,32 @@
         dom.team.textContent = fmt(state.team);
         dom.studio.textContent = fmt(state.studio);
         dom.pricingSelect.value = state.pricing;
+        if (dom.hudPricing) {
+            dom.hudPricing.textContent = PRICING[state.pricing].label;
+        }
+        if (dom.hudStrategy) {
+            dom.hudStrategy.textContent = strategy.label;
+        }
+        if (dom.hudIssues) {
+            dom.hudIssues.textContent = String(state.issues);
+            dom.hudIssues.style.color = state.issues >= 4 ? "var(--bad)" : state.issues >= 2 ? "var(--warn)" : "var(--good)";
+        }
         dom.logList.innerHTML = state.logs.map((entry) => {
             let cls = "";
             if (/\+\d|viral|bonus|positif|signe|validee|assainis|proactive|fortune|hausse|popularite/.test(entry)) cls = "log-good";
             else if (/penalite|signalement|fatigue|burnout|demissionn|takedown|panne|effondre|legal|shutdown/.test(entry)) cls = "log-bad";
             return `<li class="${cls}">${entry}</li>`;
         }).join("");
+        dom.strategyButtons.forEach((button) => {
+            button.classList.toggle("active", button.dataset.strategy === state.strategy);
+        });
+        renderObjectives();
         renderRisks();
 
         dom.actionButtons.forEach((button) => {
+            button.disabled = state.gameOver;
+        });
+        dom.strategyButtons.forEach((button) => {
             button.disabled = state.gameOver;
         });
         dom.nextDayBtn.disabled = state.gameOver;
@@ -331,6 +426,7 @@
     function closeCycle() {
         if (state.gameOver) return;
         const pricing = PRICING[state.pricing];
+        const strategy = STRATEGIES[state.strategy] || STRATEGIES.balanced;
 
         const baseDemand =
             (state.audience * 0.08) +
@@ -338,13 +434,13 @@
             (state.brand * 36) +
             (state.promo * 180) +
             rnd(-1500, 2100);
-        const demand = Math.max(0, Math.round(baseDemand * pricing.demandMult));
+        const demand = Math.max(0, Math.round(baseDemand * pricing.demandMult * strategy.demandMult));
 
         const capacity = (state.team * 1200) + (state.studio * 2600);
         const monetized = Math.min(demand, capacity);
 
         const revenue =
-            Math.round((monetized * (pricing.ticket / 100)) + (state.catalog * 110) + rnd(180, 640));
+            Math.round((monetized * ((pricing.ticket + strategy.ticketShift) / 100)) + (state.catalog * 110) + rnd(180, 640));
         const payroll = state.team * 95;
         const ops = state.studio * 130;
         const legalReserve = Math.round((100 - state.compliance) * 6.2);
@@ -353,9 +449,9 @@
 
         state.cash += net;
         state.audience += Math.round((monetized * 0.09) + (state.brand * 18) - (pricing.demandMult < 1 ? 120 : 0));
-        state.brand += pricing.brandShift + (net > 0 ? 1 : -2);
-        state.compliance -= 1.4 + (state.team / 30);
-        state.morale += (net > 0 ? 1.2 : -2.5) - (state.team > 12 ? 1 : 0);
+        state.brand += pricing.brandShift + strategy.brandShift + (net > 0 ? 1 : -2);
+        state.compliance += (-1.4 - (state.team / 30)) + strategy.complianceShift;
+        state.morale += (net > 0 ? 1.2 : -2.5) - (state.team > 12 ? 1 : 0) + strategy.moraleShift;
         state.promo = Math.max(0, state.promo - 6);
 
         const report = { demand, revenue, costs, net, event: "Journee stable." };
@@ -383,8 +479,9 @@
         if (state.gameOver) return;
         state.gameOver = true;
         const score = scoreValue();
+        const goalsDone = completedGoalsCount();
         dom.endTitle.textContent = title;
-        dom.endText.textContent = `${text} Score final: ${fmt(score)}.`;
+        dom.endText.textContent = `${text} Score final: ${fmt(score)}. Objectifs valides: ${goalsDone}/3.`;
         dom.endModal.classList.remove("hidden");
         dom.endModal.setAttribute("aria-hidden", "false");
         sendScore(score);
@@ -401,6 +498,17 @@
     function bind() {
         dom.actionButtons.forEach((button) => {
             button.addEventListener("click", () => applyAction(button.dataset.action));
+        });
+
+        dom.strategyButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                if (state.gameOver) return;
+                const nextStrategy = button.dataset.strategy;
+                if (!STRATEGIES[nextStrategy] || nextStrategy === state.strategy) return;
+                state.strategy = nextStrategy;
+                log(state, `Angle de croissance actif: ${STRATEGIES[nextStrategy].label}.`);
+                render();
+            });
         });
 
         dom.pricingSelect.addEventListener("change", () => {

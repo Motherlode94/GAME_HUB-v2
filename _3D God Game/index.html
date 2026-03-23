@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#020409">
+  <meta name="description" content="Jeu de simulation divine en 3D centré sur l'évolution, la survie et l'observation d'un monde vivant.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Dieu Observateur — Évolution & Survie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <canvas id="canvas" aria-hidden="true"></canvas>
+
+  <div id="hud">
+
+    <!-- Barre du haut -->
+    <div id="top-bar">
+      <div id="era-display">
+        <span id="era-icon">🌋</span>
+        <div id="era-info">
+          <div id="era-name">Ère Primitive</div>
+          <div id="era-year">An 0</div>
+        </div>
+      </div>
+
+      <div id="stats-center">
+        <div class="stat-pill">
+          <span class="stat-icon">👤</span>
+          <span class="stat-label">Humains</span>
+          <span class="stat-value" id="human-count">0</span>
+        </div>
+        <div class="stat-sep">·</div>
+        <div class="stat-pill">
+          <span class="stat-icon">🦌</span>
+          <span class="stat-label">Cerfs</span>
+          <span class="stat-value" id="deer-count">0</span>
+        </div>
+        <div class="stat-sep">·</div>
+        <div class="stat-pill">
+          <span class="stat-icon">🐺</span>
+          <span class="stat-label">Loups</span>
+          <span class="stat-value" id="wolf-count">0</span>
+        </div>
+        <div class="stat-sep">·</div>
+        <div class="stat-pill">
+          <span class="stat-icon">🕐</span>
+          <span class="stat-label">Heure</span>
+          <span class="stat-value" id="time-display">Aube</span>
+        </div>
+        <div class="stat-sep">·</div>
+        <div class="stat-pill">
+          <span class="stat-icon">🌱</span>
+          <span class="stat-label">Saison</span>
+          <span class="stat-value" id="season-display">Printemps</span>
+        </div>
+      </div>
+
+      <div id="era-progress-wrap">
+        <div id="era-progress-label">Prochaine ère</div>
+        <div id="era-progress-bar"><div id="era-progress-fill"></div></div>
+        <div id="gen-display">Gén. moy. <span id="gen-avg">1</span></div>
+      </div>
+    </div>
+
+    <!-- Graphe de population -->
+    <div id="pop-graph-panel">
+      <div class="panel-title">📊 POPULATION</div>
+      <div id="pop-legend">
+        <span class="pop-deer">▬ Cerfs</span>
+        <span class="pop-humans">▬ Humains</span>
+        <span class="pop-wolves">▬ Loups</span>
+      </div>
+      <canvas id="pop-graph" width="170" height="55"></canvas>
+    </div>
+
+    <div id="minimap-panel">
+      <div class="panel-title">🧭 MINIMAP</div>
+      <canvas id="minimap" width="170" height="170"></canvas>
+      <div id="minimap-legend">
+        <span class="pop-humans">● Humains</span>
+        <span class="pop-deer">● Cerfs</span>
+        <span class="pop-wolves">● Loups</span>
+      </div>
+    </div>
+
+    <div id="detail-stats-panel">
+      <div class="panel-title">📜 CHRONIQUES</div>
+      <div class="detail-stat-row"><span>Saison</span><strong id="detail-season">🌱 Printemps</strong></div>
+      <div class="detail-stat-row"><span>Naissances</span><strong id="detail-births">0</strong></div>
+      <div class="detail-stat-row"><span>Morts</span><strong id="detail-deaths">0</strong></div>
+      <div class="detail-stat-row"><span>Guerres</span><strong id="detail-wars">0</strong></div>
+      <div class="detail-stat-row"><span>Conversions</span><strong id="detail-conversions">0</strong></div>
+      <div class="detail-stat-row"><span>Maladies</span><strong id="detail-disease">0</strong></div>
+    </div>
+
+    <!-- Légende des adaptations -->
+    <div id="adapt-legend">
+      <div class="legend-title">ADAPTATIONS</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#D0EEFF"></span>Froid</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#CC5522"></span>Chaleur</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#3A8A2A"></span>Camouflage</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#EED060"></span>Vitesse</div>
+    </div>
+
+    <!-- Journal d'événements -->
+    <div id="event-log" aria-live="polite">
+      <div class="panel-title">✦ CHRONIQUES DU MONDE ✦</div>
+      <div id="events"></div>
+    </div>
+
+    <!-- Inspecteur de créature (clic sur une créature) -->
+    <div id="creature-inspector" class="hidden">
+      <button type="button" id="inspector-close" aria-label="Fermer l'inspecteur">✕</button>
+      <div class="panel-title" id="inspector-title">✦ CRÉATURE ✦</div>
+      <div id="inspector-header">
+        <span id="inspector-icon">👤</span>
+        <div>
+          <div id="inspector-type">Humain</div>
+          <div id="inspector-gen">Génération 1</div>
+          <div id="inspector-age">Âge : 0s</div>
+        </div>
+      </div>
+      <div id="inspector-state-row">
+        <span id="inspector-state">🚶 Errance</span>
+        <span id="inspector-biome">🌿 Forêt</span>
+      </div>
+
+      <div class="inspector-section">── BESOINS ──</div>
+      <div class="need-row">
+        <span class="need-label">🍖 Faim</span>
+        <div class="need-bar"><div class="need-fill" id="bar-hunger" style="background:#CC7733"></div></div>
+        <span class="need-val" id="val-hunger">80%</span>
+      </div>
+      <div class="need-row">
+        <span class="need-label">💧 Soif</span>
+        <div class="need-bar"><div class="need-fill" id="bar-thirst" style="background:#3388CC"></div></div>
+        <span class="need-val" id="val-thirst">80%</span>
+      </div>
+      <div class="need-row">
+        <span class="need-label">⚡ Énergie</span>
+        <div class="need-bar"><div class="need-fill" id="bar-energy" style="background:#CCAA22"></div></div>
+        <span class="need-val" id="val-energy">80%</span>
+      </div>
+
+      <div class="inspector-section">── ADN ──</div>
+      <div class="gene-row"><span class="gene-label">❄️ Froid</span><div class="gene-bar"><div class="gene-fill cold-gene" id="dna-cold"></div></div></div>
+      <div class="gene-row"><span class="gene-label">🔥 Chaleur</span><div class="gene-bar"><div class="gene-fill heat-gene" id="dna-heat"></div></div></div>
+      <div class="gene-row"><span class="gene-label">💨 Vitesse</span><div class="gene-bar"><div class="gene-fill speed-gene" id="dna-speed"></div></div></div>
+      <div class="gene-row"><span class="gene-label">💪 Force</span><div class="gene-bar"><div class="gene-fill str-gene" id="dna-strength"></div></div></div>
+      <div class="gene-row"><span class="gene-label">🌿 Discrétion</span><div class="gene-bar"><div class="gene-fill camo-gene" id="dna-camo"></div></div></div>
+      <div class="gene-row"><span class="gene-label">🏃 Endurance</span><div class="gene-bar"><div class="gene-fill stam-gene" id="dna-stamina"></div></div></div>
+      <div class="gene-row"><span class="gene-label">🧬 Immunité</span><div class="gene-bar"><div class="gene-fill imm-gene" id="dna-immunity"></div></div></div>
+
+      <div id="dominant-trait"></div>
+
+      <div class="inspector-section">── GÉNÉALOGIE ──</div>
+      <div id="lineage-tree"></div>
+      <div id="creature-flags"></div>
+    </div>
+
+    <!-- Pouvoirs divins -->
+    <div id="god-powers">
+      <div class="panel-title">⚜ POUVOIRS DIVINS ⚜</div>
+      <div id="powers-grid">
+        <button type="button" class="power-btn" data-power="rain" aria-label="Pouvoir pluie">
+          <span class="power-icon">🌧️</span>
+          <span class="power-name">Pluie</span>
+        </button>
+        <button type="button" class="power-btn" data-power="lightning" aria-label="Pouvoir foudre">
+          <span class="power-icon">⚡</span>
+          <span class="power-name">Foudre</span>
+        </button>
+        <button type="button" class="power-btn" data-power="abundance" aria-label="Pouvoir abondance">
+          <span class="power-icon">🌱</span>
+          <span class="power-name">Abondance</span>
+        </button>
+        <button type="button" class="power-btn" data-power="plague" aria-label="Pouvoir fléau">
+          <span class="power-icon">💀</span>
+          <span class="power-name">Fléau</span>
+        </button>
+        <button type="button" class="power-btn" data-power="blizzard" aria-label="Pouvoir blizzard">
+          <span class="power-icon">🌨️</span>
+          <span class="power-name">Blizzard</span>
+        </button>
+        <button type="button" class="power-btn toggle-btn" id="btn-speed" data-power="speed" aria-label="Accélérer le temps">
+          <span class="power-icon">⏩</span>
+          <span class="power-name">Accélérer</span>
+        </button>
+        <button type="button" class="power-btn toggle-btn" id="btn-pause" data-power="pause" aria-label="Mettre le jeu en pause">
+          <span class="power-icon">⏸</span>
+          <span class="power-name">Pause</span>
+        </button>
+        <button type="button" class="power-btn" data-power="meteor" aria-label="Pouvoir météorite">
+          <span class="power-icon">☄️</span>
+          <span class="power-name">Météorite</span>
+        </button>
+        <button type="button" class="power-btn" data-power="prophet" aria-label="Pouvoir prophète">
+          <span class="power-icon">🕊️</span>
+          <span class="power-name">Prophète</span>
+        </button>
+        <button type="button" class="power-btn" data-power="angel" aria-label="Pouvoir ange">
+          <span class="power-icon">👼</span>
+          <span class="power-name">Ange</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="camera-hint" aria-hidden="true">🖱 Gauche+glisser: rotation · Droit+glisser: déplacer · Molette: zoom · Clic: sélectionner</div>
+
+  </div>
+
+  <div id="flash-overlay"></div>
+  <div id="notification" role="status" aria-live="polite"></div>
+
+  <div id="loading-screen" role="status" aria-live="polite">
+    <div id="loading-inner">
+      <div id="loading-title">DIEU OBSERVATEUR</div>
+      <div id="loading-sub">Évolution & Survie</div>
+      <div id="loading-spinner"></div>
+      <div id="loading-text">Génération du monde...</div>
+    </div>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
