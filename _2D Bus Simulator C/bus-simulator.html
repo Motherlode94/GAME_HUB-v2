@@ -136,17 +136,17 @@ canvas{display:block;position:absolute;inset:0}
 
 <!-- Start screen -->
 <div id="start">
-  <div class="ey">ArtVibe Games présente</div>
+  <div class="ey">WN Games présente</div>
   <h1>BUS<br>SIM</h1>
   <div class="sub">Conduisez le bus ligne 42 à travers la ville. Ramassez les passagers à chaque arrêt et complétez 6 tours !</div>
   <div class="cg">
     <div><span class="ck">↑ / W</span> — Accélérer</div>
-    <div><span class="ck">Relâcher</span> — Freiner</div>
+    <div><span class="ck">↓ / S</span> — Freiner / Marche arrière</div>
     <div><span class="ck">ESPACE</span> — Ouvrir / Fermer portes</div>
     <div><span class="ck">R</span> — Recommencer</div>
   </div>
   <button id="start-btn">DÉMARRER</button>
-  <div class="badge">ArtVibe Games © 2025</div>
+  <div class="badge">WN Games © 2025</div>
 </div>
 </div>
 
@@ -159,6 +159,7 @@ canvas{display:block;position:absolute;inset:0}
 const C = document.getElementById('c');
 const ctx = C.getContext('2d');
 const W = 900, H = 580;
+const ACCEL = 0.072, BRAKE_STR = 0.12, REVERSE_ACCEL = 0.05, MAX_FWD = 3.5, MAX_REV = -1.5;
 
 // ── ROAD / ROUTE CONFIG ──────────────────────────────
 const RX1=150, RX2=750, RY1=168, RY2=412;  // road centres
@@ -378,9 +379,29 @@ function updateHUD(){
 // ── UPDATE ────────────────────────────────────────────
 function update(){
   // Speed — forward only, no reverse gear
-  if(keys['ArrowUp']||keys['KeyW']) bspd=Math.min(3.5,bspd+0.072);
-  else{bspd*=0.962;if(bspd<0.008)bspd=0;}
-  bspd=Math.max(0,bspd); // hard clamp — impossible to reverse
+if(keys['ArrowUp'] || keys['KeyW']) {
+    // Accélération avant
+    bspd = Math.min(MAX_FWD, bspd + ACCEL);
+} else if(keys['ArrowDown'] || keys['KeyS']) {
+    // Frein ou marche arrière
+    if(bspd > 0) {
+        // Freinage : décélération plus forte
+        bspd -= BRAKE_STR;
+        if(bspd < 0) bspd = 0;
+    } else {
+        // Marche arrière si vitesse <= 0
+        bspd = Math.max(MAX_REV, bspd - REVERSE_ACCEL);
+    }
+} else {
+    // Décélération naturelle (roue libre)
+    if(bspd > 0) {
+        bspd *= 0.962;
+        if(bspd < 0.008) bspd = 0;
+    } else if(bspd < 0) {
+        bspd *= 0.95;
+        if(bspd > -0.008) bspd = 0;
+    }
+}
 
   // Auto-close on speed
   if(doorsOpen&&bspd>0.45){

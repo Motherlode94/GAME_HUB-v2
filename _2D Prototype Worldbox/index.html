@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WorldBox</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c9a84c; --gold-light: #e8c96a; --gold-dim: #7a6230;
+      --bg-deep: #0a0c0f; --bg-panel: #0f1218; --bg-section: #141820; --bg-hover: #1c2230;
+      --border: rgba(201,168,76,0.2); --border-bright: rgba(201,168,76,0.5);
+      --text-main: #e8dfc8; --text-dim: #7a7060; --text-accent: #c9a84c;
+      --red: #c0392b; --green: #2ecc71;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Crimson Pro', Georgia, serif;
+      background: var(--bg-deep); color: var(--text-main);
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+      background-image: radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.03) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 20%, rgba(60,80,120,0.05) 0%, transparent 50%);
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
+      position: relative; z-index: 10; flex-shrink: 0;
+    }
+    .header-brand { display: flex; align-items: center; gap: 10px; }
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    h1 { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--gold); letter-spacing: 0.12em; text-transform: uppercase; }
+    .header-subtitle { font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dim); font-family: 'Cinzel', serif; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse-dot 2s infinite; }
+    .status-dot.paused { background: var(--red); box-shadow: 0 0 6px var(--red); animation: none; }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .weather-badge {
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.06em;
+      background: var(--bg-section); border: 1px solid var(--border); border-radius: 20px;
+      padding: 4px 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px;
+    }
+    .layout { display: grid; grid-template-columns: 220px 1fr 200px; flex: 1; overflow: hidden; }
+    .sidebar {
+      background: var(--bg-panel); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+    .sidebar-section { padding: 12px 12px 10px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 9px; padding-bottom: 5px; border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .tool-btn {
+      background: var(--bg-section); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 6px 7px; cursor: pointer; color: var(--text-main);
+      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase;
+      transition: all .15s ease; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      position: relative; overflow: hidden;
+    }
+    .tool-btn::before { content:''; position:absolute; inset:0; background:var(--tool-color,var(--gold)); opacity:0; transition:opacity .15s; }
+    .tool-btn:hover::before { opacity:.06; }
+    .tool-btn:hover { border-color: var(--border-bright); color: var(--gold-light); }
+    .tool-btn.actif { border-color: var(--gold); background: rgba(201,168,76,.1); color: var(--gold-light); box-shadow: 0 0 12px rgba(201,168,76,.15), inset 0 0 20px rgba(201,168,76,.05); }
+    .tool-btn.actif::after { content:''; position:absolute; top:0;left:0;right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+    .tool-icon { font-size: 17px; line-height: 1; position: relative; z-index: 1; }
+    .tool-name { position: relative; z-index: 1; }
+    [data-outil="eau"]{--tool-color:#2b6cff} [data-outil="herbe"]{--tool-color:#46a84b}
+    [data-outil="sable"]{--tool-color:#d9c27a} [data-outil="foret"]{--tool-color:#1f6b2d}
+    [data-outil="montagne"]{--tool-color:#7c7c7c} [data-outil="feu"]{--tool-color:#ff5a1f}
+    [data-outil="neige"]{--tool-color:#add8e6} [data-outil="marais"]{--tool-color:#5a7a3a}
+    [data-outil="humain"]{--tool-color:#ffe0bd} [data-outil="animal"]{--tool-color:#b5651d}
+    [data-outil="orc"]{--tool-color:#5a9a3a} [data-outil="elfe"]{--tool-color:#88d8b0}
+    [data-outil="zombie"]{--tool-color:#7a9a4a} [data-outil="supprimer"]{--tool-color:#c0392b}
+    .action-btn {
+      background: var(--bg-section); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px; cursor: pointer; color: var(--text-main); font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; transition: all .15s;
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .action-btn:hover { border-color: var(--border-bright); background: var(--bg-hover); color: var(--gold-light); }
+    .action-btn.danger:hover { border-color: rgba(192,57,43,.5); color: #e74c3c; }
+    .action-btn.primary { border-color: var(--gold-dim); color: var(--gold); }
+    .action-btn.primary:hover { background: rgba(201,168,76,.1); border-color: var(--gold); box-shadow: 0 0 10px rgba(201,168,76,.15); }
+    .actions-col { display: flex; flex-direction: column; gap: 5px; }
+    .brush-control { padding: 0 2px; }
+    .brush-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .brush-value { font-family:'Cinzel',serif; font-size:11px; color:var(--gold); background:rgba(201,168,76,.1); border:1px solid var(--border); border-radius:4px; padding:2px 8px; }
+    input[type="range"] { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--bg-section); outline:none; border:1px solid var(--border); }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid var(--bg-panel); box-shadow:0 0 6px rgba(201,168,76,.4); }
+    .sim-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+    .sim-btn { background:var(--bg-section); border:1px solid var(--border); border-radius:8px; padding:8px 5px; cursor:pointer; color:var(--text-main); font-family:'Cinzel',serif; font-size:9px; letter-spacing:.05em; text-transform:uppercase; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:4px; }
+    .sim-btn:hover { background:var(--bg-hover); border-color:var(--border-bright); }
+    .sim-btn.pause-btn:hover { color:#e74c3c; border-color:rgba(192,57,43,.4); }
+    .sim-btn.play-btn:hover { color:var(--green); border-color:rgba(46,204,113,.4); }
+    .canvas-area { display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-deep); overflow:auto; padding:16px; position:relative; }
+    .canvas-frame { position:relative; display:inline-block; }
+    .canvas-frame::before { content:''; position:absolute; inset:-1px; border-radius:4px; background:linear-gradient(135deg,var(--gold-dim),transparent 40%,transparent 60%,var(--gold-dim)); z-index:0; pointer-events:none; }
+    canvas { display:block; image-rendering:pixelated; max-width:100%; border-radius:2px; position:relative; z-index:1; cursor:crosshair; }
+    .corner { position:absolute; width:20px; height:20px; pointer-events:none; z-index:2; }
+    .corner-tl{top:-1px;left:-1px;border-top:2px solid var(--gold);border-left:2px solid var(--gold);border-radius:2px 0 0 0}
+    .corner-tr{top:-1px;right:-1px;border-top:2px solid var(--gold);border-right:2px solid var(--gold);border-radius:0 2px 0 0}
+    .corner-bl{bottom:-1px;left:-1px;border-bottom:2px solid var(--gold);border-left:2px solid var(--gold);border-radius:0 0 0 2px}
+    .corner-br{bottom:-1px;right:-1px;border-bottom:2px solid var(--gold);border-right:2px solid var(--gold);border-radius:0 0 2px 0}
+    .statusbar { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); background:rgba(10,12,15,.92); border:1px solid var(--border); border-radius:20px; padding:5px 16px; font-size:12px; color:var(--text-dim); letter-spacing:.04em; backdrop-filter:blur(8px); white-space:nowrap; z-index:10; transition:color .3s; pointer-events:none; }
+    .statusbar.highlight { color: var(--gold); }
+    .coord-display { position:absolute; top:16px; left:50%; transform:translateX(-50%); background:rgba(10,12,15,.85); border:1px solid var(--border); border-radius:6px; padding:4px 12px; font-family:'Cinzel',serif; font-size:10px; color:var(--text-dim); letter-spacing:.08em; backdrop-filter:blur(4px); pointer-events:none; }
+    .stats-panel { background:var(--bg-panel); border-left:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; }
+    .stats-panel::-webkit-scrollbar { width:4px; }
+    .stats-panel::-webkit-scrollbar-thumb { background:var(--gold-dim); border-radius:2px; }
+    .stat-section { padding:12px; border-bottom:1px solid var(--border); }
+    .stat-row { display:flex; justify-content:space-between; align-items:center; padding:3px 0; }
+    .stat-label { font-size:11px; color:var(--text-dim); }
+    .stat-value { font-family:'Cinzel',serif; font-size:11px; color:var(--gold); }
+    .stat-bar-wrap { margin-top:4px; height:3px; background:var(--bg-section); border-radius:2px; overflow:hidden; }
+    .stat-bar { height:100%; border-radius:2px; transition:width .5s; }
+    .legend-item { display:flex; align-items:center; gap:7px; padding:3px 0; }
+    .legend-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+    .legend-text { font-size:11px; color:var(--text-dim); }
+    .keys-hint { padding:10px 12px; }
+    .key-badge { display:inline-block; background:var(--bg-section); border:1px solid var(--border); border-radius:4px; padding:2px 6px; font-family:'Cinzel',serif; font-size:9px; color:var(--text-dim); margin:2px; }
+    #weatherCanvas { position:absolute; top:0; left:0; pointer-events:none; z-index:5; border-radius:2px; opacity:.55; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="brand-icon">🌍</div>
+    <div>
+      <h1>WorldBox</h1>
+      <div class="header-subtitle">v2 · Simulateur de monde</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="weather-badge" id="weatherBadge">☀️ <span id="weatherName">Ensoleillé</span></div>
+    <div class="header-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusLabel">Simulation active</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="section-label">Terrains</div>
+      <div class="tools-grid">
+        <button class="tool-btn" data-outil="eau"><span class="tool-icon">🌊</span><span class="tool-name">Eau</span></button>
+        <button class="tool-btn actif" data-outil="herbe"><span class="tool-icon">🌿</span><span class="tool-name">Herbe</span></button>
+        <button class="tool-btn" data-outil="sable"><span class="tool-icon">🏜️</span><span class="tool-name">Sable</span></button>
+        <button class="tool-btn" data-outil="foret"><span class="tool-icon">🌲</span><span class="tool-name">Forêt</span></button>
+        <button class="tool-btn" data-outil="montagne"><span class="tool-icon">⛰️</span><span class="tool-name">Montagne</span></button>
+        <button class="tool-btn" data-outil="neige"><span class="tool-icon">❄️</span><span class="tool-name">Neige</span></button>
+        <button class="tool-btn" data-outil="marais"><span class="tool-icon">🌾</span><span class="tool-name">Marais</span></button>
+        <button class="tool-btn" data-outil="feu"><span class="tool-icon">🔥</span><span class="tool-name">Feu</span></button>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-label">Entités</div>
+      <div class="tools-grid">
+        <button class="tool-btn" data-outil="humain"><span class="tool-icon">🧑</span><span class="tool-name">Humain</span></button>
+        <button class="tool-btn" data-outil="animal"><span class="tool-icon">🐾</span><span class="tool-name">Animal</span></button>
+        <button class="tool-btn" data-outil="orc"><span class="tool-icon">👹</span><span class="tool-name">Orc</span></button>
+        <button class="tool-btn" data-outil="elfe"><span class="tool-icon">🧝</span><span class="tool-name">Elfe</span></button>
+        <button class="tool-btn" data-outil="zombie"><span class="tool-icon">🧟</span><span class="tool-name">Zombie</span></button>
+        <button class="tool-btn" data-outil="supprimer"><span class="tool-icon">🗑️</span><span class="tool-name">Effacer</span></button>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-label">Actions</div>
+      <div class="actions-col">
+        <button class="action-btn primary" id="genererMondeBtn">✦ Générer monde</button>
+        <button class="action-btn danger" id="viderCarte">⬜ Vider carte</button>
+        <button class="action-btn" id="spawnJoueurBtn">👤 Placer joueur</button>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-label">Pinceau</div>
+      <div class="brush-control">
+        <div class="brush-header">
+          <span style="font-size:11px;color:var(--text-dim)">Rayon</span>
+          <span class="brush-value" id="valeurPinceau">1</span>
+        </div>
+        <input id="taillePinceau" type="range" min="1" max="5" value="1" />
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-label">Simulation</div>
+      <div class="sim-grid">
+        <button class="sim-btn pause-btn" id="pauseBtn">⏸ Pause</button>
+        <button class="sim-btn play-btn" id="reprendreBtn">▶ Jouer</button>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="section-label">Contrôles Joueur</div>
+      <div class="keys-hint">
+        <span class="key-badge">Z</span><span class="key-badge">Q</span><span class="key-badge">S</span><span class="key-badge">D</span>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:6px">Déplacer le joueur</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:4px">Clic → Peindre la carte</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="canvas-area">
+    <div class="canvas-frame">
+      <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+      <canvas id="monde"></canvas>
+      <canvas id="weatherCanvas"></canvas>
+    </div>
+    <div class="coord-display" id="coordDisplay">—</div>
+    <div class="statusbar" id="infos">Clique pour peindre · ZQSD pour déplacer le joueur</div>
+  </main>
+
+  <aside class="stats-panel">
+    <div class="stat-section">
+      <div class="section-label">Population</div>
+      <div class="stat-row"><span class="stat-label">🧑 Humains</span><span class="stat-value" id="statHumains">0</span></div>
+      <div class="stat-row"><span class="stat-label">🐾 Animaux</span><span class="stat-value" id="statAnimaux">0</span></div>
+      <div class="stat-row"><span class="stat-label">👹 Orcs</span><span class="stat-value" id="statOrcs">0</span></div>
+      <div class="stat-row"><span class="stat-label">🧝 Elfes</span><span class="stat-value" id="statElfes">0</span></div>
+      <div class="stat-row"><span class="stat-label">🧟 Zombies</span><span class="stat-value" id="statZombies">0</span></div>
+    </div>
+    <div class="stat-section">
+      <div class="section-label">Joueur</div>
+      <div class="stat-row"><span class="stat-label">❤️ Vie</span><span class="stat-value" id="statJoueurVie">—</span></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="barJoueurVie" style="width:100%;background:#e74c3c"></div></div>
+      <div class="stat-row" style="margin-top:6px"><span class="stat-label">📍 Position</span><span class="stat-value" id="statJoueurPos">—</span></div>
+    </div>
+    <div class="stat-section">
+      <div class="section-label">Terrain</div>
+      <div class="stat-row"><span class="stat-label">🌊 Eau</span><span class="stat-value" id="statEau">0%</span></div>
+      <div class="stat-row"><span class="stat-label">🌿 Herbe</span><span class="stat-value" id="statHerbe">0%</span></div>
+      <div class="stat-row"><span class="stat-label">🌲 Forêt</span><span class="stat-value" id="statForet">0%</span></div>
+      <div class="stat-row"><span class="stat-label">🏔️ Montagne</span><span class="stat-value" id="statMontagne">0%</span></div>
+      <div class="stat-row"><span class="stat-label">🏜️ Sable</span><span class="stat-value" id="statSable">0%</span></div>
+    </div>
+    <div class="stat-section">
+      <div class="section-label">Villages</div>
+      <div class="stat-row"><span class="stat-label">🏘️ Total</span><span class="stat-value" id="statVillages">0</span></div>
+      <div class="stat-row"><span class="stat-label">🔥 Incendies</span><span class="stat-value" id="statFeux">0</span></div>
+    </div>
+    <div class="stat-section">
+      <div class="section-label">Légende</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1a5fb4"></div><div class="legend-text">Eau profonde</div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a9eff"></div><div class="legend-text">Eau côtière</div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div><div class="legend-text">Plage / Sable</div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a9a50"></div><div class="legend-text">Herbe</div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2d6e35"></div><div class="legend-text">Forêt dense</div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#8a8a7a"></div><div class="legend-text">Montagne</div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dce8f0"></div><div class="legend-text">Neige / Glace</div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5a7a40"></div><div class="legend-text">Marais</div></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const COLS = 90, ROWS = 55, T = 11;
+
+const canvas = document.getElementById('monde');
+const ctx = canvas.getContext('2d');
+const wCanvas = document.getElementById('weatherCanvas');
+const wCtx = wCanvas.getContext('2d');
+canvas.width = wCanvas.width = COLS * T;
+canvas.height = wCanvas.height = ROWS * T;
+
+// ═══════════════════════════════════════════════════════
+// TERRAIN COLORS
+// ═══════════════════════════════════════════════════════
+const TERRAIN_PALETTE = {
+  eau:       { vars:['#1a4d9e','#1e5bb8','#163d80','#20609e'] },
+  eau_cote:  { vars:['#2979cc','#3385d0','#2570c0','#4090d8'] },
+  sable:     { vars:['#d4b86a','#c9a84c','#dcc07a','#c0a048','#e0c88a'] },
+  herbe:     { vars:['#4a9a50','#52a858','#3e8a44','#55ab5c','#468a4a','#5ab260'] },
+  foret:     { vars:['#2d6e35','#266030','#347840','#1e5528','#3a8040'] },
+  montagne:  { vars:['#8a8a7a','#7e7e6e','#969688','#828278','#747468'] },
+  feu:       { vars:['#e84a1a','#ff6030','#cc3a10','#ff7020'] },
+  neige:     { vars:['#dce8f0','#e4eef6','#d0e0ea','#c8dce8','#eaf2f8'] },
+  marais:    { vars:['#5a7a40','#4a6a34','#648a48','#507038','#3e5e2c'] },
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let outilActif = 'herbe';
+let taillePinceau = 1;
+let simulationActive = true;
+let clicEnCours = false;
+let tick = 0;
+
+const joueur = { x:10, y:10, vie:100, actif:false };
+const METEOS = [
+  { id:'soleil', nom:'Ensoleillé', emoji:'☀️', duree:300 },
+  { id:'nuage',  nom:'Nuageux',    emoji:'☁️', duree:200 },
+  { id:'pluie',  nom:'Pluie',      emoji:'🌧️', duree:180 },
+  { id:'orage',  nom:'Orage',      emoji:'⛈️', duree:80 },
+  { id:'neige',  nom:'Neige',      emoji:'🌨️', duree:100 },
+];
+let meteoActuelle = METEOS[0];
+let meteoDuree = 300;
+const particules = [];
+
+const grille = [];
+const seedGrid = [];
+
+// ═══════════════════════════════════════════════════════
+// ✦ NOISE — Value Noise avec interpolation bilinéaire lisse
+//   Remplace l'ancien Math.sin() chaotique
+// ═══════════════════════════════════════════════════════
+function hash2d(ix, iy, seed) {
+  // Hash déterministe : même seed → même carte
+  let h = (ix * 1619 + iy * 31337 + seed * 1013904223) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = h ^ (h >>> 16);
+  return (h >>> 0) / 0xFFFFFFFF; // [0,1]
+}
+
+function valueNoise(x, y, scale, seed) {
+  const fx = x * scale, fy = y * scale;
+  const ix = Math.floor(fx), iy = Math.floor(fy);
+  const tx = fx - ix, ty = fy - iy;
+  // Smoothstep pour éviter les artefacts de grille
+  const u = tx * tx * (3 - 2 * tx);
+  const v = ty * ty * (3 - 2 * ty);
+  const a = hash2d(ix,   iy,   seed);
+  const b = hash2d(ix+1, iy,   seed);
+  const c = hash2d(ix,   iy+1, seed);
+  const d = hash2d(ix+1, iy+1, seed);
+  return a*(1-u)*(1-v) + b*u*(1-v) + c*(1-u)*v + d*u*v;
+}
+
+// fBm : superposition de 4 octaves → relief naturel cohérent
+function fbm(x, y, seed) {
+  return valueNoise(x, y, 0.05, seed)        * 0.50
+       + valueNoise(x, y, 0.10, seed + 1000) * 0.25
+       + valueNoise(x, y, 0.20, seed + 2000) * 0.15
+       + valueNoise(x, y, 0.40, seed + 3000) * 0.10;
+  // amplitude totale max = 1.0
+}
+
+function moistureFbm(x, y, seed) {
+  return valueNoise(x, y, 0.06, seed)        * 0.55
+       + valueNoise(x, y, 0.12, seed + 500)  * 0.30
+       + valueNoise(x, y, 0.24, seed + 1500) * 0.15;
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function initGrille() {
+  grille.length = 0;
+  seedGrid.length = 0;
+  for (let y = 0; y < ROWS; y++) {
+    grille.push([]);
+    seedGrid.push([]);
+    for (let x = 0; x < COLS; x++) {
+      grille[y].push({ terrain:'herbe', feu:false, entite:null, structure:null, eau_prof:false });
+      seedGrid[y].push(Math.floor(Math.random() * 1000));
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ✦ GÉNÉRATION — île cohérente avec masque radial
+// ═══════════════════════════════════════════════════════
+function genererMonde() {
+  initGrille();
+  if (joueur.actif) joueur.actif = false;
+
+  const seed = Math.floor(Math.random() * 99999);
+  const cx = COLS / 2, cy = ROWS / 2;
+
+  // 1. Calcul élévation + humidité pour chaque cellule
+  const elevGrid = [];
+  const moistGrid = [];
+
+  for (let y = 0; y < ROWS; y++) {
+    elevGrid.push([]);
+    moistGrid.push([]);
+    for (let x = 0; x < COLS; x++) {
+      // Distance normalisée au centre (0=centre, 1=coin)
+      const dx = (x - cx) / cx;
+      const dy = (y - cy) / cy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      // Masque île : fort falloff aux bords pour forcer l'eau périphérique
+      // On utilise une forme légèrement elliptique + perturbation noise
+      const perturbation = valueNoise(x, y, 0.08, seed + 9000) * 0.18;
+      const distPerturbed = Math.max(0, dist - perturbation);
+      const mask = Math.max(0, 1 - Math.pow(distPerturbed / 0.82, 2.4));
+
+      const raw = fbm(x, y, seed);
+      elevGrid[y].push(raw * mask);
+      moistGrid[y].push(moistureFbm(x, y, seed + 50000));
+    }
+  }
+
+  // 2. Assignation des terrains via seuils calibrés
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const c = grille[y][x];
+      c.feu = false; c.entite = null; c.structure = null;
+
+      const e = elevGrid[y][x];  // élévation 0–1 (≈0.45 moyen sur terre)
+      const m = moistGrid[y][x]; // humidité 0–1
+
+      // Seuils clairs et non-chevauchants
+      if      (e < 0.18)                           { c.terrain = 'eau'; c.eau_prof = true; }
+      else if (e < 0.28)                           { c.terrain = 'eau'; c.eau_prof = false; }
+      else if (e < 0.33)                           { c.terrain = 'sable'; }
+      else if (e > 0.72)                           { c.terrain = 'neige'; }
+      else if (e > 0.58 && m < 0.42)              { c.terrain = 'montagne'; }
+      else if (m > 0.68 && e > 0.38)              { c.terrain = 'foret'; }
+      else if (m > 0.58 && e < 0.48)              { c.terrain = 'marais'; }
+      else                                          { c.terrain = 'herbe'; }
+    }
+  }
+
+  // 3. Rivières (tracé descendant depuis montagnes vers eau)
+  ajouterRivieres(elevGrid, 8);
+
+  rendreMonde();
+  mettreAJourStats();
+  setStatus('Nouveau monde généré — ZQSD pour déplacer le joueur.', true);
+}
+
+function ajouterRivieres(elevGrid, nbRivieres) {
+  // Trouve des sources en montagne
+  const sources = [];
+  for (let y = 2; y < ROWS-2; y++) {
+    for (let x = 2; x < COLS-2; x++) {
+      if (grille[y][x].terrain === 'montagne' && elevGrid[y][x] > 0.62) {
+        sources.push({x, y, e: elevGrid[y][x]});
+      }
+    }
+  }
+  sources.sort((a,b) => b.e - a.e);
+
+  let crees = 0, i = 0;
+  while (crees < nbRivieres && i < sources.length) {
+    let {x, y} = sources[i++];
+    const visited = new Set();
+    for (let step = 0; step < 100; step++) {
+      const key = `${x},${y}`;
+      if (visited.has(key)) break;
+      visited.add(key);
+      if (grille[y][x].terrain !== 'montagne' && grille[y][x].terrain !== 'neige') {
+        grille[y][x].terrain = 'eau';
+        grille[y][x].eau_prof = false;
+      }
+      // Descend vers le voisin le moins élevé
+      const ns = voisins(x, y)
+        .map(v => ({...v, e: elevGrid[v.y][v.x]}))
+        .sort((a,b) => a.e - b.e);
+      if (!ns.length) break;
+      const next = ns[0];
+      if (grille[next.y][next.x].terrain === 'eau') { crees++; break; }
+      if (next.e > elevGrid[y][x] + 0.03) break; // remontée, arrêt
+      x = next.x; y = next.y;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDU TUILES
+// ═══════════════════════════════════════════════════════
+function couleurTuile(c, x, y) {
+  if (c.feu) {
+    const pal = TERRAIN_PALETTE.feu.vars;
+    return pal[(tick + seedGrid[y][x]) % pal.length];
+  }
+  let key = c.terrain;
+  if (key === 'eau') key = c.eau_prof ? 'eau' : 'eau_cote';
+  const pal = TERRAIN_PALETTE[key];
+  if (!pal) return '#333';
+  const s = seedGrid[y][x];
+  return pal.vars[(s + Math.floor(s * 0.3)) % pal.vars.length];
+}
+
+function dessinerTuile(x, y) {
+  const c = grille[y][x];
+  const px = x*T, py = y*T;
+  const seed = seedGrid[y][x];
+  ctx.fillStyle = couleurTuile(c, x, y);
+  ctx.fillRect(px, py, T, T);
+  if (!c.feu) {
+    switch(c.terrain) {
+      case 'herbe':    dessinerHerbe(ctx,px,py,seed); break;
+      case 'foret':    dessinerForet(ctx,px,py,seed); break;
+      case 'montagne': dessinerMontagne(ctx,px,py,seed); break;
+      case 'eau':      dessinerEau(ctx,px,py,seed,c.eau_prof); break;
+      case 'sable':    dessinerSable(ctx,px,py,seed); break;
+      case 'neige':    dessinerNeige(ctx,px,py,seed); break;
+      case 'marais':   dessinerMarais(ctx,px,py,seed); break;
+    }
+  } else {
+    dessinerFeu(ctx,px,py,seed);
+  }
+  if (c.structure === 'village') dessinerVillage(ctx,px,py);
+}
+
+function dessinerHerbe(ctx,px,py,seed) {
+  ctx.fillStyle='rgba(30,80,35,0.5)';
+  const offsets=[[2,8],[5,6],[8,8],[3,5],[7,4],[1,3],[9,5]];
+  const nb=2+(seed%3);
+  for(let i=0;i<nb;i++){const o=offsets[i%offsets.length];ctx.fillRect(px+o[0],py+o[1],1,2);}
+  if(seed%9===0){ctx.fillStyle=seed%18===0?'rgba(255,200,50,0.7)':'rgba(220,80,120,0.6)';ctx.fillRect(px+5,py+4,2,2);}
+}
+
+function dessinerForet(ctx,px,py,seed) {
+  ctx.fillStyle='rgba(60,30,10,0.6)';ctx.fillRect(px+4,py+7,3,3);
+  ctx.fillStyle=seed%3===0?'rgba(20,70,25,0.7)':'rgba(30,90,35,0.6)';
+  ctx.beginPath();ctx.arc(px+T/2,py+4,4,0,Math.PI*2);ctx.fill();
+  if(seed%4===0){ctx.fillStyle='rgba(40,110,45,0.5)';ctx.beginPath();ctx.arc(px+3,py+6,2.5,0,Math.PI*2);ctx.fill();}
+}
+
+function dessinerMontagne(ctx,px,py,seed) {
+  ctx.fillStyle=seed%2===0?'rgba(60,60,55,0.6)':'rgba(70,70,65,0.5)';
+  ctx.beginPath();ctx.moveTo(px+T/2,py+1);ctx.lineTo(px+T-1,py+T-1);ctx.lineTo(px+1,py+T-1);ctx.closePath();ctx.fill();
+  if(seed%3===0){ctx.fillStyle='rgba(220,230,240,0.7)';ctx.beginPath();ctx.moveTo(px+T/2,py+1);ctx.lineTo(px+T/2+3,py+5);ctx.lineTo(px+T/2-3,py+5);ctx.closePath();ctx.fill();}
+}
+
+function dessinerEau(ctx,px,py,seed,deep) {
+  const phase=(tick*0.05+seed*0.3)%(Math.PI*2);
+  ctx.strokeStyle=`rgba(120,180,255,${deep?0.15:0.25})`;ctx.lineWidth=0.8;
+  ctx.beginPath();ctx.moveTo(px+1,py+4+Math.sin(phase)*1.5);ctx.quadraticCurveTo(px+3,py+4,px+6,py+4+Math.sin(phase+1)*1.5);ctx.stroke();
+  if(seed%3===0){ctx.beginPath();ctx.moveTo(px+2,py+7+Math.sin(phase+.5));ctx.quadraticCurveTo(px+5,py+7,px+9,py+7+Math.sin(phase+1.5));ctx.stroke();}
+}
+
+function dessinerSable(ctx,px,py,seed) {
+  ctx.fillStyle='rgba(120,90,20,0.3)';
+  const pts=[[2,3],[5,7],[8,2],[3,9],[7,5],[1,6]];
+  for(let i=0;i<2+seed%3;i++)ctx.fillRect(px+pts[i%pts.length][0],py+pts[i%pts.length][1],1,1);
+  if(seed%12===0){ctx.fillStyle='rgba(230,180,130,0.6)';ctx.beginPath();ctx.arc(px+6,py+6,1.5,0,Math.PI*2);ctx.fill();}
+}
+
+function dessinerNeige(ctx,px,py,seed) {
+  ctx.strokeStyle='rgba(140,180,210,0.6)';ctx.lineWidth=0.5;
+  const cx=px+T/2,cy=py+T/2;
+  for(let a=0;a<3;a++){const r=a*Math.PI/3;ctx.beginPath();ctx.moveTo(cx-Math.cos(r)*4,cy-Math.sin(r)*4);ctx.lineTo(cx+Math.cos(r)*4,cy+Math.sin(r)*4);ctx.stroke();}
+}
+
+function dessinerMarais(ctx,px,py,seed) {
+  ctx.fillStyle='rgba(40,50,20,0.35)';ctx.fillRect(px+1,py+7,T-2,3);
+  ctx.fillStyle='rgba(70,90,30,0.7)';ctx.fillRect(px+3,py+3,1,5);ctx.fillRect(px+7,py+4,1,4);
+  ctx.fillStyle='rgba(100,70,20,0.8)';ctx.beginPath();ctx.ellipse(px+3,py+3,1,2,0,0,Math.PI*2);ctx.fill();
+}
+
+function dessinerFeu(ctx,px,py,seed) {
+  const phase=(tick*0.15+seed*0.2)%(Math.PI*2);
+  const h=3+Math.sin(phase)*2;
+  ctx.fillStyle='rgba(255,80,0,0.7)';ctx.beginPath();ctx.moveTo(px+T/2,py+T-h-3);ctx.lineTo(px+T-2,py+T-1);ctx.lineTo(px+1,py+T-1);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(255,200,0,0.5)';ctx.beginPath();ctx.moveTo(px+T/2,py+T-h-1);ctx.lineTo(px+T/2+3,py+T-1);ctx.lineTo(px+T/2-3,py+T-1);ctx.closePath();ctx.fill();
+}
+
+function dessinerVillage(ctx,px,py) {
+  ctx.fillStyle='rgba(160,90,40,0.85)';ctx.fillRect(px+2,py+5,T-4,T-6);
+  ctx.fillStyle='rgba(180,60,30,0.8)';ctx.beginPath();ctx.moveTo(px+T/2,py+1);ctx.lineTo(px+T-1,py+5);ctx.lineTo(px+1,py+5);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(80,50,20,0.9)';ctx.fillRect(px+4,py+7,3,T-8);
+}
+
+function rendreMonde() {
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++) dessinerTuile(x,y);
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){const c=grille[y][x];if(c.entite)dessinerEntite(ctx,x,y,c.entite);}
+  if(joueur.actif) dessinerJoueur(ctx,joueur.x,joueur.y);
+}
+
+// ═══════════════════════════════════════════════════════
+// SPRITES ENTITÉS
+// ═══════════════════════════════════════════════════════
+function dessinerEntite(ctx,x,y,e) {
+  const px=x*T,py=y*T;
+  switch(e.type){
+    case 'humain': dessinerHumainSprite(ctx,px,py); break;
+    case 'animal': dessinerAnimalSprite(ctx,px,py); break;
+    case 'orc':    dessinerOrcSprite(ctx,px,py); break;
+    case 'elfe':   dessinerElfeSprite(ctx,px,py); break;
+    case 'zombie': dessinerZombieSprite(ctx,px,py); break;
+  }
+}
+
+function dessinerHumainSprite(ctx,px,py){
+  ctx.fillStyle='#f5c89a';ctx.beginPath();ctx.arc(px+T/2,py+4,2.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(80,120,200,0.9)';ctx.fillRect(px+3,py+6,5,4);
+  ctx.fillStyle='#f5c89a';ctx.fillRect(px+2,py+7,2,3);ctx.fillRect(px+7,py+7,2,3);
+  ctx.fillStyle='rgba(50,50,80,0.9)';ctx.fillRect(px+3,py+9,2,2);ctx.fillRect(px+6,py+9,2,2);
+}
+function dessinerAnimalSprite(ctx,px,py){
+  ctx.fillStyle='#a0724a';ctx.beginPath();ctx.ellipse(px+T/2,py+6,4,3,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px+8,py+4,2.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#7a5234';ctx.fillRect(px+7,py+2,1,2);ctx.fillRect(px+9,py+2,1,2);
+  ctx.fillRect(px+3,py+8,1,2);ctx.fillRect(px+5,py+8,1,2);ctx.fillRect(px+7,py+8,1,2);ctx.fillRect(px+9,py+8,1,2);
+}
+function dessinerOrcSprite(ctx,px,py){
+  ctx.fillStyle='#5a9a40';ctx.beginPath();ctx.arc(px+T/2,py+4,3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#4a8030';ctx.fillRect(px+2,py+6,7,5);
+  ctx.fillStyle='#e8d080';ctx.fillRect(px+3,py+7,1,3);ctx.fillRect(px+7,py+7,1,3);
+  ctx.fillStyle='#3a6020';ctx.fillRect(px+2,py+10,2,2);ctx.fillRect(px+7,py+10,2,2);
+}
+function dessinerElfeSprite(ctx,px,py){
+  ctx.fillStyle='#e8d0a8';ctx.beginPath();ctx.arc(px+T/2,py+4,2.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#d8c098';ctx.beginPath();ctx.moveTo(px+2,py+4);ctx.lineTo(px+5,py+2);ctx.lineTo(px+5,py+5);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(px+9,py+4);ctx.lineTo(px+6,py+2);ctx.lineTo(px+6,py+5);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(60,180,120,0.85)';ctx.fillRect(px+3,py+6,5,4);
+  ctx.fillStyle='#e8d0a8';ctx.fillRect(px+3,py+9,2,2);ctx.fillRect(px+6,py+9,2,2);
+}
+function dessinerZombieSprite(ctx,px,py){
+  ctx.fillStyle='#8a9a60';ctx.beginPath();ctx.arc(px+T/2,py+4,2.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(100,30,30,0.8)';ctx.beginPath();ctx.arc(px+6,py+3,1,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(70,80,50,0.85)';ctx.fillRect(px+3,py+6,5,4);
+  ctx.fillStyle='#8a9a60';ctx.fillRect(px+1,py+6,2,3);ctx.fillRect(px+8,py+6,2,3);
+  ctx.fillRect(px+3,py+9,2,2);ctx.fillRect(px+6,py+9,2,2);
+}
+
+function dessinerJoueur(ctx,x,y){
+  const px=x*T,py=y*T;
+  ctx.strokeStyle='rgba(255,220,80,0.8)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(px+T/2,py+T/2,T/2-0.5,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#f5c89a';ctx.beginPath();ctx.arc(px+T/2,py+3.5,2.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(200,60,40,0.95)';ctx.fillRect(px+2,py+6,7,4);
+  ctx.fillStyle='rgba(180,150,60,0.9)';ctx.fillRect(px+1,py+6,2,2);ctx.fillRect(px+8,py+6,2,2);
+  ctx.fillStyle='#f5c89a';ctx.fillRect(px+2,py+7,1,3);ctx.fillRect(px+8,py+7,1,3);
+  ctx.fillStyle='rgba(60,50,80,0.9)';ctx.fillRect(px+3,py+9,2,2);ctx.fillRect(px+6,py+9,2,2);
+  const pct=joueur.vie/100;
+  ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(px,py-4,T,3);
+  ctx.fillStyle=pct>0.5?'#2ecc71':pct>0.25?'#f39c12':'#e74c3c';
+  ctx.fillRect(px,py-4,T*pct,3);
+}
+
+// ═══════════════════════════════════════════════════════
+// MÉTÉO
+// ═══════════════════════════════════════════════════════
+function changerMeteo(){
+  meteoActuelle=METEOS[Math.floor(Math.random()*METEOS.length)];
+  meteoDuree=meteoActuelle.duree;
+  document.getElementById('weatherBadge').innerHTML=`${meteoActuelle.emoji} <span>${meteoActuelle.nom}</span>`;
+  particules.length=0;
+}
+
+function mettreAJourMeteo(){
+  if(--meteoDuree<=0) changerMeteo();
+  if(meteoActuelle.id==='pluie'||meteoActuelle.id==='orage'){
+    for(let i=0;i<8;i++) particules.push({x:Math.random()*canvas.width,y:0,vy:7+Math.random()*4,vx:-1-Math.random()*2,life:1,type:'pluie'});
+  }
+  if(meteoActuelle.id==='neige'){
+    for(let i=0;i<3;i++) particules.push({x:Math.random()*canvas.width,y:0,vy:1.5+Math.random(),vx:Math.sin(Date.now()*.001+i)*.5,life:1,type:'neige'});
+  }
+  wCtx.clearRect(0,0,wCanvas.width,wCanvas.height);
+  if(meteoActuelle.id==='pluie'||meteoActuelle.id==='orage'){wCtx.strokeStyle='rgba(120,160,220,0.6)';wCtx.lineWidth=0.8;}
+  for(let i=particules.length-1;i>=0;i--){
+    const p=particules[i]; p.x+=p.vx; p.y+=p.vy; p.life-=0.02;
+    if(p.y>canvas.height||p.life<=0){particules.splice(i,1);continue;}
+    if(p.type==='pluie'){wCtx.beginPath();wCtx.moveTo(p.x,p.y);wCtx.lineTo(p.x+p.vx*2,p.y+p.vy*2);wCtx.stroke();}
+    else{wCtx.fillStyle=`rgba(200,220,240,${p.life*.7})`;wCtx.beginPath();wCtx.arc(p.x,p.y,1.5,0,Math.PI*2);wCtx.fill();}
+  }
+  if(meteoActuelle.id==='orage'&&Math.random()<.01){wCtx.fillStyle='rgba(255,255,200,0.15)';wCtx.fillRect(0,0,wCanvas.width,wCanvas.height);}
+  if(meteoActuelle.id==='nuage'){wCtx.fillStyle='rgba(150,160,180,0.08)';wCtx.fillRect(0,0,wCanvas.width,wCanvas.height);}
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILITAIRES
+// ═══════════════════════════════════════════════════════
+function inBounds(x,y){return x>=0&&x<COLS&&y>=0&&y<ROWS;}
+function voisins(x,y){return [{x,y:y-1},{x:x+1,y},{x,y:y+1},{x:x-1,y}].filter(p=>inBounds(p.x,p.y));}
+function habitable(x,y){if(!inBounds(x,y))return false;const c=grille[y][x];return c.terrain!=='eau'&&c.terrain!=='montagne'&&!c.feu;}
+function procheLeau(x,y,r=3){for(let yy=y-r;yy<=y+r;yy++)for(let xx=x-r;xx<=x+r;xx++)if(inBounds(xx,yy)&&grille[yy][xx].terrain==='eau')return true;return false;}
+function compterAutour(x,y,r,terrains){let n=0;for(let yy=y-r;yy<=y+r;yy++)for(let xx=x-r;xx<=x+r;xx++)if(inBounds(xx,yy)&&terrains.includes(grille[yy][xx].terrain))n++;return n;}
+
+// ═══════════════════════════════════════════════════════
+// SIMULATION
+// ═══════════════════════════════════════════════════════
+function tickSimulation(){
+  if(!simulationActive) return;
+  tick++;
+  const feuxEteindre=[],feuxPropager=[],deplaceMents=[],newVillages=[];
+
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    const c=grille[y][x];
+    if(c.feu){
+      if(Math.random()<0.07) feuxEteindre.push({x,y});
+      for(const v of voisins(x,y)){
+        const vv=grille[v.y][v.x];
+        if(!vv.feu&&(vv.terrain==='foret'||vv.terrain==='herbe'||vv.terrain==='marais')&&Math.random()<0.1) feuxPropager.push({x:v.x,y:v.y});
+        if(vv.entite&&Math.random()<0.3){vv.entite.vie-=20;if(vv.entite.vie<=0)vv.entite=null;}
+      }
+      if((meteoActuelle.id==='pluie'||meteoActuelle.id==='orage')&&Math.random()<0.15) feuxEteindre.push({x,y});
+    }
+    if(!c.entite) continue;
+    const e=c.entite;
+
+    if(e.type==='animal'){
+      if(Math.random()<0.18){
+        const opts=voisins(x,y).filter(v=>grille[v.y][v.x].terrain!=='eau'&&!grille[v.y][v.x].entite&&!grille[v.y][v.x].feu);
+        if(opts.length) deplaceMents.push({de:{x,y},vers:opts[Math.floor(Math.random()*opts.length)]});
+      }
+    }
+
+    if(e.type==='humain'){
+      e.age++;e.faim+=0.12;e.errance++;
+      if(e.faim>130) e.vie-=1;
+      if(e.vie<=0){c.entite=null;continue;}
+      if(!e.aVillage&&e.errance>15&&!c.structure&&procheLeau(x,y,4)&&compterAutour(x,y,3,['herbe','foret','sable'])>=16)
+        newVillages.push({x,y,h:e});
+      if(Math.random()<0.3){const dest=choisirDestHumain(x,y,e);if(dest)deplaceMents.push({de:{x,y},vers:dest});}
+    }
+
+    if(e.type==='orc'){
+      e.age++;
+      if(Math.random()<0.25){
+        const opts=voisins(x,y).filter(v=>habitable(v.x,v.y));
+        if(opts.length){
+          const t=opts[Math.floor(Math.random()*opts.length)],tt=grille[t.y][t.x];
+          if(tt.entite&&tt.entite.type!=='orc'){tt.entite.vie-=15;if(tt.entite.vie<=0)tt.entite=null;}
+          else if(!tt.entite) deplaceMents.push({de:{x,y},vers:t});
+        }
+      }
+    }
+
+    if(e.type==='elfe'){
+      e.age++;
+      if(Math.random()<0.05){const opts=voisins(x,y).filter(v=>grille[v.y][v.x].terrain==='herbe'&&!grille[v.y][v.x].entite);if(opts.length)grille[opts[0].y][opts[0].x].terrain='foret';}
+      if(Math.random()<0.22){const opts=voisins(x,y).filter(v=>habitable(v.x,v.y)&&!grille[v.y][v.x].entite);if(opts.length)deplaceMents.push({de:{x,y},vers:opts[Math.floor(Math.random()*opts.length)]});}
+    }
+
+    if(e.type==='zombie'){
+      e.age++;
+      if(Math.random()<0.18){
+        const opts=voisins(x,y).filter(v=>inBounds(v.x,v.y)&&!grille[v.y][v.x].feu);
+        if(opts.length){
+          const t=opts[Math.floor(Math.random()*opts.length)],tt=grille[t.y][t.x];
+          if(tt.entite&&tt.entite.type==='humain'&&Math.random()<0.25){tt.entite.type='zombie';tt.entite.vie=80;}
+          else if(!tt.entite&&tt.terrain!=='eau') deplaceMents.push({de:{x,y},vers:t});
+        }
+      }
+    }
+  }
+
+  for(const f of feuxEteindre) grille[f.y][f.x].feu=false;
+  for(const f of feuxPropager) grille[f.y][f.x].feu=true;
+  for(const v of newVillages){const c=grille[v.y][v.x];if(c.entite?.type==='humain'&&!c.structure){c.structure='village';c.entite.aVillage=true;c.entite.foyerX=v.x;c.entite.foyerY=v.y;c.entite.errance=0;c.entite.faim=Math.max(0,c.entite.faim-25);}}
+  for(const d of deplaceMents){const src=grille[d.de.y][d.de.x],dst=grille[d.vers.y][d.vers.x];if(src.entite&&!dst.entite){dst.entite=src.entite;src.entite=null;}}
+
+  if(joueur.actif&&inBounds(joueur.x,joueur.y)&&grille[joueur.y][joueur.x].feu) joueur.vie=Math.max(0,joueur.vie-2);
+
+  rendreMonde();
+  mettreAJourMeteo();
+  if(tick%5===0) mettreAJourStats();
+}
+
+function choisirDestHumain(x,y,h){
+  const opts=voisins(x,y).filter(v=>habitable(v.x,v.y)&&!grille[v.y][v.x].entite);
+  if(!opts.length) return null;
+  if(!h.aVillage) return opts.sort((a,b)=>{
+    const sa=(grille[a.y][a.x].terrain==='herbe'?4:0)+(procheLeau(a.x,a.y,3)?3:0);
+    const sb=(grille[b.y][b.x].terrain==='herbe'?4:0)+(procheLeau(b.x,b.y,3)?3:0);
+    return sb-sa;
+  })[0];
+  return opts.sort((a,b)=>Math.abs(a.x-h.foyerX)+Math.abs(a.y-h.foyerY)-(Math.abs(b.x-h.foyerX)+Math.abs(b.y-h.foyerY)))[0];
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+function mettreAJourStats(){
+  let humains=0,animaux=0,orcs=0,elfes=0,zombies=0,villages=0,feux=0;
+  const tc={eau:0,herbe:0,foret:0,montagne:0,sable:0,neige:0,marais:0};
+  const total=COLS*ROWS;
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    const c=grille[y][x];
+    if(c.feu)feux++;
+    if(c.structure==='village')villages++;
+    tc[c.terrain]=(tc[c.terrain]||0)+1;
+    if(!c.entite)continue;
+    switch(c.entite.type){case 'humain':humains++;break;case 'animal':animaux++;break;case 'orc':orcs++;break;case 'elfe':elfes++;break;case 'zombie':zombies++;break;}
+  }
+  document.getElementById('statHumains').textContent=humains;
+  document.getElementById('statAnimaux').textContent=animaux;
+  document.getElementById('statOrcs').textContent=orcs;
+  document.getElementById('statElfes').textContent=elfes;
+  document.getElementById('statZombies').textContent=zombies;
+  document.getElementById('statVillages').textContent=villages;
+  document.getElementById('statFeux').textContent=feux;
+  document.getElementById('statEau').textContent=Math.round(tc.eau/total*100)+'%';
+  document.getElementById('statHerbe').textContent=Math.round(tc.herbe/total*100)+'%';
+  document.getElementById('statForet').textContent=Math.round(tc.foret/total*100)+'%';
+  document.getElementById('statMontagne').textContent=Math.round(tc.montagne/total*100)+'%';
+  document.getElementById('statSable').textContent=Math.round(tc.sable/total*100)+'%';
+  if(joueur.actif){
+    document.getElementById('statJoueurVie').textContent=Math.round(joueur.vie)+'%';
+    document.getElementById('barJoueurVie').style.width=joueur.vie+'%';
+    document.getElementById('statJoueurPos').textContent=`${joueur.x},${joueur.y}`;
+  } else {
+    document.getElementById('statJoueurVie').textContent='—';
+    document.getElementById('statJoueurPos').textContent='—';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PINCEAU
+// ═══════════════════════════════════════════════════════
+function peindre(x,y){
+  for(let dy=-taillePinceau+1;dy<taillePinceau;dy++) for(let dx=-taillePinceau+1;dx<taillePinceau;dx++){
+    const nx=x+dx,ny=y+dy;if(!inBounds(nx,ny))continue;
+    const c=grille[ny][nx];
+    switch(outilActif){
+      case 'eau':case 'herbe':case 'sable':case 'foret':case 'montagne':case 'neige':case 'marais':
+        c.terrain=outilActif;c.feu=false;break;
+      case 'feu': if(c.terrain!=='eau')c.feu=true;break;
+      case 'humain': if(c.terrain!=='eau'&&!c.entite)c.entite={type:'humain',vie:100,faim:0,age:0,errance:0,foyerX:nx,foyerY:ny,aVillage:false};break;
+      case 'animal': if(!c.entite)c.entite={type:'animal',vie:60};break;
+      case 'orc': if(c.terrain!=='eau'&&!c.entite)c.entite={type:'orc',vie:120,age:0};break;
+      case 'elfe': if(c.terrain!=='eau'&&!c.entite)c.entite={type:'elfe',vie:80,age:0};break;
+      case 'zombie': if(!c.entite)c.entite={type:'zombie',vie:80,age:0};break;
+      case 'supprimer': c.feu=false;c.entite=null;c.terrain='herbe';c.structure=null;break;
+    }
+  }
+  rendreMonde();
+}
+
+function positionSouris(e){
+  const r=canvas.getBoundingClientRect();
+  return{x:Math.floor((e.clientX-r.left)*(canvas.width/r.width)/T),y:Math.floor((e.clientY-r.top)*(canvas.height/r.height)/T)};
+}
+
+// ═══════════════════════════════════════════════════════
+// ÉVÈNEMENTS
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('[data-outil]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('[data-outil]').forEach(b=>b.classList.remove('actif'));
+    btn.classList.add('actif');outilActif=btn.dataset.outil;
+    const n={eau:'Eau',herbe:'Herbe',sable:'Sable',foret:'Forêt',montagne:'Montagne',neige:'Neige',marais:'Marais',feu:'Feu',humain:'Humain',animal:'Animal',orc:'Orc',elfe:'Elfe',zombie:'Zombie',supprimer:'Effacer'};
+    setStatus('Outil : '+n[outilActif],true);
+  });
+});
+
+document.getElementById('taillePinceau').addEventListener('input',e=>{
+  taillePinceau=parseInt(e.target.value);document.getElementById('valeurPinceau').textContent=taillePinceau;
+});
+canvas.addEventListener('mousedown',e=>{clicEnCours=true;const p=positionSouris(e);peindre(p.x,p.y);});
+canvas.addEventListener('mousemove',e=>{
+  const p=positionSouris(e);
+  if(inBounds(p.x,p.y))document.getElementById('coordDisplay').textContent=`x: ${p.x}  y: ${p.y}`;
+  else document.getElementById('coordDisplay').textContent='—';
+  if(clicEnCours)peindre(p.x,p.y);
+});
+canvas.addEventListener('mouseleave',()=>{document.getElementById('coordDisplay').textContent='—';});
+window.addEventListener('mouseup',()=>clicEnCours=false);
+
+document.getElementById('viderCarte').addEventListener('click',()=>{initGrille();rendreMonde();mettreAJourStats();setStatus('Carte réinitialisée.');});
+document.getElementById('genererMondeBtn').addEventListener('click',genererMonde);
+document.getElementById('spawnJoueurBtn').addEventListener('click',()=>{
+  for(let r=0;r<30;r++){
+    const cx=Math.floor(COLS/2)+Math.floor(Math.random()*10-5);
+    const cy=Math.floor(ROWS/2)+Math.floor(Math.random()*10-5);
+    if(habitable(cx,cy)&&!grille[cy][cx].entite){joueur.x=cx;joueur.y=cy;joueur.vie=100;joueur.actif=true;rendreMonde();setStatus('Joueur placé. ZQSD pour te déplacer.',true);return;}
+  }
+  setStatus('Impossible de placer le joueur ici. Génère un monde d\'abord.',false);
+});
+
+document.getElementById('pauseBtn').addEventListener('click',()=>{
+  simulationActive=false;document.getElementById('statusDot').classList.add('paused');document.getElementById('statusLabel').textContent='En pause';setStatus('Simulation en pause.');
+});
+document.getElementById('reprendreBtn').addEventListener('click',()=>{
+  simulationActive=true;document.getElementById('statusDot').classList.remove('paused');document.getElementById('statusLabel').textContent='Simulation active';setStatus('Simulation en cours.');
+});
+
+// ZQSD joueur
+window.addEventListener('keydown',e=>{
+  if(!joueur.actif)return;
+  const map={z:{dx:0,dy:-1},q:{dx:-1,dy:0},s:{dx:0,dy:1},d:{dx:1,dy:0}};
+  const mv=map[e.key.toLowerCase()];
+  if(!mv)return;
+  e.preventDefault();
+  const nx=joueur.x+mv.dx,ny=joueur.y+mv.dy;
+  if(!inBounds(nx,ny))return;
+  const c=grille[ny][nx];
+  // Eau et montagne bloquent ; neige autorisée (montagne de neige uniquement haute altitude)
+  if(c.terrain==='eau')return;
+  if(c.terrain==='montagne')return;
+  if(c.entite){c.entite.vie-=30;if(c.entite.vie<=0)c.entite=null;}
+  else{joueur.x=nx;joueur.y=ny;}
+  rendreMonde();mettreAJourStats();
+});
+
+function setStatus(msg,hl=false){
+  document.getElementById('infos').textContent=msg;
+  document.getElementById('infos').classList.toggle('highlight',hl);
+}
+
+// ═══════════════════════════════════════════════════════
+// LAUNCH
+// ═══════════════════════════════════════════════════════
+genererMonde();
+setInterval(tickSimulation,180);
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truck Driver Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #87CEEB; /* Ciel bleu */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* La route */
+        .road {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background-color: #555;
+            border-top: 5px solid #fff;
+        }
+
+        /* Le conteneur du camion */
+        .truck-container {
+            position: absolute;
+            bottom: 100px; /* Juste au-dessus de la route */
+            left: -300px; /* Départ hors écran */
+            animation: drive 8s linear infinite;
+        }
+
+        /* La cabine (avant du camion) */
+        .cab {
+            width: 120px;
+            height: 100px;
+            background-color: #e74c3c; /* Rouge */
+            border-radius: 10px 20px 5px 5px;
+            position: relative;
+            float: left;
+            z-index: 2;
+        }
+
+        /* La fenêtre */
+        .window {
+            width: 60px;
+            height: 50px;
+            background-color: #87CEEB;
+            border: 4px solid #333;
+            border-radius: 5px 15px 0 0;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            overflow: hidden; /* Pour cacher le chauffeur qui dépasse */
+        }
+
+        /* Le Chauffeur (CSS Art) */
+        .driver {
+            width: 30px;
+            height: 30px;
+            background-color: #f1c40f; /* Tête jaune */
+            border-radius: 50%;
+            position: absolute;
+            bottom: -5px;
+            left: 5px;
+        }
+        
+        .driver::after {
+            /* Le corps du chauffeur */
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background-color: #333;
+            bottom: -25px;
+            left: -5px;
+            border-radius: 10px;
+        }
+
+        /* La remorque (arrière du camion) */
+        .trailer {
+            width: 200px;
+            height: 130px;
+            background-color: #ecf0f1; /* Blanc/Gris */
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            position: relative;
+            float: left;
+            margin-left: -10px; /* Chevauchement léger */
+            z-index: 1;
+        }
+
+        /* Détail sur la remorque */
+        .trailer::before {
+            content: 'CARGO';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: sans-serif;
+            font-weight: bold;
+            color: #bdc3c7;
+            font-size: 24px;
+        }
+
+        /* Les roues */
+        .wheel {
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            border-radius: 50%;
+            border: 3px solid #999;
+            position: absolute;
+            bottom: -25px;
+            z-index: 3;
+            animation: spin 0.5s linear infinite;
+        }
+
+        .wheel::after {
+            /* Jante */
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 50%;
+        }
+
+        .wheel.front {
+            left: 30px; /* Roue avant */
+        }
+
+        .wheel.back {
+            left: 240px; /* Roue arrière */
+        }
+        
+        .wheel.middle {
+            left: 190px; /* Roue milieu remorque */
+            z-index: 4;
+        }
+
+        /* Animations */
+        @keyframes drive {
+            0% { left: -300px; }
+            100% { left: 110%; }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="road"></div>
+
+    <div class="truck-container">
+        <!-- Cabine -->
+        <div class="cab">
+            <div class="window">
+                <div class="driver"></div>
+            </div>
+            <div class="wheel front"></div>
+        </div>
+        
+        <!-- Remorque -->
+        <div class="trailer">
+            <div class="wheel middle"></div>
+            <div class="wheel back"></div>
+        </div>
+    </div>
+
+</body>
+</html>

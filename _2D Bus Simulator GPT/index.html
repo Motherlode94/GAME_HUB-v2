@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bus Simulator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { overflow: hidden; background: #0f172a; font-family: 'Barlow Condensed', sans-serif; color: #e2e8f0; }
+    canvas { display: block; }
+
+    /* ── HUD Panel ── */
+    #hud {
+      position: fixed; top: 12px; left: 12px; z-index: 20;
+      background: rgba(2,6,23,0.88);
+      border: 1px solid rgba(148,163,184,0.18);
+      border-radius: 12px;
+      padding: 14px 16px;
+      min-width: 280px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 20px 40px rgba(0,0,0,0.5);
+    }
+    #hud-title {
+      font-size: 22px; font-weight: 700; letter-spacing: 1px;
+      color: #f97316; margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(249,115,22,0.4);
+    }
+    .hud-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 3px 0; font-size: 14px; font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .hud-row:last-child { border-bottom: none; }
+    .hud-label { color: #64748b; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+    .hud-val { font-family: 'Share Tech Mono', monospace; font-size: 14px; }
+    .good  { color: #4ade80; }
+    .warn  { color: #f87171; }
+    .alert { color: #facc15; }
+    .info  { color: #60a5fa; }
+
+    #msg-bar {
+      margin-top: 10px;
+      background: rgba(249,115,22,0.12);
+      border: 1px solid rgba(249,115,22,0.25);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px; font-weight: 600; color: #fde68a;
+      min-height: 30px;
+      line-height: 1.3;
+    }
+
+    /* ── Schedule bar ── */
+    #sched-bar {
+      position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+      z-index: 20;
+      background: rgba(2,6,23,0.88);
+      border: 1px solid rgba(148,163,184,0.18);
+      border-radius: 10px;
+      padding: 8px 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      min-width: 280px;
+    }
+    #sched-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin-bottom: 2px; }
+    #sched-line { font-family: 'Share Tech Mono', monospace; font-size: 18px; font-weight: 600; }
+
+    /* ── Help panel ── */
+    #help {
+      position: fixed; right: 12px; top: 12px; z-index: 20;
+      background: rgba(2,6,23,0.88);
+      border: 1px solid rgba(148,163,184,0.18);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px; line-height: 1.7;
+      backdrop-filter: blur(10px);
+      max-width: 240px;
+    }
+    #help strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #f97316; margin-bottom: 4px; }
+    #help .key { display: inline-block; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 0 5px; font-family: 'Share Tech Mono', monospace; font-size: 12px; }
+    .sep { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
+
+    /* ── Penalty flash overlay ── */
+    #penalty-overlay {
+      position: fixed; inset: 0; z-index: 15;
+      pointer-events: none;
+      border: 6px solid #ef4444;
+      opacity: 0;
+      transition: opacity 0.1s;
+      border-radius: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="hud-title">🚌 BUS SIMULATOR</div>
+  <div class="hud-row"><span class="hud-label">Vitesse</span><span class="hud-val" id="h-speed">0 km/h</span></div>
+  <div class="hud-row"><span class="hud-label">Carburant</span><span class="hud-val" id="h-fuel">100%</span></div>
+  <div class="hud-row"><span class="hud-label">Argent</span><span class="hud-val good" id="h-money">0 €</span></div>
+  <div class="hud-row"><span class="hud-label">Passagers</span><span class="hud-val" id="h-pass">0 / 12</span></div>
+  <div class="hud-row"><span class="hud-label">Prochain arrêt</span><span class="hud-val info" id="h-stop">Centre Ville</span></div>
+  <div class="hud-row"><span class="hud-label">Score</span><span class="hud-val alert" id="h-score">0</span></div>
+  <div id="msg-bar">Conduis jusqu'à Centre Ville, ouvre les portes avec E.</div>
+</div>
+
+<!-- Schedule bar -->
+<div id="sched-bar">
+  <div id="sched-title">HORAIRE</div>
+  <div id="sched-line">--:-- → --:--</div>
+</div>
+
+<!-- Help -->
+<div id="help">
+  <strong>Commandes</strong>
+  <span class="key">Z</span>/<span class="key">↑</span> Accélérer &nbsp;
+  <span class="key">S</span>/<span class="key">↓</span> Freiner<br>
+  <span class="key">Q</span>/<span class="key">D</span> Tourner &nbsp;
+  <span class="key">Espace</span> Frein fort<br>
+  <span class="key">E</span> Portes à l'arrêt<br>
+  <span class="key">F</span> Ravitaillement au dépôt<br>
+  <span class="key">R</span> Recommencer
+  <hr class="sep">
+  <span style="color:#4ade80">●</span> Arrêt actif &nbsp; <span style="color:#facc15">●</span> Futur arrêt<br>
+  <span style="color:#fbbf24">⛽</span> Dépôt carburant payant<br>
+  Respecte les horaires !
+</div>
+
+<div id="penalty-overlay"></div>
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
+
+// ══════════════════ INPUT ══════════════════
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  if (e.key.toLowerCase() === 'e') toggleDoors();
+  if (e.key.toLowerCase() === 'f') tryRefuel();
+  if (e.key.toLowerCase() === 'r') resetGame();
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// ══════════════════ WORLD ══════════════════
+const WORLD = { w: 1900, h: 1300 };
+
+const roads = [
+  { x:220, y:180, w:1460, h:140 },  // top horizontal  (center y=250)
+  { x:220, y:910, w:1460, h:140 },  // bottom horizontal (center y=980)
+  { x:330, y:180, w:140, h:860 },   // left vertical    (center x=400)
+  { x:1380, y:180, w:140, h:860 },  // right vertical   (center x=1450)
+  { x:830, y:180, w:140, h:860 }    // middle vertical  (center x=900)
+];
+
+const buildings = [
+  { x:40,  y:40,   w:180, h:180, color:'#334155' },
+  { x:520, y:40,   w:250, h:110, color:'#1e3a5f' },
+  { x:1030,y:40,   w:250, h:110, color:'#1a3a2e' },
+  { x:1580,y:50,   w:220, h:150, color:'#3b1a5e' },
+  { x:60,  y:360,  w:190, h:220, color:'#1a3a2e' },
+  { x:530, y:380,  w:220, h:180, color:'#3d1a1a' },
+  { x:1050,y:380,  w:180, h:180, color:'#1a2e3a' },
+  { x:1570,y:360,  w:200, h:220, color:'#1a3a2e' },
+  { x:50,  y:1100, w:230, h:140, color:'#2e2a1a' },
+  { x:1560,y:1100, w:240, h:140, color:'#1a1a3a' }
+];
+
+// ══════════════════ STOPS & SCHEDULE ══════════════════
+// Scheduled arrival in REAL seconds from game start (at reasonable pace)
+const SCHEDULE   = [8, 22, 42, 64, 85];
+const LAP_DUR    = 105; // seconds per full lap
+
+const routeStops = [
+  { x:400,  y:250, name:'Centre Ville', waiting:4 },
+  { x:950,  y:250, name:'Gare',         waiting:3 },
+  { x:1450, y:600, name:'Université',   waiting:5 },
+  { x:950,  y:980, name:'Hôpital',      waiting:2 },
+  { x:400,  y:980, name:'Marché',       waiting:6 }
+];
+
+// ══════════════════ DEPOT ══════════════════
+const depot = { x:900, y:600, costPerPct:0.35 };
+
+// ══════════════════ BUS ══════════════════
+const bus = {
+  x:310, y:250, angle:0, speed:0,
+  w:84, h:42,
+  maxSpeed:4.4, accel:0.07, brake:0.10, friction:0.025, turnRate:0.045,
+  fuel:100, doorsOpen:false,
+  groups: [],          // [{count, dest}]  – passengers with destination
+  capacity:12,
+  get passengers() { return this.groups.reduce((s,g) => s+g.count, 0); }
+};
+
+// ══════════════════ GAME STATE ══════════════════
+const G = {
+  money:0, score:0,
+  stopIdx:0, lap:0,
+  timer:0,        // real seconds elapsed
+  msgTimer:0,
+  penaltyFlash:0,
+  finished:false
+};
+
+function schedArrival(stopIdx) {
+  return G.lap * LAP_DUR + SCHEDULE[stopIdx];
+}
+function fmt(s) {
+  const mm = Math.floor(s/60).toString().padStart(2,'0');
+  const ss = Math.floor(s%60).toString().padStart(2,'0');
+  return `${mm}:${ss}`;
+}
+
+// ══════════════════ TRAFFIC ══════════════════
+// Waypoint loops (road centers)
+const PATHS = [
+  [{x:400,y:250},{x:900,y:250},{x:1450,y:250},{x:1450,y:980},{x:900,y:980},{x:400,y:980}],
+  [{x:1450,y:250},{x:900,y:250},{x:400,y:250},{x:400,y:980},{x:900,y:980},{x:1450,y:980}],
+  [{x:900,y:250},{x:900,y:980},{x:900,y:250}],
+  [{x:400,y:250},{x:900,y:250},{x:400,y:250}],
+  [{x:400,y:980},{x:900,y:980},{x:1450,y:980},{x:400,y:980}],
+  [{x:1450,y:250},{x:1450,y:980},{x:1450,y:250}]
+];
+const CAR_COLORS = ['#3b82f6','#8b5cf6','#f97316','#06b6d4','#ec4899','#a3e635','#facc15','#f43f5e'];
+
+function mkTraffic() {
+  const defs = [
+    {pi:0,wi:0,sp:2.0},{pi:0,wi:3,sp:1.8},
+    {pi:1,wi:0,sp:1.7},{pi:1,wi:3,sp:2.1},
+    {pi:2,wi:0,sp:1.9},{pi:2,wi:1,sp:1.6},
+    {pi:3,wi:0,sp:1.5},
+    {pi:4,wi:1,sp:2.2},
+    {pi:5,wi:0,sp:1.8}
+  ];
+  return defs.map((d,i) => {
+    const wp = PATHS[d.pi][d.wi % PATHS[d.pi].length];
+    return {
+      x: wp.x + (Math.random()-0.5)*20,
+      y: wp.y + (Math.random()-0.5)*20,
+      angle:0, speed:d.sp, maxSpeed:d.sp,
+      pi:d.pi, wi:d.wi % PATHS[d.pi].length,
+      color:CAR_COLORS[i % CAR_COLORS.length],
+      w:36, h:20
+    };
+  });
+}
+let traffic = mkTraffic();
+
+function updateTraffic() {
+  for (const car of traffic) {
+    const path = PATHS[car.pi];
+    const tgt = path[car.wi];
+    const dx = tgt.x - car.x, dy = tgt.y - car.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 20) { car.wi = (car.wi + 1) % path.length; continue; }
+
+    // Steer
+    let da = Math.atan2(dy, dx) - car.angle;
+    while (da >  Math.PI) da -= Math.PI*2;
+    while (da < -Math.PI) da += Math.PI*2;
+    car.angle += da * 0.10;
+
+    // Slow near bus
+    const bd = Math.hypot(bus.x-car.x, bus.y-car.y);
+    const busF = bd < 90 ? Math.max(0.1, bd/90) : 1;
+
+    // Slow near other cars
+    let carF = 1;
+    for (const o of traffic) {
+      if (o === car) continue;
+      const d = Math.hypot(o.x-car.x, o.y-car.y);
+      if (d < 55) carF = Math.min(carF, Math.max(0.1, d/55));
+    }
+
+    const sp = car.maxSpeed * busF * carF;
+    car.x += Math.cos(car.angle) * sp;
+    car.y += Math.sin(car.angle) * sp;
+    car.x = Math.max(50, Math.min(WORLD.w-50, car.x));
+    car.y = Math.max(50, Math.min(WORLD.h-50, car.y));
+  }
+}
+
+// ══════════════════ HELPERS ══════════════════
+function isOnRoad(x, y) {
+  return roads.some(r => x > r.x && x < r.x+r.w && y > r.y && y < r.y+r.h);
+}
+function nearestStop() {
+  let best = null;
+  routeStops.forEach((s,i) => {
+    const d = Math.hypot(s.x-bus.x, s.y-bus.y);
+    if (!best || d < best.d) best = {s,i,d};
+  });
+  return best;
+}
+
+// ══════════════════ DOORS / BOARDING ══════════════════
+function toggleDoors() {
+  const nb = nearestStop();
+  if (!nb || nb.d > 70 || Math.abs(bus.speed) > 0.25) {
+    setMsg('Immobilise-toi à un arrêt pour ouvrir les portes.'); return;
+  }
+  bus.doorsOpen = !bus.doorsOpen;
+  if (bus.doorsOpen) handleStation(nb.s, nb.i);
+  else setMsg('Portes fermées. En route !');
+}
+
+function handleStation(stop, si) {
+  // 1 — Disembark passengers destined here
+  let off = 0;
+  bus.groups = bus.groups.filter(g => {
+    if (g.dest === si) { off += g.count; return false; }
+    return true;
+  });
+  if (off > 0) { G.money += off*3; G.score += off*8; }
+
+  // 2 — Board new passengers only at the current route stop
+  let on = 0, schedMsg = '';
+  if (si === G.stopIdx) {
+    // Schedule check
+    const sched = schedArrival(si);
+    const late  = G.timer - sched;
+    if (late > 5) {
+      const pen = Math.floor(late * 2);
+      const finePen = Math.floor(late * 0.4);
+      G.score = Math.max(0, G.score - pen);
+      G.money = Math.max(0, G.money - finePen);
+      schedMsg = ` ⚠️ ${Math.floor(late)}s retard (-${pen}pts -${finePen}€)`;
+      G.penaltyFlash = 100;
+    } else if (late > -15) {
+      G.score += 20; schedMsg = ' ✅ À l\'heure (+20pts)';
+    } else {
+      schedMsg = ` ⏰ En avance de ${Math.abs(Math.floor(late))}s`;
+    }
+
+    // Board
+    const free = bus.capacity - bus.passengers;
+    const board = Math.min(free, stop.waiting);
+    if (board > 0) {
+      let rem = board;
+      while (rem > 0) {
+        const ahead = Math.random() < 0.55 ? 1 : 2;
+        const dest = (si + ahead) % routeStops.length;
+        const cnt  = Math.min(rem, Math.ceil(Math.random()*3));
+        bus.groups.push({count:cnt, dest});
+        rem -= cnt;
+      }
+      stop.waiting -= board;
+      G.money += board * 3;
+      G.score += board * 10;
+      on = board;
+    }
+
+    G.stopIdx = (G.stopIdx + 1) % routeStops.length;
+    if (G.stopIdx === 0) G.lap++;
+    stop.waiting = Math.floor(Math.random()*6)+1;
+  }
+
+  let msg = '';
+  if (off > 0) msg += `↓ ${off} descendent. `;
+  if (on  > 0) msg += `↑ ${on} montent.`;
+  if (!msg)    msg = 'Aucun changement.';
+  setMsg(msg + schedMsg, 220);
+}
+
+// ══════════════════ REFUEL ══════════════════
+function tryRefuel() {
+  const d = Math.hypot(depot.x-bus.x, depot.y-bus.y);
+  if (d > 85 || Math.abs(bus.speed) > 0.25) {
+    setMsg('Arrête-toi au dépôt ⛽ pour ravitailler (F).'); return;
+  }
+  const needed = 100 - bus.fuel;
+  if (needed < 1) { setMsg('Réservoir déjà plein !'); return; }
+  const totalCost = needed * depot.costPerPct;
+  if (G.money < totalCost) {
+    const canBuy = Math.floor(G.money / depot.costPerPct);
+    if (canBuy <= 0) { setMsg('Pas assez d\'argent pour ravitailler !'); return; }
+    bus.fuel += canBuy;
+    G.money  -= canBuy * depot.costPerPct;
+    setMsg(`Fonds limités — +${canBuy}% carburant ajouté.`);
+  } else {
+    G.money  -= totalCost;
+    bus.fuel  = 100;
+    G.finished = false;
+    setMsg(`✅ Plein effectué ! -${totalCost.toFixed(0)} €`);
+  }
+}
+
+// ══════════════════ MESSAGE ══════════════════
+const msgEl = document.getElementById('msg-bar');
+function setMsg(txt, dur=200) { msgEl.textContent = txt; G.msgTimer = dur; }
+
+// ══════════════════ BUS UPDATE ══════════════════
+function updateBus() {
+  if (G.finished) return;
+
+  const acc = keys['z'] || keys['arrowup'];
+  const brk = keys['s'] || keys['arrowdown'];
+  const lft = keys['q'] || keys['arrowleft'];
+  const rgt = keys['d'] || keys['arrowright'];
+  const hbk = keys[' '];
+
+  if (acc && !bus.doorsOpen && bus.fuel > 0) bus.speed += bus.accel;
+  if (brk && !bus.doorsOpen && bus.fuel > 0) bus.speed -= bus.accel * 0.75;
+  if (hbk) {
+    bus.speed += bus.speed > 0 ? -bus.brake*1.8 : (bus.speed < 0 ? bus.brake*1.8 : 0);
+  }
+  if (!acc && !brk) {
+    if (bus.speed > 0) bus.speed = Math.max(0, bus.speed-bus.friction);
+    if (bus.speed < 0) bus.speed = Math.min(0, bus.speed+bus.friction);
+  }
+  bus.speed = Math.max(-1.8, Math.min(bus.maxSpeed, bus.speed));
+
+  if (Math.abs(bus.speed) > 0.15 && !bus.doorsOpen) {
+    const tf = Math.min(1, Math.abs(bus.speed)/2.5);
+    if (lft) bus.angle -= bus.turnRate * tf;
+    if (rgt) bus.angle += bus.turnRate * tf;
+  }
+
+  const nx = bus.x + Math.cos(bus.angle)*bus.speed;
+  const ny = bus.y + Math.sin(bus.angle)*bus.speed;
+  if (isOnRoad(nx, ny)) { bus.x = nx; bus.y = ny; }
+  else bus.speed *= 0.85;
+
+  bus.x = Math.max(0, Math.min(WORLD.w, bus.x));
+  bus.y = Math.max(0, Math.min(WORLD.h, bus.y));
+
+  if (Math.abs(bus.speed) > 0.05) {
+    bus.fuel = Math.max(0, bus.fuel - (0.004 + (Math.abs(bus.speed)/bus.maxSpeed)*0.011));
+  }
+  if (bus.fuel <= 0) {
+    bus.speed = Math.max(0, bus.speed - 0.05);
+    setMsg('⛽ Panne sèche ! Ravitaillez au dépôt (F) ou R pour recommencer.', 30);
+    if (bus.speed <= 0.01) G.finished = true;
+  }
+
+  G.timer += 1/60;
+  G.score  += Math.abs(bus.speed) * 0.015;
+  if (G.penaltyFlash > 0) G.penaltyFlash--;
+}
+
+// ══════════════════ HUD UPDATE ══════════════════
+function updateHUD() {
+  const $ = id => document.getElementById(id);
+  $('h-speed').textContent = `${Math.round(Math.abs(bus.speed)*18)} km/h`;
+  $('h-fuel').innerHTML  = `<span class="${bus.fuel<25?'warn':bus.fuel<50?'alert':'good'}">${bus.fuel.toFixed(0)}%</span>`;
+  $('h-money').textContent = `${G.money.toFixed(0)} €`;
+  $('h-pass').textContent  = `${bus.passengers} / ${bus.capacity}`;
+  $('h-score').textContent = Math.floor(G.score).toString();
+
+  const ns = routeStops[G.stopIdx];
+  $('h-stop').textContent = `${ns.name} (${ns.waiting}✋)`;
+
+  // Schedule bar
+  const sched = schedArrival(G.stopIdx);
+  const diff  = sched - G.timer;
+  let color   = '#4ade80';
+  if (diff < 0)  color = '#f87171';
+  else if (diff < 10) color = '#facc15';
+  const tag = diff < -1 ? `<span style="color:#f87171">RETARD ${Math.abs(Math.floor(diff))}s</span>`
+            : diff < 10 ? `<span style="color:#facc15">URGENT</span>`
+            : `<span style="color:#4ade80">+${Math.floor(diff)}s</span>`;
+  $('sched-line').innerHTML =
+    `<span style="color:#60a5fa">${fmt(G.timer)}</span>&nbsp;→&nbsp;<span style="color:${color}">${fmt(sched)}</span>&nbsp;&nbsp;${tag}`;
+
+  // Message auto
+  if (G.msgTimer > 0) G.msgTimer--;
+  else {
+    const nd = Math.hypot(depot.x-bus.x, depot.y-bus.y);
+    if (bus.doorsOpen) msgEl.textContent = '🚪 Portes ouvertes.';
+    else if (nd < 90)  msgEl.textContent = '⛽ Appuie sur F pour ravitailler.';
+    else               msgEl.textContent = `Conduis vers → ${ns.name}`;
+  }
+
+  // Penalty border flash
+  const ov = document.getElementById('penalty-overlay');
+  ov.style.opacity = (G.penaltyFlash > 0 && Math.floor(G.penaltyFlash/7)%2===0) ? '0.55' : '0';
+}
+
+// ══════════════════ RESET ══════════════════
+function resetGame() {
+  bus.x=310; bus.y=250; bus.angle=0; bus.speed=0;
+  bus.fuel=100; bus.doorsOpen=false; bus.groups=[];
+  G.money=0; G.score=0; G.stopIdx=0; G.lap=0;
+  G.timer=0; G.finished=false; G.penaltyFlash=0; G.msgTimer=0;
+  routeStops[0].waiting=4; routeStops[1].waiting=3;
+  routeStops[2].waiting=5; routeStops[3].waiting=2; routeStops[4].waiting=6;
+  traffic = mkTraffic();
+  setMsg('Nouvelle partie — Bonne route chauffeur !');
+}
+
+// ══════════════════ DRAW HELPERS ══════════════════
+function roundRect(x,y,w,h,r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+// ══════════════════ DRAW ══════════════════
+function getCamera() {
+  return {
+    x: Math.max(0, Math.min(WORLD.w-canvas.width,  bus.x - canvas.width/2)),
+    y: Math.max(0, Math.min(WORLD.h-canvas.height, bus.y - canvas.height/2))
+  };
+}
+
+function drawGrass(c) {
+  // Base grass
+  ctx.fillStyle = '#1a3a20';
+  ctx.fillRect(-c.x, -c.y, WORLD.w, WORLD.h);
+  // Subtle grid pattern
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+  ctx.lineWidth = 1;
+  for (let gx=0; gx<WORLD.w; gx+=80) {
+    ctx.beginPath();
+    ctx.moveTo(gx-c.x, -c.y);
+    ctx.lineTo(gx-c.x, WORLD.h-c.y);
+    ctx.stroke();
+  }
+  for (let gy=0; gy<WORLD.h; gy+=80) {
+    ctx.beginPath();
+    ctx.moveTo(-c.x, gy-c.y);
+    ctx.lineTo(WORLD.w-c.x, gy-c.y);
+    ctx.stroke();
+  }
+}
+
+function drawBuildings(c) {
+  for (const b of buildings) {
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(b.x-c.x+5, b.y-c.y+5, b.w, b.h);
+    // Body
+    ctx.fillStyle = b.color;
+    ctx.fillRect(b.x-c.x, b.y-c.y, b.w, b.h);
+    // Top highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+    ctx.fillRect(b.x-c.x, b.y-c.y, b.w, 5);
+    // Windows
+    ctx.fillStyle = 'rgba(253,230,138,0.25)';
+    for (let wx=10; wx<b.w-16; wx+=22) {
+      for (let wy=10; wy<b.h-16; wy+=20) {
+        ctx.fillRect(b.x-c.x+wx, b.y-c.y+wy, 10, 8);
+      }
+    }
+  }
+}
+
+function drawRoads(c) {
+  for (const r of roads) {
+    // Asphalt
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(r.x-c.x, r.y-c.y, r.w, r.h);
+    // Kerb edges
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(r.x-c.x,       r.y-c.y,       r.w, 4);
+    ctx.fillRect(r.x-c.x,       r.y+r.h-4-c.y, r.w, 4);
+    ctx.fillRect(r.x-c.x,       r.y-c.y,       4, r.h);
+    ctx.fillRect(r.x+r.w-4-c.x, r.y-c.y,       4, r.h);
+  }
+  // Centre dashes
+  ctx.strokeStyle = '#facc15';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([22,14]);
+  for (const r of roads) {
+    ctx.beginPath();
+    if (r.w > r.h) {
+      const y = r.y + r.h/2 - c.y;
+      ctx.moveTo(r.x-c.x, y); ctx.lineTo(r.x+r.w-c.x, y);
+    } else {
+      const x = r.x + r.w/2 - c.x;
+      ctx.moveTo(x, r.y-c.y); ctx.lineTo(x, r.y+r.h-c.y);
+    }
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+function drawDepot(c) {
+  const x = depot.x-c.x, y = depot.y-c.y;
+  const pulse = 0.7 + 0.3*Math.sin(Date.now()/500);
+
+  // Zone
+  ctx.fillStyle = `rgba(251,191,36,${0.08*pulse})`;
+  ctx.beginPath(); ctx.arc(x, y, 60, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = `rgba(251,191,36,${0.5*pulse})`;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.arc(x, y, 60, 0, Math.PI*2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Icon + label
+  ctx.font = '26px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('⛽', x, y+9);
+  ctx.font = 'bold 11px "Barlow Condensed"';
+  ctx.fillStyle = '#fef3c7';
+  ctx.fillText('DÉPÔT', x, y+26);
+  ctx.textAlign = 'left';
+}
+
+function drawStops(c) {
+  routeStops.forEach((s, i) => {
+    const x = s.x-c.x, y = s.y-c.y;
+    const active = i === G.stopIdx;
+
+    if (active) {
+      const p = 0.4 + 0.6*Math.abs(Math.sin(Date.now()/400));
+      ctx.fillStyle = `rgba(34,197,94,${0.12*p})`;
+      ctx.beginPath(); ctx.arc(x, y, 55, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Pole
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(x-2, y-36, 4, 28);
+
+    // Sign board
+    ctx.fillStyle = active ? '#16a34a' : '#78350f';
+    roundRect(x-34, y-56, 68, 22, 4);
+    ctx.fill();
+    ctx.fillStyle = active ? '#bbf7d0' : '#fde68a';
+    ctx.font = 'bold 9px "Barlow Condensed"';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.name.toUpperCase(), x, y-41);
+    ctx.textAlign = 'left';
+
+    // Platform dot
+    ctx.fillStyle = active ? '#22c55e' : '#eab308';
+    ctx.beginPath(); ctx.arc(x, y, active ? 11 : 8, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = active ? '#bbf7d0' : '#fef3c7';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, active ? 11 : 8, 0, Math.PI*2); ctx.stroke();
+
+    // Waiting badge
+    if (s.waiting > 0) {
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath(); ctx.arc(x+16, y-16, 10, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#f9fafb';
+      ctx.font = 'bold 10px "Barlow Condensed"';
+      ctx.textAlign = 'center';
+      ctx.fillText(s.waiting, x+16, y-12);
+      ctx.textAlign = 'left';
+    }
+  });
+}
+
+function drawTraffic(c) {
+  for (const car of traffic) {
+    ctx.save();
+    ctx.translate(car.x-c.x, car.y-c.y);
+    ctx.rotate(car.angle);
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(-car.w/2+3, -car.h/2+3, car.w, car.h);
+
+    // Body
+    ctx.fillStyle = car.color;
+    roundRect(-car.w/2, -car.h/2, car.w, car.h, 4);
+    ctx.fill();
+
+    // Roof
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fillRect(-car.w/2+6, -car.h/2+4, car.w-16, car.h-8);
+
+    // Windshield
+    ctx.fillStyle = 'rgba(147,197,253,0.6)';
+    ctx.fillRect(-car.w/2+4, -car.h/2+5, car.w*0.3, car.h-10);
+
+    // Headlights
+    ctx.fillStyle = '#fef9c3';
+    ctx.fillRect(car.w/2-5, -car.h/2+4, 4, 5);
+    ctx.fillRect(car.w/2-5, car.h/2-9,  4, 5);
+
+    // Wheels
+    ctx.fillStyle = '#1e293b';
+    [[-car.w/2+5,-car.h/2-3],[car.w/2-13,-car.h/2-3],
+     [-car.w/2+5, car.h/2-1],[car.w/2-13, car.h/2-1]].forEach(([wx,wy]) => {
+      ctx.fillRect(wx, wy, 11, 4);
+    });
+
+    ctx.restore();
+  }
+}
+
+function drawBus(c) {
+  ctx.save();
+  ctx.translate(bus.x-c.x, bus.y-c.y);
+  ctx.rotate(bus.angle);
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(-bus.w/2+5, -bus.h/2+5, bus.w, bus.h);
+
+  // Body colour (flash on penalty)
+  const flash = G.penaltyFlash > 0 && Math.floor(G.penaltyFlash/6)%2===0;
+  ctx.fillStyle = flash ? '#7f1d1d' : '#dc2626';
+  roundRect(-bus.w/2, -bus.h/2, bus.w, bus.h, 6);
+  ctx.fill();
+
+  // Side stripe
+  ctx.fillStyle = flash ? '#991b1b' : '#b91c1c';
+  ctx.fillRect(-bus.w/2, -bus.h/2, bus.w, 9);
+  ctx.fillRect(-bus.w/2, bus.h/2-9, bus.w, 9);
+
+  // Window strip
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-bus.w/2+8, -bus.h/2+11, bus.w-20, 11);
+  ctx.fillStyle = 'rgba(147,197,253,0.65)';
+  ctx.fillRect(-bus.w/2+10, -bus.h/2+12, bus.w-24, 9);
+
+  // Door indicator
+  const doorColor = bus.doorsOpen ? '#4ade80' : '#fca5a5';
+  ctx.fillStyle = doorColor;
+  ctx.fillRect(bus.w/2-18, -9, 8, 18);
+  if (bus.doorsOpen) {
+    ctx.fillStyle = '#86efac';
+    ctx.fillRect(bus.w/2-9, -9, 7, 18);
+  }
+
+  // Headlights
+  ctx.fillStyle = '#fef08a';
+  ctx.shadowColor = '#fef08a'; ctx.shadowBlur = 6;
+  ctx.fillRect(bus.w/2-5, -bus.h/2+5, 6, 6);
+  ctx.fillRect(bus.w/2-5, bus.h/2-11, 6, 6);
+  ctx.shadowBlur = 0;
+
+  // Wheels
+  ctx.fillStyle = '#0f172a';
+  [[-22,-bus.h/2-4],[22,-bus.h/2-4],[-22,bus.h/2-2],[22,bus.h/2-2]].forEach(([wx,wy]) => {
+    ctx.beginPath(); ctx.arc(wx,wy,8,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#334155'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(wx,wy,5,0,Math.PI*2); ctx.stroke();
+  });
+
+  ctx.restore();
+}
+
+function drawMinimap(c) {
+  const MW=200, MH=145;
+  const MX=canvas.width-MW-14, MY=canvas.height-MH-14;
+  const sx=MW/WORLD.w, sy=MH/WORLD.h;
+
+  ctx.fillStyle = 'rgba(2,6,23,0.88)';
+  roundRect(MX, MY, MW, MH, 8); ctx.fill();
+  ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+  ctx.lineWidth=1;
+  roundRect(MX, MY, MW, MH, 8); ctx.stroke();
+
+  // Roads
+  ctx.fillStyle = '#1e293b';
+  roads.forEach(r => ctx.fillRect(MX+r.x*sx, MY+r.y*sy, r.w*sx, r.h*sy));
+
+  // Depot
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath(); ctx.arc(MX+depot.x*sx, MY+depot.y*sy, 3, 0, Math.PI*2); ctx.fill();
+
+  // Stops
+  routeStops.forEach((s,i) => {
+    ctx.fillStyle = i===G.stopIdx ? '#22c55e' : '#facc15';
+    ctx.beginPath(); ctx.arc(MX+s.x*sx, MY+s.y*sy, 3.5, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Traffic (blue dots)
+  ctx.fillStyle = '#60a5fa';
+  traffic.forEach(car => {
+    ctx.beginPath(); ctx.arc(MX+car.x*sx, MY+car.y*sy, 2, 0, Math.PI*2); ctx.fill();
+  });
+
+  // Bus
+  ctx.fillStyle = '#ef4444';
+  ctx.beginPath(); ctx.arc(MX+bus.x*sx, MY+bus.y*sy, 4.5, 0, Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#475569';
+  ctx.font = '10px "Barlow Condensed"';
+  ctx.fillText('MINIMAP', MX+5, MY+12);
+}
+
+// ══════════════════ MAIN LOOP ══════════════════
+function loop() {
+  updateBus();
+  updateTraffic();
+
+  const cam = getCamera();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawGrass(cam);
+  drawBuildings(cam);
+  drawRoads(cam);
+  drawDepot(cam);
+  drawStops(cam);
+  drawTraffic(cam);
+  drawBus(cam);
+  drawMinimap(cam);
+
+  updateHUD();
+  requestAnimationFrame(loop);
+}
+
+setMsg('Conduis jusqu\'à Centre Ville → ouvre les portes avec E.');
+loop();
+</script>
+</body>
+</html>

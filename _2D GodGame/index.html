@@ -1,0 +1,642 @@
+import React, { useEffect, useState } from "react";
+
+const TICK_MS = 1000;
+const GRID_SIZE = 6;
+const INITIAL_STATE = {
+  bois: 40,
+  nourriture: 30,
+  foi: 40,
+  population: 6,
+  bonheur: 70,
+  jour: 1,
+  outil: "adorer",
+  message: "Bienvenue, divinite. Guide ton peuple.",
+  selection: null,
+  jeuTermine: false,
+  victoire: false,
+};
+
+const TYPES = {
+  VIDE: "vide",
+  FORET: "foret",
+  FERME: "ferme",
+  MAISON: "maison",
+  TEMPLE: "temple",
+};
+
+const OUTILS = {
+  ADORER: "adorer",
+  PLUIE: "pluie",
+  FOUDRE: "foudre",
+  COUPER: "couper",
+};
+
+function genererMonde() {
+  const monde = [];
+
+  for (let y = 0; y < GRID_SIZE; y += 1) {
+    const ligne = [];
+    for (let x = 0; x < GRID_SIZE; x += 1) {
+      ligne.push({
+        x,
+        y,
+        type: Math.random() > 0.75 ? TYPES.FORET : TYPES.VIDE,
+        fertilite: 50 + Math.floor(Math.random() * 50),
+      });
+    }
+    monde.push(ligne);
+  }
+
+  monde[2][2] = { ...monde[2][2], type: TYPES.MAISON };
+  monde[2][3] = { ...monde[2][3], type: TYPES.FERME };
+  monde[3][2] = { ...monde[3][2], type: TYPES.FORET };
+
+  return monde;
+}
+
+function calculerStats(monde) {
+  let nbForets = 0;
+  let nbFermes = 0;
+  let nbMaisons = 0;
+  let nbTemples = 0;
+
+  for (let y = 0; y < monde.length; y += 1) {
+    for (let x = 0; x < monde[y].length; x += 1) {
+      const cellule = monde[y][x];
+      if (cellule.type === TYPES.FORET) nbForets += 1;
+      if (cellule.type === TYPES.FERME) nbFermes += 1;
+      if (cellule.type === TYPES.MAISON) nbMaisons += 1;
+      if (cellule.type === TYPES.TEMPLE) nbTemples += 1;
+    }
+  }
+
+  return { nbForets, nbFermes, nbMaisons, nbTemples };
+}
+
+function coutConstruction(type) {
+  switch (type) {
+    case TYPES.FERME:
+      return { bois: 10, foi: 0 };
+    case TYPES.MAISON:
+      return { bois: 15, foi: 5 };
+    case TYPES.TEMPLE:
+      return { bois: 20, foi: 20 };
+    default:
+      return { bois: 0, foi: 0 };
+  }
+}
+
+function nomCase(type) {
+  switch (type) {
+    case TYPES.FORET:
+      return "Foret";
+    case TYPES.FERME:
+      return "Ferme";
+    case TYPES.MAISON:
+      return "Maison";
+    case TYPES.TEMPLE:
+      return "Temple";
+    default:
+      return "Terrain vide";
+  }
+}
+
+function emojiCase(type) {
+  switch (type) {
+    case TYPES.FORET:
+      return "🌲";
+    case TYPES.FERME:
+      return "🌾";
+    case TYPES.MAISON:
+      return "🏠";
+    case TYPES.TEMPLE:
+      return "⛩️";
+    default:
+      return "·";
+  }
+}
+
+function modifierCaseDansMonde(monde, x, y, transformateur) {
+  return monde.map((ligne) =>
+    ligne.map((cellule) => {
+      if (cellule.x !== x || cellule.y !== y) return cellule;
+      return transformateur(cellule);
+    })
+  );
+}
+
+export default function GodGamePrototype() {
+  const [monde, setMonde] = useState(genererMonde);
+  const [etat, setEtat] = useState(INITIAL_STATE);
+
+  useEffect(() => {
+    if (etat.jeuTermine) return undefined;
+
+    const intervalId = setInterval(() => {
+      setEtat((ancienEtat) => {
+        const stats = calculerStats(monde);
+        const productionBois = stats.nbForets * 3;
+        const productionNourriture = stats.nbFermes * 4;
+        const generationFoi = stats.nbTemples * 3 + Math.max(0, Math.floor(ancienEtat.bonheur / 25));
+        const consommation = Math.max(1, ancienEtat.population * 2);
+        const places = stats.nbMaisons * 4;
+        const nourriture = Math.max(0, ancienEtat.nourriture + productionNourriture - consommation);
+
+        let bonheur = ancienEtat.bonheur;
+        if (productionNourriture < consommation) bonheur -= 6;
+        else bonheur += 1;
+        if (stats.nbTemples > 0) bonheur += 1;
+        if (places < ancienEtat.population) bonheur -= 5;
+        bonheur = Math.max(0, Math.min(100, bonheur));
+
+        let population = ancienEtat.population;
+        const manqueMaison = places < ancienEtat.population;
+        const peutGrandir = !manqueMaison && nourriture > ancienEtat.population * 2 && bonheur > 55;
+        const doitBaisser = nourriture <= 0 || bonheur < 15;
+
+        if (doitBaisser) population = Math.max(0, population - 1);
+        else if (peutGrandir && Math.random() > 0.55) population += 1;
+
+        const foi = Math.min(100, ancienEtat.foi + generationFoi);
+        const bois = ancienEtat.bois + productionBois;
+        const jour = ancienEtat.jour + 1;
+
+        if (population <= 0) {
+          return {
+            ...ancienEtat,
+            bois,
+            nourriture,
+            foi,
+            population,
+            bonheur,
+            jour,
+            jeuTermine: true,
+            victoire: false,
+            message: "Ton peuple a disparu. Le regne divin s'effondre.",
+          };
+        }
+
+        if (foi >= 100 && population >= 20 && stats.nbTemples >= 2) {
+          return {
+            ...ancienEtat,
+            bois,
+            nourriture,
+            foi,
+            population,
+            bonheur,
+            jour,
+            jeuTermine: true,
+            victoire: true,
+            message: "Victoire. Ton peuple te venere comme une divinite supreme.",
+          };
+        }
+
+        return {
+          ...ancienEtat,
+          bois,
+          nourriture,
+          foi,
+          population,
+          bonheur,
+          jour,
+        };
+      });
+    }, TICK_MS);
+
+    return () => clearInterval(intervalId);
+  }, [monde, etat.jeuTermine]);
+
+  function payer(type) {
+    const cout = coutConstruction(type);
+
+    if (etat.bois < cout.bois || etat.foi < cout.foi) return false;
+
+    setEtat((ancienEtat) => ({
+      ...ancienEtat,
+      bois: ancienEtat.bois - cout.bois,
+      foi: ancienEtat.foi - cout.foi,
+    }));
+
+    return true;
+  }
+
+  function agirSurCase(cellule) {
+    if (etat.jeuTermine) return;
+
+    setEtat((ancienEtat) => ({
+      ...ancienEtat,
+      selection: { x: cellule.x, y: cellule.y },
+    }));
+
+    if (etat.outil === OUTILS.ADORER) {
+      setEtat((ancienEtat) => ({
+        ...ancienEtat,
+        foi: Math.min(100, ancienEtat.foi + 2),
+        bonheur: Math.min(100, ancienEtat.bonheur + 1),
+        message: `Tes fideles prient sur ${nomCase(cellule.type).toLowerCase()}.`,
+      }));
+      return;
+    }
+
+    if (etat.outil === OUTILS.PLUIE) {
+      if (etat.foi < 8) {
+        setEtat((ancienEtat) => ({ ...ancienEtat, message: "Foi insuffisante pour invoquer la pluie." }));
+        return;
+      }
+
+      if (cellule.type === TYPES.FERME) {
+        setEtat((ancienEtat) => ({
+          ...ancienEtat,
+          foi: ancienEtat.foi - 8,
+          nourriture: ancienEtat.nourriture + 12 + Math.floor(cellule.fertilite / 10),
+          bonheur: Math.min(100, ancienEtat.bonheur + 4),
+          message: "La pluie benit les recoltes.",
+        }));
+      } else {
+        setEtat((ancienEtat) => ({
+          ...ancienEtat,
+          foi: ancienEtat.foi - 8,
+          bonheur: Math.min(100, ancienEtat.bonheur + 1),
+          message: "Une pluie sacree tombe sur le royaume.",
+        }));
+      }
+      return;
+    }
+
+    if (etat.outil === OUTILS.FOUDRE) {
+      if (etat.foi < 15) {
+        setEtat((ancienEtat) => ({ ...ancienEtat, message: "Foi insuffisante pour invoquer la foudre." }));
+        return;
+      }
+
+      if (cellule.type !== TYPES.VIDE) {
+        setMonde((ancienMonde) =>
+          modifierCaseDansMonde(ancienMonde, cellule.x, cellule.y, (ancienneCellule) => ({
+            ...ancienneCellule,
+            type: TYPES.VIDE,
+          }))
+        );
+
+        setEtat((ancienEtat) => ({
+          ...ancienEtat,
+          foi: ancienEtat.foi - 15,
+          bonheur: Math.max(0, ancienEtat.bonheur - 8),
+          message: "La foudre divine a frappe la case.",
+        }));
+      } else {
+        setEtat((ancienEtat) => ({
+          ...ancienEtat,
+          foi: ancienEtat.foi - 15,
+          message: "La foudre frappe un terrain desert.",
+        }));
+      }
+      return;
+    }
+
+    if (etat.outil === OUTILS.COUPER) {
+      if (cellule.type === TYPES.FORET) {
+        setMonde((ancienMonde) =>
+          modifierCaseDansMonde(ancienMonde, cellule.x, cellule.y, (ancienneCellule) => ({
+            ...ancienneCellule,
+            type: TYPES.VIDE,
+          }))
+        );
+
+        setEtat((ancienEtat) => ({
+          ...ancienEtat,
+          bois: ancienEtat.bois + 14,
+          message: "Les fideles coupent la foret et rapportent du bois.",
+        }));
+      } else {
+        setEtat((ancienEtat) => ({ ...ancienEtat, message: "Il n'y a pas de foret ici." }));
+      }
+      return;
+    }
+
+    if (etat.outil === TYPES.FERME || etat.outil === TYPES.MAISON || etat.outil === TYPES.TEMPLE) {
+      if (cellule.type !== TYPES.VIDE) {
+        setEtat((ancienEtat) => ({ ...ancienEtat, message: "Cette case n'est pas libre." }));
+        return;
+      }
+
+      if (!payer(etat.outil)) {
+        setEtat((ancienEtat) => ({ ...ancienEtat, message: "Ressources insuffisantes pour construire." }));
+        return;
+      }
+
+      setMonde((ancienMonde) =>
+        modifierCaseDansMonde(ancienMonde, cellule.x, cellule.y, (ancienneCellule) => ({
+          ...ancienneCellule,
+          type: etat.outil,
+        }))
+      );
+
+      setEtat((ancienEtat) => ({
+        ...ancienEtat,
+        message: `${nomCase(etat.outil)} construite.`,
+      }));
+    }
+  }
+
+  function recommencer() {
+    setMonde(genererMonde());
+    setEtat(INITIAL_STATE);
+  }
+
+  const stats = calculerStats(monde);
+  const outils = [
+    { id: OUTILS.ADORER, label: "Benir" },
+    { id: OUTILS.PLUIE, label: "Pluie" },
+    { id: OUTILS.FOUDRE, label: "Foudre" },
+    { id: OUTILS.COUPER, label: "Recolter bois" },
+    { id: TYPES.FERME, label: "Construire ferme" },
+    { id: TYPES.MAISON, label: "Construire maison" },
+    { id: TYPES.TEMPLE, label: "Construire temple" },
+  ];
+
+  return (
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <div style={styles.gauche}>
+          <div style={styles.panel}>
+            <div style={styles.header}>
+              <div>
+                <h1 style={styles.titre}>Divine Dominion</h1>
+                <p style={styles.sousTitre}>Mini God Game prototype jouable</p>
+              </div>
+
+              <div style={styles.headerRight}>
+                <div style={styles.badge}>Jour {etat.jour}</div>
+                <button type="button" style={styles.button} onClick={recommencer}>
+                  Recommencer
+                </button>
+              </div>
+            </div>
+
+            <div style={styles.statsGrid}>
+              <StatCard label="Bois" value={etat.bois} />
+              <StatCard label="Nourriture" value={etat.nourriture} />
+              <StatCard label="Foi" value={etat.foi} />
+              <StatCard label="Population" value={etat.population} />
+              <BonheurCard valeur={etat.bonheur} />
+            </div>
+
+            <div style={styles.grille}>
+              {monde.map((ligne) =>
+                ligne.map((cellule) => {
+                  const estSelectionnee =
+                    etat.selection &&
+                    etat.selection.x === cellule.x &&
+                    etat.selection.y === cellule.y;
+
+                  return (
+                    <button
+                      key={`${cellule.x}-${cellule.y}`}
+                      type="button"
+                      onClick={() => agirSurCase(cellule)}
+                      title={nomCase(cellule.type)}
+                      style={{
+                        ...styles.case,
+                        ...(estSelectionnee ? styles.caseSelectionnee : {}),
+                      }}
+                    >
+                      {emojiCase(cellule.type)}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            <div style={styles.messageBox}>
+              <p style={{ margin: 0 }}>{etat.message}</p>
+              {etat.jeuTermine ? (
+                <p
+                  style={{
+                    marginTop: 12,
+                    fontWeight: "bold",
+                    color: etat.victoire ? "#34d399" : "#fb7185",
+                  }}
+                >
+                  {etat.victoire
+                    ? "Condition atteinte : 20 habitants, 2 temples et 100 foi."
+                    : "Relance une partie pour essayer une autre strategie."}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.droite}>
+          <div style={styles.panel}>
+            <h2 style={styles.panelTitle}>Pouvoirs et constructions</h2>
+            <div style={{ display: "grid", gap: 10 }}>
+              {outils.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setEtat((ancienEtat) => ({ ...ancienEtat, outil: item.id }))}
+                  style={{
+                    ...styles.button,
+                    ...(etat.outil === item.id ? styles.buttonActive : {}),
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={styles.panel}>
+            <h2 style={styles.panelTitle}>Etat du royaume</h2>
+            <div style={styles.row}><span>Forets</span><span>{stats.nbForets}</span></div>
+            <div style={styles.row}><span>Fermes</span><span>{stats.nbFermes}</span></div>
+            <div style={styles.row}><span>Maisons</span><span>{stats.nbMaisons}</span></div>
+            <div style={styles.row}><span>Temples</span><span>{stats.nbTemples}</span></div>
+          </div>
+
+          <div style={styles.panel}>
+            <h2 style={styles.panelTitle}>Regles</h2>
+            <p>• Les forets produisent du bois.</p>
+            <p>• Les fermes nourrissent la population.</p>
+            <p>• Les maisons augmentent la capacite d'accueil.</p>
+            <p>• Les temples generent de la foi.</p>
+            <p>• Tu gagnes si ton peuple prospere et te venere.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value }) {
+  return (
+    <div style={styles.statCard}>
+      <div style={styles.statLabel}>{label}</div>
+      <div style={styles.statValue}>{value}</div>
+    </div>
+  );
+}
+
+function BonheurCard({ valeur }) {
+  return (
+    <div style={styles.statCard}>
+      <div style={styles.statLabel}>Bonheur</div>
+      <div style={styles.statValue}>{valeur}%</div>
+      <div style={styles.progressBg}>
+        <div
+          style={{
+            ...styles.progressFill,
+            width: `${Math.max(0, Math.min(100, valeur))}%`,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(to bottom, #020617, #0f172a, #020617)",
+    color: "#f8fafc",
+    padding: 16,
+    fontFamily: "Arial, sans-serif",
+  },
+  container: {
+    maxWidth: 1200,
+    margin: "0 auto",
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr",
+    gap: 24,
+  },
+  gauche: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 24,
+  },
+  droite: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 24,
+  },
+  panel: {
+    background: "rgba(15, 23, 42, 0.9)",
+    border: "1px solid #334155",
+    borderRadius: 24,
+    padding: 20,
+    boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 16,
+    flexWrap: "wrap",
+    marginBottom: 20,
+  },
+  headerRight: {
+    display: "flex",
+    gap: 10,
+    alignItems: "center",
+  },
+  titre: {
+    margin: 0,
+    fontSize: 32,
+  },
+  sousTitre: {
+    margin: "8px 0 0 0",
+    color: "#94a3b8",
+  },
+  panelTitle: {
+    marginTop: 0,
+    marginBottom: 16,
+  },
+  badge: {
+    padding: "8px 12px",
+    borderRadius: 12,
+    background: "#1e293b",
+    border: "1px solid #475569",
+  },
+  button: {
+    padding: "10px 14px",
+    borderRadius: 14,
+    border: "1px solid #475569",
+    background: "#334155",
+    color: "#f8fafc",
+    cursor: "pointer",
+    fontSize: 14,
+  },
+  buttonActive: {
+    background: "#2563eb",
+    border: "1px solid #60a5fa",
+  },
+  statsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(5, 1fr)",
+    gap: 12,
+    marginBottom: 20,
+  },
+  statCard: {
+    background: "#1e293b",
+    border: "1px solid #475569",
+    borderRadius: 16,
+    padding: 12,
+  },
+  statLabel: {
+    color: "#94a3b8",
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  statValue: {
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+  progressBg: {
+    height: 8,
+    width: "100%",
+    background: "#334155",
+    borderRadius: 999,
+    overflow: "hidden",
+    marginTop: 10,
+  },
+  progressFill: {
+    height: "100%",
+    background: "#34d399",
+    borderRadius: 999,
+    transition: "width 0.2s ease",
+  },
+  grille: {
+    display: "grid",
+    gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
+    gap: 8,
+    background: "rgba(2, 6, 23, 0.6)",
+    padding: 12,
+    borderRadius: 24,
+    border: "1px solid #1e293b",
+  },
+  case: {
+    aspectRatio: "1 / 1",
+    borderRadius: 16,
+    border: "1px solid #475569",
+    background: "#1e293b",
+    color: "#f8fafc",
+    fontSize: 28,
+    cursor: "pointer",
+  },
+  caseSelectionnee: {
+    border: "2px solid #facc15",
+    background: "#334155",
+  },
+  messageBox: {
+    marginTop: 16,
+    borderRadius: 16,
+    border: "1px solid #475569",
+    background: "rgba(30, 41, 59, 0.75)",
+    padding: 16,
+  },
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+};

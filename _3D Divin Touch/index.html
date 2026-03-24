@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Divine Dominion 3D</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold:#d4a843; --gold2:#f0c96a;
+      --panel:rgba(8,5,20,0.90); --border:rgba(212,168,67,0.22);
+      --text:#e8dfc8; --muted:#8a7a60;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{ background:#060312; overflow:hidden; }
+    canvas{ position:fixed; inset:0; z-index:0; display:block; }
+
+    /* ── TOPBAR ── */
+    #topbar{
+      position:fixed; top:12px; left:50%; transform:translateX(-50%);
+      z-index:10; display:flex; gap:10px; align-items:center;
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:10px; padding:7px 18px;
+      font-family:'Cinzel',serif; font-size:13px; letter-spacing:1px;
+      backdrop-filter:blur(14px);
+      box-shadow:0 0 30px rgba(212,168,67,0.08);
+    }
+    #day-lbl{ color:var(--gold2); }
+    .btn{
+      padding:5px 15px; border-radius:8px; cursor:pointer;
+      background:rgba(212,168,67,0.10); border:1px solid rgba(212,168,67,0.28);
+      color:var(--gold2); font-family:'Cinzel',serif; font-size:11px;
+      transition:background .15s;
+    }
+    .btn:hover{ background:rgba(212,168,67,0.24); }
+
+    /* ── HUD left ── */
+    #hud{
+      position:fixed; top:12px; left:12px; z-index:10;
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:14px; padding:14px 16px; min-width:255px;
+      backdrop-filter:blur(14px); font-family:'Crimson Text',Georgia,serif;
+      color:var(--text); box-shadow:0 0 30px rgba(0,0,0,0.5);
+    }
+    #hud h1{
+      font-family:'Cinzel',serif; font-size:19px; color:var(--gold);
+      letter-spacing:1px; text-shadow:0 0 20px rgba(212,168,67,0.35);
+      margin-bottom:10px;
+    }
+    .sg{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px; }
+    .sc{
+      background:rgba(255,255,255,0.035); border:1px solid var(--border);
+      border-radius:8px; padding:6px 8px;
+    }
+    .sl{ font-size:10px; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
+    .sv{ font-family:'Cinzel',serif; font-size:17px; }
+    .sc.full{ grid-column:1/-1; }
+    .bar{ height:4px; background:rgba(255,255,255,0.09); border-radius:2px; margin-top:4px; overflow:hidden; }
+    .bf{ height:100%; border-radius:2px; background:#db2777; transition:width .5s; }
+    #msg-box{
+      padding:8px 10px; background:rgba(212,168,67,0.07);
+      border:1px solid rgba(212,168,67,0.18); border-radius:8px;
+      font-style:italic; color:var(--gold2); font-size:13px; line-height:1.4;
+    }
+
+    /* ── TOOLS right ── */
+    #tools{
+      position:fixed; right:12px; top:12px; z-index:10;
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:14px; padding:14px; min-width:215px;
+      backdrop-filter:blur(14px); font-family:'Crimson Text',serif;
+      box-shadow:0 0 30px rgba(0,0,0,0.5);
+    }
+    #tools h2{
+      font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px;
+      color:var(--gold); border-bottom:1px solid var(--border);
+      padding-bottom:7px; margin-bottom:9px;
+    }
+    .tool{
+      width:100%; display:flex; align-items:center; gap:7px;
+      padding:7px 10px; border-radius:8px; margin-bottom:5px;
+      border:1px solid rgba(212,168,67,0.12);
+      background:rgba(28,18,52,0.7); color:var(--text);
+      font-family:'Crimson Text',serif; font-size:14px;
+      cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+    }
+    .tool:hover{ background:rgba(212,168,67,0.09); border-color:rgba(212,168,67,0.3); transform:translateX(2px); }
+    .tool.active{ background:rgba(212,168,67,0.17); border-color:var(--gold); color:var(--gold2); }
+    .ti{ font-size:15px; width:18px; text-align:center; }
+    .tc{ margin-left:auto; font-size:10px; color:var(--muted); }
+
+    /* ── HINT ── */
+    #hint{
+      position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+      z-index:10; background:var(--panel); border:1px solid var(--border);
+      border-radius:8px; padding:5px 16px; backdrop-filter:blur(12px);
+      font-family:'Crimson Text',serif; font-size:12px; color:var(--muted);
+      pointer-events:none; white-space:nowrap;
+    }
+
+    /* ── END OVERLAY ── */
+    #overlay{
+      display:none; position:fixed; inset:0; z-index:50;
+      background:rgba(0,0,0,0.75); backdrop-filter:blur(6px);
+      align-items:center; justify-content:center;
+    }
+    #overlay.show{ display:flex; }
+    .ov{
+      background:rgba(8,4,22,0.98); border:1px solid var(--gold);
+      border-radius:20px; padding:38px 48px; text-align:center;
+      box-shadow:0 0 60px rgba(212,168,67,0.2); max-width:380px;
+    }
+    .ov.lose{ border-color:#f87171; box-shadow:0 0 60px rgba(239,68,68,0.2); }
+    .ov h2{ font-family:'Cinzel',serif; font-size:26px; color:var(--gold); margin-bottom:12px; }
+    .ov.lose h2{ color:#f87171; }
+    .ov p{ font-family:'Crimson Text',serif; font-size:15px; color:var(--text); margin-bottom:22px; line-height:1.6; }
+  </style>
+</head>
+<body>
+
+<div id="topbar">
+  <span id="day-lbl">Jour 1</span>
+  <button class="btn" onclick="resetGame()">✦ Recommencer</button>
+</div>
+
+<div id="hud">
+  <h1>☀️ Divine Dominion</h1>
+  <div class="sg" id="stats-grid"></div>
+  <div id="msg-box">Bienvenue, divinité.</div>
+</div>
+
+<div id="tools">
+  <h2>⚡ POUVOIRS &amp; CONSTRUCTIONS</h2>
+  <div id="tools-list"></div>
+</div>
+
+<div id="hint">🖱 Clic pour agir · Glisser pour orbiter · Molette pour zoomer</div>
+
+<div id="overlay">
+  <div class="ov" id="ov-box">
+    <h2 id="ov-title"></h2>
+    <p id="ov-msg"></p>
+    <button class="btn" onclick="resetGame()">✦ Nouvelle partie</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════
+const GRID     = 6;
+const TICK_MS  = 1200;
+const SPACING  = 2.3;
+const TSIZE    = 2.05;
+
+const T = { vide:'vide', foret:'foret', ferme:'ferme', maison:'maison', temple:'temple' };
+const O = { ADORER:'adorer', PLUIE:'pluie', FOUDRE:'foudre', COUPER:'couper' };
+
+const TOOLS_DEF = [
+  { id:O.ADORER,  label:'Bénir',           icon:'✨', cost:'' },
+  { id:O.PLUIE,   label:'Pluie',            icon:'🌧️', cost:'8 foi' },
+  { id:O.FOUDRE,  label:'Foudre',           icon:'⚡', cost:'15 foi' },
+  { id:O.COUPER,  label:'Récolter bois',    icon:'🪓', cost:'' },
+  { id:T.ferme,   label:'Construire ferme', icon:'🌾', cost:'10🪵' },
+  { id:T.maison,  label:'Construire maison',icon:'🏠', cost:'15🪵+5✨' },
+  { id:T.temple,  label:'Construire temple',icon:'⛩️', cost:'20🪵+20✨' },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════════════
+let monde, bois, nourriture, foi, population, bonheur, jour,
+    outil, message, selTile, finished, victory, tickTimer;
+
+function genMonde() {
+  const m = [];
+  for (let y=0; y<GRID; y++) {
+    const row=[];
+    for (let x=0; x<GRID; x++)
+      row.push({ x, y, type: Math.random()>0.75 ? T.foret : T.vide,
+                        fertilite: 50+Math.floor(Math.random()*50) });
+    m.push(row);
+  }
+  m[2][2]={...m[2][2],type:T.maison};
+  m[2][3]={...m[2][3],type:T.ferme};
+  m[3][2]={...m[3][2],type:T.foret};
+  return m;
+}
+
+function calcStats(){
+  let nF=0,nFm=0,nM=0,nT=0;
+  monde.flat().forEach(c=>{
+    if(c.type===T.foret) nF++; if(c.type===T.ferme) nFm++;
+    if(c.type===T.maison)nM++; if(c.type===T.temple)nT++;
+  });
+  return {nbForets:nF,nbFermes:nFm,nbMaisons:nM,nbTemples:nT};
+}
+
+function tick(){
+  if(finished)return;
+  jour++;
+  const s=calcStats();
+  const pB=s.nbForets*3, pN=s.nbFermes*4;
+  const gF=s.nbTemples*3+Math.max(0,Math.floor(bonheur/25));
+  const cN=Math.max(1,population*2);
+  const pl=s.nbMaisons*4;
+  bois+=pB;
+  nourriture=Math.max(0,nourriture+pN-cN);
+  foi=Math.min(100,foi+gF);
+  let nb=bonheur;
+  if(pN<cN)nb-=6; else nb+=1;
+  if(s.nbTemples>0)nb+=1;
+  if(pl<population)nb-=5;
+  bonheur=Math.max(0,Math.min(100,nb));
+  const peut=(pl>=population)&&(nourriture>population*2)&&(bonheur>55);
+  const doit=(nourriture<=0)||(bonheur<15);
+  if(doit)population=Math.max(0,population-1);
+  else if(peut&&Math.random()>0.55)population++;
+  if(population<=0){finished=true;victory=false;showOverlay();}
+  else if(foi>=100&&population>=20&&s.nbTemples>=2){finished=true;victory=true;showOverlay();}
+  updateUI();
+}
+
+function actCell(x,y){
+  if(finished)return;
+  const cell=monde[y][x];
+  // Deselect old
+  if(selTile){ tileMeshes[selTile.y][selTile.x].material.emissive.setHex(0x000000); }
+  selTile={x,y};
+  tileMeshes[y][x].material.emissive.setHex(0x4a2a08);
+
+  if(outil===O.ADORER){
+    foi=Math.min(100,foi+2); bonheur=Math.min(100,bonheur+1);
+    setMsg(`Tes fidèles prient sur ${cellName(cell.type)}.`);
+    spawnParticles(x,y,'bless');
+    updateUI(); return;
+  }
+  if(outil===O.PLUIE){
+    if(foi<8){setMsg('Foi insuffisante pour la pluie.');updateUI();return;}
+    foi-=8;
+    if(cell.type===T.ferme){nourriture+=12+Math.floor(cell.fertilite/10);bonheur=Math.min(100,bonheur+4);setMsg('La pluie bénit les récoltes.');}
+    else{bonheur=Math.min(100,bonheur+1);setMsg('Une pluie sacrée tombe.');}
+    spawnParticles(x,y,'rain');
+    updateUI();return;
+  }
+  if(outil===O.FOUDRE){
+    if(foi<15){setMsg('Foi insuffisante pour la foudre.');updateUI();return;}
+    foi-=15;
+    if(cell.type!==T.vide){
+      monde[y][x]={...cell,type:T.vide};
+      bonheur=Math.max(0,bonheur-8);
+      setMsg('La foudre divine a frappé la case.');
+      spawnParticles(x,y,'lightning');
+      refreshTile(x,y);
+    }else setMsg('La foudre frappe un terrain désert.');
+    updateUI();return;
+  }
+  if(outil===O.COUPER){
+    if(cell.type!==T.foret){setMsg('Pas de forêt ici.');updateUI();return;}
+    monde[y][x]={...cell,type:T.vide};
+    bois+=14;
+    setMsg('Les fidèles coupent la forêt.');
+    spawnParticles(x,y,'chop');
+    refreshTile(x,y);updateUI();return;
+  }
+  if([T.ferme,T.maison,T.temple].includes(outil)){
+    if(cell.type!==T.vide){setMsg("Cette case n'est pas libre.");updateUI();return;}
+    const cost=buildCost(outil);
+    if(bois<cost.bois||foi<cost.foi){setMsg('Ressources insuffisantes.');updateUI();return;}
+    bois-=cost.bois; foi-=cost.foi;
+    monde[y][x]={...cell,type:outil};
+    setMsg(`${cellName(outil)} construite.`);
+    refreshTile(x,y,true);
+    updateUI();
+  }
+}
+
+function buildCost(t){
+  if(t===T.ferme) return{bois:10,foi:0};
+  if(t===T.maison)return{bois:15,foi:5};
+  if(t===T.temple)return{bois:20,foi:20};
+  return{bois:0,foi:0};
+}
+function cellName(t){
+  return{vide:'terrain vide',foret:'forêt',ferme:'ferme',maison:'maison',temple:'temple'}[t]||t;
+}
+function setMsg(txt){message=txt;}
+
+// ═══════════════════════════════════════════════════════════════════
+// THREE.JS SCENE
+// ═══════════════════════════════════════════════════════════════════
+let scene, camera, renderer, raycaster;
+let tileMeshes=[], tileGroups=[];
+const meshToTile=new Map();
+let particles=[], animQueue=[];
+
+// Camera
+const cam={theta:Math.PI*0.18, phi:1.02, radius:20};
+let isDrag=false, dragPrev={x:0,y:0}, mdPos={x:0,y:0};
+let hovTile=null;
+
+function initScene(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x060212);
+  scene.fog=new THREE.FogExp2(0x060212,0.022);
+
+  camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,0.1,120);
+  moveCam();
+
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  document.body.insertBefore(renderer.domElement,document.body.firstChild);
+
+  raycaster=new THREE.Raycaster();
+
+  // ── Lights ──
+  scene.add(new THREE.AmbientLight(0x5060a0,0.55));
+  const sun=new THREE.DirectionalLight(0xfff0d0,1.15);
+  sun.position.set(12,20,10);
+  sun.castShadow=true;
+  sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;
+  sun.shadow.camera.near=0.5; sun.shadow.camera.far=70;
+  [-14,14,-14,14].forEach((v,i)=>{
+    if(i===0)sun.shadow.camera.left=v;
+    else if(i===1)sun.shadow.camera.right=v;
+    else if(i===2)sun.shadow.camera.top=v;
+    else sun.shadow.camera.bottom=v;
+  });
+  scene.add(sun);
+  const fill=new THREE.DirectionalLight(0x3050b0,0.28);
+  fill.position.set(-10,5,-8); scene.add(fill);
+
+  // ── Ground ──
+  const gnd=new THREE.Mesh(
+    new THREE.PlaneGeometry(60,60),
+    new THREE.MeshLambertMaterial({color:0x0a1a0a})
+  );
+  gnd.rotation.x=-Math.PI/2; gnd.position.y=-0.09; gnd.receiveShadow=true;
+  scene.add(gnd);
+
+  // ── Stars ──
+  const sv=[];
+  for(let i=0;i<1200;i++) sv.push((Math.random()-.5)*150,(Math.random()*.7+.3)*60,(Math.random()-.5)*150);
+  const sg=new THREE.BufferGeometry();
+  sg.setAttribute('position',new THREE.Float32BufferAttribute(sv,3));
+  scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.07})));
+
+  // ── Input ──
+  const c=renderer.domElement;
+  c.addEventListener('mousedown',onMD);
+  c.addEventListener('mousemove',onMM);
+  c.addEventListener('mouseup',  onMU);
+  c.addEventListener('wheel',    onWh,{passive:true});
+  window.addEventListener('mouseup',()=>isDrag=false);
+  window.addEventListener('resize',onResize);
+}
+
+function moveCam(){
+  camera.position.set(
+    cam.radius*Math.sin(cam.phi)*Math.sin(cam.theta),
+    cam.radius*Math.cos(cam.phi),
+    cam.radius*Math.sin(cam.phi)*Math.cos(cam.theta)
+  );
+  camera.lookAt(0,0,0);
+}
+
+function tilePos(x,z){
+  return new THREE.Vector3(
+    (x-(GRID-1)/2)*SPACING, 0,
+    (z-(GRID-1)/2)*SPACING
+  );
+}
+
+// ── Build entire grid ──
+function buildGrid(){
+  tileMeshes=[]; tileGroups=[]; meshToTile.clear();
+  for(let y=0;y<GRID;y++){
+    tileMeshes.push([]); tileGroups.push([]);
+    for(let x=0;x<GRID;x++){
+      const type=monde[y][x].type;
+      const pos=tilePos(x,y);
+      // Base tile
+      const mat=new THREE.MeshLambertMaterial({color:tileCol(type),emissive:0x000000});
+      const mesh=new THREE.Mesh(new THREE.BoxGeometry(TSIZE,.15,TSIZE),mat);
+      mesh.position.copy(pos); mesh.receiveShadow=true;
+      scene.add(mesh);
+      tileMeshes[y].push(mesh);
+      meshToTile.set(mesh.uuid,{x,y});
+      // Object group
+      const grp=makeGrp(type);
+      if(grp){grp.position.copy(pos);scene.add(grp);}
+      tileGroups[y].push(grp||null);
+    }
+  }
+}
+
+function refreshTile(x,y,popIn=false){
+  const type=monde[y][x].type;
+  const pos=tilePos(x,y);
+  tileMeshes[y][x].material.color.setHex(tileCol(type));
+  if(tileMeshes[y][x].material.emissive) tileMeshes[y][x].material.emissive.setHex(0x4a2a08);
+  // Remove old group
+  if(tileGroups[y][x]){
+    const old=tileGroups[y][x];
+    scene.remove(old);
+    old.traverse(o=>{if(o.isMesh){o.geometry.dispose();}});
+  }
+  const grp=makeGrp(type);
+  if(grp){
+    grp.position.copy(pos);
+    if(popIn){grp.scale.setScalar(0.01);animQueue.push({grp,t:0});}
+    scene.add(grp);
+  }
+  tileGroups[y][x]=grp||null;
+}
+
+function tileCol(type){
+  return{vide:0x2a4a24,foret:0x183516,ferme:0x382510,maison:0x2a2a3a,temple:0x38240a}[type]||0x2a4a24;
+}
+
+// ══════════════════════════════════════════
+// 3D OBJECT FACTORIES
+// ══════════════════════════════════════════
+function makeGrp(type){
+  if(type===T.foret)  return makeForest();
+  if(type===T.ferme)  return makeFarm();
+  if(type===T.maison) return makeHouse();
+  if(type===T.temple) return makeTemple();
+  return null;
+}
+
+function makeForest(){
+  const g=new THREE.Group();
+  const positions=[[-0.38,-0.3],[0.3,0.38],[-0.05,0.1],[0.4,-0.35]];
+  const count=Math.floor(Math.random()*2)+2;
+  for(let i=0;i<count;i++){
+    const t=oneTree();
+    t.position.set(positions[i][0],.075,positions[i][1]);
+    t.rotation.y=Math.random()*Math.PI*2;
+    t.scale.setScalar(.7+Math.random()*.5);
+    g.add(t);
+  }
+  return g;
+}
+
+function oneTree(){
+  const g=new THREE.Group();
+  const tMat=new THREE.MeshLambertMaterial({color:0x5c3a1e});
+  const f1Mat=new THREE.MeshLambertMaterial({color:0x175c20});
+  const f2Mat=new THREE.MeshLambertMaterial({color:0x1e7828});
+
+  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.07,.1,.52,6),tMat);
+  trunk.position.y=.26; trunk.castShadow=true; g.add(trunk);
+  const f1=new THREE.Mesh(new THREE.ConeGeometry(.44,.65,7),f1Mat);
+  f1.position.y=.72; f1.castShadow=true; g.add(f1);
+  const f2=new THREE.Mesh(new THREE.ConeGeometry(.32,.5,7),f2Mat);
+  f2.position.y=1.08; f2.castShadow=true; g.add(f2);
+  return g;
+}
+
+function makeFarm(){
+  const g=new THREE.Group();
+  const sM=new THREE.MeshLambertMaterial({color:0x55341a});
+  const stM=new THREE.MeshLambertMaterial({color:0xcb9020});
+  const hM=new THREE.MeshLambertMaterial({color:0xeec040});
+
+  // Soil ridges
+  for(let r=-1;r<=1;r++){
+    const ridge=new THREE.Mesh(new THREE.BoxGeometry(1.55,.07,.22),sM);
+    ridge.position.set(0,.075+.035,r*.36); ridge.castShadow=true; g.add(ridge);
+  }
+  // Wheat stalks in grid
+  for(let rx=-2;rx<=2;rx++) for(let rz=-1;rz<=1;rz++){
+    const stalk=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.4,4),stM);
+    stalk.position.set(rx*.24,.075+.2,rz*.32);
+    stalk.castShadow=true; g.add(stalk);
+    const head=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.12,5),hM);
+    head.position.set(rx*.24,.075+.46,rz*.32); g.add(head);
+  }
+  return g;
+}
+
+function makeHouse(){
+  const g=new THREE.Group();
+  const wM=new THREE.MeshLambertMaterial({color:0xddd0b0});
+  const rM=new THREE.MeshLambertMaterial({color:0xa01818});
+  const dM=new THREE.MeshLambertMaterial({color:0x6b3a1a});
+  const winM=new THREE.MeshLambertMaterial({color:0x93c5fd,emissive:new THREE.Color(0x2055a0)});
+
+  const body=new THREE.Mesh(new THREE.BoxGeometry(1.05,.82,.9),wM);
+  body.position.y=.075+.41; body.castShadow=true; body.receiveShadow=true; g.add(body);
+
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(.82,.52,4),rM);
+  roof.position.y=.075+.82+.26; roof.rotation.y=Math.PI/4;
+  roof.castShadow=true; g.add(roof);
+
+  const door=new THREE.Mesh(new THREE.BoxGeometry(.2,.32,.05),dM);
+  door.position.set(0,.075+.16,.48); g.add(door);
+
+  for(const xo of[-.3,.3]){
+    const win=new THREE.Mesh(new THREE.BoxGeometry(.18,.18,.05),winM);
+    win.position.set(xo,.075+.52,.48); g.add(win);
+  }
+  // Chimney
+  const ch=new THREE.Mesh(new THREE.BoxGeometry(.12,.25,.12),
+    new THREE.MeshLambertMaterial({color:0x8b7060}));
+  ch.position.set(.32,.075+1.07,.12); g.add(ch);
+  return g;
+}
+
+function makeTemple(){
+  const g=new THREE.Group();
+  const goldM=new THREE.MeshLambertMaterial({color:0xc8951e,emissive:new THREE.Color(.08,.04,0)});
+  const darkM=new THREE.MeshLambertMaterial({color:0x7a5510});
+  const blueM=new THREE.MeshLambertMaterial({color:0x183860});
+
+  // Platform
+  const base=new THREE.Mesh(new THREE.BoxGeometry(1.65,.13,1.65),darkM);
+  base.position.y=.075+.065; base.castShadow=true; base.receiveShadow=true; g.add(base);
+
+  let ty=.075+.13;
+  for(const[w,h,d]of[[1.35,.38,1.35],[1.0,.3,1.0],[.7,.24,.7]]){
+    const tier=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),goldM);
+    tier.position.y=ty+h/2; tier.castShadow=true; g.add(tier);
+    const ov=new THREE.Mesh(new THREE.BoxGeometry(w+.32,.07,d+.32),blueM);
+    ov.position.y=ty+h; g.add(ov);
+    ty+=h+.07;
+  }
+  // Spire
+  const sp=new THREE.Mesh(new THREE.CylinderGeometry(.04,.09,.44,8),goldM);
+  sp.position.y=ty+.22; sp.castShadow=true; g.add(sp);
+
+  // Four corner pillars on base
+  for(const[px,pz]of[[.55,.55],[-.55,.55],[.55,-.55],[-.55,-.55]]){
+    const pillar=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.42,6),darkM);
+    pillar.position.set(px,.075+.13+.21,pz); g.add(pillar);
+  }
+  return g;
+}
+
+// ══════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════
+function spawnParticles(tx,ty,kind){
+  const pos=tilePos(tx,ty);
+  let col, count, speed;
+  if(kind==='bless') {col=0xf0d060;count=10;speed=.05;}
+  else if(kind==='rain'){col=0x60a0ff;count=8;speed=.04;}
+  else if(kind==='lightning'){col=0xf0f040;count=14;speed=.08;}
+  else {col=0x8b5e3c;count=6;speed=.03;}
+
+  for(let i=0;i<count;i++){
+    const mat=new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:.9});
+    const geo=kind==='rain'?new THREE.BoxGeometry(.04,.12,.04):new THREE.SphereGeometry(.06,4,4);
+    const mesh=new THREE.Mesh(geo,mat);
+    mesh.position.set(
+      pos.x+(Math.random()-.5)*1.6,
+      .5+Math.random()*.5,
+      pos.z+(Math.random()-.5)*1.6
+    );
+    scene.add(mesh);
+    const v={x:(Math.random()-.5)*speed,y:speed*.8+Math.random()*speed,z:(Math.random()-.5)*speed};
+    particles.push({mesh,vel:v,life:55,max:55});
+  }
+}
+
+function tickParticles(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.life--;
+    p.mesh.position.x+=p.vel.x; p.mesh.position.y+=p.vel.y; p.mesh.position.z+=p.vel.z;
+    p.vel.y-=.002;
+    p.mesh.material.opacity=p.life/p.max*.9;
+    if(p.life<=0){scene.remove(p.mesh);p.mesh.geometry.dispose();particles.splice(i,1);}
+  }
+}
+
+function tickAnimQueue(){
+  for(let i=animQueue.length-1;i>=0;i--){
+    const a=animQueue[i];
+    a.t+=.12;
+    const s=Math.min(1,a.t);
+    a.grp.scale.setScalar(s);
+    if(a.t>=1)animQueue.splice(i,1);
+  }
+}
+
+// ══════════════════════════════════════════
+// CAMERA / MOUSE
+// ══════════════════════════════════════════
+function onMD(e){isDrag=false;mdPos={x:e.clientX,y:e.clientY};dragPrev={x:e.clientX,y:e.clientY};}
+function onMU(e){if(!isDrag)doClick(e);isDrag=false;}
+function onMM(e){
+  const moved=Math.abs(e.clientX-mdPos.x)+Math.abs(e.clientY-mdPos.y);
+  if(moved>5)isDrag=true;
+  if(isDrag&&e.buttons===1){
+    const dx=e.clientX-dragPrev.x, dy=e.clientY-dragPrev.y;
+    cam.theta-=dx*.008;
+    cam.phi=Math.max(.18,Math.min(Math.PI/2-.04,cam.phi+dy*.008));
+    dragPrev={x:e.clientX,y:e.clientY};
+    moveCam();
+  }else if(e.buttons===0) doHover(e);
+}
+function onWh(e){
+  cam.radius=Math.max(7,Math.min(38,cam.radius+e.deltaY*.015));
+  moveCam();
+}
+function onResize(){
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+}
+
+function mouseNDC(e){
+  return new THREE.Vector2((e.clientX/innerWidth)*2-1,-(e.clientY/innerHeight)*2+1);
+}
+
+function castTiles(e){
+  raycaster.setFromCamera(mouseNDC(e),camera);
+  const hits=raycaster.intersectObjects(tileMeshes.flat());
+  return hits.length>0?meshToTile.get(hits[0].object.uuid):null;
+}
+
+function doClick(e){const t=castTiles(e);if(t)actCell(t.x,t.y);}
+
+function doHover(e){
+  const t=castTiles(e);
+  if(hovTile){
+    const{x,y}=hovTile;
+    const isSel=selTile&&selTile.x===x&&selTile.y===y;
+    tileMeshes[y][x].material.emissive.setHex(isSel?0x4a2a08:0x000000);
+  }
+  if(t){
+    const isSel=selTile&&selTile.x===t.x&&selTile.y===t.y;
+    tileMeshes[t.y][t.x].material.emissive.setHex(isSel?0x6a3c10:0x1a1206);
+    renderer.domElement.style.cursor='pointer';
+  }else renderer.domElement.style.cursor='default';
+  hovTile=t||null;
+}
+
+// ══════════════════════════════════════════
+// UI
+// ══════════════════════════════════════════
+function updateUI(){
+  document.getElementById('day-lbl').textContent=`Jour ${jour}`;
+  document.getElementById('msg-box').textContent=message;
+  const s=calcStats();
+  document.getElementById('stats-grid').innerHTML=
+    sc('🪵','Bois',Math.floor(bois))+
+    sc('🌽','Nourriture',Math.floor(nourriture))+
+    sc('✨','Foi',Math.floor(foi))+
+    sc('👥','Population',population)+
+    `<div class="sc full">
+      <div class="sl">❤️ Bonheur</div>
+      <div class="sv">${bonheur}%</div>
+      <div class="bar"><div class="bf" style="width:${bonheur}%"></div></div>
+    </div>`+
+    sc('🌲','Forêts',s.nbForets)+sc('🌾','Fermes',s.nbFermes)+
+    sc('🏠','Maisons',s.nbMaisons)+sc('⛩️','Temples',s.nbTemples);
+
+  document.getElementById('tools-list').innerHTML=TOOLS_DEF.map(t=>
+    `<button class="tool${outil===t.id?' active':''}" onclick="selectTool('${t.id}')">
+      <span class="ti">${t.icon}</span><span>${t.label}</span><span class="tc">${t.cost}</span>
+    </button>`
+  ).join('');
+}
+
+function sc(ico,lbl,val){
+  return`<div class="sc"><div class="sl">${ico} ${lbl}</div><div class="sv">${val}</div></div>`;
+}
+function selectTool(id){outil=id;updateUI();}
+
+function showOverlay(){
+  const w=victory;
+  const box=document.getElementById('ov-box');
+  box.className='ov'+(w?'':' lose');
+  document.getElementById('ov-title').textContent=w?'☀️ Victoire !':'💀 Défaite';
+  document.getElementById('ov-msg').textContent=w
+    ?'Ton peuple te vénère comme une divinité suprême. La légende est écrite.'
+    :"Ton peuple a disparu dans l'oubli. Le règne divin s'effondre.";
+  document.getElementById('overlay').classList.add('show');
+}
+
+// ══════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════
+function resetGame(){
+  clearInterval(tickTimer);
+  particles.forEach(p=>{scene.remove(p.mesh);p.mesh.geometry.dispose();});
+  particles=[]; animQueue=[];
+
+  monde=genMonde(); bois=40; nourriture=30; foi=40;
+  population=6; bonheur=70; jour=1;
+  outil=O.ADORER; message='Bienvenue, divinité. Guide ton peuple.';
+  selTile=null; hovTile=null; finished=false; victory=false;
+
+  document.getElementById('overlay').classList.remove('show');
+
+  // Clear existing tile scene objects
+  tileMeshes.flat().forEach(m=>{scene.remove(m);m.geometry.dispose();m.material.dispose();});
+  tileGroups.flat().forEach(g=>{
+    if(g){scene.remove(g);g.traverse(o=>{if(o.isMesh)o.geometry.dispose();});}
+  });
+
+  buildGrid();
+  updateUI();
+  tickTimer=setInterval(tick,TICK_MS);
+}
+
+// ══════════════════════════════════════════
+// ANIMATE LOOP
+// ══════════════════════════════════════════
+function animate(){
+  requestAnimationFrame(animate);
+  tickParticles();
+  tickAnimQueue();
+
+  // Temple gold pulse
+  const now=Date.now()*.001;
+  tileGroups.forEach((row,y)=>row.forEach((grp,x)=>{
+    if(!grp||monde[y][x].type!==T.temple)return;
+    grp.traverse(obj=>{
+      if(obj.isMesh&&obj.material&&obj.material.emissive){
+        const v=.12+.07*Math.sin(now*2.2+x+y);
+        obj.material.emissive.setRGB(v*.8,v*.45,0);
+      }
+    });
+  }));
+
+  // Gentle float for bless particles (already handled in tickParticles)
+  renderer.render(scene,camera);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+initScene();
+resetGame();
+animate();
+</script>
+</body>
+</html>
