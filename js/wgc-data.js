@@ -7,6 +7,8 @@
             year: 2026,
             tags: ["", "", "", ""],
             playUrl: "DONE/_2D Artiste Manager/index.html",
+            description: " ",
+            rating:  7.5,
 
             ///////// Metadata for display and management
             //changelog: [
@@ -22,6 +24,8 @@
             year: 2026,
             tags: ["", "", "", ""],
             playUrl: "DONE/_2D War Zone Commander/index.html",
+            description: " ",
+            rating:  7.5,
 
             ///////// Metadata for display and management
             //changelog: [
@@ -37,6 +41,8 @@
             year: 2026,
             tags: ["", "", "", ""],
             playUrl: "DONE/_2D Football Manager/index.html",
+            description: " ",
+            rating:  7.5,
 
             ///////// Metadata for display and management
             //changelog: [
