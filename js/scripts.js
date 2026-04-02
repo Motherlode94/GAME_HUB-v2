@@ -1,308 +1,59 @@
+document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener('DOMContentLoaded', function() {
-// ── Game Data ─────────────────────────────────
-const GAMES = [
-        {
-            id: 1,
-            title: "Artiste Manager",
-            category: "action",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Artiste Manager/index.html",
-            description: " ",
-            rating:  7.5,
+// ── Game Data ──────────────────────────────────────────────────────────────
+const GAMES = (window.WGC_DATA && Array.isArray(window.WGC_DATA.GAMES))
+    ? window.WGC_DATA.GAMES
+    : [];
 
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 2,
-            title: "War Zone Commander",
-            category: "strategy",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D War Zone Commander/index.html",
-            description: " ",
-            rating:  7.5,
+// ── Storage helpers ────────────────────────────────────────────────────────
+function getScores(gameId)          { return window.WGC_DATA?.getScores(gameId)    ?? []; }
+function saveScores(gameId, scores) { window.WGC_DATA?.saveScores(gameId, scores); }
+function addScore(gameId, entry)    { return window.WGC_DATA?.addScore(gameId, entry); }
+function getComments(gameId)        { return window.WGC_DATA?.getComments(gameId)  ?? []; }
+function saveComments(gameId, c)    { window.WGC_DATA?.saveComments(gameId, c); }
 
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 3,
-            title: "Football Manager",
-            category: "sports",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Football Manager/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 4,
-            title: "Free Force ",
-            category: "action",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Free Force/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 5,
-            title: "Be The King",
-            category: "strategy",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Be The King/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 6,
-            title: "Fighting Legends",
-            category: "action",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Fighting Legends/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 7,
-            title: "City Builder",
-            category: "strategy",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D City Builder/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 8,
-            title: " Hero Forces",
-            category: "action",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Hero Forces/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 9,
-            title: "NFL Sim",
-            category: "sports",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D NFL Sim/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 10,
-            title: "Dungeon Crawler",
-            category: "rpg",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Dungeon Crawler/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 11,
-            title: "Axis Infinity",
-            category: "strategy",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Axis Infinity/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        },
-        {
-            id: 12,
-            title: "Vampire's Sim",
-            category: "rpg",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Vampire's Sim/index.html",
-            description: " ",
-            rating:  7.5,
-
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-
-        },
-        {
-            id: 13,
-            title: "Tower Defense",
-            category: "strategy",
-            year: 2026,
-            tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Tower Defense/index.html",
-            description: " ",
-            rating:  7.5,
-            
-            ///////// Metadata for display and management
-            //changelog: [
-            //    { version: "", date: "", notes: ["", "", ""] },
-            //]
-            //coverImage: "path/to/image.png",
-            //strategyType: "",
-        }
-];
-
-
-// ── Storage helpers ────────────────────────────
-if (window.WGC_DATA && Array.isArray(window.WGC_DATA.GAMES) && window.WGC_DATA.GAMES.length) {
-    GAMES.splice(0, GAMES.length, ...window.WGC_DATA.GAMES);
-}
-
-function getScores(gameId) {
-    if (window.WGC_DATA && typeof window.WGC_DATA.getScores === 'function') {
-        return window.WGC_DATA.getScores(gameId);
+// ── Identite joueur auto-generee ───────────────────────────────────────────
+// Cree une seule fois, stockee en localStorage, jamais demandee au joueur.
+function getOrCreatePlayerId() {
+    let pid = localStorage.getItem('wgc_pid');
+    if (!pid) {
+        pid = 'J-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+        localStorage.setItem('wgc_pid', pid);
     }
-    try { return JSON.parse(localStorage.getItem(`wgc_scores_${gameId}`)) || []; }
-    catch { return []; }
+    return pid;
 }
-function saveScores(gameId, scores) {
-    if (window.WGC_DATA && typeof window.WGC_DATA.saveScores === 'function') {
-        window.WGC_DATA.saveScores(gameId, scores);
-        return;
-    }
-    localStorage.setItem(`wgc_scores_${gameId}`, JSON.stringify(scores));
-}
-function addScore(gameId, entry) {
-    if (window.WGC_DATA && typeof window.WGC_DATA.addScore === 'function') {
-        return window.WGC_DATA.addScore(gameId, entry);
-    }
-    const scores = getScores(gameId);
-    scores.push(entry);
-    saveScores(gameId, scores);
-    return getScores(gameId);
-}
-function getComments(gameId) {
-    if (window.WGC_DATA && typeof window.WGC_DATA.getComments === 'function') {
-        return window.WGC_DATA.getComments(gameId);
-    }
-    try { return JSON.parse(localStorage.getItem(`wgc_comments_${gameId}`)) || []; }
-    catch { return []; }
-}
-function saveComments(gameId, comments) {
-    if (window.WGC_DATA && typeof window.WGC_DATA.saveComments === 'function') {
-        window.WGC_DATA.saveComments(gameId, comments);
-        return;
-    }
-    localStorage.setItem(`wgc_comments_${gameId}`, JSON.stringify(comments));
-}
+const PLAYER_ID = getOrCreatePlayerId();
 
-// ── Debounce helper ────────────────────────────
+// ── Debounce helper ────────────────────────────────────────────────────────
 function debounce(fn, delay = 300) {
     let timer;
     return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
 }
 
-// ── State ──────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────────────
 let activeCategory = 'all';
 let searchQuery    = '';
 let sortMode       = 'default';
 let currentGameId  = null;
+let lastPlayedGame = null;
 
-// Pseudo persistant par session (demandé une seule fois avant le 1er jeu)
-let playerName = sessionStorage.getItem('wgc_playerName') || '';
-
-// Favoris (persistant dans localStorage)
+// Favoris
 function getFavorites() {
     try { return JSON.parse(localStorage.getItem('wgc_favorites') || '[]'); } catch { return []; }
 }
 function toggleFavorite(gameId) {
     const favs = getFavorites();
-    const idx = favs.indexOf(gameId);
+    const idx  = favs.indexOf(gameId);
     if (idx === -1) favs.push(gameId); else favs.splice(idx, 1);
     localStorage.setItem('wgc_favorites', JSON.stringify(favs));
-    return idx === -1; // true = ajouté
+    return idx === -1;
 }
 function isFavorite(gameId) { return getFavorites().includes(gameId); }
 
-// ── DOM ────────────────────────────────────────
+// ── DOM refs ───────────────────────────────────────────────────────────────
 const grid        = document.getElementById('games-grid');
 const noResults   = document.getElementById('no-results');
 const resultsInfo = document.getElementById('results-info');
-const strategyCompare = document.getElementById('strategy-compare');
 const gameCount   = document.getElementById('game-count');
 const searchInput = document.getElementById('search-input');
 const clearBtn    = document.getElementById('clear-search');
@@ -312,148 +63,49 @@ const chips       = document.querySelectorAll('.chip');
 const modalOverlay = document.getElementById('modal-overlay');
 const modalClose   = document.getElementById('modal-close');
 
-const modalGameOverlay = document.getElementById('modal-game-overlay');
-const modalGameClose   = document.getElementById('modal-game-close');
-const modalGameTitle   = document.getElementById('modal-game-title');
-const gameIframe       = document.getElementById('game-iframe');
-const viewerEmpty      = document.getElementById('viewer-empty');
-const viewerPopoutBtn  = document.getElementById('viewer-popout');
+// Panel post-game (avis optionnel uniquement)
+const postgamePanel = document.getElementById('postgame-panel');
+const postgameTitle = document.getElementById('postgame-game-title');
+const pgStars       = document.querySelectorAll('.pg-star');
+const pgCommentText = document.getElementById('pg-comment-text');
+const pgSubmitBtn   = document.getElementById('pg-submit-btn');
+const pgSkipBtn     = document.getElementById('pg-skip-btn');
 
-// Post-game panel
-const postgamePanel  = document.getElementById('postgame-panel');
-const postgameTitle  = document.getElementById('postgame-game-title');
-const pgScoreName    = document.getElementById('pg-score-name');
-const pgScoreValue   = document.getElementById('pg-score-value');
-const pgStars        = document.querySelectorAll('.pg-star');
-const pgCommentText  = document.getElementById('pg-comment-text');
-const pgSubmitBtn    = document.getElementById('pg-submit-btn');
-const pgSkipBtn      = document.getElementById('pg-skip-btn');
+// Banner session
 const sessionBanner      = document.getElementById('session-banner');
 const sessionBannerTitle = document.getElementById('session-banner-title');
 const sessionFinishBtn   = document.getElementById('session-finish-btn');
 const sessionCancelBtn   = document.getElementById('session-cancel-btn');
 
-// ── Grid ───────────────────────────────────────
-const FOUR_X_AXES = [
-    { key: 'explore', label: 'Explore', short: 'EXP' },
-    { key: 'expand', label: 'Expand', short: 'XPD' },
-    { key: 'exploit', label: 'Exploit', short: 'XPL' },
-    { key: 'exterminate', label: 'Exterminate', short: 'XTR' }
-];
+// ── Toast notification ─────────────────────────────────────────────────────
+const scoreToast = (function () {
+    const el = document.createElement('div');
+    el.id = 'score-toast';
+    el.style.cssText = [
+        'position:fixed', 'bottom:2rem', 'left:50%',
+        'transform:translateX(-50%) translateY(2rem)',
+        'background:#16213e', 'color:#e0e0e0', 'border:1px solid #e63946',
+        'padding:.75rem 1.5rem', 'border-radius:8px', 'font-size:.95rem',
+        'opacity:0', 'transition:opacity .3s,transform .3s', 'z-index:9999',
+        'pointer-events:none', 'white-space:nowrap'
+    ].join(';');
+    document.body.appendChild(el);
+    return el;
+}());
 
-function clampPercent(value) {
-    const numeric = Number(value);
-    if (!Number.isFinite(numeric)) return 0;
-    return Math.max(0, Math.min(100, Math.round(numeric)));
+let toastTimer = null;
+function showToast(msg, ms = 3000) {
+    scoreToast.textContent = msg;
+    scoreToast.style.opacity = '1';
+    scoreToast.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        scoreToast.style.opacity = '0';
+        scoreToast.style.transform = 'translateX(-50%) translateY(2rem)';
+    }, ms);
 }
 
-function getFourXProfile(game) {
-    if (!game || game.category !== 'strategy') return null;
-    const source = game.fourX || {};
-    return {
-        explore: clampPercent(source.explore),
-        expand: clampPercent(source.expand),
-        exploit: clampPercent(source.exploit),
-        exterminate: clampPercent(source.exterminate)
-    };
-}
-
-function getFourXAverage(profile) {
-    if (!profile) return 0;
-    const total = FOUR_X_AXES.reduce((sum, axis) => sum + profile[axis.key], 0);
-    return Math.round(total / FOUR_X_AXES.length);
-}
-
-function getStrongestAxis(profile) {
-    if (!profile) return { key: '', label: '', value: 0 };
-    let best = FOUR_X_AXES[0];
-    for (let i = 1; i < FOUR_X_AXES.length; i++) {
-        if (profile[FOUR_X_AXES[i].key] > profile[best.key]) {
-            best = FOUR_X_AXES[i];
-        }
-    }
-    return { key: best.key, label: best.label, value: profile[best.key] };
-}
-
-function renderFourXSummary(game) {
-    const profile = getFourXProfile(game);
-    if (!profile) return '';
-
-    const strongest = getStrongestAxis(profile);
-    const profileType = game.strategyType || 'Strategy 4X';
-
-    return `
-        <div class="card-4x">
-            <div class="card-4x-header">
-                <span class="card-4x-badge">4X</span>
-                <span class="card-4x-type">${escapeHtml(profileType)}</span>
-            </div>
-            <div class="card-4x-meta">
-                <span>Dominant: ${escapeHtml(strongest.label)} ${strongest.value}</span>
-                <span>4X Avg: ${getFourXAverage(profile)}</span>
-            </div>
-            <div class="card-4x-mini">
-                ${FOUR_X_AXES.map(axis => `<span>${axis.short}<em>${profile[axis.key]}</em></span>`).join('')}
-            </div>
-        </div>
-    `;
-}
-
-function renderStrategyCompare(filteredGames) {
-    if (!strategyCompare) return;
-
-    const strategyGames = filteredGames.filter(game => game.category === 'strategy');
-    if (!strategyGames.length) {
-        strategyCompare.innerHTML = '';
-        strategyCompare.classList.add('hidden');
-        return;
-    }
-
-    const ranked = strategyGames
-        .map((game) => {
-            const profile = getFourXProfile(game);
-            return {
-                game,
-                profile,
-                avg: getFourXAverage(profile),
-                strongest: getStrongestAxis(profile)
-            };
-        })
-        .sort((a, b) => b.avg - a.avg);
-
-    strategyCompare.innerHTML = `
-        <div class="strategy-compare-head">
-            <div>
-                <p class="strategy-compare-kicker">Comparateur Strategy</p>
-                <h3>Vue 4X des jeux strategy visibles</h3>
-            </div>
-            <span class="strategy-compare-count">${ranked.length} jeu${ranked.length > 1 ? 'x' : ''}</span>
-        </div>
-        <div class="strategy-compare-list">
-            ${ranked.map((entry) => `
-                <article class="strategy-compare-card">
-                    <div class="strategy-compare-top">
-                        <h4>${escapeHtml(entry.game.title)}</h4>
-                        <span class="strategy-compare-score">${entry.avg}</span>
-                    </div>
-                    <p class="strategy-compare-type">${escapeHtml(entry.game.strategyType || 'Strategy')} - Focus ${escapeHtml(entry.strongest.label)}</p>
-                    <div class="strategy-compare-bars">
-                        ${FOUR_X_AXES.map(axis => `
-                            <div class="sx-bar-row">
-                                <span>${axis.label}</span>
-                                <div class="sx-bar-track"><i style="width:${entry.profile[axis.key]}%"></i></div>
-                                <strong>${entry.profile[axis.key]}</strong>
-                            </div>
-                        `).join('')}
-                    </div>
-                </article>
-            `).join('')}
-        </div>
-    `;
-
-    strategyCompare.classList.remove('hidden');
-}
-
+// ── Grid ───────────────────────────────────────────────────────────────────
 function getFiltered() {
     let list = [...GAMES];
     if (activeCategory === 'favorites') {
@@ -466,15 +118,15 @@ function getFiltered() {
         const q = searchQuery.toLowerCase();
         list = list.filter(g =>
             g.title.toLowerCase().includes(q) ||
-            g.description.toLowerCase().includes(q) ||
+            (g.description ?? '').toLowerCase().includes(q) ||
             g.tags.some(t => t.toLowerCase().includes(q))
         );
     }
     switch (sortMode) {
         case 'az':     list.sort((a, b) => a.title.localeCompare(b.title)); break;
         case 'za':     list.sort((a, b) => b.title.localeCompare(a.title)); break;
-        case 'rating': list.sort((a, b) => b.rating - a.rating);            break;
-        case 'year':   list.sort((a, b) => b.year - a.year);                break;
+        case 'rating': list.sort((a, b) => b.rating - a.rating);           break;
+        case 'year':   list.sort((a, b) => b.year - a.year);               break;
     }
     return list;
 }
@@ -482,33 +134,28 @@ function getFiltered() {
 function renderGrid() {
     const filtered = getFiltered();
     gameCount.textContent = GAMES.length;
+
     if (filtered.length === 0) {
         grid.innerHTML = '';
         noResults.classList.remove('hidden');
         resultsInfo.innerHTML = '';
-        renderStrategyCompare([]);
         return;
     }
 
     noResults.classList.add('hidden');
-    renderStrategyCompare(filtered);
     resultsInfo.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${GAMES.length}</strong> games`;
+
     grid.innerHTML = filtered.map((game, i) => `
-        <div class="game-card${game.playUrl ? ' game-card--playable' : ''}${game.category === 'strategy' ? ' game-card--strategy' : ''}" data-id="${game.id}" style="animation-delay:${i * 0.05}s">
+        <div class="game-card${game.playUrl ? ' game-card--playable' : ''}" data-id="${game.id}" style="animation-delay:${i * 0.05}s">
             <button class="card-fav-btn${isFavorite(game.id) ? ' active' : ''}" data-fav-id="${game.id}" title="Ajouter aux favoris">&#10084;</button>
-            ${game.coverImage ? `
-                <div class="card-media">
-                    <img src="${escapeAttr(game.coverImage)}" alt="${escapeAttr(game.title)} cover" loading="lazy">
-                </div>
-            ` : ''}
+            ${game.coverImage ? `<div class="card-media"><img src="${escapeAttr(game.coverImage)}" alt="${escapeAttr(game.title)} cover" loading="lazy"></div>` : ''}
             <div class="card-content">
                 <div class="card-header">
                     <span class="card-category">${game.category}</span>
-                    <span class="card-rating">${game.rating.toFixed(1)}</span>
+                    <span class="card-rating">${(game.rating ?? 0).toFixed(1)}</span>
                 </div>
-                <h3>${game.title}</h3>
-                <p>${game.description}</p>
-                ${renderFourXSummary(game)}
+                <h3>${escapeHtml(game.title)}</h3>
+                <p>${escapeHtml(game.description ?? '')}</p>
                 <div class="card-footer">
                     <span class="card-year">${game.year}</span>
                     ${game.playUrl ? `<span class="card-play">&#9654; Play</span>` : `<span class="card-more">Details &rarr;</span>`}
@@ -516,13 +163,14 @@ function renderGrid() {
             </div>
         </div>
     `).join('');
+
     grid.querySelectorAll('.game-card').forEach(card => {
         card.addEventListener('click', () => openModal(parseInt(card.dataset.id, 10)));
     });
     grid.querySelectorAll('.card-fav-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', e => {
             e.stopPropagation();
-            const id = parseInt(btn.dataset.favId, 10);
+            const id    = parseInt(btn.dataset.favId, 10);
             const added = toggleFavorite(id);
             btn.classList.toggle('active', added);
             if (activeCategory === 'favorites') renderGrid();
@@ -530,7 +178,7 @@ function renderGrid() {
     });
 }
 
-// ── Modal info ─────────────────────────────────
+// ── Modal info ─────────────────────────────────────────────────────────────
 function openModal(id) {
     const game = GAMES.find(g => g.id === id);
     if (!game) return;
@@ -538,18 +186,19 @@ function openModal(id) {
 
     document.getElementById('modal-badge').textContent = game.category.toUpperCase();
     document.getElementById('modal-title').textContent = game.title;
-    document.getElementById('modal-desc').textContent  = game.description;
+    document.getElementById('modal-desc').textContent  = game.description ?? '';
     document.getElementById('modal-meta').innerHTML = `
-        <span><span class="star">★</span> ${game.rating.toFixed(1)} / 10</span>
+        <span><span class="star">★</span> ${(game.rating ?? 0).toFixed(1)} / 10</span>
         <span>📅 ${game.year}</span>
         <span>🎮 ${capitalize(game.category)}</span>
     `;
-    document.getElementById('modal-tags').innerHTML = game.tags.map(t => `<span class="modal-tag">${t}</span>`).join('');
+    document.getElementById('modal-tags').innerHTML =
+        game.tags.map(t => `<span class="modal-tag">${escapeHtml(t)}</span>`).join('');
 
     const playBtn = document.getElementById('modal-play-btn');
     if (game.playUrl) {
         playBtn.classList.remove('hidden');
-        playBtn.onclick = () => { closeModal(); openGame(game); };
+        playBtn.onclick = () => { closeModal(); launchGame(game); };
     } else {
         playBtn.classList.add('hidden');
         playBtn.onclick = null;
@@ -570,23 +219,22 @@ function closeModal() {
     currentGameId = null;
 }
 
-// ── Tabs ───────────────────────────────────────
+// ── Tabs ───────────────────────────────────────────────────────────────────
 document.querySelectorAll('.modal-tab').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
-
 function switchTab(tab) {
     document.querySelectorAll('.modal-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById(`tab-${tab}`).classList.add('active');
 }
 
-// ── Leaderboard ────────────────────────────────
+// ── Leaderboard ────────────────────────────────────────────────────────────
 function renderLeaderboard(gameId) {
     const scores = getScores(gameId).sort((a, b) => b.score - a.score);
     const list   = document.getElementById('leaderboard-list');
-    if (scores.length === 0) {
-        list.innerHTML = `<p class="lb-empty">No scores yet. Be the first!</p>`;
+    if (!scores.length) {
+        list.innerHTML = `<p class="lb-empty">Aucun score pour l'instant. Sois le premier !</p>`;
         return;
     }
     list.innerHTML = scores.map((e, i) => `
@@ -599,22 +247,11 @@ function renderLeaderboard(gameId) {
     `).join('');
 }
 
-// Score submission removed — scores are submitted via the post-game panel after playing
-
-// ── Changelog ─────────────────────────────────
-function submitScoreForGame(gameId, name, score) {
-    if (!name || !Number.isFinite(score) || score < 0) return;
-    addScore(gameId, {
-        name,
-        score,
-        date: new Date().toLocaleDateString('fr-FR')
-    });
-}
-
+// ── Changelog ─────────────────────────────────────────────────────────────
 function renderChangelog(game) {
     const container = document.getElementById('changelog-list');
-    if (!game.changelog || !game.changelog.length) {
-        container.innerHTML = `<p class="lb-empty">No patch notes yet.</p>`;
+    if (!game.changelog?.length) {
+        container.innerHTML = `<p class="lb-empty">Aucune note de patch pour l'instant.</p>`;
         return;
     }
     container.innerHTML = game.changelog.map((e, i) => `
@@ -629,12 +266,12 @@ function renderChangelog(game) {
     `).join('');
 }
 
-// ── Comments ───────────────────────────────────
+// ── Comments ───────────────────────────────────────────────────────────────
 function renderComments(gameId) {
-    const comments = getComments(gameId);
+    const comments  = getComments(gameId);
     const container = document.getElementById('comments-list');
     if (!comments.length) {
-        container.innerHTML = `<p class="lb-empty">No reviews yet. Play the game and share your thoughts!</p>`;
+        container.innerHTML = `<p class="lb-empty">Aucun avis pour l'instant. Joue et laisse le tien !</p>`;
         return;
     }
     container.innerHTML = comments
@@ -643,7 +280,7 @@ function renderComments(gameId) {
             <div class="comment-card">
                 <div class="comment-header">
                     <span class="comment-name">${escapeHtml(c.name)}</span>
-                    <span class="comment-stars">${'★'.repeat(c.stars)}${'☆'.repeat(5-c.stars)}</span>
+                    <span class="comment-stars">${'★'.repeat(c.stars)}${'☆'.repeat(5 - c.stars)}</span>
                     <span class="comment-date">${c.date}</span>
                 </div>
                 ${c.score ? `<span class="comment-score">Score: ${Number(c.score).toLocaleString()}</span>` : ''}
@@ -652,122 +289,62 @@ function renderComments(gameId) {
         `).join('');
 }
 
-// ── Game launch ───────────────────────────────
-let lastPlayedGame = null;
-
-function persistActiveSession(game) {
-    if (!game) return;
+// ── Game launch — nouvelle page ────────────────────────────────────────────
+function launchGame(game) {
+    lastPlayedGame = game;
     sessionStorage.setItem('wgc_activeGameId', String(game.id));
+    window.open(new URL(game.playUrl, window.location.href).toString(), '_blank');
+    syncSessionBanner();
 }
 
 function clearActiveSession() {
     sessionStorage.removeItem('wgc_activeGameId');
 }
 
-function syncSessionBanner() {
-    if (!sessionBanner) return;
+// ── Score AUTO-SAUVEGARDE — zéro interaction requise ──────────────────────
+// Le jeu envoie : window.opener.postMessage({ type:'gameScore', score:1234 }, '*')
+window.addEventListener('message', e => {
+    if (e.origin !== location.origin) return;
+    if (e.data?.type !== 'gameScore') return;
 
-    if (!lastPlayedGame || !postgamePanel.classList.contains('hidden')) {
-        sessionBanner.classList.add('hidden');
-        return;
-    }
+    const score = parseInt(e.data.score);
+    if (!score || score <= 0) return;
 
-    sessionBannerTitle.textContent = lastPlayedGame.title;
-    sessionBanner.classList.remove('hidden');
-}
+    const game = GAMES.find(g => g.id === Number(e.data.gameId)) || lastPlayedGame;
+    if (!game) return;
 
-function updateViewerControls() {
-    if (!viewerPopoutBtn) return;
-    const hasGame = !!(lastPlayedGame && lastPlayedGame.playUrl);
-    viewerPopoutBtn.disabled = !hasGame;
-    viewerPopoutBtn.style.opacity = hasGame ? '1' : '0.5';
-    viewerPopoutBtn.style.cursor = hasGame ? 'pointer' : 'not-allowed';
-}
-
-function openGame(game) {
-    if (!playerName) {
-        showPseudoModal(game);
-        return;
-    }
-    launchGame(game);
-}
-
-function launchGame(game) {
     lastPlayedGame = game;
-    persistActiveSession(game);
-    syncSessionBanner();
 
-    modalGameTitle.textContent = game.title;
-    modalGameOverlay.classList.add('active');
-    if (viewerEmpty) viewerEmpty.classList.add('hidden');
-    gameIframe.src = new URL(game.playUrl, window.location.href).toString();
-    updateViewerControls();
+    // Sauvegarde immediate — aucune action requise du joueur
+    addScore(game.id, {
+        name:  PLAYER_ID,
+        score,
+        date:  new Date().toLocaleDateString('fr-FR')
+    });
 
-    modalGameOverlay.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+    showToast(`✓ Score ${score.toLocaleString()} enregistre — ${game.title}`);
 
-// ── Pseudo modal ───────────────────────────────
-const pseudoOverlay    = document.getElementById('pseudo-overlay');
-const pseudoInput      = document.getElementById('pseudo-input');
-const pseudoConfirmBtn = document.getElementById('pseudo-confirm-btn');
-const pseudoCancelBtn  = document.getElementById('pseudo-cancel-btn');
-let pendingGame = null;
-
-function showPseudoModal(game) {
-    pendingGame = game;
-    pseudoInput.value = playerName;
-    pseudoOverlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => pseudoInput.focus(), 50);
-}
-
-function closePseudoModal() {
-    pseudoOverlay.classList.add('hidden');
-    document.body.style.overflow = '';
-    pendingGame = null;
-}
-
-pseudoConfirmBtn.addEventListener('click', () => {
-    const val = pseudoInput.value.trim();
-    if (!val) { pseudoInput.style.borderColor = '#e63946'; setTimeout(() => pseudoInput.style.borderColor = '', 1500); return; }
-    playerName = val.slice(0, 20);
-    sessionStorage.setItem('wgc_playerName', playerName);
-    closePseudoModal();
-    if (pendingGame) launchGame(pendingGame);
-});
-
-pseudoCancelBtn.addEventListener('click', closePseudoModal);
-
-pseudoInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') pseudoConfirmBtn.click();
-    if (e.key === 'Escape') closePseudoModal();
-});
-
-function closeGame() {
-    modalGameOverlay.classList.remove('active');
-    gameIframe.src = '';
-    if (viewerEmpty) viewerEmpty.classList.remove('hidden');
-    modalGameTitle.textContent = 'Selectionne un jeu pour commencer';
-    updateViewerControls();
-
-    if (lastPlayedGame) {
-        showPostGame(lastPlayedGame);
+    // Propose un avis optionnel (panel leger, tout skippable en un clic)
+    if (postgamePanel?.classList.contains('hidden')) {
+        showReviewPanel(game);
     }
-}
+});
 
-// ── Post-game panel ────────────────────────────
+// ── Panel avis optionnel ───────────────────────────────────────────────────
 let selectedStars = 0;
 
-function showPostGame(game) {
+function showReviewPanel(game) {
+    if (!postgamePanel) return;
     postgameTitle.textContent = game.title;
     selectedStars = 0;
-    pgStars.forEach(s => s.classList.remove('active'));
-    pgScoreName.value    = playerName; // pre-fill with session pseudo
-    pgScoreValue.value   = '';
-    pgScoreValue.disabled = false;
-    pgScoreValue.placeholder = 'Ton score (optionnel)';
-    delete pgScoreValue.dataset.fromGame;
-    pgCommentText.value  = '';
+    pgStars.forEach(s => s.classList.remove('active', 'hover'));
+    if (pgCommentText) pgCommentText.value = '';
+
+    // Masquer les champs nom/score du HTML (non utilises dans ce systeme)
+    ['pg-score-name', 'pg-score-value'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 
     postgamePanel.classList.remove('hidden');
     postgamePanel.classList.add('open');
@@ -775,7 +352,8 @@ function showPostGame(game) {
     syncSessionBanner();
 }
 
-function closePostGame() {
+function closeReviewPanel() {
+    if (!postgamePanel) return;
     postgamePanel.classList.remove('open');
     postgamePanel.classList.add('hidden');
     document.body.style.overflow = '';
@@ -784,9 +362,6 @@ function closePostGame() {
     syncSessionBanner();
 }
 
-
-
-// Star rating
 pgStars.forEach(star => {
     star.addEventListener('mouseover', () => {
         const val = parseInt(star.dataset.val);
@@ -801,72 +376,61 @@ pgStars.forEach(star => {
     });
 });
 
-if (sessionFinishBtn) {
-    sessionFinishBtn.addEventListener('click', () => {
-        if (!lastPlayedGame) return;
-        closeGame();
+if (pgSubmitBtn) {
+    pgSubmitBtn.addEventListener('click', () => {
+        if (!lastPlayedGame) { closeReviewPanel(); return; }
+
+        const text  = pgCommentText?.value.trim() ?? '';
+        const stars = selectedStars || 3;
+
+        if (text || selectedStars > 0) {
+            const comments = getComments(lastPlayedGame.id);
+            comments.push({
+                name:  PLAYER_ID,
+                stars,
+                score: null,
+                text,
+                date:  new Date().toLocaleDateString('fr-FR'),
+                ts:    new Date().toISOString()
+            });
+            saveComments(lastPlayedGame.id, comments);
+            showToast('✓ Avis publie !');
+        }
+
+        const gid = lastPlayedGame.id;
+        closeReviewPanel();
+        openModal(gid);
+        switchTab('comments');
     });
 }
 
+if (pgSkipBtn) pgSkipBtn.addEventListener('click', closeReviewPanel);
+
+// ── Session banner ─────────────────────────────────────────────────────────
+function syncSessionBanner() {
+    if (!sessionBanner) return;
+    if (!lastPlayedGame || !postgamePanel?.classList.contains('hidden')) {
+        sessionBanner.classList.add('hidden');
+        return;
+    }
+    sessionBannerTitle.textContent = lastPlayedGame.title;
+    sessionBanner.classList.remove('hidden');
+}
+
+if (sessionFinishBtn) {
+    sessionFinishBtn.addEventListener('click', () => {
+        if (lastPlayedGame) showReviewPanel(lastPlayedGame);
+    });
+}
 if (sessionCancelBtn) {
     sessionCancelBtn.addEventListener('click', () => {
         clearActiveSession();
         lastPlayedGame = null;
         syncSessionBanner();
-        updateViewerControls();
     });
 }
 
-pgSubmitBtn.addEventListener('click', () => {
-    if (!lastPlayedGame) return;
-
-    const name = pgScoreName.value.trim();
-    if (!name) { flashInput(pgScoreName, 'Entre ton pseudo !'); return; }
-
-    // Update session pseudo if changed
-    if (name !== playerName) {
-        playerName = name;
-        sessionStorage.setItem('wgc_playerName', playerName);
-    }
-
-    // Score: auto (from game via postMessage) or manual, always optional
-    const scoreRaw = pgScoreValue.value.trim();
-    const score    = scoreRaw !== '' ? parseInt(scoreRaw) : null;
-    const scoreValid = score !== null && !isNaN(score) && score >= 0;
-
-    const text = pgCommentText.value.trim();
-    if (!scoreValid && !text) {
-        flashInput(pgCommentText, 'Ajoute un avis ou un score...');
-        return;
-    }
-
-    const gid = lastPlayedGame.id;
-
-    if (scoreValid) {
-        submitScoreForGame(gid, name, score);
-    }
-
-    if (text) {
-        const comments = getComments(gid);
-        comments.push({
-            name,
-            stars: selectedStars || 3,
-            score: scoreValid ? score : null,
-            text,
-            date: new Date().toLocaleDateString('fr-FR'),
-            ts: new Date().toISOString()
-        });
-        saveComments(gid, comments);
-    }
-
-    closePostGame();
-    openModal(gid);
-    switchTab(text ? 'comments' : 'scores');
-});
-
-pgSkipBtn.addEventListener('click', closePostGame);
-
-// ── Events ─────────────────────────────────────
+// ── Events ─────────────────────────────────────────────────────────────────
 searchInput.addEventListener('input', debounce(() => {
     searchQuery = searchInput.value.trim();
     clearBtn.classList.toggle('visible', searchQuery.length > 0);
@@ -888,69 +452,30 @@ chips.forEach(chip => {
 });
 modalClose.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
-modalGameClose.addEventListener('click', closeGame);
-if (viewerPopoutBtn) {
-    viewerPopoutBtn.addEventListener('click', () => {
-        if (!lastPlayedGame || !lastPlayedGame.playUrl) return;
-        window.open(new URL(lastPlayedGame.playUrl, window.location.href).toString(), '_blank');
-    });
-}
 document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    if (!postgamePanel.classList.contains('hidden')) closePostGame();
-    else if (modalGameOverlay.classList.contains('active')) closeGame();
+    if (postgamePanel && !postgamePanel.classList.contains('hidden')) closeReviewPanel();
     else closeModal();
 });
 
-// ── Helpers ────────────────────────────────────
+window.addEventListener('focus', syncSessionBanner);
+
+// ── Helpers ────────────────────────────────────────────────────────────────
 function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
 function escapeHtml(str) {
     if (!str) return '';
     return String(str)
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#39;');
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-function escapeAttr(str) {
-    return escapeHtml(str);
-}
-function flashInput(input, msg) {
-    input.style.borderColor = '#e63946';
-    const prev = input.placeholder;
-    input.placeholder = msg;
-    setTimeout(() => { input.style.borderColor=''; input.placeholder=prev; }, 2000);
-}
+function escapeAttr(str) { return escapeHtml(str); }
 
-// ── Auto-score from game via postMessage ───────
-// Games can send: parent.postMessage({ type: 'gameScore', score: 1234 }, '*')
-window.addEventListener('message', (e) => {
-    if (e.origin !== location.origin) return;
-    if (e.data?.type === 'gameScore') {
-        const reportedGame = GAMES.find(game => game.id === Number(e.data.gameId)) || lastPlayedGame;
-        if (!reportedGame) return;
-
-        lastPlayedGame = reportedGame;
-        if (postgamePanel.classList.contains('hidden')) {
-            showPostGame(reportedGame);
-        }
-
-        pgScoreValue.value            = e.data.score;
-        pgScoreValue.disabled         = true;
-        pgScoreValue.placeholder      = 'Score reçu du jeu';
-        pgScoreValue.dataset.fromGame = 'true';
-    }
-});
-
+// ── Init ───────────────────────────────────────────────────────────────────
 const activeGameId = Number(sessionStorage.getItem('wgc_activeGameId'));
 if (activeGameId) {
-    lastPlayedGame = GAMES.find((game) => game.id === activeGameId) || null;
+    lastPlayedGame = GAMES.find(g => g.id === activeGameId) || null;
 }
-
-window.addEventListener('focus', syncSessionBanner);
 syncSessionBanner();
-updateViewerControls();
-
 renderGrid();
+
 }); // end DOMContentLoaded

@@ -121,7 +121,7 @@
         },
         {
             id: 8,
-            title: " Hero Forces",
+            title: "Hero Forces",
             category: "action",
             year: 2026,
             tags: ["", "", "", ""],
@@ -215,6 +215,23 @@
             description: " ",
             rating:  7.5,
             
+            ///////// Metadata for display and management
+            //changelog: [
+            //    { version: "", date: "", notes: ["", "", ""] },
+            //]
+            //coverImage: "path/to/image.png",
+            //strategyType: "",
+        },
+        {
+            id: 14,
+            title: "Hard Wood",
+            category: "sports",
+            year: 2026,
+            tags: ["", "", "", ""],
+            playUrl: "DONE/_2D Hard Wood/index.html",
+            description: " ",
+            rating:  7.5,
+
             ///////// Metadata for display and management
             //changelog: [
             //    { version: "", date: "", notes: ["", "", ""] },

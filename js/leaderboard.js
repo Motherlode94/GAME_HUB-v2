@@ -119,8 +119,8 @@ document.getElementById('lb-sort').addEventListener('change', renderPage);
 document.getElementById('lb-clear-all').addEventListener('click', () => {
     if (!confirm('Effacer tous les scores et avis locaux ?')) return;
     Object.keys(localStorage)
-        .filter((key) => key.startsWith('wgc_'))
-        .forEach((key) => localStorage.removeItem(key));
+    .filter((key) => key.startsWith('wgc_scores_') || key.startsWith('wgc_comments_'))
+    .forEach((key) => localStorage.removeItem(key));
     renderPage();
 });
 
