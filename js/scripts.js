@@ -2,8 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ── Game Data ──────────────────────────────────────────────────────────────
 const GAMES = (window.WGC_DATA && Array.isArray(window.WGC_DATA.GAMES))
-    ? window.WGC_DATA.GAMES
-    : [];
+    ? window.WGC_DATA.GAMES : [];
 
 // ── Storage helpers ────────────────────────────────────────────────────────
 function getScores(gameId)          { return window.WGC_DATA?.getScores(gameId)    ?? []; }
@@ -13,7 +12,6 @@ function getComments(gameId)        { return window.WGC_DATA?.getComments(gameId
 function saveComments(gameId, c)    { window.WGC_DATA?.saveComments(gameId, c); }
 
 // ── Identite joueur auto-generee ───────────────────────────────────────────
-// Cree une seule fois, stockee en localStorage, jamais demandee au joueur.
 function getOrCreatePlayerId() {
     let pid = localStorage.getItem('wgc_pid');
     if (!pid) {
@@ -24,7 +22,33 @@ function getOrCreatePlayerId() {
 }
 const PLAYER_ID = getOrCreatePlayerId();
 
-// ── Debounce helper ────────────────────────────────────────────────────────
+// ── Placeholder visuel par categorie ──────────────────────────────────────
+const CATEGORY_THEME = {
+    action:     { color: '#7f1d1d', accent: '#ef4444', icon: '⚔️' },
+    strategy:   { color: '#1e3a5f', accent: '#3b82f6', icon: '♟️' },
+    sports:     { color: '#14532d', accent: '#22c55e', icon: '🏆' },
+    rpg:        { color: '#3b1a5f', accent: '#a855f7', icon: '🧙' },
+    simulation: { color: '#1a3a3a', accent: '#06b6d4', icon: '🔬' },
+    adventure:  { color: '#3a2a0a', accent: '#f59e0b', icon: '🗺️' },
+};
+
+function getCategoryTheme(category) {
+    return CATEGORY_THEME[category] || { color: '#1a1a2e', accent: '#e63946', icon: '🎮' };
+}
+
+function renderCardMedia(game) {
+    if (game.coverImage) {
+        return `<div class="card-media">
+            <img src="${escapeAttr(game.coverImage)}" alt="${escapeAttr(game.title)} cover" loading="lazy">
+        </div>`;
+    }
+    const { color, accent, icon } = getCategoryTheme(game.category);
+    return `<div class="card-media card-media--placeholder" style="background:linear-gradient(135deg,${color},${color}dd);border-bottom:2px solid ${accent}22">
+        <span class="card-placeholder-icon" style="color:${accent}">${icon}</span>
+    </div>`;
+}
+
+// ── Debounce ───────────────────────────────────────────────────────────────
 function debounce(fn, delay = 300) {
     let timer;
     return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
@@ -37,7 +61,6 @@ let sortMode       = 'default';
 let currentGameId  = null;
 let lastPlayedGame = null;
 
-// Favoris
 function getFavorites() {
     try { return JSON.parse(localStorage.getItem('wgc_favorites') || '[]'); } catch { return []; }
 }
@@ -50,7 +73,7 @@ function toggleFavorite(gameId) {
 }
 function isFavorite(gameId) { return getFavorites().includes(gameId); }
 
-// ── DOM refs ───────────────────────────────────────────────────────────────
+// ── DOM ────────────────────────────────────────────────────────────────────
 const grid        = document.getElementById('games-grid');
 const noResults   = document.getElementById('no-results');
 const resultsInfo = document.getElementById('results-info');
@@ -59,42 +82,37 @@ const searchInput = document.getElementById('search-input');
 const clearBtn    = document.getElementById('clear-search');
 const sortSelect  = document.getElementById('sort-select');
 const chips       = document.querySelectorAll('.chip');
-
 const modalOverlay = document.getElementById('modal-overlay');
 const modalClose   = document.getElementById('modal-close');
-
-// Panel post-game (avis optionnel uniquement)
 const postgamePanel = document.getElementById('postgame-panel');
 const postgameTitle = document.getElementById('postgame-game-title');
 const pgStars       = document.querySelectorAll('.pg-star');
 const pgCommentText = document.getElementById('pg-comment-text');
 const pgSubmitBtn   = document.getElementById('pg-submit-btn');
 const pgSkipBtn     = document.getElementById('pg-skip-btn');
-
-// Banner session
 const sessionBanner      = document.getElementById('session-banner');
 const sessionBannerTitle = document.getElementById('session-banner-title');
 const sessionFinishBtn   = document.getElementById('session-finish-btn');
 const sessionCancelBtn   = document.getElementById('session-cancel-btn');
 
-// ── Toast notification ─────────────────────────────────────────────────────
+// ── Toast ──────────────────────────────────────────────────────────────────
 const scoreToast = (function () {
     const el = document.createElement('div');
     el.id = 'score-toast';
     el.style.cssText = [
-        'position:fixed', 'bottom:2rem', 'left:50%',
+        'position:fixed','bottom:2rem','left:50%',
         'transform:translateX(-50%) translateY(2rem)',
-        'background:#16213e', 'color:#e0e0e0', 'border:1px solid #e63946',
-        'padding:.75rem 1.5rem', 'border-radius:8px', 'font-size:.95rem',
-        'opacity:0', 'transition:opacity .3s,transform .3s', 'z-index:9999',
-        'pointer-events:none', 'white-space:nowrap'
+        'background:#16213e','color:#e0e0e0','border:1px solid #e63946',
+        'padding:.75rem 1.5rem','border-radius:8px','font-size:.95rem',
+        'opacity:0','transition:opacity .3s,transform .3s','z-index:9999',
+        'pointer-events:none','white-space:nowrap'
     ].join(';');
     document.body.appendChild(el);
     return el;
 }());
 
 let toastTimer = null;
-function showToast(msg, ms = 3000) {
+function showToast(msg, ms = 3500) {
     scoreToast.textContent = msg;
     scoreToast.style.opacity = '1';
     scoreToast.style.transform = 'translateX(-50%) translateY(0)';
@@ -148,7 +166,7 @@ function renderGrid() {
     grid.innerHTML = filtered.map((game, i) => `
         <div class="game-card${game.playUrl ? ' game-card--playable' : ''}" data-id="${game.id}" style="animation-delay:${i * 0.05}s">
             <button class="card-fav-btn${isFavorite(game.id) ? ' active' : ''}" data-fav-id="${game.id}" title="Ajouter aux favoris">&#10084;</button>
-            ${game.coverImage ? `<div class="card-media"><img src="${escapeAttr(game.coverImage)}" alt="${escapeAttr(game.title)} cover" loading="lazy"></div>` : ''}
+            ${renderCardMedia(game)}
             <div class="card-content">
                 <div class="card-header">
                     <span class="card-category">${game.category}</span>
@@ -156,6 +174,9 @@ function renderGrid() {
                 </div>
                 <h3>${escapeHtml(game.title)}</h3>
                 <p>${escapeHtml(game.description ?? '')}</p>
+                <div class="card-tags">
+                    ${game.tags.filter(Boolean).map(t => `<span class="card-tag">${escapeHtml(t)}</span>`).join('')}
+                </div>
                 <div class="card-footer">
                     <span class="card-year">${game.year}</span>
                     ${game.playUrl ? `<span class="card-play">&#9654; Play</span>` : `<span class="card-more">Details &rarr;</span>`}
@@ -193,7 +214,7 @@ function openModal(id) {
         <span>🎮 ${capitalize(game.category)}</span>
     `;
     document.getElementById('modal-tags').innerHTML =
-        game.tags.map(t => `<span class="modal-tag">${escapeHtml(t)}</span>`).join('');
+        game.tags.filter(Boolean).map(t => `<span class="modal-tag">${escapeHtml(t)}</span>`).join('');
 
     const playBtn = document.getElementById('modal-play-btn');
     if (game.playUrl) {
@@ -289,11 +310,17 @@ function renderComments(gameId) {
         `).join('');
 }
 
-// ── Game launch — nouvelle page ────────────────────────────────────────────
+// ── Game launch — popup blocked detection ──────────────────────────────────
 function launchGame(game) {
+    const win = window.open(new URL(game.playUrl, window.location.href).toString(), '_blank');
+
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+        showToast('⚠️ Popup bloquée — autorise les popups pour ce site puis réessaie.', 7000);
+        return;
+    }
+
     lastPlayedGame = game;
     sessionStorage.setItem('wgc_activeGameId', String(game.id));
-    window.open(new URL(game.playUrl, window.location.href).toString(), '_blank');
     syncSessionBanner();
 }
 
@@ -301,8 +328,7 @@ function clearActiveSession() {
     sessionStorage.removeItem('wgc_activeGameId');
 }
 
-// ── Score AUTO-SAUVEGARDE — zéro interaction requise ──────────────────────
-// Le jeu envoie : window.opener.postMessage({ type:'gameScore', score:1234 }, '*')
+// ── Score AUTO-SAUVEGARDE ──────────────────────────────────────────────────
 window.addEventListener('message', e => {
     if (e.origin !== location.origin) return;
     if (e.data?.type !== 'gameScore') return;
@@ -315,16 +341,14 @@ window.addEventListener('message', e => {
 
     lastPlayedGame = game;
 
-    // Sauvegarde immediate — aucune action requise du joueur
     addScore(game.id, {
         name:  PLAYER_ID,
         score,
         date:  new Date().toLocaleDateString('fr-FR')
     });
 
-    showToast(`✓ Score ${score.toLocaleString()} enregistre — ${game.title}`);
+    showToast(`✓ Score ${score.toLocaleString()} enregistré — ${game.title}`);
 
-    // Propose un avis optionnel (panel leger, tout skippable en un clic)
     if (postgamePanel?.classList.contains('hidden')) {
         showReviewPanel(game);
     }
@@ -339,13 +363,10 @@ function showReviewPanel(game) {
     selectedStars = 0;
     pgStars.forEach(s => s.classList.remove('active', 'hover'));
     if (pgCommentText) pgCommentText.value = '';
-
-    // Masquer les champs nom/score du HTML (non utilises dans ce systeme)
     ['pg-score-name', 'pg-score-value'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
-
     postgamePanel.classList.remove('hidden');
     postgamePanel.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -367,9 +388,7 @@ pgStars.forEach(star => {
         const val = parseInt(star.dataset.val);
         pgStars.forEach(s => s.classList.toggle('hover', parseInt(s.dataset.val) <= val));
     });
-    star.addEventListener('mouseleave', () => {
-        pgStars.forEach(s => s.classList.remove('hover'));
-    });
+    star.addEventListener('mouseleave', () => pgStars.forEach(s => s.classList.remove('hover')));
     star.addEventListener('click', () => {
         selectedStars = parseInt(star.dataset.val);
         pgStars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= selectedStars));
@@ -379,24 +398,18 @@ pgStars.forEach(star => {
 if (pgSubmitBtn) {
     pgSubmitBtn.addEventListener('click', () => {
         if (!lastPlayedGame) { closeReviewPanel(); return; }
-
         const text  = pgCommentText?.value.trim() ?? '';
         const stars = selectedStars || 3;
-
         if (text || selectedStars > 0) {
             const comments = getComments(lastPlayedGame.id);
             comments.push({
-                name:  PLAYER_ID,
-                stars,
-                score: null,
-                text,
-                date:  new Date().toLocaleDateString('fr-FR'),
-                ts:    new Date().toISOString()
+                name: PLAYER_ID, stars, score: null, text,
+                date: new Date().toLocaleDateString('fr-FR'),
+                ts:   new Date().toISOString()
             });
             saveComments(lastPlayedGame.id, comments);
-            showToast('✓ Avis publie !');
+            showToast('✓ Avis publié !');
         }
-
         const gid = lastPlayedGame.id;
         closeReviewPanel();
         openModal(gid);
@@ -417,18 +430,8 @@ function syncSessionBanner() {
     sessionBanner.classList.remove('hidden');
 }
 
-if (sessionFinishBtn) {
-    sessionFinishBtn.addEventListener('click', () => {
-        if (lastPlayedGame) showReviewPanel(lastPlayedGame);
-    });
-}
-if (sessionCancelBtn) {
-    sessionCancelBtn.addEventListener('click', () => {
-        clearActiveSession();
-        lastPlayedGame = null;
-        syncSessionBanner();
-    });
-}
+if (sessionFinishBtn) sessionFinishBtn.addEventListener('click', () => { if (lastPlayedGame) showReviewPanel(lastPlayedGame); });
+if (sessionCancelBtn) sessionCancelBtn.addEventListener('click', () => { clearActiveSession(); lastPlayedGame = null; syncSessionBanner(); });
 
 // ── Events ─────────────────────────────────────────────────────────────────
 searchInput.addEventListener('input', debounce(() => {
@@ -457,24 +460,20 @@ document.addEventListener('keydown', e => {
     if (postgamePanel && !postgamePanel.classList.contains('hidden')) closeReviewPanel();
     else closeModal();
 });
-
 window.addEventListener('focus', syncSessionBanner);
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
 function escapeHtml(str) {
     if (!str) return '';
-    return String(str)
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function escapeAttr(str) { return escapeHtml(str); }
 
 // ── Init ───────────────────────────────────────────────────────────────────
 const activeGameId = Number(sessionStorage.getItem('wgc_activeGameId'));
-if (activeGameId) {
-    lastPlayedGame = GAMES.find(g => g.id === activeGameId) || null;
-}
+if (activeGameId) lastPlayedGame = GAMES.find(g => g.id === activeGameId) || null;
 syncSessionBanner();
 renderGrid();
 

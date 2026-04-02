@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +31,8 @@
                 <option value="topscore">Meilleur score global</option>
                 <option value="activity">+ Actif</option>
             </select>
-            <button id="lb-clear-all" class="lb-danger-btn">🗑 Effacer mes données</button>
+            <button id="lb-clear-scores" class="lb-danger-btn">🗑 Effacer mes scores</button>
+            <button id="lb-reset-id" class="lb-danger-btn lb-danger-btn--subtle">↺ Réinitialiser mon ID</button>
         </div>
 
         <div id="lb-summary" class="lb-summary"></div>
@@ -39,7 +40,7 @@
         <div id="lb-empty"   class="lb-empty-state hidden">
             <span>🏆</span>
             <p>Aucun score enregistré.</p>
-            <small>Lance un jeu depuis le catalogue, puis valide ton score à la fin de la session.</small>
+            <small>Lance un jeu depuis le catalogue — ton score est sauvegardé automatiquement.</small>
             <a href="index.html" class="lb-play-link">Voir les jeux →</a>
         </div>
 
@@ -47,6 +48,7 @@
 
     <footer>
         <p>&copy; 2026 Warlike Gaming Corps. All rights reserved.</p>
+        <p>&copy; Designed and developed by HardieBay7.</p>
     </footer>
 
     <script src="js/wgc-data.js"></script>

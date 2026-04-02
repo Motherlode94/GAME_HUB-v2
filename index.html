@@ -14,7 +14,7 @@
             <div class="header-copy">
                 <p class="eyebrow">Warlike Gaming Corps</p>
                 <h1>GAME HUB <span>NEXT</span></h1>
-                <p class="subtitle">Catalogue moderne avec lancement integre - <span id="game-count">0</span> jeux</p>
+                <p class="subtitle">Catalogue — <span id="game-count">0</span> jeux</p>
             </div>
             <div class="header-btns">
                 <a href="leaderboard.html" class="header-btn">Leaderboard</a>
@@ -52,39 +52,17 @@
         </div>
     </section>
 
-    <main class="container hub-layout">
-        <section class="catalog-pane">
-            <div class="results-info" id="results-info"></div>
-            <section class="strategy-compare hidden" id="strategy-compare"></section>
-            <div class="games-grid" id="games-grid"></div>
-            <div class="no-results hidden" id="no-results">
-                <span>&#127918;</span>
-                <p>Aucun jeu trouve.</p>
-                <small>Essaie une autre recherche ou categorie.</small>
-            </div>
-        </section>
-
-        <aside class="viewer-pane" id="modal-game-overlay">
-            <div class="modal modal-game" id="modal-game">
-                <div class="modal-game-topbar">
-                    <div class="viewer-title-wrap">
-                        <p class="viewer-kicker">Lancement integre</p>
-                        <span class="modal-game-title" id="modal-game-title">Selectionne un jeu pour commencer</span>
-                    </div>
-                    <div class="viewer-actions">
-                        <button id="viewer-popout" type="button" class="viewer-btn">Ouvrir onglet</button>
-                        <button class="modal-close modal-game-close" id="modal-game-close" type="button">Terminer</button>
-                    </div>
-                </div>
-                <div id="viewer-empty" class="viewer-empty">
-                    <strong>Tout se joue ici.</strong>
-                    <p>Choisis un jeu dans la grille, puis clique sur Play Now.</p>
-                </div>
-                <iframe id="game-iframe" src="about:blank" allowfullscreen allow="fullscreen" title="Game Viewer"></iframe>
-            </div>
-        </aside>
+    <main class="container">
+        <div class="results-info" id="results-info"></div>
+        <div class="games-grid" id="games-grid"></div>
+        <div class="no-results hidden" id="no-results">
+            <span>&#127918;</span>
+            <p>Aucun jeu trouve.</p>
+            <small>Essaie une autre recherche ou categorie.</small>
+        </div>
     </main>
 
+    <!-- Modal info jeu -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="modal">
             <button class="modal-close" id="modal-close" type="button">&#10005;</button>
@@ -101,7 +79,6 @@
             </div>
 
             <div class="modal-tab-content active" id="tab-scores">
-                <p class="lb-scores-hint">Les scores se valident apres la session.</p>
                 <div class="leaderboard" id="leaderboard-list"></div>
             </div>
 
@@ -117,6 +94,7 @@
         </div>
     </div>
 
+    <!-- Panel avis post-game (optionnel) -->
     <div class="postgame-overlay hidden" id="postgame-panel">
         <div class="postgame-window">
             <div class="postgame-header">
@@ -127,12 +105,7 @@
                 </div>
             </div>
 
-            <p class="postgame-subtitle">Laisse ton score et ton avis.</p>
-
-            <div class="pg-field-row">
-                <input type="text" id="pg-score-name" placeholder="Ton pseudo" maxlength="20">
-                <input type="number" id="pg-score-value" placeholder="Ton score (optionnel)" min="0">
-            </div>
+            <p class="postgame-subtitle">Laisse ton avis — totalement optionnel.</p>
 
             <div class="pg-stars-wrap">
                 <span class="pg-stars-label">Ta note :</span>
@@ -149,25 +122,12 @@
 
             <div class="pg-actions">
                 <button id="pg-skip-btn" class="pg-btn-skip" type="button">Passer</button>
-                <button id="pg-submit-btn" class="pg-btn-submit" type="button">Envoyer</button>
+                <button id="pg-submit-btn" class="pg-btn-submit" type="button">Publier</button>
             </div>
         </div>
     </div>
 
-    <!-- Pseudo modal -->
-    <div class="pseudo-overlay hidden" id="pseudo-overlay">
-        <div class="pseudo-window">
-            <p class="pseudo-label">Avant de jouer</p>
-            <h3>Entre ton pseudo</h3>
-            <p class="pseudo-hint">Il sera utilisé pour ton score sur le leaderboard.</p>
-            <input type="text" id="pseudo-input" placeholder="Ton pseudo..." maxlength="20" autocomplete="off">
-            <div class="pseudo-actions">
-                <button id="pseudo-cancel-btn" class="pseudo-btn-cancel" type="button">Annuler</button>
-                <button id="pseudo-confirm-btn" class="pseudo-btn-confirm" type="button">Jouer</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Banner session active -->
     <div class="session-banner hidden" id="session-banner">
         <div class="session-banner-copy">
             <p class="session-banner-label">Session active</p>
