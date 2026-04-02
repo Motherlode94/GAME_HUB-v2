@@ -159,6 +159,16 @@
             playUrl: "DONE/_2D Basket Sim/index.html",
             description: "Gère ton équipe de basketball et participe à des championnats compétitifs.",
             rating: 7.5,
+        },
+        {
+            id: 17,
+            title: "Platerformer Challenge",
+            category: "platformer",
+            year: 2026,
+            tags: ["plateformer", "challenge", "precision", "reflexes"],
+            playUrl: "DONE/_2D Platerformer/index.html",
+            description: "Teste tes compétences de plateformer à travers des niveaux remplis de pièges et d'obstacles.",
+            rating: 7.5,
         }
     ];
 

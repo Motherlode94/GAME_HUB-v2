@@ -240,7 +240,7 @@ class Enemy {
                 break;
         }
 
-        if (img && img.complete) {
+        if (img && img.complete && img.naturalWidth > 0) {
             // Dessiner l'image scalée à la taille de l'ennemi (crop si sheet, ici image complète scalée)
             ctx.drawImage(img, 0, 0, frameWidth, frameHeight, -this.radius, -this.radius, this.size, this.size);
         } else {

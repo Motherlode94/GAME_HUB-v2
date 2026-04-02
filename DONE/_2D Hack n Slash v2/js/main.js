@@ -12,16 +12,10 @@ const playerImg = new Image();
 playerImg.src = 'assets/sprites/player.png';
 
 const enemyNormalImg = new Image();
-enemyNormalImg.src = 'https://img.craftpix.net/2025/01/Beholder-Monsters-Top-Down-Pixel-Art-Sprites.webp';
-
-const enemyFastImg = new Image();
-enemyFastImg.src = 'https://img.craftpix.net/2025/09/Free-Top-Down-Goblin-Character-Sprite4.png';
-
-const enemyTankImg = new Image();
-enemyTankImg.src = 'https://img.craftpix.net/2024/11/Golem-Pixel-Art-Top-Down-Sprite-Pack2-720x480.webp';
-
-const enemyBossImg = new Image();
-enemyBossImg.src = 'https://cdn.gamedevmarket.net/cover-images/eHuDlcTzrSco9kv931q09eHhsb0hAPbzj9a28Uef.png';
+enemyNormalImg.src = 'assets/sprites/enemy_normal.webp';
+enemyFastImg.src   = 'assets/sprites/enemy_fast.png';
+enemyTankImg.src   = 'assets/sprites/enemy_tank.webp';
+enemyBossImg.src   = 'assets/sprites/enemy_boss.png';
 
 // Attendre le chargement des images
 let imagesLoaded = 0;
