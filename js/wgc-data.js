@@ -46,7 +46,7 @@
             category: "strategy",
             year: 2026,
             tags: ["royaute", "strategie", "empire", "politique"],
-            playUrl: "DONE/_2D Be The King/index.html",
+            playUrl: "DONE/_2D Be The Kings/index.html",
             description: "Construis ton royaume, lève des armées et étends ton empire. Le trône t'attend — sauras-tu le garder ?",
             rating: 7.5,
         },
@@ -148,6 +148,16 @@
             tags: ["hack", "slash", "action", "jeu"],
             playUrl: "DONE/_2D Hack n Slash v2/index.html",
             description: "Reviens dans l'univers de Hack n Slash avec de nouvelles capacités et des défis plus difficiles.",
+            rating: 7.5,
+        },
+        {
+            id: 16,
+            title: "Basket Sim",
+            category: "sports",
+            year: 2026,
+            tags: ["basketball", "simulation", "equipe", "championnat"],
+            playUrl: "DONE/_2D Basket Sim/index.html",
+            description: "Gère ton équipe de basketball et participe à des championnats compétitifs.",
             rating: 7.5,
         }
     ];
