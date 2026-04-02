@@ -53,11 +53,11 @@
         },
         {
             id: 4,
-            title: "Free Force  ",
+            title: "Free Force",
             category: "action",
             year: 2026,
             tags: ["", "", "", ""],
-            playUrl: "DONE/_2D Free Force  /index.html",
+            playUrl: "DONE/_2D Free Force/index.html",
             description: " ",
             rating:  7.5,
 
@@ -194,6 +194,8 @@
             year: 2026,
             tags: ["", "", "", ""],
             playUrl: "DONE/_2D Vampire's Sim/index.html",
+            description: " ",
+            rating:  7.5,
 
             ///////// Metadata for display and management
             //changelog: [
@@ -210,6 +212,8 @@
             year: 2026,
             tags: ["", "", "", ""],
             playUrl: "DONE/_2D Tower Defense/index.html",
+            description: " ",
+            rating:  7.5,
             
             ///////// Metadata for display and management
             //changelog: [
