@@ -29,7 +29,7 @@
             //]
             //coverImage: "path/to/image.png",
             //strategyType: "",
-        }
+        },
         {
             id: 3,
             title: "Football Manager",
