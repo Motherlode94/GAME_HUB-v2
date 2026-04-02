@@ -171,6 +171,54 @@ const GAMES = [
             //]
             //coverImage: "path/to/image.png",
             //strategyType: "",
+        },
+        {
+            id: 11,
+            title: "Axis Infinity",
+            category: "strategy",
+            year: 2026,
+            tags: ["", "", "", ""],
+            playUrl: "DONE/_2D Axis Infinity/index.html",
+            description: " ",
+            rating:  7.5,
+
+            ///////// Metadata for display and management
+            //changelog: [
+            //    { version: "", date: "", notes: ["", "", ""] },
+            //]
+            //coverImage: "path/to/image.png",
+            //strategyType: "",
+        },
+        {
+            id: 12,
+            title: "Vampire's Sim",
+            category: "rpg",
+            year: 2026,
+            tags: ["", "", "", ""],
+            playUrl: "DONE/_2D Vampire's Sim/index.html",
+
+            ///////// Metadata for display and management
+            //changelog: [
+            //    { version: "", date: "", notes: ["", "", ""] },
+            //]
+            //coverImage: "path/to/image.png",
+            //strategyType: "",
+
+        },
+        {
+            id: 13,
+            title: "Tower Defense",
+            category: "strategy",
+            year: 2026,
+            tags: ["", "", "", ""],
+            playUrl: "DONE/_2D Tower Defense/index.html",
+            
+            ///////// Metadata for display and management
+            //changelog: [
+            //    { version: "", date: "", notes: ["", "", ""] },
+            //]
+            //coverImage: "path/to/image.png",
+            //strategyType: "",
         }
 ];
 
