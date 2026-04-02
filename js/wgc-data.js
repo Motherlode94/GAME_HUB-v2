@@ -2,11 +2,11 @@
     const GAMES = [
         {
             id: 1,
-            title: "Combat Arena",
+            title: "Artiste Manager",
             category: "action",
             year: 2026,
             tags: ["", "", "", ""],
-            playUrl: "//index.html",
+            playUrl: "DONE/_2D Artiste Manager/index.html",
 
             ///////// Metadata for display and management
             //changelog: [
@@ -15,6 +15,37 @@
             //coverImage: "path/to/image.png",
             //strategyType: "",
         },
+        {
+            id: 2,
+            title: "War Zone Commander",
+            category: "strategy",
+            year: 2026,
+            tags: ["", "", "", ""],
+            playUrl: "DONE/_2D War Zone Commander/index.html",
+
+            ///////// Metadata for display and management
+            //changelog: [
+            //    { version: "", date: "", notes: ["", "", ""] },
+            //]
+            //coverImage: "path/to/image.png",
+            //strategyType: "",
+        }
+        {
+            id: 3,
+            title: "Football Manager",
+            category: "sports",
+            year: 2026,
+            tags: ["", "", "", ""],
+            playUrl: "DONE/_2D Football Manager/index.html",
+
+            ///////// Metadata for display and management
+            //changelog: [
+            //    { version: "", date: "", notes: ["", "", ""] },
+            //]
+            //coverImage: "path/to/image.png",
+            //strategyType: "",
+        }
+
     ];
 
     function parseJson(value, fallback) {
