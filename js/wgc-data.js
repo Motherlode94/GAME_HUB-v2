@@ -166,7 +166,7 @@
             category: "platformer",
             year: 2026,
             tags: ["plateformer", "challenge", "precision", "reflexes"],
-            playUrl: "DONE/_2D Platerformer/index.html",
+            playUrl: "DONE/_2D Plateformer/index.html",
             description: "Teste tes compétences de plateformer à travers des niveaux remplis de pièges et d'obstacles.",
             rating: 7.5,
         }
