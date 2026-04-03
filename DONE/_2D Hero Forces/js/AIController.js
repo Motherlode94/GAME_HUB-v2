@@ -8,20 +8,22 @@ RTS.Game.AIController = function(navGrid, buildings, squads, resources, difficul
     this.navGrid   = navGrid;
     this.buildings = buildings;
     this.squads    = squads;
-    this.resources = resources; // RTS.Game.ResourceManager (Axis)
+    this.resources = resources;
     this.difficultyMultiplier = Math.max(0.6, Math.min(1.5, difficultyMultiplier || 1.0));
 
     this._gameTime = 0;
 
-    this._thinkTimer    = 2.5;
-    this._thinkInterval = 5.0;
+    this._thinkTimer    = 8.0;
+    this._thinkInterval = 12.0;
     this._spawnTimer    = 0;
 
-    // Keep at least N Axis squads close to HQ.
-    this._minGarrison = 1;
+    // Cooldown global entre deux tentatives de spawn (évite le spam si _canSpawnReinforcement
+    // retourne false puis true dans la même fenêtre d'intervalle).
+    this._globalSpawnCooldown     = 0;
+    this._globalSpawnCooldownMax  = 12.0; // secondes minimales entre deux spawns effectifs
 
-    // Objective history to avoid over-stacking on one capture point.
-    this._assignedCPs = {}; // cpIndex -> number of assigned squads
+    this._minGarrison  = 1;
+    this._assignedCPs  = {};
 };
 
 RTS.Game.AIController.UNIT_COSTS = {
@@ -45,14 +47,14 @@ RTS.Game.AIController.UNIT_COSTS = {
 // ---------------------------------------------------------------------------
 
 RTS.Game.AIController.prototype._getPhase = function() {
-    if (this._gameTime < 110) return 1;
-    if (this._gameTime < 260) return 2;
+    if (this._gameTime < 240) return 1;
+    if (this._gameTime < 480) return 2;
     return 3;
 };
 
 RTS.Game.AIController.prototype._spawnInterval = function() {
     var p = this._getPhase();
-    var base = p === 1 ? 24 : p === 2 ? 17 : 13;
+    var base = p === 1 ? 55 : p === 2 ? 38 : 26;
     return Math.max(7, base / this.difficultyMultiplier);
 };
 
@@ -70,12 +72,16 @@ RTS.Game.AIController.prototype.update = function(dt) {
     this._gameTime   += dt;
     this._thinkTimer += dt;
     this._spawnTimer += dt;
+    if (this._globalSpawnCooldown > 0) this._globalSpawnCooldown -= dt;
 
     this._cleanDeadSquads();
 
     if (this._spawnTimer >= this._spawnInterval()) {
         this._spawnTimer = 0;
-        if (this._canSpawnReinforcement()) this._spawnUnit();
+        if (this._globalSpawnCooldown <= 0 && this._canSpawnReinforcement()) {
+            this._spawnUnit();
+            this._globalSpawnCooldown = this._globalSpawnCooldownMax / this.difficultyMultiplier;
+        }
     }
 
     if (this._thinkTimer >= this._thinkInterval) {
@@ -91,7 +97,7 @@ RTS.Game.AIController.prototype._canSpawnReinforcement = function() {
     var mul        = this.difficultyMultiplier;
 
     // Anti-snowball: prevent the AI from extending a large lead forever.
-    var hardCapBase       = phase === 1 ? 7 : phase === 2 ? 9 : 12;
+    var hardCapBase       = phase === 1 ? 5 : phase === 2 ? 7 : 9;
     var leadAllowanceBase = phase === 1 ? 0 : phase === 2 ? 1 : 2;
     var hardCap           = Math.max(4, Math.round(hardCapBase * mul));
     var leadAllowance     = Math.max(0, Math.round(leadAllowanceBase * mul));
@@ -121,7 +127,8 @@ RTS.Game.AIController.prototype._cleanDeadSquads = function() {
     for (var i = this.squads.length - 1; i >= 0; i--) {
         var sq = this.squads[i];
         if (sq.dead && sq._aliveSoldiers().length === 0 &&
-            !sq._muzzleFlashes.length && !sq._tracers.length && !sq._hitSparks.length)
+            !sq._wreckActive &&
+            !sq._muzzleFlashes.length && !sq._tracers.length && !sq._hitSparks.length && !sq._explosions.length)
             this.squads.splice(i, 1);
     }
 };

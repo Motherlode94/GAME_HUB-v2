@@ -57,76 +57,137 @@ RTS.Game.Map.NavGrid.prototype._defineSectors = function() {
     }
 
     if (mapId === 1) {
-        // MAP 01 — CARENTAN : diagonale bas-gauche → haut-droite
-        // Espacement minimum ~0.18 entre chaque point
+        // ── MAP 01 — CARENTAN ──────────────────────────────────────────────────
+        // Rivière centrale N-S, ville industrielle à l'ouest, campagne à l'est.
+        // Alliés : bas-gauche (zone urbaine dense). Axis : haut-droite (campagne).
+        // Points calés sur les ponts, carrefours, usines et rives visibles.
         this.capturePoints = [
-            cp( 0,'QG Allié',         'QG',   0.04,0.94,'hq',        'allied', 100,null,        0, true,  false),
-            cp( 1,'QG Axis',          'QG',   0.96,0.06,'hq',        'axis',   100,null,        0, true,  false),
-            // Zone alliée
-            cp( 2,'Dépôt Munitions',  'MUN',  0.12,0.76,'munitions', 'allied', 100,'munitions', 10, false, false),
-            cp( 3,'Carburant Ouest',  'FUEL', 0.05,0.52,'fuel',      'neutral',  0,'fuel',       8, false, false),
-            // Quart allié
-            cp( 4,'Église',           'EGL',  0.24,0.34,'munitions', 'neutral',  0,'munitions',  7, false, false),
-            cp( 7,'Marché',           'MRC',  0.18,0.60,'munitions', 'neutral',  0,'munitions',  6, false, false),
-            // Centre
-            cp( 5,'Carrefour VP',     'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
-            // Quart axis
-            cp( 8,'Usine Nord',       'USN',  0.76,0.28,'fuel',      'neutral',  0,'fuel',       6, false, false),
-            cp( 6,'Gare Est',         'GAR',  0.82,0.65,'fuel',      'neutral',  0,'fuel',       7, false, false),
-            // Zone axis
-            cp( 9,'Carburant Est',    'FUEL', 0.95,0.46,'fuel',      'neutral',  0,'fuel',       8, false, false),
-            cp(10,'Arsenal Axis',     'MUN',  0.88,0.22,'munitions', 'axis',    100,'munitions', 10, false, false),
-            // Avant-postes axis (zones avancées bien distinctes)
-            cp(11,'Avant-Poste Sud',  'APO',  0.62,0.78,'outpost',   'axis',      0, null,       0, false, true),
-            cp(12,'Avant-Poste Nord', 'APO',  0.68,0.16,'outpost',   'axis',      0, null,       0, false, true)
+            cp( 0,'QG Allié',          'QG',   0.06,0.88,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',           'QG',   0.88,0.08,'hq',        'axis',   100,null,        0, true,  false),
+            // Zone alliée — quartier industriel ouest
+            cp( 2,'Arsenal du Port',   'MUN',  0.14,0.72,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Dépôt Carburant',   'FUEL', 0.08,0.48,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Ponts sur la rivière — axes de passage critiques
+            cp( 4,'Pont Nord',         'PNT',  0.36,0.22,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 7,'Pont Central',      'PTC',  0.42,0.50,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            // VP — croisement routier au centre exact de la ville
+            cp( 5,'Carrefour Central', 'VP',   0.50,0.46,'vp',        'neutral',  0, null,        0, false, false),
+            // Rive est — zone industrielle et ferroviaire
+            cp( 8,'Gare de Triage',    'GAR',  0.64,0.34,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            cp( 6,'Entrepôts Est',     'ENT',  0.68,0.60,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            // Zone axis — campagne nord-est
+            cp( 9,'Ferme Axis',        'FRM',  0.82,0.42,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            cp(10,'Dépôt Munitions N', 'MUN',  0.76,0.18,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Avant-postes — têtes de pont rive est
+            cp(11,'Tête de Pont Sud',  'TPS',  0.54,0.74,'outpost',   'axis',      0, null,       0, false, true),
+            cp(12,'Tête de Pont Nord', 'TPN',  0.58,0.18,'outpost',   'axis',      0, null,       0, false, true)
         ];
 
     } else if (mapId === 2) {
-        // MAP 02 — MARAIS DU NORD : QG haut et bas, flancs larges
+        // ── MAP 02 — PORT FLUVIAL ──────────────────────────────────────────────
+        // Canaux multiples, chantier naval est, phare nord-est, île fortifiée sud-ouest.
+        // Alliés : ouest (zone industrielle). Axis : est (port + chantier naval).
+        // Ponts = goulots, île = flanc isolé, phare = point dominant.
         this.capturePoints = [
-            cp( 0,'QG Allié',         'QG',   0.50,0.96,'hq',        'allied', 100,null,        0, true,  false),
-            cp( 1,'QG Axis',          'QG',   0.50,0.04,'hq',        'axis',   100,null,        0, true,  false),
-            // Flanc gauche allié
-            cp( 2,'Dépôt Sud-Ouest',  'MUN',  0.12,0.82,'munitions', 'allied', 100,'munitions', 10, false, false),
-            cp( 3,'Passage Ouest',    'FUEL', 0.05,0.58,'fuel',      'neutral',  0,'fuel',       8, false, false),
-            // Centre-bas
-            cp( 7,'Croisée Sud',      'CRS',  0.30,0.70,'munitions', 'neutral',  0,'munitions',  6, false, false),
-            cp( 6,'Marécage',         'MRC',  0.14,0.36,'fuel',      'neutral',  0,'fuel',       7, false, false),
-            // Centre exact
-            cp( 5,'Village VP',       'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
-            // Centre-haut
-            cp( 4,'Pont Nord',        'PNT',  0.50,0.26,'munitions', 'neutral',  0,'munitions',  7, false, false),
-            cp( 8,'Verger Est',       'VRG',  0.86,0.36,'fuel',      'neutral',  0,'fuel',       6, false, false),
-            // Flanc droit axis
-            cp( 9,'Passage Est',      'FUEL', 0.95,0.58,'fuel',      'neutral',  0,'fuel',       8, false, false),
-            cp(10,'Dépôt Nord-Est',   'MUN',  0.88,0.18,'munitions', 'axis',    100,'munitions', 10, false, false),
-            // Avant-postes (coins opposés)
-            cp(11,'Bunker Ouest',     'BNK',  0.18,0.18,'outpost',   'axis',      0, null,       0, false, true),
-            cp(12,'Bunker Est',       'BNK',  0.82,0.78,'outpost',   'axis',      0, null,       0, false, true)
+            cp( 0,'QG Allié',          'QG',   0.08,0.42,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',           'QG',   0.86,0.30,'hq',        'axis',   100,null,        0, true,  false),
+            // Zone alliée — complexe industriel ouest
+            cp( 2,'Entrepôts Alliés',  'MUN',  0.16,0.26,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Dépôt Fuel Ouest',  'FUEL', 0.12,0.60,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Ponts centraux — passages sur les canaux
+            cp( 4,'Grand Pont',        'PNT',  0.38,0.46,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 7,'Pont Ferroviaire',  'PRF',  0.42,0.64,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            // VP — centre-ville au croisement des canaux
+            cp( 5,'Écluse Centrale',   'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
+            // Phare nord-est — position dominante axis
+            cp( 8,'Phare',             'PHA',  0.82,0.10,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            // Chantier naval est
+            cp( 6,'Chantier Naval',    'CNV',  0.72,0.52,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Zone axis — port et quais
+            cp( 9,'Quais du Port',     'QAI',  0.84,0.58,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            cp(10,'Arsenal Naval',     'MUN',  0.68,0.20,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Île fortifiée sud-ouest — flanc isolé
+            cp(11,'Île Fortifiée',     'ILE',  0.18,0.80,'outpost',   'axis',      0, null,       0, false, true),
+            // Avant-poste nord — zone circulaire (circuits routiers)
+            cp(12,'Terrain Circulaire','TRC',  0.74,0.08,'outpost',   'axis',      0, null,       0, false, true)
+        ];
+
+    } else if (mapId === 3) {
+        // ── MAP 03 — BOCAGE NORMAND ────────────────────────────────────────────
+        // Terrain bocager normand, lac nord-ouest, collines boisées, route nationale.
+        // Alliés : haut-gauche. Axis : bas-droite.
+        this.capturePoints = [
+            cp( 0,'QG Allié',          'QG',   0.05,0.08,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',           'QG',   0.92,0.90,'hq',        'axis',   100,null,        0, true,  false),
+            // Zone alliée — fermes et hameaux
+            cp( 2,'Ferme du Moulin',   'MUN',  0.16,0.24,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Lac Nord-Ouest',    'FUEL', 0.08,0.50,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Bocage centre-ouest
+            cp( 4,'Hameau des Prés',   'HMS',  0.28,0.38,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 7,'Carrefour Bocage',  'CBG',  0.32,0.62,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            // VP — croisement de la route nationale
+            cp( 5,'Pont-Route VP',     'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
+            // Bocage centre-est — collines et crêtes
+            cp( 6,'Colline 112',       'H112', 0.68,0.36,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            cp( 8,'Route Nationale',   'RN7',  0.72,0.62,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            // Zone axis — bocage sud-est
+            cp( 9,'Verger Axis',       'VRG',  0.90,0.56,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            cp(10,'Dépôt Sud-Est',     'MUN',  0.82,0.76,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Avant-postes
+            cp(11,'Crête Est',         'CRE',  0.74,0.18,'outpost',   'axis',      0, null,       0, false, true),
+            cp(12,'Bois du Sud',       'BSU',  0.58,0.82,'outpost',   'axis',      0, null,       0, false, true)
+        ];
+
+    } else if (mapId === 4) {
+        // ── MAP 04 — CÔTE INDUSTRIELLE ────────────────────────────────────────
+        // Grande carte : port industriel est, cratères centraux, forêts ouest.
+        // Alliés : nord-ouest (ville côtière). Axis : sud-est (zone portuaire).
+        this.capturePoints = [
+            cp( 0,'QG Allié',          'QG',   0.10,0.12,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',           'QG',   0.88,0.88,'hq',        'axis',   100,null,        0, true,  false),
+            // Zone alliée — port nord
+            cp( 2,'Dépôt Portuaire',   'MUN',  0.30,0.08,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Réservoirs Nord',   'FUEL', 0.58,0.14,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Centre — cratères de bombardement (positions élevées)
+            cp( 4,'Cratère Nord',      'CRN',  0.36,0.40,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 7,'Cratère Sud',       'CRS',  0.42,0.62,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            // VP — centre exact des cratères (position dominante)
+            cp( 5,'Sommet des Terres', 'VP',   0.40,0.50,'vp',        'neutral',  0, null,        0, false, false),
+            // Côte est — pont et zone industrielle
+            cp( 8,'Pont Côtier',       'PCO',  0.72,0.44,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            cp( 6,'Zone Industrielle', 'IND',  0.76,0.66,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            // Zone axis — port sud
+            cp( 9,'Quais Sud',         'QSU',  0.82,0.52,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            cp(10,'Arsenal Sud',       'MUN',  0.72,0.80,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Avant-postes
+            cp(11,'Phare Est',         'PHA',  0.62,0.08,'outpost',   'axis',      0, null,       0, false, true),
+            cp(12,'Forêt Ouest',       'FOR',  0.12,0.62,'outpost',   'axis',      0, null,       0, false, true)
         ];
 
     } else {
-        // MAP 03 — BOCAGE NORMAND : diagonale haut-gauche → bas-droite
+        // ── MAP 05 — PLAINES DU NORD ──────────────────────────────────────────
+        // Plaines ouvertes, ville côtière nord-est, cratères centraux, îles sud-ouest.
+        // Alliés : nord-ouest. Axis : sud-est.
         this.capturePoints = [
-            cp( 0,'QG Allié',         'QG',   0.04,0.06,'hq',        'allied', 100,null,        0, true,  false),
-            cp( 1,'QG Axis',          'QG',   0.96,0.94,'hq',        'axis',   100,null,        0, true,  false),
-            // Zone alliée
-            cp( 2,'Ferme Alliée',     'MUN',  0.14,0.22,'munitions', 'allied', 100,'munitions', 10, false, false),
-            cp( 3,'Lac Nord-Ouest',   'FUEL', 0.06,0.46,'fuel',      'neutral',  0,'fuel',       8, false, false),
-            // Quart allié
-            cp( 4,'Moulin Ouest',     'MLN',  0.26,0.36,'munitions', 'neutral',  0,'munitions',  7, false, false),
-            cp( 7,'Hameau Centre',    'HMS',  0.28,0.65,'munitions', 'neutral',  0,'munitions',  6, false, false),
-            // Centre
-            cp( 5,'Ruines VP',        'VP',   0.50,0.50,'vp',        'neutral',  0, null,        0, false, false),
-            // Quart axis
-            cp( 6,'Colline 112',      'H112', 0.72,0.36,'fuel',      'neutral',  0,'fuel',       7, false, false),
-            cp( 8,'Route Nationale',  'RN',   0.74,0.64,'fuel',      'neutral',  0,'fuel',       6, false, false),
-            // Zone axis
-            cp( 9,'Lac Sud-Est',      'FUEL', 0.94,0.52,'fuel',      'neutral',  0,'fuel',       8, false, false),
-            cp(10,'Dépôt Axis',       'MUN',  0.86,0.78,'munitions', 'axis',    100,'munitions', 10, false, false),
-            // Avant-postes axis
-            cp(11,'Poste Avancé Est', 'PAN',  0.76,0.18,'outpost',   'axis',      0, null,       0, false, true),
-            cp(12,'Poste Avancé Sud', 'PAS',  0.60,0.84,'outpost',   'axis',      0, null,       0, false, true)
+            cp( 0,'QG Allié',          'QG',   0.06,0.10,'hq',        'allied', 100,null,        0, true,  false),
+            cp( 1,'QG Axis',           'QG',   0.90,0.88,'hq',        'axis',   100,null,        0, true,  false),
+            // Zone alliée — champs et hameaux nord-ouest
+            cp( 2,'Ferme Nord',        'MUN',  0.10,0.34,'munitions', 'allied', 100,'munitions', 10, false, false),
+            cp( 3,'Carburant Ouest',   'FUEL', 0.20,0.58,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            // Ville côtière nord-est — zone urbaine dense
+            cp( 4,'Port de Ville',     'PTV',  0.68,0.12,'munitions', 'neutral',  0,'munitions',  7, false, false),
+            cp( 7,'Quartier Urbain',   'URB',  0.74,0.28,'munitions', 'neutral',  0,'munitions',  6, false, false),
+            // VP — cratères centraux (position dominante sur les plaines)
+            cp( 5,'Cratères VP',       'VP',   0.52,0.46,'vp',        'neutral',  0, null,        0, false, false),
+            // Plaines centre-est
+            cp( 8,'Route des Plaines', 'RPL',  0.62,0.58,'fuel',      'neutral',  0,'fuel',       6, false, false),
+            cp( 6,'Carrefour Est',     'CRE',  0.78,0.52,'fuel',      'neutral',  0,'fuel',       7, false, false),
+            // Zone axis — sud-est
+            cp( 9,'Collines Sud',      'CSU',  0.86,0.68,'fuel',      'neutral',  0,'fuel',       8, false, false),
+            cp(10,'Base Axis',         'MUN',  0.80,0.78,'munitions', 'axis',    100,'munitions', 10, false, false),
+            // Avant-postes — îles sud-ouest et côte
+            cp(11,'Îles Fortifiées',   'ILE',  0.20,0.76,'outpost',   'axis',      0, null,       0, false, true),
+            cp(12,'Lighthouse',        'LGT',  0.50,0.22,'outpost',   'axis',      0, null,       0, false, true)
         ];
     }
 
@@ -532,6 +593,12 @@ RTS.Game.Map.NavGrid.prototype._getNeighbors = function(x, y) {
 RTS.Game.Map.NavGrid.prototype.getTile = function(x, y) {
     if (x < 0 || y < 0 || x >= this.cols || y >= this.rows) return null;
     return this.grid[y][x];
+};
+
+/** Retourne la tuile à partir de coordonnées monde. */
+RTS.Game.Map.NavGrid.prototype.getTileAtWorld = function(worldX, worldY) {
+    var g = this.worldToGrid(worldX, worldY);
+    return this.getTile(g.x, g.y);
 };
 
 RTS.Game.Map.NavGrid.prototype.worldToGrid = function(worldX, worldY) {

@@ -598,3 +598,8 @@ body::after {
         display: flex;
     }
 }
+
+/* ── HUD PANEL — rendu uniquement via canvas (ProductionUI.js)
+   Les éléments HTML #hud-panel / #hud-nav sont masqués pour éviter
+   le double rendu et les conflits d'affichage. ── */
+#hud-panel, #hud-title, .hud-btn, #hud-nav, .nav-btn { display: none !important; }

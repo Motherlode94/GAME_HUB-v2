@@ -67,7 +67,7 @@ RTS.Game.Map.MapRenderer = function(imagePath, onLoadCallback) {
  * @param {RTS.Engine.Camera}        camera
  * @param {RTS.Game.Map.NavGrid}     navGrid  (peut être null pendant le chargement)
  */
-RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGrid, dt) {
+RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGrid, dt, squads) {
     this.time += (dt !== undefined ? dt : 0.016);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -95,7 +95,7 @@ RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGri
     // === Espace ÉCRAN ===
     this._renderVignette(ctx, canvas);
     if (navGrid) {
-        this._renderMinimap(ctx, canvas, camera, navGrid);
+        this._renderMinimap(ctx, canvas, camera, navGrid, squads || []);
         this._renderHUD(ctx, canvas, camera, navGrid);
     }
 };
@@ -644,7 +644,7 @@ RTS.Game.Map.MapRenderer.prototype._renderVignette = function(ctx, canvas) {
 //  COUCHE 8 — MINIMAP
 // ---------------------------------------------------------------------------
 
-RTS.Game.Map.MapRenderer.prototype._renderMinimap = function(ctx, canvas, camera, navGrid) {
+RTS.Game.Map.MapRenderer.prototype._renderMinimap = function(ctx, canvas, camera, navGrid, squads) {
     var MM_W  = 210;
     var MM_H  = Math.round(MM_W * navGrid.mapHeight / navGrid.mapWidth);
     var PAD   = 18;
@@ -652,6 +652,9 @@ RTS.Game.Map.MapRenderer.prototype._renderMinimap = function(ctx, canvas, camera
     var mmY   = canvas.height - MM_H - PAD;
     var scaleX = MM_W / navGrid.mapWidth;
     var scaleY = MM_H / navGrid.mapHeight;
+
+    // Stocker les bounds pour le clic (utilisé par Game.js)
+    this._minimapBounds = { x: mmX, y: mmY, w: MM_W, h: MM_H, scaleX: scaleX, scaleY: scaleY };
 
     ctx.save();
 
@@ -723,6 +726,28 @@ RTS.Game.Map.MapRenderer.prototype._renderMinimap = function(ctx, canvas, camera
         ctx.stroke();
     });
 
+    // --- Bâtiments alliés et axis (carrés colorés + indicateur prod) ---
+    if (squads && squads._buildings) {
+        squads._buildings.forEach(function(b) {
+            if (!b.isBuilt) return;
+            var bx2 = mmX + b.x * scaleX;
+            var by3 = mmY + b.y * scaleY;
+            var bs  = b.team === 'allied' ? 4 : 3.5;
+            ctx.fillStyle   = b.team === 'allied' ? '#2255cc' : '#882222';
+            ctx.strokeStyle = b.team === 'allied' ? '#88bbff' : '#ff8888';
+            ctx.lineWidth   = 1;
+            ctx.fillRect(bx2 - bs/2, by3 - bs/2, bs, bs);
+            ctx.strokeRect(bx2 - bs/2, by3 - bs/2, bs, bs);
+            // Point vert si en production
+            if (b.queue && b.queue.length > 0) {
+                ctx.beginPath();
+                ctx.arc(bx2 + bs/2 + 1, by3 - bs/2 - 1, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#44ff88';
+                ctx.fill();
+            }
+        });
+    }
+
     // --- Rectangle de vue caméra ---
     var vx = mmX + camera.x * scaleX;
     var vy = mmY + camera.y * scaleY;
@@ -735,13 +760,33 @@ RTS.Game.Map.MapRenderer.prototype._renderMinimap = function(ctx, canvas, camera
     ctx.strokeRect(vx, vy, vw, vh);
     ctx.setLineDash([]);
 
+    // --- Unités alliées et axis (points colorés) ---
+    if (squads && squads.length) {
+        squads.forEach(function(sq) {
+            if (sq.dead || sq.isAerial) return;
+            var ux = mmX + sq.x * scaleX;
+            var uy = mmY + sq.y * scaleY;
+            // N'afficher que si la tuile est visible (fog)
+            var tile = navGrid.getTileAtWorld(sq.x, sq.y);
+            if (!tile || tile.fogState === 0) return;
+            var dotR = sq.isVehicle ? 2.5 : 1.8;
+            ctx.beginPath();
+            ctx.arc(ux, uy, dotR, 0, Math.PI * 2);
+            ctx.fillStyle  = sq.team === 'allied' ? '#4488ff' : '#dd3333';
+            ctx.fill();
+            ctx.strokeStyle = sq.team === 'allied' ? '#aaccff' : '#ffaaaa';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+        });
+    }
+
     ctx.restore();
 
-    // Étiquette au-dessus
+    // Étiquette au-dessus (cliquable visuellement)
     ctx.fillStyle = 'rgba(180,200,160,0.65)';
     ctx.font      = '9px "Courier New"';
     ctx.textAlign = 'left';
-    ctx.fillText('CARTE TACTIQUE', mmX, mmY - 7);
+    ctx.fillText('CARTE TACTIQUE  [clic = naviguer]', mmX, mmY - 7);
 };
 
 // ---------------------------------------------------------------------------

@@ -43,21 +43,95 @@ window.onload = function() {
     canvas.style.background = '#0a0a0a';
     canvas.style.cursor     = 'crosshair';
 
-    // -----------------------------------------------------------------------
-    //  INPUTS
-    // -----------------------------------------------------------------------
-    var mouseX = canvas.width  / 2;
-    var mouseY = canvas.height / 2;
-    var keys   = {};
+// -----------------------------------------------------------------------
+// INPUTS
+// -----------------------------------------------------------------------
+let mouseX = canvas.width / 2;
+let mouseY = canvas.height / 2;
+const keys = {};
 
-    var isDragging   = false;
-    var dragStartX   = 0, dragStartY = 0;
-    var dragCurrentX = 0, dragCurrentY = 0;
-    var DRAG_THRESH  = 6;
-    var isPanning    = false;
-    var panLastX     = 0, panLastY = 0;
-    var touchMode    = null; // 'drag' | 'pan'
-    var pinchLastDist = 0;
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let dragCurrentX = 0;
+let dragCurrentY = 0;
+const DRAG_THRESH = 6;
+
+let isPanning = false;
+let panLastX = 0;
+let panLastY = 0;
+let touchMode = null; // 'drag' | 'pan'
+let pinchLastDist = 0;
+
+// Why: le menu contextuel navigateur casse le clic droit gameplay.
+canvas.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+});
+
+function getCanvasMousePosition(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+    };
+}
+
+function isInsideProductionUI(y) {
+    return Boolean(prodUI) && y > (canvas.height - prodUI.barH);
+}
+
+function cancelBuildMode() {
+    buildMode = false;
+    buildTemplate = null;
+    canvas.style.cursor = "default";
+    console.log("Construction annulée");
+}
+
+canvas.addEventListener("mousemove", (e) => {
+    const pos = getCanvasMousePosition(e);
+    mouseX = pos.x;
+    mouseY = pos.y;
+});
+
+canvas.addEventListener("mousedown", (e) => {
+    const pos = getCanvasMousePosition(e);
+    mouseX = pos.x;
+    mouseY = pos.y;
+
+    const clickedProdUI = isInsideProductionUI(pos.y);
+
+    // A. Priorité UI production
+    if (clickedProdUI) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Clic gauche: l'UI doit gérer
+        if (e.button === 0) {
+            return;
+        }
+
+        // Clic droit ou autre: ignoré totalement sur l'UI
+        return;
+    }
+
+    // B. Clic droit hors UI
+    if (e.button === 2) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (buildMode) {
+            cancelBuildMode();
+            return;
+        }
+
+        // Sinon: ordre de mouvement normal,
+        // le moteur CoH-like peut prendre la suite ici.
+        return;
+    }
+
+    // C. Clic gauche / autre hors UI
+    // Le reste du moteur gameplay peut gérer ici.
+});
 
     // -----------------------------------------------------------------------
     //  SYSTÈMES
@@ -526,6 +600,12 @@ window.onload = function() {
     // -----------------------------------------------------------------------
     function start(mapWidth, mapHeight, mapId) {
         camera  = new RTS.Engine.Camera(canvas.width, canvas.height, mapWidth, mapHeight);
+
+        // Zoom initial : voir toute la carte entière au démarrage.
+        var zoomFitW = canvas.width  / mapWidth;
+        var zoomFitH = canvas.height / mapHeight;
+        camera.zoom  = Math.min(zoomFitW, zoomFitH);
+
         navGrid = new RTS.Game.Map.NavGrid(mapWidth, mapHeight, 48, mapId || 1);
 
         var cp = navGrid.capturePoints;
@@ -580,6 +660,8 @@ window.onload = function() {
         squads.push(new RTS.Game.Squad(a2.x, a2.y, 'allied', 'rifle'));
         squads.push(new RTS.Game.Squad(a3.x, a3.y, 'allied', 'mg'));
         squads.push(new RTS.Game.Squad(a4.x, a4.y, 'allied', 'pioneer'));
+        var a5 = _clampWorldPos(hqX+120, hqY+80, 20);
+        squads.push(new RTS.Game.Squad(a5.x, a5.y, 'allied', 'pioneer'));
 
         // --- IA Axis ---
         aiCtrl = new RTS.Game.AIController(navGrid, buildings, squads, aiRes, aiDifficultyMultiplier);
@@ -596,7 +678,7 @@ window.onload = function() {
         prodUI.selectBuilding(alliedHQ);
         prodUI.activeTab = 'construct';
 
-        _centerCameraOnAlliedBase();
+        camera.snapTo(mapWidth / 2, mapHeight / 2);
 
         // --- Systèmes victoire & objectifs ---
         objectivesPanel = new RTS.Game.ObjectivesPanel(canvas);
@@ -618,7 +700,152 @@ window.onload = function() {
     // -----------------------------------------------------------------------
     //  BOUCLE
     // -----------------------------------------------------------------------
-    function gameLoop(now) {
+
+    // ── HELPERS EXPOSÉS AU HTML ────────────────────────────────────────────
+    window._hudCenterBase = function() {
+        if (camera && navGrid) _centerCameraOnAlliedBase();
+    };
+    window._hudZoom = function(dir) {
+        if (camera) camera.applyZoom(dir > 0 ? -120 : 120, canvas.width/2, canvas.height/2);
+    };
+    window._hudSelectBuilding = function(bldgIdx) {
+        var b = buildings[bldgIdx];
+        if (b && prodUI) { prodUI.selectBuilding(b); _updateHUD(); }
+    };
+    window._hudProduce = function(unitType, timeVal, costMP, costMun, costFuel, amount) {
+        if (!prodUI || !prodUI.selectedBuilding) return;
+        var b = prodUI.selectedBuilding;
+        var prod = null;
+        (b.produces||[]).forEach(function(p){ if (p.unitType===unitType) prod=p; });
+        if (!prod) return;
+        for (var i=0;i<(amount||1);i++) _tryProduce(prod, 1);
+        _updateHUD();
+    };
+    window._hudConstruct = function(buildingType) {
+        if (!prodUI || !prodUI.selectedBuilding) return;
+        var b = prodUI.selectedBuilding;
+        var cons = null;
+        (b.constructs||[]).forEach(function(c){ if (c.buildingType===buildingType) cons=c; });
+        if (!cons) return;
+        var blockReason = _getConstructionBlockReason(cons);
+        if (blockReason) { alert(blockReason); return; }
+        if (!resources.canAfford(cons.cost)) { alert('Ressources insuffisantes'); return; }
+        _startBuildMode(cons);
+    };
+    window._hudUpgrade = function(upgId) {
+        var hq = _getAlliedHQBuilding();
+        if (!hq) return;
+        var upgs = _alliedHQUpgrades();
+        for (var i=0;i<upgs.length;i++) { if (upgs[i].id===upgId) { _startHQUpgrade(upgs[i]); _updateHUD(); return; } }
+    };
+
+    function _updateHUD() {
+        // HUD entierement rendu sur canvas par ProductionUI — elements HTML desactives.
+        return;
+    }
+    function _updateHUD_UNUSED() {
+        var panel  = document.getElementById('hud-panel');
+        var title  = document.getElementById('hud-title');
+        var btns   = document.getElementById('hud-buttons');
+        if (!panel || !btns) return;
+
+        var b = prodUI && prodUI.selectedBuilding;
+        if (!b) { panel.classList.remove('visible'); return; }
+        panel.classList.add('visible');
+
+        var res = resources ? resources.get() : { manpower:0, munitions:0, fuel:0 };
+        var tier = techTier || 1;
+
+        title.textContent = b.label || b.type.toUpperCase();
+        btns.innerHTML = '';
+
+        function canAff(cost) {
+            return res.manpower  >= (cost.manpower  ||0) &&
+                   res.munitions >= (cost.munitions ||0) &&
+                   res.fuel      >= (cost.fuel      ||0);
+        }
+        function costStr(cost) {
+            var parts=[];
+            if (cost.manpower)  parts.push('⚔ '+cost.manpower);
+            if (cost.munitions) parts.push('💥 '+cost.munitions);
+            if (cost.fuel)      parts.push('⛽ '+cost.fuel);
+            return parts.join('  ');
+        }
+        function makeBtn(icon, label, cost, time, onClick, disabled, extraClass, lockMsg) {
+            var btn = document.createElement('button');
+            btn.className = 'hud-btn' + (extraClass ? ' '+extraClass : '');
+            var affordable = !cost || canAff(cost);
+            btn.disabled = disabled || !affordable;
+            btn.innerHTML =
+                '<span class="btn-icon">'+icon+'</span>'+
+                '<span class="btn-label">'+label+'</span>'+
+                (cost ? '<span class="btn-cost">'+costStr(cost)+'</span>' : '')+
+                (time ? '<span class="btn-time">⏱ '+time+'s</span>' : '')+
+                (lockMsg ? '<span class="btn-lock">'+lockMsg+'</span>' : '');
+            if (!btn.disabled && onClick) btn.onclick = onClick;
+            btns.appendChild(btn);
+        }
+
+        // ── Si QG : upgrades tier + constructions ──────────────────────────
+        if (b.type === 'hq') {
+            // Upgrades de tier
+            var upgs = _alliedHQUpgrades();
+            upgs.forEach(function(upg) {
+                var done    = tier >= upg.targetTier;
+                var inProg  = techUpgradeState && techUpgradeState.id === upg.id;
+                var avail   = tier === upg.requiresTier && !techUpgradeState && !done;
+                var label   = done ? '✓ Tier '+upg.targetTier : inProg ? '⚙ En cours…' : upg.label;
+                makeBtn('⭐', label, done||inProg ? null : upg.cost, done||inProg ? null : upg.time,
+                    function(id){ return function(){ window._hudUpgrade(id); }; }(upg.id),
+                    !avail, 'tier-btn', !done && !inProg && !avail ? 'Tier '+upg.requiresTier+' requis' : null);
+            });
+
+            // Séparateur
+            var sep = document.createElement('div');
+            sep.style.cssText = 'width:1px;height:100px;background:#4477ff33;flex-shrink:0;margin:0 4px;';
+            btns.appendChild(sep);
+
+            // Constructions
+            var counts = _getAlliedBuildingCounts();
+            var built  = _getAlliedBuiltTechMap();
+            (b.constructs||[]).forEach(function(cons) {
+                var alreadyBuilt = (counts[cons.buildingType]||0) > 0;
+                var tierOk  = tier >= (cons.minTier||1);
+                var reqs    = cons.requires||[];
+                var reqOk   = reqs.every(function(r){ return !!built[r]; });
+                var hasPion = _alliedPioneers().length > 0;
+                var ok      = !alreadyBuilt && tierOk && reqOk && hasPion;
+                var lockMsg = alreadyBuilt ? '✓ Construit' : !tierOk ? 'Tier '+(cons.minTier||1)+' requis' : !reqOk ? 'Prérequis manquant' : !hasPion ? 'Pioneer requis' : null;
+                makeBtn('⌂', cons.label, ok ? cons.cost : null, ok ? cons.time : null,
+                    function(bt){ return function(){ window._hudConstruct(bt); }; }(cons.buildingType),
+                    !ok || alreadyBuilt, alreadyBuilt ? 'built' : '', lockMsg);
+            });
+
+            // Pionniers
+            var sep2 = document.createElement('div');
+            sep2.style.cssText = 'width:1px;height:100px;background:#4477ff33;flex-shrink:0;margin:0 4px;';
+            btns.appendChild(sep2);
+        }
+
+        // ── Production d'unités ────────────────────────────────────────────
+        var ICONS = { rifle:'👊', mg:'🔥', pioneer:'🔧', assault:'💪', at_inf:'🚀',
+            mortar:'💣', medic:'➕', sniper:'🎯', jeep:'🚗', halftrack:'🚛',
+            recon_car:'👁', anti_inf_car:'⚡', sherman:'🛡', panzer:'🛡',
+            tank_destroyer:'🎯', heavy_tank:'🔱', artillery_truck:'💥',
+            heli_transport:'🚁', heli_attack:'🚁', airstrike:'✈',
+            flamethrower:'🔥', paratrooper:'🪂', officer:'⭐',
+            m10_wolverine:'🛡', ranger:'🗡', combat_engineer:'⚙',
+            aa_halftrack:'🛡', bofors:'🎯', m7_priest:'💥', calliope:'🚀' };
+
+        (b.produces||[]).forEach(function(prod) {
+            var tierOk = tier >= (prod.minTier||1);
+            makeBtn(ICONS[prod.unitType]||'⚔', prod.label, tierOk?prod.cost:null, tierOk?prod.time:null,
+                function(ut){ return function(){ window._hudProduce(ut); }; }(prod.unitType),
+                !tierOk || !b.isBuilt, '', !tierOk ? 'Tier '+(prod.minTier||1)+' requis' : null);
+        });
+    }
+
+        function gameLoop(now) {
         var dt = Math.min((now - lastTime) / 1000, 0.05);
         lastTime = now;
 
@@ -709,6 +936,29 @@ window.onload = function() {
         ctx.save();
         ctx.scale(camera.zoom, camera.zoom);
         ctx.translate(-camera.x, -camera.y);
+
+        // Indicateur visuel : surbrillance des bâtiments alliés si aucun n'est sélectionné
+        var noBldgSelected = !prodUI || !prodUI.selectedBuilding;
+        if (noBldgSelected) {
+            var pulse = 0.5 + Math.abs(Math.sin(lastTime * 0.002)) * 0.5;
+            buildings.forEach(function(b) {
+                if (b.team !== 'allied' || !b.isBuilt) return;
+                ctx.save();
+                ctx.globalAlpha = 0.25 * pulse;
+                ctx.strokeStyle = '#4488ff';
+                ctx.lineWidth = 4 / camera.zoom;
+                ctx.setLineDash([6, 4]);
+                ctx.strokeRect(b.x - b.w/2 - 4, b.y - b.h/2 - 4, b.w + 8, b.h + 8);
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 0.7 * pulse;
+                ctx.fillStyle = '#7aaaff';
+                ctx.font = 'bold ' + Math.round(9 / camera.zoom) + 'px "Courier New"';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                ctx.fillText('▼ CLIQUER', b.x, b.y - b.h/2 - 6);
+                ctx.restore();
+            });
+        }
+
         buildings.forEach(function(b) { b.render(ctx); });
 
         // Trier unités : sol avant aériens
@@ -722,7 +972,10 @@ window.onload = function() {
 
         ctx.restore();
 
+        if (buildMode) _renderBuildModeHint();
         if (isDragging) _renderRubberBand();
+        _updateHUD();
+
         if (prodUI) {
             prodUI.setSelectedPioneers(_selectedPioneers());
             prodUI.setSelectedSquads(_selectedSquads());
@@ -767,16 +1020,89 @@ window.onload = function() {
         if (!buildTemplate) return;
         var stats = RTS.Game.Building.STATS[buildTemplate.buildingType];
         if (!stats) return;
-        var w=stats.w, h=stats.h;
-        var x=buildGhostX, y=buildGhostY;
+        var w = stats.w, h = stats.h;
+        var x = buildGhostX, y = buildGhostY;
+
         ctx.save();
-        ctx.fillStyle='rgba(80,160,255,0.2)';
-        ctx.fillRect(x-w/2, y-h/2, w, h);
-        ctx.strokeStyle='rgba(100,200,255,0.8)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
-        ctx.strokeRect(x-w/2, y-h/2, w, h); ctx.setLineDash([]);
-        ctx.fillStyle='rgba(150,220,255,0.8)'; ctx.font='bold 9px "Courier New"';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(stats.label, x, y);
+
+        // Ombre portée
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(x - w/2 + 5, y - h/2 + 5, w, h);
+
+        // Corps du ghost avec pulsation
+        var pulse = 0.55 + Math.abs(Math.sin(Date.now() * 0.004)) * 0.45;
+        ctx.fillStyle = 'rgba(80,160,255,' + (0.18 * pulse) + ')';
+        ctx.fillRect(x - w/2, y - h/2, w, h);
+
+        // Bordure animée
+        ctx.strokeStyle = 'rgba(120,200,255,' + (0.9 * pulse) + ')';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 3]);
+        ctx.strokeRect(x - w/2, y - h/2, w, h);
+        ctx.setLineDash([]);
+
+        // Nom du bâtiment
+        ctx.fillStyle = 'rgba(160,225,255,' + (0.9 * pulse) + ')';
+        ctx.font = 'bold 11px "Courier New"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⌂ ' + stats.label, x, y);
+
+        // Ligne vers le pioneer assigné
+        var pioneer = buildTemplate.pioneer;
+        if (pioneer) {
+            ctx.save();
+            ctx.setLineDash([4, 6]);
+            ctx.strokeStyle = 'rgba(255,210,80,0.55)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(pioneer.x, pioneer.y);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // Icône pioneer
+            ctx.fillStyle = 'rgba(255,210,80,0.9)';
+            ctx.font = 'bold 9px "Courier New"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('🔧', pioneer.x, pioneer.y - (pioneer.radius || 14) - 2);
+            ctx.restore();
+        }
+
+        ctx.restore();
+
+        // Bandeau d'instruction en bas (dans l'espace UI, hors world-transform)
+        // Ce bandeau est rendu APRÈS ctx.restore() du monde → on le dessine en coords écran.
+        // On réutilise le ctx global (screen-space) via une sauvegarde externe.
+    }
+
+    function _renderBuildModeHint() {
+        if (!buildMode || !buildTemplate) return;
+        var stats = RTS.Game.Building.STATS[buildTemplate.buildingType] || {};
+        var cv = canvas;
+        var barY = cv.height - (prodUI ? prodUI.barH + 38 : 168);
+
+        ctx.save();
+        // Fond semi-transparent
+        ctx.fillStyle = 'rgba(4,12,30,0.92)';
+        ctx.fillRect(0, barY, cv.width, 36);
+        ctx.strokeStyle = 'rgba(100,190,255,0.6)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, barY); ctx.lineTo(cv.width, barY); ctx.stroke();
+
+        // Texte gauche : nom
+        ctx.fillStyle = '#7aaaff';
+        ctx.font = 'bold 11px "Courier New"';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🏗  PLACEMENT : ' + (stats.label || buildTemplate.buildingType.toUpperCase()), 16, barY + 18);
+
+        // Texte droite : instructions
+        ctx.fillStyle = 'rgba(150,200,255,0.7)';
+        ctx.font = '10px "Courier New"';
+        ctx.textAlign = 'right';
+        ctx.fillText('Clic gauche = confirmer   |   Échap = annuler', cv.width - 16, barY + 18);
+
         ctx.restore();
     }
 
@@ -889,10 +1215,16 @@ window.onload = function() {
 
     function _buildingAtScreen(sx, sy) {
         if (!camera) return null;
-        var w=camera.screenToWorld(sx,sy), found=null;
-        buildings.forEach(function(b){
-            if (b.team!=='allied') return;
-            if (w.x>=b.x-b.w/2&&w.x<=b.x+b.w/2&&w.y>=b.y-b.h/2&&w.y<=b.y+b.h/2) found=b;
+        var w = camera.screenToWorld(sx, sy);
+        var found = null;
+        // Marge de clic en pixels écran → convertie en unités monde
+        // Permet de cliquer sur un bâtiment même très dézoomé (min 20px écran de marge)
+        var clickMarginWorld = Math.max(0, (20 / camera.zoom) - 10);
+        buildings.forEach(function(b) {
+            if (b.team !== 'allied') return;
+            var hw = b.w / 2 + clickMarginWorld;
+            var hh = b.h / 2 + clickMarginWorld;
+            if (w.x >= b.x - hw && w.x <= b.x + hw && w.y >= b.y - hh && w.y <= b.y + hh) found = b;
         });
         return found;
     }
@@ -935,7 +1267,7 @@ window.onload = function() {
         if (!navGrid || !camera) return;
 
         if (buildMode) {
-            _cancelBuild();
+            // Clic droit ignoré en mode placement — utiliser Échap pour annuler
             return;
         }
 
@@ -1003,18 +1335,24 @@ window.onload = function() {
 
         var btn = prodUI ? prodUI.handleClick(sx, sy) : null;
         if (btn) {
-            if (btn.action === 'produce' && btn.canAfford) _tryProduce(btn.prod, shiftKey ? 5 : 1);
-            else if (btn.action === 'construct' && btn.canAfford && btn.canBuild) _startBuildMode(btn.cons);
-            else if (btn.action === 'ability' && btn.canUse) btn.squad.activateAbility(btn.abilityId, squads);
-            return;
+            // Toujours consommer le clic si l'action est une navigation (onglet, scroll)
+            if (btn.action === 'tab' || btn.action === 'scroll' || btn.action === 'rally') return;
+            // Pour les actions nécessitant des ressources : consommer seulement si activable
+            if (btn.action === 'produce' && btn.canAfford) { _tryProduce(btn.prod, shiftKey ? 5 : 1); return; }
+            if (btn.action === 'construct' && btn.canAfford && btn.canBuild) { _startBuildMode(btn.cons); return; }
+            if (btn.action === 'ability' && btn.canUse) { btn.squad.activateAbility(btn.abilityId, squads); return; }
+            if (btn.action === 'upgrade') { /* les upgrades sont gérés par handleClick interne */ return; }
+            // Bouton désactivé (ressources insuffisantes, tier requis...) : ne PAS bloquer le clic
+            // → laisser passer vers _buildingAtScreen
         }
 
         var previouslySelected = _selectedSquads();
         var bldg = _buildingAtScreen(sx, sy);
         if (bldg) {
             _deselectAll();
-            if (prodUI) prodUI.selectBuilding(bldg);
-            return;
+            if (prodUI) { prodUI.selectBuilding(bldg); prodUI.setSelectedSquads([]); }
+            _updateHUD();
+            return;  // bâtiment sélectionné → ne pas déclencher de déplacement
         }
 
         var clicked = _squadAtScreen(sx, sy);
@@ -1026,8 +1364,15 @@ window.onload = function() {
         _deselectAll();
         if (clicked) {
             clicked.selected = true;
-            if (prodUI) prodUI.selectBuilding(null);
+            // Désélectionner le bâtiment pour afficher le panel unité
+            if (prodUI) { prodUI.selectBuilding(null); prodUI.setSelectedSquads([clicked]); }
             return;
+        }
+
+        // Clic sur terrain vide : revenir au QG
+        if (prodUI && !prodUI.selectedBuilding) {
+            var hqB = _getAlliedHQBuilding();
+            if (hqB) { prodUI.selectBuilding(hqB); prodUI.setSelectedSquads([]); _updateHUD(); }
         }
 
         if (allowTouchMoveFallback && (previouslySelected.length > 0 || (prodUI && prodUI.selectedBuilding))) {
@@ -1083,6 +1428,11 @@ window.onload = function() {
     //  CONSTRUCTION DE BÂTIMENT
     // -----------------------------------------------------------------------
     function _startBuildMode(cons) {
+        // Toggle : recliquer le même bâtiment annule le placement en cours
+        if (buildMode && buildTemplate && buildTemplate.buildingType === cons.buildingType) {
+            _cancelBuild();
+            return;
+        }
         var blockReason = _getConstructionBlockReason(cons);
         if (blockReason) { console.warn('[Game] ' + blockReason); return; }
         if (!resources.canAfford(cons.cost)) { console.warn('[Game] Ressources insuffisantes.'); return; }
@@ -1092,7 +1442,7 @@ window.onload = function() {
         buildMode     = true;
         buildTemplate = { buildingType:cons.buildingType, cost:cons.cost, time:cons.time, pioneer:pioneer };
         canvas.style.cursor = 'cell';
-        console.info('[Game] Clic droit pour placer : '+cons.label);
+        console.info('[Game] Clic gauche pour placer : '+cons.label+' (Échap pour annuler)');
     }
 
     function _placeBuilding(worldX, worldY) {
@@ -1186,7 +1536,11 @@ window.onload = function() {
             var inRect = _squadsInRect(dragStartX, dragStartY, dragCurrentX, dragCurrentY);
             if (!e.shiftKey) _deselectAll();
             inRect.forEach(function(s) { s.selected = true; });
-            if (inRect.length > 0 && prodUI) prodUI.selectBuilding(null);
+            // Fermer le panel bâtiment dès qu'on sélectionne des unités par rectangle
+            if (inRect.length > 0 && !e.shiftKey && prodUI) {
+                prodUI.selectBuilding(null);
+                prodUI.setSelectedSquads(inRect);
+            }
             isDragging = false;
             return;
         }
@@ -1202,6 +1556,14 @@ window.onload = function() {
 
     canvas.addEventListener('contextmenu', function(e) {
         e.preventDefault();
+        // CORRECTION : Si on est en mode construction, le clic droit ANNULE tout
+    if (buildMode) {
+        buildMode = false;
+        buildTemplate = null;
+        canvas.style.cursor = 'crosshair';
+        console.log("Construction annulée par clic droit");
+        return; 
+    }
         if (!camera) return;
         var p = _screenFromEvent(e);
         _issueMoveOrRallyAtScreen(p.x, p.y, !!e.shiftKey);

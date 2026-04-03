@@ -159,10 +159,12 @@
 </div>
 
 <canvas id="gameCanvas"></canvas>
-<div id="mobileControls" class="mobile-controls">
-    <button id="mobileZoomOut" type="button" title="Zoom out">-</button>
-    <button id="mobileZoomIn" type="button" title="Zoom in">+</button>
-    <button id="mobileHome" type="button" title="Center HQ">HQ</button>
+
+<!-- Boutons navigation (coin haut-droit, canvas gère le HUD de production) -->
+<div id="hud-nav-btns" style="position:fixed;right:12px;top:230px;display:flex;flex-direction:column;gap:6px;z-index:900;">
+    <button onclick="window._hudCenterBase&&window._hudCenterBase()" style="padding:8px 12px;background:rgba(4,8,22,0.92);border:1.5px solid rgba(100,160,255,0.4);border-radius:8px;color:#aaccff;font:bold 11px 'Courier New';cursor:pointer;">🏠 BASE</button>
+    <button onclick="window._hudZoom&&window._hudZoom(1)" style="padding:8px 12px;background:rgba(4,8,22,0.92);border:1.5px solid rgba(100,160,255,0.4);border-radius:8px;color:#aaccff;font:bold 11px 'Courier New';cursor:pointer;">＋ ZOOM</button>
+    <button onclick="window._hudZoom&&window._hudZoom(-1)" style="padding:8px 12px;background:rgba(4,8,22,0.92);border:1.5px solid rgba(100,160,255,0.4);border-radius:8px;color:#aaccff;font:bold 11px 'Courier New';cursor:pointer;">－ ZOOM</button>
 </div>
 
 <script src="js/Camera.js"></script>

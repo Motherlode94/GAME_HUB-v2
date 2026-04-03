@@ -23,9 +23,9 @@ RTS.Game.ResourceManager = function(team) {
         this.munitions = 40;
         this.fuel      = 20;
     } else {
-        this.manpower  = 520;
-        this.munitions = 90;
-        this.fuel      = 60;
+        this.manpower  = 280;
+        this.munitions = 45;
+        this.fuel      = 25;
     }
 
     this.maxManpower  = 9999;
@@ -33,9 +33,9 @@ RTS.Game.ResourceManager = function(team) {
     this.maxFuel      = 999;
 
     // Taux / seconde (plus strict pour un pacing proche CoH).
-    this._mpRate  = 10;
-    this._munRate = 0.8;
-    this._fuRate  = 0.45;
+    this._mpRate  = 7;
+    this._munRate = 0.6;
+    this._fuRate  = 0.35;
 
     // Pour affichage HUD (+X/min)
     this.manpowerRate  = Math.round(this._mpRate * 60);

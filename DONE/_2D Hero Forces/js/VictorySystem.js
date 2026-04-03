@@ -37,7 +37,7 @@ RTS.Game.VictorySystem = function(navGrid, squads, buildings, onVictory, onObjec
 
     // Domination : temps de contrôle total des 5+ points
     this._dominationTimer  = { allied: 0, axis: 0 };
-    this.dominationRequired = 60;   // secondes
+    this.dominationRequired = 120;   // secondes
 
     // Temps de jeu total
     this.gameTime   = 0;
@@ -105,7 +105,7 @@ RTS.Game.VictorySystem.prototype._updateVPBleed = function(dt) {
 
     cps.forEach(function(cp) {
         if (cp.isHQ) return;
-        var rate = cp.type === 'vp' ? 3.0 : 0.8;
+        var rate = cp.type === 'vp' ? 1.2 : 0.35;
         if (cp.owner === 'allied') axisBleed   += rate;
         if (cp.owner === 'axis')   alliedBleed += rate;
     });
@@ -187,8 +187,8 @@ RTS.Game.VictorySystem.prototype._checkVictory = function() {
     var alliedBldg  = this.buildings.filter(function(b){ return b.team==='allied'&&b.isBuilt; }).length;
     var axisBldg    = this.buildings.filter(function(b){ return b.team==='axis'  &&b.isBuilt; }).length;
 
-    if (alliedUnits === 0 && alliedBldg === 0 && this.gameTime > 30) { this._triggerVictory('axis',   'annihilation'); return; }
-    if (axisUnits   === 0 && axisBldg   === 0 && this.gameTime > 30) { this._triggerVictory('allied', 'annihilation'); return; }
+    if (alliedUnits === 0 && alliedBldg === 0 && this.gameTime > 120) { this._triggerVictory('axis',   'annihilation'); return; }
+    if (axisUnits   === 0 && axisBldg   === 0 && this.gameTime > 120) { this._triggerVictory('allied', 'annihilation'); return; }
 };
 
 RTS.Game.VictorySystem.prototype._triggerVictory = function(winner, condition) {
