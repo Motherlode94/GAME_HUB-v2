@@ -200,79 +200,102 @@ class Enemy {
         return this.health <= 0;
     }
 
-    draw(ctx) {
-        ctx.save();
-        ctx.translate(this.pos.x, this.pos.y);
+draw(ctx) {
+    ctx.save();
+    ctx.translate(this.pos.x, this.pos.y);
 
-        if (this.deathTimer > 0) {
-            ctx.globalAlpha = this.deathTimer / 30;
-            ctx.rotate(this.deathTimer * 0.1); // Rotation pendant la mort
-        } else {
-            // Pulse basé sur la santé
-            const pulse = 0.8 + 0.2 * Math.sin(Date.now() * 0.005);
-            ctx.globalAlpha = 0.7 + 0.3 * (this.health / this.maxHealth) * pulse;
-        }
+    if (this.deathTimer > 0) {
+        ctx.globalAlpha = this.deathTimer / 30;
+        ctx.rotate(this.deathTimer * 0.1);
+    } else {
+        const pulse = 0.8 + 0.2 * Math.sin(Date.now() * 0.005);
+        ctx.globalAlpha = 0.7 + 0.3 * (this.health / this.maxHealth) * pulse;
+    }
 
-        // Dessin du sprite (adapté au type)
-        let img = null;
-        let frameWidth = 200; // Exemple de taille de frame pour sheets
-        let frameHeight = 200;
-        switch(this.type) {
+    let img = null;
+
+    switch (this.type) {
+        case 'boss':
+            img = enemyBossImg;
+            break;
+        case 'tank':
+            img = enemyTankImg;
+            break;
+        case 'fast':
+            img = enemyFastImg;
+            break;
+        default:
+            img = enemyNormalImg;
+            break;
+    }
+
+    if (img && img.complete && img.naturalWidth > 0) {
+        let drawWidth = 64;
+        let drawHeight = 64;
+        let yOffset = 50;
+
+        switch (this.type) {
             case 'boss':
-                img = enemyBossImg;
-                frameWidth = 700; // Image complète car pas sheet
-                frameHeight = 400;
+                drawWidth = 120;
+                drawHeight = 120;
+                yOffset = 92;
                 break;
             case 'tank':
-                img = enemyTankImg;
-                frameWidth = 720;
-                frameHeight = 480;
+                drawWidth = 86;
+                drawHeight = 86;
+                yOffset = 66;
                 break;
             case 'fast':
-                img = enemyFastImg;
-                frameWidth = 1800;
-                frameHeight = 1200;
+                drawWidth = 60;
+                drawHeight = 60;
+                yOffset = 46;
                 break;
             default:
-                img = enemyNormalImg;
-                frameWidth = 1800;
-                frameHeight = 1200;
+                drawWidth = 70;
+                drawHeight = 70;
+                yOffset = 54;
                 break;
         }
 
-        if (img && img.complete && img.naturalWidth > 0) {
-            // Dessiner l'image scalée à la taille de l'ennemi (crop si sheet, ici image complète scalée)
-            ctx.drawImage(img, 0, 0, frameWidth, frameHeight, -this.radius, -this.radius, this.size, this.size);
-        } else {
-            // Fallback procédural
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = this.type === 'boss' ? 25 : 15;
-            ctx.beginPath();
-            ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-            ctx.fill();
-        }
+        ctx.drawImage(
+            img,
+            -drawWidth / 2,
+            -yOffset,
+            drawWidth,
+            drawHeight
+        );
+    } else {
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = this.type === 'boss' ? 25 : 15;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
-        // Barre de vie
-        if (this.type === 'boss' || (this.type === 'tank' && this.maxHealth > 3)) {
-            const barWidth = 50;
-            const barHeight = 6;
-            const healthPercent = this.health / this.maxHealth;
-            
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = '#333333';
-            ctx.fillRect(-barWidth/2, -this.radius - 20, barWidth, barHeight);
-            ctx.fillStyle = healthPercent > 0.6 ? '#00ff00' : healthPercent > 0.3 ? '#ffff00' : '#ff0000';
-            ctx.fillRect(-barWidth/2, -this.radius - 20, barWidth * healthPercent, barHeight);
-            
-            // Bordure
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(-barWidth/2, -this.radius - 20, barWidth, barHeight);
-        }
+    if (this.type === 'boss' || (this.type === 'tank' && this.maxHealth > 3)) {
+        const barWidth = this.type === 'boss' ? 64 : 50;
+        const barHeight = 6;
+        const healthPercent = this.health / this.maxHealth;
+        const barY = this.type === 'boss' ? -78 : -52;
 
         ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
-        ctx.restore();
+        ctx.fillStyle = '#333333';
+        ctx.fillRect(-barWidth / 2, barY, barWidth, barHeight);
+
+        ctx.fillStyle =
+            healthPercent > 0.6 ? '#00ff00' :
+            healthPercent > 0.3 ? '#ffff00' :
+            '#ff0000';
+        ctx.fillRect(-barWidth / 2, barY, barWidth * healthPercent, barHeight);
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-barWidth / 2, barY, barWidth, barHeight);
     }
+
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+    ctx.restore();
+}
 }

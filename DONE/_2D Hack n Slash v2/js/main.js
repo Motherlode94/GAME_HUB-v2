@@ -6,16 +6,26 @@ let gameMode = 'survival'; // 'survival', 'timeAttack', 'bossRush', 'endless'
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const gameContainer = document.getElementById('gameContainer');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
+const gameOverScreen = document.getElementById('gameOver');
+const winScreen = document.getElementById('win');
 
 // Chargement des sprites
 const playerImg = new Image();
 playerImg.src = 'assets/sprites/player.png';
 
 const enemyNormalImg = new Image();
-enemyNormalImg.src = 'assets/sprites/enemy_normal.webp';
-enemyFastImg.src   = 'assets/sprites/enemy_fast.png';
-enemyTankImg.src   = 'assets/sprites/enemy_tank.webp';
-enemyBossImg.src   = 'assets/sprites/enemy_boss.png';
+enemyNormalImg.src = 'assets/sprites/enemy_normal.png';
+
+const enemyFastImg = new Image();
+enemyFastImg.src = 'assets/sprites/enemy_fast.png';
+
+const enemyTankImg = new Image();
+enemyTankImg.src = 'assets/sprites/enemy_tank.png';
+
+const enemyBossImg = new Image();
+enemyBossImg.src = 'assets/sprites/enemy_boss.png';
 
 // Attendre le chargement des images
 let imagesLoaded = 0;
@@ -64,6 +74,16 @@ function initLevel() {
     }
     
     updateUI();
+}
+
+function startGame() {
+    resetGame();
+    gameState = 'playing';
+    gameContainer.style.display = 'block';
+    gameOverScreen.style.display = 'none';
+    winScreen.style.display = 'none';
+    startButton.style.display = 'none';
+    restartButton.style.display = 'inline-flex';
 }
 
 function setGameMode(mode) {
@@ -193,10 +213,10 @@ function updateUI() {
 
 function showGameOver() {
     document.getElementById('finalScore').textContent = score;
-    document.getElementById('gameOver').style.display = 'block';
+    gameOverScreen.style.display = 'block';
+    winScreen.style.display = 'none';
     gameState = 'gameover';
-    
-    // Effets de game over
+
     for (let i = 0; i < 50; i++) {
         particles.push(new Particle(
             player.pos.x,
@@ -213,10 +233,10 @@ function showGameOver() {
 
 function showWin() {
     document.getElementById('finalLevel').textContent = level;
-    document.getElementById('win').style.display = 'block';
+    winScreen.style.display = 'block';
+    gameOverScreen.style.display = 'none';
     gameState = 'won';
 }
-
 function update() {
     if (hitStopFrames > 0) {
         hitStopFrames--;
@@ -283,7 +303,7 @@ if (proj.pos.distance(player.pos) < player.radius + proj.radius) {
         enemy.update(player);
         
         // Attaque du joueur
-        if (player.weaponSystem.attacking) {
+        if (player && player.weaponSystem.attacking) {
             const dx = enemy.pos.x - attackCenter.x;
             const dy = enemy.pos.y - attackCenter.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
@@ -316,7 +336,7 @@ if (proj.pos.distance(player.pos) < player.radius + proj.radius) {
             }
             
             // Knockback
-            if (!player.dashing) {
+            if (!player.dash.dashing) {
                 const knockbackDir = player.pos.sub(enemy.pos).normalize();
                 player.pos = player.pos.add(knockbackDir.mul(15));
             }
@@ -337,18 +357,18 @@ if (proj.pos.distance(player.pos) < player.radius + proj.radius) {
             
             switch(pickup.type) {
                 case 'health':
-                    player.health = Math.min(player.maxHealth, player.health + 2);
+                    player.stats.heal(2);
                     createExperiencePopup(pickup.pos.x, pickup.pos.y, '+2 HP');
                     break;
                 case 'experience':
                     player.progression.addXP(50);
                     break;
                 case 'special':
-                    player.specialCharge = Math.min(player.specialMax, player.specialCharge + 40);
+                    player.progression.addSpecial(40);
                     createExperiencePopup(pickup.pos.x, pickup.pos.y, '+40 SPECIAL');
                     break;
                 case 'speed':
-                    player.speed += 0.5;
+                    player.movement.baseSpeed += 0.5;
                     createExperiencePopup(pickup.pos.x, pickup.pos.y, '+SPEED');
                     break;
             }
@@ -474,8 +494,7 @@ function drawBackground() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
-    
-    // Shockwaves
+
     shockwaves.forEach(sw => {
         ctx.save();
         ctx.globalAlpha = sw.life * 0.7;
@@ -489,17 +508,12 @@ function draw() {
         ctx.restore();
     });
 
-    // Pickups
     pickups.forEach(pickup => pickup.draw(ctx));
-    
-    // ProjectileS
     projectiles.forEach(p => p.draw(ctx));
 
-    // Ennemis
     enemies.forEach(enemy => {
         enemy.draw(ctx);
-        
-        // Projectiles
+
         enemy.projectiles.forEach(proj => {
             ctx.save();
             ctx.fillStyle = proj.color || '#ff5555';
@@ -508,87 +522,83 @@ function draw() {
             ctx.beginPath();
             ctx.arc(proj.pos.x, proj.pos.y, proj.radius, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Traînée
+
             ctx.strokeStyle = '#ff8888';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(proj.pos.x, proj.pos.y);
             ctx.lineTo(proj.pos.x - proj.vel.x * 3, proj.pos.y - proj.vel.y * 3);
             ctx.stroke();
-            
             ctx.restore();
         });
     });
 
-    // Joueur
-    player.draw(ctx);
+    if (player) {
+        player.draw(ctx);
+    }
 
-        // Afficher le timer en Time Attack
-    if (gameMode === 'timeAttack') {
+    if (player && gameMode === 'timeAttack') {
         ctx.save();
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(canvas.width/2 - 100, 10, 200, 40);
-        
+        ctx.fillRect(canvas.width / 2 - 100, 10, 200, 40);
+
         const timeLeft = timeAttackMaxTime - timeAttackTimer;
         const seconds = Math.floor(timeLeft / 60);
         const percent = timeLeft / timeAttackMaxTime;
-        
+
         ctx.font = 'bold 24px Arial';
         ctx.fillStyle = percent > 0.5 ? '#00ff00' : percent > 0.2 ? '#ffff00' : '#ff0000';
         ctx.textAlign = 'center';
         ctx.shadowColor = '#000000';
         ctx.shadowBlur = 5;
         ctx.fillText(`TEMPS: ${seconds}s`, canvas.width / 2, 35);
-        
-        // Barre de temps
+
         ctx.fillStyle = '#333333';
-        ctx.fillRect(canvas.width/2 - 90, 45, 180, 10);
+        ctx.fillRect(canvas.width / 2 - 90, 45, 180, 10);
         ctx.fillStyle = percent > 0.5 ? '#00ff00' : percent > 0.2 ? '#ffff00' : '#ff0000';
-        ctx.fillRect(canvas.width/2 - 90, 45, 180 * percent, 10);
-        
+        ctx.fillRect(canvas.width / 2 - 90, 45, 180 * percent, 10);
+
         ctx.shadowBlur = 0;
         ctx.restore();
     }
 
-    // Zone d'attaque visuelle
-    if (player.weaponSystem.attacking) {
+    if (player && player.weaponSystem.attacking) {
         const angle = Math.atan2(player.facing.y, player.facing.x);
         ctx.save();
         ctx.translate(player.pos.x, player.pos.y);
         ctx.rotate(angle);
-        
-        const attackLength = 55 + (player.combo * 0.8);
-        const attackColor = player.combo > 15 ? '#ff5500' : player.combo > 8 ? '#ffff00' : '#ffffff';
-        
+
+        const attackLength = 55 + player.combo * 0.8;
+        const attackColor =
+            player.combo > 15 ? '#ff5500' :
+            player.combo > 8 ? '#ffff00' :
+            '#ffffff';
+
         ctx.shadowColor = attackColor;
         ctx.shadowBlur = 30;
-        ctx.strokeStyle = `rgba(255, 255, 200, 0.8)`;
+        ctx.strokeStyle = 'rgba(255, 255, 200, 0.8)';
         ctx.lineWidth = player.combo > 15 ? 12 : player.combo > 8 ? 10 : 8;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(18, 0);
         ctx.lineTo(attackLength, 0);
         ctx.stroke();
-        
-        // Effet de vague
+
         ctx.lineWidth = 4;
-        ctx.strokeStyle = `rgba(255, 200, 100, 0.4)`;
+        ctx.strokeStyle = 'rgba(255, 200, 100, 0.4)';
         ctx.beginPath();
         ctx.moveTo(15, -3);
-        ctx.quadraticCurveTo(attackLength/2, -8, attackLength, -3);
+        ctx.quadraticCurveTo(attackLength / 2, -8, attackLength, -3);
         ctx.moveTo(15, 3);
-        ctx.quadraticCurveTo(attackLength/2, 8, attackLength, 3);
+        ctx.quadraticCurveTo(attackLength / 2, 8, attackLength, 3);
         ctx.stroke();
-        
+
         ctx.shadowBlur = 0;
         ctx.restore();
     }
 
-    // Particules
     particles.forEach(particle => particle.draw(ctx));
-    
-    // Popups
+
     damageNumbers.forEach(d => {
         ctx.save();
         ctx.globalAlpha = d.timer / 60;
@@ -601,7 +611,7 @@ function draw() {
         ctx.fillText(d.value.toString(), d.x, d.y);
         ctx.restore();
     });
-    
+
     scorePopups.forEach(s => {
         ctx.save();
         ctx.globalAlpha = s.timer / 90;
@@ -614,7 +624,7 @@ function draw() {
         ctx.fillText(s.value, s.x, s.y);
         ctx.restore();
     });
-    
+
     experiencePopups.forEach(e => {
         ctx.save();
         ctx.globalAlpha = e.timer / 90;
@@ -625,7 +635,7 @@ function draw() {
         ctx.fillText(e.text, e.x, e.y);
         ctx.restore();
     });
-    
+
     levelUpMessages.forEach(l => {
         ctx.save();
         ctx.globalAlpha = l.timer / 120;
@@ -636,22 +646,18 @@ function draw() {
         ctx.shadowColor = '#000000';
         ctx.shadowBlur = 10;
         ctx.fillText(l.text, l.x, l.y);
-        
+
         ctx.font = 'bold 20px Arial';
         ctx.fillText(l.subtext, l.x, l.y + 35);
         ctx.restore();
     });
-    
-    // Combo counter
-    drawComboCounter();
-    
-    // Message fin de niveau
-    if (levelComplete) {
+
+    if (player && levelComplete) {
         ctx.save();
         ctx.globalAlpha = 0.9;
         ctx.fillStyle = '#000000';
-        ctx.fillRect(canvas.width/2 - 200, canvas.height/2 - 60, 400, 120);
-        
+        ctx.fillRect(canvas.width / 2 - 200, canvas.height / 2 - 60, 400, 120);
+
         ctx.globalAlpha = 1;
         ctx.font = 'bold 48px Arial';
         ctx.fillStyle = '#00ff00';
@@ -659,40 +665,42 @@ function draw() {
         ctx.shadowColor = '#00ff00';
         ctx.shadowBlur = 15;
         ctx.fillText('NIVEAU TERMINÉ !', canvas.width / 2, canvas.height / 2 - 20);
-        
+
         ctx.font = '24px Arial';
         ctx.fillStyle = '#ffffff';
         ctx.shadowBlur = 5;
         ctx.fillText(`Préparez-vous pour le niveau ${level + 1}`, canvas.width / 2, canvas.height / 2 + 30);
-        
+
         if (levelCompleteTimer < 60) {
-            ctx.fillText(`Début dans ${Math.ceil(levelCompleteTimer/60)}`, canvas.width / 2, canvas.height / 2 + 60);
+            ctx.fillText(`Début dans ${Math.ceil(levelCompleteTimer / 60)}`, canvas.width / 2, canvas.height / 2 + 60);
         }
-        
+
         ctx.shadowBlur = 0;
         ctx.restore();
     }
     
     // Stats en bas
-    ctx.save();
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(10, canvas.height - 90, 250, 80);
-    
-    ctx.font = '14px Arial';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Ennemis tués: ${player.killCount}`, 20, canvas.height - 70);
-    ctx.fillText(`Combo max: ${player.combo}`, 20, canvas.height - 50);
-    ctx.fillText(`Temps: ${Math.floor(gameTime/60)}s`, 20, canvas.height - 30);
-    
-    ctx.fillText(
-    `Vitesse: ${player.movement.baseSpeed.toFixed(1)}`,
-    150,
-    canvas.height - 70
-);
-    ctx.fillText(`Niveau: ${player.level}`, 150, canvas.height - 50);
-    ctx.fillText(`Spécial: ${Math.floor(player.specialCharge)}%`, 150, canvas.height - 30);
-    ctx.restore();
+    if (player) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(10, canvas.height - 90, 250, 80);
+
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.fillText(`Ennemis tués: ${player.rewards.killCount}`, 20, canvas.height - 70);
+        ctx.fillText(`Combo max: ${player.combo}`, 20, canvas.height - 50);
+        ctx.fillText(`Temps: ${Math.floor(gameTime / 60)}s`, 20, canvas.height - 30);
+
+        ctx.fillText(
+            `Vitesse: ${player.movement.baseSpeed.toFixed(1)}`,
+            150,
+            canvas.height - 70
+        );
+        ctx.fillText(`Niveau: ${player.level}`, 150, canvas.height - 50);
+        ctx.fillText(`Spécial: ${Math.floor(player.specialCharge)}%`, 150, canvas.height - 30);
+        ctx.restore();
+    }
 }
 
 function gameLoop() {
@@ -701,19 +709,34 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Contrôles
+// Contrôles clavier
 document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
-    const preventKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 
-                        'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 
-                        'KeyJ', 'KeyK', 'KeyE', 'ShiftLeft', 'KeyL'];
+
+    const preventKeys = [
+        'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+        'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD',
+        'KeyJ', 'KeyK', 'KeyE', 'ShiftLeft', 'KeyL'
+    ];
+
     if (preventKeys.includes(e.code)) {
         e.preventDefault();
     }
 });
+
 document.addEventListener('keyup', (e) => {
     keys[e.code] = false;
 });
+
+// Boutons UI
+startButton.addEventListener('click', startGame);
+restartButton.addEventListener('click', startGame);
+
+document
+    .querySelectorAll('#gameOver button, #win button')
+    .forEach((button) => {
+        button.addEventListener('click', startGame);
+    });
 
 // Contrôles tactiles pour mobile
 let touchStartX = 0;
@@ -721,49 +744,54 @@ let touchStartY = 0;
 
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
+
+    if (!player) return;
+
     const touch = e.touches[0];
     const rect = canvas.getBoundingClientRect();
     touchStartX = touch.clientX - rect.left;
     touchStartY = touch.clientY - rect.top;
-    
-    // Zone gauche = déplacement, droite = attaque
+
     if (touchStartX < canvas.width / 2) {
-        // Déplacement
-        const dir = new Vector(touchStartX - player.pos.x, touchStartY - player.pos.y).normalize();
+        const dir = new Vector(
+            touchStartX - player.pos.x,
+            touchStartY - player.pos.y
+        ).normalize();
+
         keys['ArrowRight'] = dir.x > 0.3;
         keys['ArrowLeft'] = dir.x < -0.3;
         keys['ArrowDown'] = dir.y > 0.3;
         keys['ArrowUp'] = dir.y < -0.3;
     } else {
-        // Attaque ou dash
         if (touchStartY < canvas.height / 2) {
-            keys['Space'] = true; // Attaque
+            keys['Space'] = true;
         } else {
-            keys['ShiftLeft'] = true; // Dash
+            keys['ShiftLeft'] = true;
         }
     }
 });
 
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
-    if (e.touches[0]) {
-        const touch = e.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        const x = touch.clientX - rect.left;
-        const y = touch.clientY - rect.top;
-        
-        // Mettre à jour le déplacement si on touche la zone gauche
-        if (x < canvas.width / 2) {
-            const dir = new Vector(x - player.pos.x, y - player.pos.y).normalize();
-            keys['ArrowRight'] = dir.x > 0.3;
-            keys['ArrowLeft'] = dir.x < -0.3;
-            keys['ArrowDown'] = dir.y > 0.3;
-            keys['ArrowUp'] = dir.y < -0.3;
-        }
+
+    if (!player || !e.touches[0]) return;
+
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    if (x < canvas.width / 2) {
+        const dir = new Vector(x - player.pos.x, y - player.pos.y).normalize();
+
+        keys['ArrowRight'] = dir.x > 0.3;
+        keys['ArrowLeft'] = dir.x < -0.3;
+        keys['ArrowDown'] = dir.y > 0.3;
+        keys['ArrowUp'] = dir.y < -0.3;
     }
 });
 
-canvas.addEventListener('touchend', (e) => {
+canvas.addEventListener('touchend', () => {
     keys['Space'] = false;
     keys['ShiftLeft'] = false;
     keys['ArrowRight'] = false;
@@ -777,18 +805,27 @@ function resetGame() {
     enemies = [];
     particles = [];
     pickups = [];
+    projectiles = [];
     shockwaves = [];
     damageNumbers = [];
     scorePopups = [];
     experiencePopups = [];
     levelUpMessages = [];
+    keys = {};
     score = 0;
     level = 1;
     gameState = 'playing';
+    enemiesToSpawn = 0;
+    spawnTimer = 0;
+    levelComplete = false;
+    levelCompleteTimer = 0;
     gameTime = 0;
-    timeAttackTimer = 0; // Réinitialiser le timer
-    document.getElementById('gameOver').style.display = 'none';
-    document.getElementById('win').style.display = 'none';
+    timeAttackTimer = 0;
+    hitStopFrames = 0;
+
+    gameOverScreen.style.display = 'none';
+    winScreen.style.display = 'none';
+
     initLevel();
     updateUI();
 }
@@ -804,7 +841,7 @@ setTimeout(() => {
         timer: 180,
         color: '#ffffff'
     });
-    
+
     setTimeout(() => {
         experiencePopups.push({
             x: canvas.width / 2,
@@ -813,7 +850,7 @@ setTimeout(() => {
             timer: 180,
             color: '#ffff00'
         });
-        
+
         setTimeout(() => {
             experiencePopups.push({
                 x: canvas.width / 2,
@@ -826,6 +863,5 @@ setTimeout(() => {
     }, 1000);
 }, 500);
 
-// Démarrage
-resetGame();
+gameState = 'menu';
 gameLoop();
