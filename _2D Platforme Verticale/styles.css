@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  background-color: #6B6B6B;
+  color: white;
+  display: flex;
+  justify-content: center;
+}
+
+.game {
+  width: 900px;
+  text-align: center;
+}
+
+.start_btn {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+button.btn_start {
+  padding: 10px 28px;
+  border: 0;
+  color: #fff;
+  background-color: #3C7103;
+  border-radius: 10px 100px / 120px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.2s, transform 0.1s;
+}
+
+button.btn_start:hover {
+  background-color: #55a004;
+  transform: scale(1.04);
+}
+
+.game_infos {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  padding: 0 10px;
+  font-size: 18px;
+}
+
+.player_infos {
+  display: flex;
+  justify-content: space-between;
+  border: 2px solid black;
+  margin-bottom: 15px;
+  padding: 0 10px;
+  font-size: 18px;
+}
+
+.container {
+  height: 500px;
+  width: 800px;
+  border: 2px solid #909;
+  position: relative;
+  margin: 0 auto;
+  background: linear-gradient(to top, #1a0a00, #2d1200, #1e1e2f);
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* ─── MARKET ─── */
+
+.hidden { display: none !important; }
+
+.market {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 6px;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.market h2 {
+  font-size: 30px;
+  margin-bottom: 6px;
+  color: gold;
+  text-shadow: 0 0 12px rgba(255,215,0,0.6);
+}
+
+.market p {
+  margin-bottom: 24px;
+  font-size: 15px;
+  color: #ccc;
+}
+
+.cards { display: flex; gap: 18px; }
+
+.card {
+  width: 150px;
+  height: 90px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  border-radius: 14px;
+  background: #2a5902;
+  border: 2px solid gold;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+  margin-bottom: 0;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+}
+
+.card:hover {
+  transform: scale(1.1) translateY(-4px);
+  background: #3C7103;
+  box-shadow: 0 8px 24px rgba(255,215,0,0.35);
+}
+
+.credit {
+  margin-top: 14px;
+  font-size: 13px;
+  color: #ddd;
+  opacity: 0.7;
+}

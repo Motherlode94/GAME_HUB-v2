@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>My Platformer</title>
+</head>
+<body>
+  <div class="game">
+    <div class="start_btn">
+      <button class="btn_start">Start / Restart</button>
+    </div>
+    <div class="game_infos">
+      <span class="score">Height: 0</span>
+      <span class="time">Time: 00:00</span>
+    </div>
+    <div class="player_infos">
+      <span class="health">Health: 100</span>
+      <span class="coins">Coins: 0</span>
+      <span class="level">Level: 1</span>
+    </div>
+    <div class="container">
+      <canvas id="gameCanvas" width="800" height="500"></canvas>
+      <div class="market hidden">
+        <h2>🛒 Marché</h2>
+        <p>Choisis une carte de pouvoir</p>
+        <div class="cards">
+          <button class="card card1"></button>
+          <button class="card card2"></button>
+          <button class="card card3"></button>
+        </div>
+      </div>
+    </div>
+    <p class="credit">Test Game made by @Hardiebay7</p>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -154,7 +154,7 @@ const TICK_MS  = 1200;
 const SPACING  = 2.3;
 const TSIZE    = 2.05;
 
-const T = { vide:'vide', foret:'foret', ferme:'ferme', maison:'maison', temple:'temple' };
+const T = { empty:'empty', ferme:'ferme', maison:'maison', forest:'forest', temple:'temple', marche:'marche', caserne:'caserne' };
 const O = { ADORER:'adorer', PLUIE:'pluie', FOUDRE:'foudre', COUPER:'couper' };
 
 const TOOLS_DEF = [
@@ -164,14 +164,18 @@ const TOOLS_DEF = [
   { id:O.COUPER,  label:'Récolter bois',    icon:'🪓', cost:'' },
   { id:T.ferme,   label:'Construire ferme', icon:'🌾', cost:'10🪵' },
   { id:T.maison,  label:'Construire maison',icon:'🏠', cost:'15🪵+5✨' },
+  { id:T.forest,   label:'Construire forêt', icon:'🌲', cost:'5🪵' },
+  { id:T.empty,    label:'Terrain vide',     icon:'⬜', cost:'' },
   { id:T.temple,  label:'Construire temple',icon:'⛩️', cost:'20🪵+20✨' },
+  { id:T.marche,  label:'Construire marché',icon:'🏪', cost:'25🪵+10✨' },
+  { id:T.caserne, label:'Construire caserne',icon:'⚔️', cost:'30🪵+15✨' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
 // GAME STATE
 // ═══════════════════════════════════════════════════════════════════
 let monde, bois, nourriture, foi, population, bonheur, jour,
-    outil, message, selTile, finished, victory, tickTimer;
+    outil, message, selTile, finished, victory, tickTimer, particles=[], animQueue=[];
 
 function genMonde() {
   const m = [];
@@ -189,12 +193,13 @@ function genMonde() {
 }
 
 function calcStats(){
-  let nF=0,nFm=0,nM=0,nT=0;
+  let nF=0,nFm=0,nM=0,nT=0,nMar=0,nCas=0;
   monde.flat().forEach(c=>{
     if(c.type===T.foret) nF++; if(c.type===T.ferme) nFm++;
     if(c.type===T.maison)nM++; if(c.type===T.temple)nT++;
+    if(c.type===T.marche)nMar++; if(c.type===T.caserne)nCas++;
   });
-  return {nbForets:nF,nbFermes:nFm,nbMaisons:nM,nbTemples:nT};
+  return {nbForets:nF,nbFermes:nFm,nbMaisons:nM,nbTemples:nT,nbMarches:nMar,nbCasernes:nCas};
 }
 
 function tick(){
@@ -202,23 +207,25 @@ function tick(){
   jour++;
   const s=calcStats();
   const pB=s.nbForets*3, pN=s.nbFermes*4;
-  const gF=s.nbTemples*3+Math.max(0,Math.floor(bonheur/25));
+  const gF=s.nbTemples*3+Math.max(0,Math.floor(bonheur/25))+s.nbMarches*2;
   const cN=Math.max(1,population*2);
-  const pl=s.nbMaisons*4;
+  const pl=s.nbMaisons*4 + s.nbCasernes*2;
   bois+=pB;
   nourriture=Math.max(0,nourriture+pN-cN);
   foi=Math.min(100,foi+gF);
   let nb=bonheur;
-  if(pN<cN)nb-=6; else nb+=1;
+  if(pN<cN)nb-=3; else nb+=1; // Reduced food penalty from -6 to -3
   if(s.nbTemples>0)nb+=1;
-  if(pl<population)nb-=5;
+  if(s.nbMarches>0)nb+=2;
+  if(s.nbCasernes>0)nb+=1; // Barracks provide security bonus
+  if(pl<population)nb-=2; // Reduced housing penalty from -5 to -2
   bonheur=Math.max(0,Math.min(100,nb));
   const peut=(pl>=population)&&(nourriture>population*2)&&(bonheur>55);
   const doit=(nourriture<=0)||(bonheur<15);
   if(doit)population=Math.max(0,population-1);
   else if(peut&&Math.random()>0.55)population++;
   if(population<=0){finished=true;victory=false;showOverlay();}
-  else if(foi>=100&&population>=20&&s.nbTemples>=2){finished=true;victory=true;showOverlay();}
+  else if(foi>=100&&population>=22&&s.nbTemples>=2&&s.nbMarches>=1){finished=true;victory=true;showOverlay();} // Adjusted win condition
   updateUI();
 }
 
@@ -279,11 +286,15 @@ function actCell(x,y){
 function buildCost(t){
   if(t===T.ferme) return{bois:10,foi:0};
   if(t===T.maison)return{bois:15,foi:5};
+  if(t===T.forest) return{bois:5, foi:0};
+  if(t===T.empty)  return{bois:0, foi:0};
   if(t===T.temple)return{bois:20,foi:20};
+  if(t===T.marche)return{bois:25,foi:10};
+  if(t===T.caserne)return{bois:30,foi:15};
   return{bois:0,foi:0};
 }
 function cellName(t){
-  return{vide:'terrain vide',foret:'forêt',ferme:'ferme',maison:'maison',temple:'temple'}[t]||t;
+  return{empty:'terrain vide',forest:'forest',ferme:'ferme',maison:'maison',temple:'temple',marche:'marché',caserne:'caserne'}[t]||t;
 }
 function setMsg(txt){message=txt;}
 
@@ -293,7 +304,7 @@ function setMsg(txt){message=txt;}
 let scene, camera, renderer, raycaster;
 let tileMeshes=[], tileGroups=[];
 const meshToTile=new Map();
-let particles=[], animQueue=[];
+let peopleGroups=[];
 
 // Camera
 const cam={theta:Math.PI*0.18, phi:1.02, radius:20};
@@ -377,9 +388,9 @@ function tilePos(x,z){
 
 // ── Build entire grid ──
 function buildGrid(){
-  tileMeshes=[]; tileGroups=[]; meshToTile.clear();
+  tileMeshes=[]; tileGroups=[]; peopleGroups=[]; meshToTile.clear();
   for(let y=0;y<GRID;y++){
-    tileMeshes.push([]); tileGroups.push([]);
+    tileMeshes.push([]); tileGroups.push([]); peopleGroups.push([]);
     for(let x=0;x<GRID;x++){
       const type=monde[y][x].type;
       const pos=tilePos(x,y);
@@ -394,6 +405,29 @@ function buildGrid(){
       const grp=makeGrp(type);
       if(grp){grp.position.copy(pos);scene.add(grp);}
       tileGroups[y].push(grp||null);
+
+      // Add people near buildings
+      let peopleGrp=null;
+      if([T.maison,T.temple,T.marche,T.caserne].includes(type)){
+        peopleGrp=new THREE.Group();
+        const numPeople=type===T.maison?Math.floor(Math.random()*2)+1:
+                        type===T.temple?Math.floor(Math.random()*3)+2:
+                        type===T.marche?Math.floor(Math.random()*4)+2:
+                        Math.floor(Math.random()*3)+1;
+        for(let p=0;p<numPeople;p++){
+          const person=makePerson();
+          person.position.set(
+            (Math.random()-.5)*1.2,
+            .075,
+            (Math.random()-.5)*1.2
+          );
+          person.rotation.y=Math.random()*Math.PI*2;
+          peopleGrp.add(person);
+        }
+        peopleGrp.position.copy(pos);
+        scene.add(peopleGrp);
+      }
+      peopleGroups[y].push(peopleGrp);
     }
   }
 }
@@ -416,20 +450,50 @@ function refreshTile(x,y,popIn=false){
     scene.add(grp);
   }
   tileGroups[y][x]=grp||null;
+
+  // Update people
+  if(peopleGroups[y][x]){
+    scene.remove(peopleGroups[y][x]);
+    peopleGroups[y][x].traverse(o=>{if(o.isMesh)o.geometry.dispose();});
+  }
+  let peopleGrp=null;
+  if([T.maison,T.temple,T.marche,T.caserne].includes(type)){
+    peopleGrp=new THREE.Group();
+    const numPeople=type===T.maison?Math.floor(Math.random()*2)+1:
+                    type===T.temple?Math.floor(Math.random()*3)+2:
+                    type===T.marche?Math.floor(Math.random()*4)+2:
+                    Math.floor(Math.random()*3)+1;
+    for(let p=0;p<numPeople;p++){
+      const person=makePerson();
+      person.position.set(
+        (Math.random()-.5)*1.2,
+        .075,
+        (Math.random()-.5)*1.2
+      );
+      person.rotation.y=Math.random()*Math.PI*2;
+      peopleGrp.add(person);
+    }
+    peopleGrp.position.copy(pos);
+    scene.add(peopleGrp);
+  }
+  peopleGroups[y][x]=peopleGrp;
 }
 
 function tileCol(type){
-  return{vide:0x2a4a24,foret:0x183516,ferme:0x382510,maison:0x2a2a3a,temple:0x38240a}[type]||0x2a4a24;
+  return{vide:0x2a4a24,foret:0x183516,ferme:0x382510,maison:0x2a2a3a,temple:0x38240a,marche:0x4a3a1a,caserne:0x3a2a2a}[type]||0x2a4a24;
 }
 
 // ══════════════════════════════════════════
 // 3D OBJECT FACTORIES
 // ══════════════════════════════════════════
 function makeGrp(type){
-  if(type===T.foret)  return makeForest();
+  if(type===T.empty)  return makeEmpty();
   if(type===T.ferme)  return makeFarm();
   if(type===T.maison) return makeHouse();
+  if(type===T.forest) return makeForest();
   if(type===T.temple) return makeTemple();
+  if(type===T.marche) return makeMarket();
+  if(type===T.caserne)return makeBarracks();
   return null;
 }
 
@@ -512,6 +576,14 @@ function makeHouse(){
   return g;
 }
 
+function makeForest(){
+  const g=new THREE();
+}
+
+function makeEmpty(){
+  const g=new THREE();
+}
+
 function makeTemple(){
   const g=new THREE.Group();
   const goldM=new THREE.MeshLambertMaterial({color:0xc8951e,emissive:new THREE.Color(.08,.04,0)});
@@ -539,6 +611,99 @@ function makeTemple(){
     const pillar=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.42,6),darkM);
     pillar.position.set(px,.075+.13+.21,pz); g.add(pillar);
   }
+  return g;
+}
+
+function makeMarket(){
+  const g=new THREE.Group();
+  const woodM=new THREE.MeshLambertMaterial({color:0x8b4513});
+  const roofM=new THREE.MeshLambertMaterial({color:0x8b0000});
+  const stallM=new THREE.MeshLambertMaterial({color:0xdeb887});
+
+  // Base platform
+  const base=new THREE.Mesh(new THREE.BoxGeometry(1.2,.1,1.2),woodM);
+  base.position.y=.075+.05; base.castShadow=true; base.receiveShadow=true; g.add(base);
+
+  // Market stalls
+  for(let i=0;i<4;i++){
+    const angle=i*Math.PI/2;
+    const stall=new THREE.Mesh(new THREE.BoxGeometry(.3,.4,.3),stallM);
+    stall.position.set(Math.cos(angle)*.4,.075+.25,Math.sin(angle)*.4);
+    stall.castShadow=true; g.add(stall);
+    // Roof over stall
+    const roof=new THREE.Mesh(new THREE.ConeGeometry(.2,.15,4),roofM);
+    roof.position.set(Math.cos(angle)*.4,.075+.4,Math.sin(angle)*.4);
+    roof.rotation.y=angle; g.add(roof);
+  }
+
+  // Central pillar
+  const pillar=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.5,6),woodM);
+  pillar.position.y=.075+.25; pillar.castShadow=true; g.add(pillar);
+
+  return g;
+}
+
+function makeBarracks(){
+  const g=new THREE.Group();
+  const stoneM=new THREE.MeshLambertMaterial({color:0x696969});
+  const woodM=new THREE.MeshLambertMaterial({color:0x8b4513});
+  const roofM=new THREE.MeshLambertMaterial({color:0x2f4f4f});
+
+  // Base
+  const base=new THREE.Mesh(new THREE.BoxGeometry(1.4,.2,1.4),stoneM);
+  base.position.y=.075+.1; base.castShadow=true; base.receiveShadow=true; g.add(base);
+
+  // Walls
+  const wall1=new THREE.Mesh(new THREE.BoxGeometry(1.4,.6,.1),stoneM);
+  wall1.position.set(0,.075+.4,.7); wall1.castShadow=true; g.add(wall1);
+  const wall2=new THREE.Mesh(new THREE.BoxGeometry(1.4,.6,.1),stoneM);
+  wall2.position.set(0,.075+.4,-.7); wall2.castShadow=true; g.add(wall2);
+  const wall3=new THREE.Mesh(new THREE.BoxGeometry(.1,.6,1.4),stoneM);
+  wall3.position.set(.65,.075+.4,0); wall3.castShadow=true; g.add(wall3);
+  const wall4=new THREE.Mesh(new THREE.BoxGeometry(.1,.6,.8),stoneM);
+  wall4.position.set(-.65,.075+.4,.3); wall4.castShadow=true; g.add(wall4);
+
+  // Roof
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(1,.3,4),roofM);
+  roof.position.y=.075+.7; roof.rotation.y=Math.PI/4; roof.castShadow=true; g.add(roof);
+
+  // Door
+  const door=new THREE.Mesh(new THREE.BoxGeometry(.2,.4,.05),woodM);
+  door.position.set(-.65,.075+.3,-.35); g.add(door);
+
+  return g;
+}
+
+function makePerson(){
+  const g=new THREE.Group();
+  const skinM=new THREE.MeshLambertMaterial({color:0xf5deb3});
+  const clothM=new THREE.MeshLambertMaterial({color:0x8b4513});
+  const hairM=new THREE.MeshLambertMaterial({color:0x654321});
+
+  // Body
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,.2,6),clothM);
+  body.position.y=.15; body.castShadow=true; g.add(body);
+
+  // Head
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.08,6,6),skinM);
+  head.position.y=.3; head.castShadow=true; g.add(head);
+
+  // Hair
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(.09,6,6),hairM);
+  hair.position.y=.32; hair.scale.set(1,0.7,1); g.add(hair);
+
+  // Arms
+  for(const x of [-.08,.08]){
+    const arm=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.15,4),skinM);
+    arm.position.set(x,.2,0); arm.rotation.z=x>0?-.2:.2; arm.castShadow=true; g.add(arm);
+  }
+
+  // Legs
+  for(const x of [-.03,.03]){
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.18,4),clothM);
+    leg.position.set(x,.05,0); leg.castShadow=true; g.add(leg);
+  }
+
   return g;
 }
 
@@ -660,7 +825,8 @@ function updateUI(){
       <div class="bar"><div class="bf" style="width:${bonheur}%"></div></div>
     </div>`+
     sc('🌲','Forêts',s.nbForets)+sc('🌾','Fermes',s.nbFermes)+
-    sc('🏠','Maisons',s.nbMaisons)+sc('⛩️','Temples',s.nbTemples);
+    sc('🏠','Maisons',s.nbMaisons)+sc('⛩️','Temples',s.nbTemples)+
+    sc('🏪','Marchés',s.nbMarches)+sc('⚔️','Casernes',s.nbCasernes);
 
   document.getElementById('tools-list').innerHTML=TOOLS_DEF.map(t=>
     `<button class="tool${outil===t.id?' active':''}" onclick="selectTool('${t.id}')">
@@ -693,7 +859,7 @@ function resetGame(){
   particles.forEach(p=>{scene.remove(p.mesh);p.mesh.geometry.dispose();});
   particles=[]; animQueue=[];
 
-  monde=genMonde(); bois=40; nourriture=30; foi=40;
+  monde=genMonde(); bois=50; nourriture=40; foi=50;
   population=6; bonheur=70; jour=1;
   outil=O.ADORER; message='Bienvenue, divinité. Guide ton peuple.';
   selTile=null; hovTile=null; finished=false; victory=false;
@@ -703,6 +869,9 @@ function resetGame(){
   // Clear existing tile scene objects
   tileMeshes.flat().forEach(m=>{scene.remove(m);m.geometry.dispose();m.material.dispose();});
   tileGroups.flat().forEach(g=>{
+    if(g){scene.remove(g);g.traverse(o=>{if(o.isMesh)o.geometry.dispose();});}
+  });
+  peopleGroups.flat().forEach(g=>{
     if(g){scene.remove(g);g.traverse(o=>{if(o.isMesh)o.geometry.dispose();});}
   });
 
@@ -732,6 +901,18 @@ function animate(){
   }));
 
   // Gentle float for bless particles (already handled in tickParticles)
+
+  // Animate people
+  const time=Date.now()*.001;
+  peopleGroups.forEach(row=>row.forEach(grp=>{
+    if(grp){
+      grp.children.forEach((person,i)=>{
+        person.position.y=.075 + Math.sin(time*2 + i)*.02;
+        person.rotation.y += .005;
+      });
+    }
+  }));
+
   renderer.render(scene,camera);
 }
 
