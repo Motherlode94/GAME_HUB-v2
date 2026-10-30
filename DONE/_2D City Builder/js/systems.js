@@ -92,7 +92,7 @@ const SystemsModule = (() => {
 
     // Municipal safety policy improves crime prevention at a recurring tax cost.
     const policySafetyBonus = typeof cityPolicy !== 'undefined' && cityPolicy === 'safety' ? 12 : 0;
-    state.crime = clamp(Math.round(crimeRaw - crimeControl - techCrimeBonus - policySafetyBonus), 0, 100);
+    state.crime = clamp(Math.round(crimeRaw - crimeControl - techCrimeBonus - policySafetyBonus - (window._cityTroopCrimeReduction || 0)), 0, 100);
 
     // ── Pénalités satisfaction lues par recalcResources() ──
     window._satPenaltyCrime     = state.crime     > 15 ? Math.floor((state.crime     - 15) * 0.3)  : 0;
