@@ -456,5 +456,39 @@ RTS.SquadDefs = {
         attackRange:290, attackDamage:28, attackRate:0.7, combatMode:"rocket",
         aoeDamage:12, aoeRadius:26, projectileSpeed:330, isAir:true,
         color:"#c38d72", cost:{gold:100,fuel:35,ammo:38}, productionTime:9, icon:"UCV"
+    },
+    // Additional combined-arms roster, compatible with the existing combat modes.
+    combat_medic: {
+        label:"Équipe sanitaire",category:"support",defaultCount:2,maxCount:2,
+        memberHp:65,memberSize:12,speed:86,formationSpread:17,formationType:"line",
+        attackRange:0,attackDamage:0,attackRate:0,combatMode:"repair",
+        repairRate:16,repairRange:65,
+        color:"#e8ddd1",cost:{gold:48,fuel:0,ammo:0},productionTime:5,icon:"MED"
+    },
+    heavy_mg: {
+        label:"Équipe mitrailleuse lourde",category:"infantry",defaultCount:3,maxCount:3,
+        memberHp:76,memberSize:13,speed:65,formationSpread:19,formationType:"line",
+        attackRange:285,attackDamage:16,attackRate:2.1,combatMode:"machinegun",
+        projectileSpeed:590,color:"#69918a",cost:{gold:96,fuel:0,ammo:55},productionTime:8,icon:"HMG"
+    },
+    mechanized_scout: {
+        label:"Éclaireur blindé",category:"vehicle",defaultCount:1,maxCount:1,
+        memberHp:145,memberSize:20,speed:135,formationSpread:0,formationType:"solo",
+        attackRange:230,attackDamage:15,attackRate:2.5,combatMode:"machinegun",
+        projectileSpeed:520,color:"#658a6b",cost:{gold:90,fuel:35,ammo:24},productionTime:8,icon:"SCV"
+    },
+    rocket_artillery: {
+        label:"Artillerie légère mobile",category:"vehicle",defaultCount:1,maxCount:1,
+        memberHp:115,memberSize:24,speed:72,formationSpread:0,formationType:"solo",
+        attackRange:570,minRange:155,attackDamage:56,attackRate:0.24,
+        combatMode:"artillery",aoeDamage:40,aoeRadius:65,projectileSpeed:160,arcHeight:90,
+        color:"#b7784f",cost:{gold:145,fuel:50,ammo:75},productionTime:11,icon:"ART"
+    },
+    interceptor_drone: {
+        label:"Drone intercepteur",category:"air",defaultCount:1,maxCount:1,
+        memberHp:78,memberSize:13,speed:205,formationSpread:0,formationType:"solo",
+        attackRange:330,attackDamage:30,attackRate:1.1,combatMode:"rocket",
+        projectileSpeed:370,antiAirOnly:true,isAir:true,
+        color:"#75aabc",cost:{gold:105,fuel:30,ammo:42},productionTime:8,icon:"INT"
     }
 };
