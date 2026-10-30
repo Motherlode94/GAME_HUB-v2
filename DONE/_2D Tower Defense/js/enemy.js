@@ -56,7 +56,11 @@ function spawnEnemy(typeKey, wave) {
     const w = Math.max(0, wave - 1);
     const hpMultiplier = (1 + w * 0.18) * Math.pow(1.035, w);
     const speedMultiplier = Math.min(1.5, 1 + w * 0.012);
-    const hp = Math.round(t.hp * hpMultiplier);
+    // Bosses use a dedicated, predictable curve (wave 10 = 1800 HP).
+    // The generic exponential multiplier made the first boss excessively tanky.
+    const hp = typeKey === 'BOSS'
+        ? Math.round(1800 * (1 + Math.max(0, wave - 10) * 0.055))
+        : Math.round(t.hp * hpMultiplier);
     const start = pathWaypoints[0];
 
     enemies.push({
@@ -91,7 +95,7 @@ function damageEnemy(enemy, amount, tower, pierceArmor = false) {
     enemy.life -= effective;
     enemy.hitFlash = 80;
     if (tower) {
-        tower.damageDealt += Math.min(effective, effective + enemy.life);
+        tower.damageDealt += Math.min(effective, Math.max(0, enemy.life + effective));
         if (enemy.life <= 0) tower.kills += 1;
     }
     return effective;
@@ -243,6 +247,16 @@ function drawEnemies(ctx) {
         }
 
         if (enemy.isBoss) {
+            // Large readable boss health bar with exact remaining HP.
+            const bw = 118, bx = enemy.x - bw / 2, by = enemy.y - size / 2 - 31;
+            const pct = Math.max(0, Math.min(1, enemy.life / enemy.maxLife));
+            ctx.fillStyle = 'rgba(0,0,0,.85)'; ctx.fillRect(bx - 3, by - 5, bw + 6, 22);
+            ctx.fillStyle = '#4e1515'; ctx.fillRect(bx, by, bw, 9);
+            ctx.fillStyle = pct > .35 ? '#ff9f43' : '#ff4444';
+            ctx.fillRect(bx, by, bw * pct, 9);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Arial'; ctx.textAlign = 'center';
+            ctx.fillText(Math.ceil(Math.max(0, enemy.life)) + ' / ' + enemy.maxLife + ' PV', enemy.x, by + 18);
+            ctx.textAlign = 'left';
             ctx.fillStyle = '#ffaa00';
             ctx.font = 'bold 11px Arial';
             ctx.textAlign = 'center';
