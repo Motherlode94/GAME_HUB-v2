@@ -156,8 +156,6 @@ function getFiltered() {
     switch (sortMode) {
         case 'az':     list.sort((a, b) => a.title.localeCompare(b.title)); break;
         case 'za':     list.sort((a, b) => b.title.localeCompare(a.title)); break;
-        case 'rating': list.sort((a, b) => b.rating - a.rating);           break;
-        case 'year':   list.sort((a, b) => b.year - a.year);               break;
     }
     return list;
 }
@@ -183,7 +181,6 @@ function renderGrid() {
             <div class="card-content">
                 <div class="card-header">
                     <span class="card-category">${game.category}</span>
-                    <span class="card-rating">${(game.rating ?? 0).toFixed(1)}</span>
                 </div>
                 <h3>${escapeHtml(game.title)}</h3>
                 <p>${escapeHtml(game.description ?? '')}</p>
@@ -191,7 +188,6 @@ function renderGrid() {
                     ${game.tags.filter(Boolean).map(t => `<span class="card-tag">${escapeHtml(t)}</span>`).join('')}
                 </div>
                 <div class="card-footer">
-                    <span class="card-year">${game.year}</span>
                     ${game.playUrl ? `<button type="button" class="card-launch" data-play-id="${game.id}" aria-label="Jouer à ${escapeAttr(game.title)}">&#9654; Jouer</button>` : `<span class="card-more">Details &rarr;</span>`}
                 </div>
             </div>
@@ -224,8 +220,6 @@ function openModal(id) {
     document.getElementById('modal-title').textContent = game.title;
     document.getElementById('modal-desc').textContent  = game.description ?? '';
     document.getElementById('modal-meta').innerHTML = `
-        <span><span class="star">★</span> ${(game.rating ?? 0).toFixed(1)} / 10</span>
-        <span>📅 ${game.year}</span>
         <span>🎮 ${capitalize(game.category)}</span>
     `;
     document.getElementById('modal-tags').innerHTML =
@@ -242,8 +236,6 @@ function openModal(id) {
 
     switchTab('scores');
     renderLeaderboard(id);
-    renderChangelog(game);
-    renderComments(id);
 
     modalOverlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -273,7 +265,7 @@ function renderLeaderboard(gameId) {
         list.innerHTML = `<p class="lb-empty">Aucun score pour l'instant. Sois le premier !</p>`;
         return;
     }
-    list.innerHTML = scores.map((e, i) => `
+    list.innerHTML = '<p class="lb-empty">Scores enregistrés dans ce navigateur uniquement, non vérifiés en ligne.</p>' + scores.map((e, i) => `
         <div class="lb-row ${i===0?'lb-gold':i===1?'lb-silver':i===2?'lb-bronze':''}">
             <span class="lb-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</span>
             <span class="lb-name">${escapeHtml(e.name)}</span>
@@ -366,7 +358,7 @@ window.addEventListener('message', e => {
     showToast(`✓ Score ${score.toLocaleString()} enregistré — ${game.title}`);
 
     if (postgamePanel?.classList.contains('hidden')) {
-        showReviewPanel(game);
+        clearActiveSession(); syncSessionBanner();
     }
 });
 
@@ -374,6 +366,7 @@ window.addEventListener('message', e => {
 let selectedStars = 0;
 
 function showReviewPanel(game) {
+    return; // Ratings/review prompts disabled until verified user feedback exists.
     if (!postgamePanel) return;
     postgameTitle.textContent = game.title;
     selectedStars = 0;
@@ -446,7 +439,7 @@ function syncSessionBanner() {
     sessionBanner.classList.remove('hidden');
 }
 
-if (sessionFinishBtn) sessionFinishBtn.addEventListener('click', () => { if (lastPlayedGame) showReviewPanel(lastPlayedGame); });
+if (sessionFinishBtn) sessionFinishBtn.addEventListener('click', () => { if (lastPlayedGame) { clearActiveSession(); lastPlayedGame = null; syncSessionBanner(); } });
 if (sessionCancelBtn) sessionCancelBtn.addEventListener('click', () => { clearActiveSession(); lastPlayedGame = null; syncSessionBanner(); });
 
 // ── Events ─────────────────────────────────────────────────────────────────
