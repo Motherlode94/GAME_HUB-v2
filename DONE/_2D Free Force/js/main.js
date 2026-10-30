@@ -817,6 +817,47 @@ class EnemyHeavy {
     }
 }
 
+// New enemy archetypes: a fast recon soldier and a resilient assault soldier.
+class EnemyScout extends EnemyBasic {
+    constructor(x) {
+        super(x);
+        this.type = 'scout';
+        this.hp = this.maxHp = 2;
+        this.vx = -(3.0 + Math.random() * 1.2);
+        this.width = 30;
+        this.y = GROUND_Y - this.height;
+    }
+    draw() {
+        super.draw();
+        ctx.fillStyle = '#60d5b5';
+        ctx.fillRect(this.x + 5, this.y + 6, this.width - 10, 6);
+    }
+    hit(dmg) {
+        this.hp -= dmg || 1;
+        if (this.hp <= 0) return explode(this, 170, '#60d5b5');
+        return false;
+    }
+}
+class EnemyAssault extends EnemyHeavy {
+    constructor(x) {
+        super(x);
+        this.type = 'assault';
+        this.hp = this.maxHp = 5;
+        this.vx = -(1.6 + Math.random() * .5);
+    }
+    draw() {
+        super.draw();
+        ctx.fillStyle = '#ffb15f';
+        ctx.fillRect(this.x + 6, this.y + 8, this.width - 12, 8);
+    }
+    hit(dmg) {
+        this.hp -= dmg || 1;
+        if (this.hp <= 0) return explode(this, 350, '#ffb15f');
+        screenShake(3);
+        return false;
+    }
+}
+
 class EnemyFlying {
     constructor(x) {
         this.x = x; this.y = GROUND_Y - 160 - Math.random() * 100;
@@ -1355,10 +1396,15 @@ function gameLoop() {
             enemySpawnTimer = 0;
             const r = Math.random();
             const spawnX = cameraX + GAME_WIDTH + 80 + Math.random() * 150;
-            if      (r < 0.40) enemies.push(new EnemyBasic(spawnX));
-            else if (r < 0.60) enemies.push(new EnemyHeavy(spawnX));
-            else if (r < 0.80) enemies.push(new EnemyFlying(spawnX));
-            else               enemies.push(new EnemyShooter(spawnX));
+            if (r < 0.22) {
+                // Small infantry fireteam, not one lone soldier per spawn.
+                for (let i = 0; i < 3; i++) enemies.push(new EnemyBasic(spawnX + i * 46));
+            } else if (r < 0.35) {
+                for (let i = 0; i < 2; i++) enemies.push(new EnemyScout(spawnX + i * 42));
+            } else if (r < 0.49) enemies.push(new EnemyAssault(spawnX));
+            else if (r < 0.64) enemies.push(new EnemyHeavy(spawnX));
+            else if (r < 0.82) enemies.push(new EnemyFlying(spawnX));
+            else enemies.push(new EnemyShooter(spawnX));
         }
 
         // Boss spawn
