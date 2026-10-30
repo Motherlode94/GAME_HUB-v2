@@ -36,6 +36,7 @@ RTS.Squad = function(x, y, team, typeName, memberCount) {
     // Vehicle orientation and mobility are tracked per unit, not shared in SquadDefs.
     this.heading  = 0;
     this.engineDamage = 0;
+    this.rotorDamage = 0; // Air units: propulsion degradation separate from land engines.
 
     // Combat
     this.attackRange = def.attackRange;
@@ -123,6 +124,13 @@ RTS.Squad.prototype.takeDamage = function(damage, fromX, fromY, particles) {
         // Repeated penetrating hits can damage the engine, reducing mobility.
         if (damage >= this.def.memberHp * 0.18) {
             this.engineDamage = Math.min(0.65, this.engineDamage + 0.07);
+        }
+    }
+    if (this.def.category === "air") {
+        // Aircraft are not tanks: no directional armour multiplier.
+        // Significant hits may damage the rotor/drive system and restrict flight.
+        if (damage >= this.def.memberHp * 0.12) {
+            this.rotorDamage = Math.min(0.75, (this.rotorDamage || 0) + 0.09);
         }
     }
     best.hp -= damage;
