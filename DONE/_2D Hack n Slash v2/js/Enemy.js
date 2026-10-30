@@ -31,6 +31,7 @@ class Enemy {
         
         this.health = this.maxHealth;
         this.deathTimer = 0;
+        this.hitFlashFrames = 0;
         this.color = this.getColor();
         this.attackCooldown = 0;
         this.projectiles = [];
@@ -57,6 +58,7 @@ class Enemy {
     }
 
     update(player) {
+        if (this.hitFlashFrames > 0) this.hitFlashFrames--;
         if (this.deathTimer > 0) {
             this.deathTimer--;
             this.pos.y += 2; // Tombe lors de la mort
@@ -179,6 +181,7 @@ class Enemy {
 
     takeDamage(amount) {
         this.health -= amount;
+        this.hitFlashFrames = 7;
         
         // Effet visuel de dégâts
         createDamageNumber(this.pos.x, this.pos.y - this.radius - 10, amount, '#ffffff');
@@ -203,6 +206,12 @@ class Enemy {
 draw(ctx) {
     ctx.save();
     ctx.translate(this.pos.x, this.pos.y);
+
+    // Contact shadow: stays beneath the sprite even during damage flashes.
+    ctx.fillStyle = 'rgba(0,0,0,.42)';
+    ctx.beginPath();
+    ctx.ellipse(2, 3, this.radius * 1.06, Math.max(4, this.radius * .28), 0, 0, Math.PI * 2);
+    ctx.fill();
 
     if (this.deathTimer > 0) {
         ctx.globalAlpha = this.deathTimer / 30;
@@ -271,6 +280,20 @@ draw(ctx) {
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fill();
+    }
+
+    // Brief colored contour communicates an actual hit, not an idle pulse.
+    if (this.hitFlashFrames > 0 && this.deathTimer <= 0) {
+        ctx.save();
+        ctx.globalAlpha = this.hitFlashFrames / 7;
+        ctx.strokeStyle = '#fff0bb';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#ffd28c';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(0, -this.radius * .3, this.radius * 1.05, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
     }
 
     if (this.type === 'boss' || (this.type === 'tank' && this.maxHealth > 3)) {
