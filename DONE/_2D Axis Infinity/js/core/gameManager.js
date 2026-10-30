@@ -368,30 +368,28 @@ class GameManager {
             return;
         }
 
-        // IA simple
-        let skill;
-        const ultimateSkills = usableSkills.filter(s => s.isUltimate);
-        
-        if (ultimateSkills.length > 0 && (enemy.currentHP / enemy.maxHP) > 0.5 && Math.random() > 0.3) {
-            skill = ultimateSkills[0];
+        // Tactical AI: healing when critical, finishing weak targets, otherwise efficiency.
+        const allies = this.enemyTeam.filter(c => c.isAlive);
+        const opponents = this.playerTeam.filter(c => c.isAlive);
+        if (!opponents.length) { this._endBattle(true); return; }
+        const healSkills = usableSkills.filter(s => s.heal || s.shield);
+        const attackSkills = usableSkills.filter(s => !s.heal && !s.shield);
+        const criticalAlly = allies.slice().sort((a,b) =>
+            a.currentHP / Math.max(1,a.maxHP) - b.currentHP / Math.max(1,b.maxHP))[0];
+        let skill, target;
+        if (criticalAlly && criticalAlly.currentHP / Math.max(1, criticalAlly.maxHP) < 0.48 && healSkills.length) {
+            skill = healSkills.find(s => s.heal) || healSkills[0];
+            target = criticalAlly;
+        } else if (attackSkills.length) {
+            skill = attackSkills.slice().sort((a,b) =>
+                (b.damage || 0) / Math.max(1,b.cost) - (a.damage || 0) / Math.max(1,a.cost))[0];
+            const ultimate = attackSkills.find(s => s.isUltimate);
+            if (ultimate && opponents.some(t => t.currentHP > (skill.damage || 0))) skill = ultimate;
+            target = opponents.slice().sort((a,b) =>
+                a.currentHP - b.currentHP || a.defense - b.defense)[0];
         } else {
-            skill = usableSkills[Math.floor(Math.random() * usableSkills.length)];
-        }
-
-        // Choisir la cible
-        let target;
-        if (skill.heal || skill.shield) {
-            const allies = this.enemyTeam.filter(c => c.isAlive);
-            target = allies[Math.floor(Math.random() * allies.length)];
-        } else {
-            const playerTargets = this.playerTeam.filter(c => c.isAlive);
-            const lowHPTargets = playerTargets.filter(t => (t.currentHP / t.maxHP) < 0.3);
-            
-            if (lowHPTargets.length > 0 && Math.random() > 0.4) {
-                target = lowHPTargets[Math.floor(Math.random() * lowHPTargets.length)];
-            } else {
-                target = playerTargets[Math.floor(Math.random() * playerTargets.length)];
-            }
+            skill = healSkills[0];
+            target = criticalAlly;
         }
 
         if (!target) {
