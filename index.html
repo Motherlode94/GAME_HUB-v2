@@ -17,7 +17,7 @@
                 <p class="subtitle">Catalogue — <span id="game-count">0</span> jeux</p>
             </div>
             <div class="header-btns">
-                <a href="leaderboard.html" class="header-btn">Leaderboard</a>
+                <a href="leaderboard.html" class="header-btn">Scores locaux</a>
                 <a href="space.html" class="header-btn alt">Espace Joueur</a>
             </div>
         </div>
@@ -35,8 +35,6 @@
                     <option value="default">Tri: Defaut</option>
                     <option value="az">A -&gt; Z</option>
                     <option value="za">Z -&gt; A</option>
-                    <option value="rating">Top notes</option>
-                    <option value="year">Plus recents</option>
                 </select>
             </div>
             <div class="filter-chips" id="filter-chips">
@@ -78,57 +76,16 @@
             <div class="modal-tags" id="modal-tags"></div>
 
             <div class="modal-tabs">
-                <button class="modal-tab active" data-tab="scores" type="button">Scores</button>
-                <button class="modal-tab" data-tab="comments" type="button">Reviews</button>
-                <button class="modal-tab" data-tab="changelog" type="button">Patch Notes</button>
+                <button class="modal-tab active" data-tab="scores" type="button">Scores locaux</button>
             </div>
 
             <div class="modal-tab-content active" id="tab-scores">
                 <div class="leaderboard" id="leaderboard-list"></div>
             </div>
 
-            <div class="modal-tab-content" id="tab-comments">
-                <div class="comments-list" id="comments-list"></div>
-            </div>
-
-            <div class="modal-tab-content" id="tab-changelog">
-                <div class="changelog-list" id="changelog-list"></div>
-            </div>
+</div>
 
             <button class="modal-play-btn hidden" id="modal-play-btn" type="button">Play Now</button>
-        </div>
-    </div>
-
-    <!-- Panel avis post-game (optionnel) -->
-    <div class="postgame-overlay hidden" id="postgame-panel">
-        <div class="postgame-window">
-            <div class="postgame-header">
-                <span class="postgame-icon">&#127918;</span>
-                <div>
-                    <p class="postgame-label">Session terminee</p>
-                    <h3 id="postgame-game-title">Game Title</h3>
-                </div>
-            </div>
-
-            <p class="postgame-subtitle">Laisse ton avis — totalement optionnel.</p>
-
-            <div class="pg-stars-wrap">
-                <span class="pg-stars-label">Ta note :</span>
-                <div class="pg-stars">
-                    <span class="pg-star" data-val="1">&#9733;</span>
-                    <span class="pg-star" data-val="2">&#9733;</span>
-                    <span class="pg-star" data-val="3">&#9733;</span>
-                    <span class="pg-star" data-val="4">&#9733;</span>
-                    <span class="pg-star" data-val="5">&#9733;</span>
-                </div>
-            </div>
-
-            <textarea id="pg-comment-text" placeholder="Ton avis sur le jeu..." rows="3" maxlength="300"></textarea>
-
-            <div class="pg-actions">
-                <button id="pg-skip-btn" class="pg-btn-skip" type="button">Passer</button>
-                <button id="pg-submit-btn" class="pg-btn-submit" type="button">Publier</button>
-            </div>
         </div>
     </div>
 
