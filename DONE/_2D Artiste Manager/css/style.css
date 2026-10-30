@@ -497,3 +497,12 @@ body { background:var(--bg); font-family:'Syne',sans-serif; color:var(--text); h
 
 /* ── CASHFLOW ALERT ── */
 .cashflow-warning { background: rgba(239,68,68,.08); border: 1px solid var(--red); border-radius: 8px; padding: .6rem .9rem; font-size: .78rem; color: var(--red); margin-bottom: .8rem; }
+
+/* Visual polish: stronger navigation and hierarchy */
+.title-card,.dash-card{box-shadow:0 12px 34px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.06);transition:box-shadow .2s ease,transform .2s ease}
+.title-card:hover,.dash-card:hover{box-shadow:0 17px 45px rgba(0,0,0,.32),0 0 0 1px rgba(221,154,255,.22);transform:translateY(-2px)}
+.topbar{box-shadow:0 7px 25px rgba(0,0,0,.24)}
+.btn-cta,.btn-tab,.btn-nextweek{transition:filter .18s ease,transform .18s ease}
+.btn-cta:hover:not(:disabled),.btn-tab:hover:not(:disabled),.btn-nextweek:hover:not(:disabled){filter:brightness(1.14)}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid #f1a9ff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.title-card,.dash-card,.btn-cta,.btn-tab,.btn-nextweek{transition:none!important;transform:none!important}}
