@@ -40,6 +40,22 @@ class TileMap {
                         ctx.lineWidth = 1;
                         ctx.strokeRect(dx + 0.5, dy + 0.5, ts - 1, ts - 1);
                     }
+                    // Tile silhouette and top-edge highlights improve readability over the background.
+                    if (!this.isSolid(col, row - 1)) {
+                        ctx.fillStyle = 'rgba(220,255,198,.22)';
+                        ctx.fillRect(dx + 2, dy + 1, ts - 4, 2);
+                        ctx.fillStyle = 'rgba(18,33,17,.21)';
+                        ctx.fillRect(dx, dy + ts - 5, ts, 5);
+                    }
+                    if (!this.isSolid(col - 1, row)) {
+                        ctx.fillStyle = 'rgba(255,255,255,.075)';
+                        ctx.fillRect(dx, dy + 4, 2, ts - 6);
+                    }
+                    // Deterministic stone texture details; no random flicker.
+                    if (((row * 17 + col * 23) % 7) === 0) {
+                        ctx.fillStyle = 'rgba(25,23,17,.17)';
+                        ctx.fillRect(dx + ts * .38, dy + ts * .52, ts * .22, 2);
+                    }
                 }
             }
         }
