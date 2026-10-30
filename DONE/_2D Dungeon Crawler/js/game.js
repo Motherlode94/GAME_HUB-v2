@@ -373,6 +373,14 @@ function drawEnemy(e) {
   const py = e.y * TS + TS / 2;
   const bob = Math.sin(animTick * 0.06 + e.wobble) * 2;
 
+  // Ground contact: anchors creatures to the same stone floor.
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.34)';
+  ctx.beginPath();
+  ctx.ellipse(px + 1, py + 13, e.isBoss ? 15 : (e.symbol === 'o' ? 12 : 9), 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
   // Boss glow
   if (e.isBoss) {
     let glow = 0.3 + 0.2 * Math.sin(animTick * 0.08);
@@ -441,6 +449,13 @@ function drawOrc(px, py, bob, e) {
 }
 
 function drawSkeleton(px, py, bob, e) {
+  // Rib cage silhouette makes this enemy distinct at small tile sizes.
+  ctx.strokeStyle = 'rgba(205,198,175,.70)';
+  ctx.lineWidth = 1.6;
+  for (let rib = 0; rib < 3; rib++) {
+    const ry = py + bob + rib * 3;
+    ctx.beginPath();ctx.moveTo(px-5,ry);ctx.lineTo(px,ry+2);ctx.lineTo(px+5,ry);ctx.stroke();
+  }
   // Bones body
   ctx.strokeStyle = e.color; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(px, py - 2 + bob); ctx.lineTo(px, py + 8 + bob); ctx.stroke();
@@ -505,6 +520,12 @@ function drawPlayer() {
   const px = player.x * TS + TS / 2;
   const py = player.y * TS + TS / 2;
   const bob = Math.sin(animTick * 0.08) * 1.5;
+
+  // Hero contact shadow, drawn below armor and cloak.
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.36)';
+  ctx.beginPath();ctx.ellipse(px + 1, py + 14, 11, 4, 0, 0, Math.PI*2);ctx.fill();
+  ctx.restore();
 
   // Shield glow if high def
   if (player.def >= 10) {
