@@ -27,6 +27,11 @@ const CHARACTER_PRESETS = [
     { id: 'sniper',   name: 'Astra (Lance)',        color: '#7ab6ff', glowColor: '#2277ff', speed: 5.2, jumpForce: -15.3, attackReach: 82, attackDamage: 11, chargedDamage: 26, dashPower: 17, weaponLength: 48, weapon: 'Lance photonique',      skill: 'Grande portée'              },
     { id: 'pyro',     name: 'Pyra (Fouet feu)',     color: '#ff9a3d', glowColor: '#ff5d1f', speed: 5.5, jumpForce: -15.1, attackReach: 74, attackDamage: 10, chargedDamage: 29, dashPower: 18, weaponLength: 44, weapon: 'Fouet incendiaire',    skill: 'Charge explosive'           },
     { id: 'monk',     name: 'Zenko (Bâton)',        color: '#c98bff', glowColor: '#9d3dff', speed: 5.8, jumpForce: -16.8, attackReach: 60, attackDamage: 11, chargedDamage: 25, dashPower: 19, weaponLength: 38, weapon: 'Bâton mystique',       skill: 'Double saut plus agile'     }
+    { id: 'ronin', name: 'Raiden (Katana)', color:'#83ddff', glowColor:'#3dcaff', speed:6.1, jumpForce:-15.8, attackReach:72, attackDamage:12, chargedDamage:28, dashPower:20, weaponLength:46, weapon:'Katana électrique', skill:'Duelliste rapide' },
+    { id: 'guardian', name:'Aegis (Bouclier)', color:'#f1ca83', glowColor:'#dba846', speed:4.3, jumpForce:-13.8, attackReach:59, attackDamage:13, chargedDamage:31, dashPower:14, weaponLength:35, weapon:'Glaive du rempart', skill:'Combattant résistant' },
+    { id: 'reaper', name:'Noctis (Faux)', color:'#a997e7', glowColor:'#7548cf', speed:5.4, jumpForce:-15.4, attackReach:79, attackDamage:11, chargedDamage:30, dashPower:18, weaponLength:49, weapon:'Faux spectrale', skill:'Portée étendue' },
+    { id: 'brawler', name:'Kora (Gantelets)', color:'#fa8aa7', glowColor:'#ed477b', speed:6.6, jumpForce:-15.7, attackReach:48, attackDamage:10, chargedDamage:25, dashPower:22, weaponLength:25, weapon:'Gantelets à impulsion', skill:'Corps à corps mobile' },
+    { id: 'warden', name:'Boreal (Hallebarde)', color:'#a5d7c1', glowColor:'#5dba96', speed:4.9, jumpForce:-14.7, attackReach:86, attackDamage:12, chargedDamage:29, dashPower:16, weaponLength:52, weapon:'Hallebarde de givre', skill:'Contrôle de distance' }
 ];
 
 function presetById(id) {
@@ -435,6 +440,35 @@ class Player {
             ctx.fillStyle='#d9acff';ctx.fillRect(cx-4,this.y+65,8,6);
         }
         ctx.restore();
+
+        // Distinct silhouettes for the five additional playable fighters.
+        if (['ronin','guardian','reaper','brawler','warden'].includes(archetype)) {
+            ctx.save(); ctx.shadowBlur = 0;
+            if (archetype === 'ronin') {
+                ctx.fillStyle='#263a4c';
+                ctx.beginPath();ctx.moveTo(cx-19,this.y+9);ctx.lineTo(cx,this.y-12);ctx.lineTo(cx+19,this.y+9);ctx.closePath();ctx.fill();
+                ctx.fillStyle='#6acde9';ctx.fillRect(cx-2,this.y+30,4,32);
+            } else if (archetype === 'guardian') {
+                ctx.fillStyle='#68583a';
+                ctx.fillRect(this.x-2,this.y+31,15,23);ctx.fillRect(this.x+this.width-13,this.y+31,15,23);
+                ctx.strokeStyle='#edce8d';ctx.lineWidth=3;ctx.strokeRect(cx-12,this.y+34,24,27);
+            } else if (archetype === 'reaper') {
+                ctx.fillStyle='#24182f';
+                ctx.beginPath();ctx.moveTo(cx-18,this.y+13);ctx.lineTo(cx,this.y-16);ctx.lineTo(cx+18,this.y+13);ctx.fill();
+                ctx.beginPath();ctx.moveTo(cx-13,this.y+46);ctx.lineTo(cx-22,this.y+79);ctx.lineTo(cx+22,this.y+79);ctx.lineTo(cx+13,this.y+46);ctx.fill();
+            } else if (archetype === 'brawler') {
+                ctx.fillStyle='#673248';
+                ctx.fillRect(this.x-6,this.y+47,17,16);ctx.fillRect(this.x+this.width-11,this.y+47,17,16);
+                ctx.strokeStyle='#ffbfd1';ctx.lineWidth=2;
+                ctx.strokeRect(this.x-6,this.y+47,17,16);ctx.strokeRect(this.x+this.width-11,this.y+47,17,16);
+            } else if (archetype === 'warden') {
+                ctx.fillStyle='#31574d';
+                ctx.beginPath();ctx.moveTo(cx-17,this.y+5);ctx.lineTo(cx-11,this.y-10);ctx.lineTo(cx,this.y-17);ctx.lineTo(cx+11,this.y-10);ctx.lineTo(cx+17,this.y+5);ctx.fill();
+                ctx.strokeStyle='#a5d7c1';ctx.lineWidth=3;
+                ctx.beginPath();ctx.moveTo(cx-12,this.y+36);ctx.lineTo(cx,this.y+52);ctx.lineTo(cx+12,this.y+36);ctx.stroke();
+            }
+            ctx.restore();
+        }
 
         // Yeux
         ctx.fillStyle  = 'white';
