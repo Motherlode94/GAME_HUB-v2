@@ -368,3 +368,15 @@ body {
 .defense-hand { background:#26364d; border:2px solid #61738c; color:#fff; padding:12px 18px; border-radius:8px; min-height:48px; font-weight:700; cursor:pointer; }
 .defense-hand.active { background:#376aa0; border-color:#75c7ff; box-shadow:0 0 0 2px rgba(117,199,255,.22); }
 @media(max-width:600px) { #defenseControls { width:95%; } .defense-hand { flex:1; padding:12px 8px; } #defenseControls strong { width:100%; text-align:center; } }
+
+/* Five game modes must stay visible without clipping. */
+.mode-select { width: min(780px, 96vw); }
+.mode-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.mode-card { min-width:0; }
+@media(max-width:650px) {
+  .mode-select { width:95vw; }
+  .mode-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:360px) {
+  .mode-cards { grid-template-columns:1fr; }
+}
