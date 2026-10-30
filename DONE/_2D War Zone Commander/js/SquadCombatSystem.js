@@ -52,7 +52,19 @@ RTS.SquadCombatSystem = {
                 var dx = other.x - squad.x;
                 var dy = other.y - squad.y;
                 var d  = Math.sqrt(dx * dx + dy * dy);
-                if (d < targetD) { targetD = d; target = other; }
+                // Tactical order T: prioritize armored targets already in weapon range.
+                // If no armor is in range, keep normal nearest-enemy behavior.
+                var inRange = d <= squad.def.attackRange &&
+                    !(mode === "artillery" && d < (squad.def.minRange || 0));
+                var armored = other.def && (other.def.category === "vehicle" || other.def.category === "air");
+                var priority = squad.targetPriority === "armor" && inRange && armored;
+                var currentArmored = target && target.def &&
+                    (target.def.category === "vehicle" || target.def.category === "air") &&
+                    targetD <= squad.def.attackRange;
+                if (!target || (priority && !currentArmored) ||
+                    (priority === !!currentArmored && d < targetD)) {
+                    targetD = d; target = other;
+                }
             });
 
             if (!target) return;
