@@ -856,3 +856,6 @@ button:focus-visible{outline:2px solid #9be8ff;outline-offset:3px}
 /* Districts disconnected from the largest road network. */
 .tile.disconnected-road { outline: 2px dashed #f59e0b; outline-offset: -3px; }
 .tile.disconnected-road::after { content: '⚠'; position: absolute; right: 0; top: 0; font-size: 11px; line-height: 1; pointer-events: none; }
+
+/* Public transit coverage: subtly indicate served blocks. */
+.tile.transit-served:not(.disconnected-road) { box-shadow: inset 0 0 0 2px rgba(35, 195, 143, .5); }
