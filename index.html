@@ -27,7 +27,7 @@
         <div class="container controls-grid">
             <div class="search-wrap">
                 <span class="search-icon">&#128269;</span>
-                <input type="text" id="search-input" placeholder="Rechercher un jeu" autocomplete="off">
+                <input type="text" id="search-input" placeholder="Rechercher un jeu, genre ou mot-clé…  (/)" aria-label="Rechercher un jeu" autocomplete="off">
                 <button class="clear-btn" id="clear-search" title="Effacer" type="button">&#10005;</button>
             </div>
             <div class="select-wrap">
@@ -40,20 +40,25 @@
                 </select>
             </div>
             <div class="filter-chips" id="filter-chips">
-                <button class="chip active" data-cat="all" type="button">All</button>
+                <button class="chip active" data-cat="all" type="button">Tous</button>
                 <button class="chip" data-cat="action" type="button">Action</button>
-                <button class="chip" data-cat="strategy" type="button">Strategy</button>
-                <button class="chip" data-cat="sports" type="button">Sports</button>
+                <button class="chip" data-cat="strategy" type="button">Stratégie</button>
+                <button class="chip" data-cat="sports" type="button">Sport</button>
                 <button class="chip" data-cat="rpg" type="button">RPG</button>
                 <button class="chip" data-cat="simulation" type="button">Simulation</button>
-                <button class="chip" data-cat="adventure" type="button">Adventure</button>
+                <button class="chip" data-cat="adventure" type="button">Aventure</button>
                 <button class="chip" data-cat="favorites" type="button">&#10084; Favoris</button>
             </div>
         </div>
     </section>
 
     <main class="container">
-        <div class="results-info" id="results-info"></div>
+        <section class="hub-discover" aria-label="Découvrir les jeux">
+            <div><p class="eyebrow">Bibliothèque WarLike</p><h2>Choisis ta prochaine partie</h2><p>Retrouve rapidement tes jeux favoris et tes dernières sessions.</p></div>
+            <div class="hub-discover-actions"><button id="hub-continue" type="button" hidden>▶ Reprendre mon dernier jeu</button><button id="hub-random" type="button">🎲 Découverte aléatoire</button></div>
+        </section>
+        <div class="hub-recent" id="hub-recent" hidden></div>
+        <div class="results-info" id="results-info" aria-live="polite"></div>
         <div class="games-grid" id="games-grid"></div>
         <div class="no-results hidden" id="no-results">
             <span>&#127918;</span>
