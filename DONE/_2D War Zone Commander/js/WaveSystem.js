@@ -56,7 +56,18 @@ RTS.WaveSystem = {
         { type: "heavy_aa", cost: 4, minWave: 6 },
         { type: "ew_drone", cost: 2, minWave: 5 },
         { type: "light_attack_heli", cost: 3, minWave: 5 },
-        { type: "gunship", cost: 5, minWave: 7 }
+        { type: "gunship", cost: 5, minWave: 7 },
+        { type: "special_forces", cost: 3, minWave: 4 },
+        { type: "paratroopers", cost: 2, minWave: 3 },
+        { type: "mortar_team", cost: 3, minWave: 4 },
+        { type: "apc", cost: 3, minWave: 4 },
+        { type: "armored_engineer", cost: 3, minWave: 5 },
+        { type: "selfpropelled_mortar", cost: 4, minWave: 5 },
+        { type: "long_range_aa", cost: 5, minWave: 7 },
+        { type: "heavy_transport_heli", cost: 4, minWave: 6 },
+        { type: "fighter_aircraft", cost: 5, minWave: 7 },
+        { type: "strike_aircraft", cost: 5, minWave: 7 },
+        { type: "loitering_drone", cost: 3, minWave: 5 }
     ],
 
     reset: function() {
@@ -162,10 +173,10 @@ RTS.WaveSystem = {
         // Support medics participate only when damage dealers are already present.
         var doctrine = ["infantry", "mechanized", "air", "artillery"][(this._waveInLevel - 1) % 4];
         var doctrineTypes = {
-            infantry: ["riflemen","assault_team","recon_team","heavy_mg","grenadier_team","combat_engineers","at_team","sniper_team"],
-            mechanized: ["matv","mechanized_scout","bradley","wheeled_ifv","armored_car","tank_destroyer","m1a2","riflemen"],
-            air: ["apache","blackhawk","attack_drone","interceptor_drone","light_attack_heli","gunship","manpads","mobile_aa","riflemen"],
-            artillery: ["paladin","rocket_artillery","tank_destroyer","mlrs","at_team","heavy_mg","riflemen"]
+            infantry: ["riflemen","assault_team","recon_team","heavy_mg","grenadier_team","combat_engineers","special_forces","paratroopers","mortar_team","at_team","sniper_team"],
+            mechanized: ["matv","mechanized_scout","bradley","wheeled_ifv","armored_car","tank_destroyer","apc","armored_engineer","m1a2","riflemen"],
+            air: ["apache","blackhawk","attack_drone","interceptor_drone","light_attack_heli","gunship","fighter_aircraft","strike_aircraft","loitering_drone","manpads","mobile_aa","riflemen"],
+            artillery: ["paladin","rocket_artillery","tank_destroyer","selfpropelled_mortar","mlrs","at_team","heavy_mg","riflemen"]
         };
         var avail = this.CATALOG.filter(function(e) {
             return e.minWave <= w && e.type !== "combat_medic";
