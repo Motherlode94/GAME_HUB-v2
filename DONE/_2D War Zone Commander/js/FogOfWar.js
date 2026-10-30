@@ -13,7 +13,7 @@ RTS.FogOfWar = {
         fog.visible.fill(0);
         game.squads.forEach(function(s) {
             if ((s.team !== "blue" && s.team !== "ally") || s.isDead()) return;
-            var radius = s.def && s.def.category === "air" ? 400 : 250;
+            var radius = s.typeName === "recon_drone" ? 650 : s.typeName === "recon_team" ? 360 : s.def && s.def.category === "air" ? 400 : 250;
             reveal(s.x, s.y, radius);
         });
         game.buildings.forEach(function(b) {
