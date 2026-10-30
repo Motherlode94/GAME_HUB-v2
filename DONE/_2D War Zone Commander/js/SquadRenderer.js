@@ -68,17 +68,23 @@ RTS.SquadRenderer = {
         switch (type) {
             // ── Infanterie ──────────────────────────────────────────────────
             case "riflemen":    RTS.SquadRenderer._drawRiflemen(ctx, m, s, isBlue);   break;
+            case "assault_team": RTS.SquadRenderer._drawRiflemen(ctx, m, s, isBlue); break;
+            case "recon_team": RTS.SquadRenderer._drawSniperTeam(ctx, m, s, isBlue); break;
             case "at_team":     RTS.SquadRenderer._drawAtTeam(ctx, m, s, isBlue);     break;
             case "sniper_team": RTS.SquadRenderer._drawSniperTeam(ctx, m, s, isBlue); break;
             case "manpads":     RTS.SquadRenderer._drawManpads(ctx, m, s, isBlue);    break;
             // ── Véhicules ──────────────────────────────────────────────────
             case "matv":        RTS.SquadRenderer._drawMatv(ctx, m, s, isBlue);       break;
             case "bradley":     RTS.SquadRenderer._drawBradley(ctx, m, s, isBlue);    break;
+            case "wheeled_ifv": RTS.SquadRenderer._drawBradley(ctx, m, s, isBlue); break;
+            case "mobile_aa": RTS.SquadRenderer._drawMlrs(ctx, m, s, isBlue); break;
             case "m1a2":        RTS.SquadRenderer._drawM1a2(ctx, m, s, isBlue);       break;
             case "paladin":     RTS.SquadRenderer._drawPaladin(ctx, m, s, isBlue);    break;
             case "mlrs":        RTS.SquadRenderer._drawMlrs(ctx, m, s, isBlue);       break;
             // ── Aviation ───────────────────────────────────────────────────
             case "apache":      RTS.SquadRenderer._drawApache(ctx, m, s, isBlue);     break;
+            case "attack_drone": RTS.SquadRenderer._drawApache(ctx, m, s, isBlue); break;
+            case "recon_drone": RTS.SquadRenderer._drawBlackhawk(ctx, m, s, isBlue); break;
             case "blackhawk":   RTS.SquadRenderer._drawBlackhawk(ctx, m, s, isBlue);  break;
             // ── Support ────────────────────────────────────────────────────
             case "engineer":    RTS.SquadRenderer._drawEngineer(ctx, m, s, isBlue);   break;
