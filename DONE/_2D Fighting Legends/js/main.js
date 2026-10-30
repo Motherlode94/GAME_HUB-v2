@@ -120,6 +120,10 @@ class Player {
         this.guarding = false;
         this.guardMeter = 100;
         this.guardBroken = 0;
+        this.guardWindow = 0;
+        this.parryFlash = 0;
+        this.comboHits = 0;
+        this.comboWindow = 0;
 
         this.health    = 100;
         this.hurtFlash = 0;
@@ -201,6 +205,14 @@ class Player {
     // Recevoir un coup
     takeDamage(dmg, attacker = null) {
         const incomingFromFront = attacker && (attacker.x - this.x) * this.facing >= -15;
+        if (this.guarding && this.guardBroken <= 0 && incomingFromFront && this.guardWindow > 0) {
+            this.guardWindow = 0;
+            this.guardMeter = Math.min(100, this.guardMeter + 14);
+            this.parryFlash = 24;
+            if (attacker) { attacker.attackCooldown = Math.max(attacker.attackCooldown, 38); attacker.knockX = -this.facing * 6; }
+            spawnParticles(this.x + this.width/2 + this.facing*22, this.y+30, '#e5faff', 26);
+            return {parried:true, damage:0};
+        }
         if (this.guarding && this.guardBroken <= 0 && incomingFromFront) {
             const cost = Math.ceil(dmg * 2.1);
             const prevented = this.guardMeter >= cost ? .80 : .35;
@@ -214,10 +226,12 @@ class Player {
             }
         }
         this.health    = Math.max(0, this.health - dmg);
+        if (dmg > 0) { this.comboHits = 0; this.comboWindow = 0; }
         this.hurtFlash = 12;
         this.knockX    = -this.facing * 9;
         triggerHitFlash();
         triggerScreenShake(dmg >= 20 ? 8 : 4);
+        return {parried:false, damage:dmg};
     }
 
     applyBurn(durationFrames) {
@@ -227,6 +241,9 @@ class Player {
 
     // Mise à jour
     update() {
+        if (this.guardWindow > 0) this.guardWindow--;
+        if (this.parryFlash > 0) this.parryFlash--;
+        if (this.comboWindow > 0) this.comboWindow--; else this.comboHits = 0;
         if (this.guardBroken > 0) this.guardBroken--;
         if (!this.guarding && this.guardBroken === 0) this.guardMeter = Math.min(100, this.guardMeter + 0.32);
         if (this.guarding) this.velocityX *= .45;
@@ -528,6 +545,10 @@ class Player {
         this.guarding = false;
         this.guardMeter = 100;
         this.guardBroken = 0;
+        this.guardWindow = 0;
+        this.parryFlash = 0;
+        this.comboHits = 0;
+        this.comboWindow = 0;
         this.hurtFlash      = 0;
         this.knockX         = 0;
         this.walkCycle      = 0;
@@ -672,6 +693,8 @@ function drawBackground() {
 
 // TRAITEMENT INPUTS
 function handleInputs(p) {
+    if (keysDown[p.keys.guard] && p.guardBroken === 0) p.guardWindow = 9;
+    keysDown[p.keys.guard] = false;
     p.guarding = !!keys[p.keys.guard] && p.guardBroken === 0 && p.guardMeter > 0 && !p.isAttacking;
     if (keys[p.keys.left])  { p.velocityX = -p.speed; p.facing = -1; }
     if (keys[p.keys.right]) { p.velocityX =  p.speed; p.facing =  1; }
@@ -769,8 +792,11 @@ function gameLoop() {
             if (boxOverlap(ab, { x: player2.x, y: player2.y, w: player2.width, h: player2.height })) {
                 let dmg = player1.isCharging ? player1.chargedDamage : player1.attackDamage;
                 if (player1.character?.id === 'assassin' && player1.isDashing) dmg += 6;
-                player2.takeDamage(dmg, player1);
-                if (player1.character?.id === 'pyro') player2.applyBurn(player1.isCharging ? 220 : 140);
+                const comboBonus = player1.comboWindow > 0 ? Math.min(5, player1.comboHits * 2) : 0;
+                const outcome = player2.takeDamage(dmg + comboBonus, player1);
+                if (!outcome.parried) { player1.comboHits = Math.min(9, player1.comboHits + 1); player1.comboWindow = 125; }
+                else { player1.comboHits = 0; player1.comboWindow = 0; }
+                if (!outcome.parried && player1.character?.id === 'pyro') player2.applyBurn(player1.isCharging ? 220 : 140);
                 player1.hitThisSwing = true;
                 if (player1.isCharging) safeSoundHitCharged(); else safeSoundHit();
                 spawnParticles(player2.x + player2.width / 2, player2.y + 30, '#FFD700', player1.isCharging ? 20 : 12);
@@ -781,8 +807,11 @@ function gameLoop() {
             if (boxOverlap(ab, { x: player1.x, y: player1.y, w: player1.width, h: player1.height })) {
                 let dmg = player2.isCharging ? player2.chargedDamage : player2.attackDamage;
                 if (player2.character?.id === 'assassin' && player2.isDashing) dmg += 6;
-                player1.takeDamage(dmg, player2);
-                if (player2.character?.id === 'pyro') player1.applyBurn(player2.isCharging ? 220 : 140);
+                const comboBonus = player2.comboWindow > 0 ? Math.min(5, player2.comboHits * 2) : 0;
+                const outcome = player1.takeDamage(dmg + comboBonus, player2);
+                if (!outcome.parried) { player2.comboHits = Math.min(9, player2.comboHits + 1); player2.comboWindow = 125; }
+                else { player2.comboHits = 0; player2.comboWindow = 0; }
+                if (!outcome.parried && player2.character?.id === 'pyro') player1.applyBurn(player2.isCharging ? 220 : 140);
                 player2.hitThisSwing = true;
                 if (player2.isCharging) safeSoundHitCharged(); else safeSoundHit();
                 spawnParticles(player1.x + player1.width / 2, player1.y + 30, '#FFD700', player2.isCharging ? 20 : 12);
@@ -800,6 +829,14 @@ function gameLoop() {
             ctx.fillStyle = '#10202c'; ctx.fillRect(barX, barY, p.width + 4, 5);
             ctx.fillStyle = p.guardBroken > 0 ? '#ff6040' : '#5bd8ff';
             ctx.fillRect(barX, barY, (p.width + 4) * p.guardMeter / 100, 5);
+            if (p.comboHits >= 2 && p.comboWindow > 0) {
+                ctx.fillStyle = '#ffde77';ctx.textAlign='center';ctx.font='bold 14px sans-serif';
+                ctx.fillText(p.comboHits + ' COMBO',p.x+p.width/2,p.y-23);
+            }
+            if (p.parryFlash > 0) {
+                ctx.fillStyle='#c6f7ff';ctx.textAlign='center';ctx.font='bold 15px sans-serif';
+                ctx.fillText('PARRY !',p.x+p.width/2,p.y-40);
+            }
             if (p.guarding) {
                 ctx.save();
                 ctx.strokeStyle = '#8ae9ff'; ctx.lineWidth = 4; ctx.shadowColor = '#37d6ff'; ctx.shadowBlur = 16;
