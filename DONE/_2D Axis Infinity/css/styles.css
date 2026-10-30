@@ -1486,3 +1486,18 @@ body {
     color: var(--accent-gold);
     font-weight: 600;
 }
+/* Species-specific illustrated emblem: distinct even when emoji symbols repeat */
+.axis-portrait {
+  position:relative; display:inline-flex; align-items:center; justify-content:center;
+  overflow:hidden; isolation:isolate; border-radius:16px;
+  min-width:64px; min-height:64px;
+  border:2px solid hsl(var(--axis-hue),75%,65%);
+  background:radial-gradient(circle at 30% 24%,hsl(var(--axis-hue),80%,43%),transparent 57%),
+    linear-gradient(145deg,hsl(var(--axis-hue),53%,24%),#101827 75%);
+  box-shadow:inset 0 0 18px #0007,0 3px 12px #0005;
+}
+.axis-portrait::before {content:"";position:absolute;width:72%;height:72%;transform:rotate(45deg);border:1px solid #ffffff45;border-radius:12px;}
+.axis-emblem {font-size:1.45em;filter:drop-shadow(0 2px 3px #000a);z-index:1;}
+.axis-signature {position:absolute;right:2px;bottom:2px;padding:1px 4px;border-radius:5px;background:#0b1423e8;color:#fff;font:bold 9px Arial,sans-serif;letter-spacing:.05em;z-index:2;}
+.team-slot .axis-portrait {min-width:40px;min-height:40px;width:100%;height:100%;border-radius:10px;}
+.battle-creature-icon.axis-portrait {min-width:72px;min-height:72px;}
