@@ -431,6 +431,42 @@ function drawBackground() {
     ctx.fillStyle = gradient1;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
+    // Ancient arena floor beneath the combatants: stable hexagonal stone seams.
+    // Drawn in screen space so the gameplay collision system is untouched.
+    ctx.save();
+    const cell = 96, rowHeight = 72;
+    ctx.strokeStyle = 'rgba(112,102,157,.16)';
+    ctx.lineWidth = 1;
+    for (let row = -1; row <= Math.ceil(canvas.height / rowHeight); row++) {
+        const cy = row * rowHeight + 18;
+        const offset = (row & 1) * (cell / 2);
+        for (let col = -1; col <= Math.ceil(canvas.width / cell); col++) {
+            const cx = col * cell + offset;
+            ctx.beginPath();
+            for (let side = 0; side <= 6; side++) {
+                const angle = side * Math.PI / 3;
+                const x = cx + Math.cos(angle) * 48;
+                const y = cy + Math.sin(angle) * 42;
+                if (side === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            }
+            ctx.stroke();
+            if (((col * 13 + row * 7) & 7) === 0) {
+                ctx.fillStyle='rgba(101,89,137,.10)';
+                ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);ctx.fill();
+            }
+        }
+    }
+    // Edge vignette gives the playable arena a focal point.
+    const vignette = ctx.createRadialGradient(canvas.width*.5, canvas.height*.48,
+        Math.min(canvas.width,canvas.height)*.15,
+        canvas.width*.5,canvas.height*.48,
+        Math.max(canvas.width,canvas.height)*.73);
+    vignette.addColorStop(0,'rgba(0,0,0,0)');
+    vignette.addColorStop(1,'rgba(0,0,0,.34)');
+    ctx.fillStyle=vignette;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.restore();
+
     // Étoiles lointaines
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     for (let i = 0; i < 100; i++) {
