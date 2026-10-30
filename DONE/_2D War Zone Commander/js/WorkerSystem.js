@@ -5,7 +5,7 @@ RTS.WorkerSystem = {
         game.squads.forEach(function(squad) {
             if (squad.team !== "blue") return;
             var mode = squad.def && squad.def.combatMode;
-            if (squad.typeName === "supply_truck") RTS.WorkerSystem._tickSupply(game, squad, delta);
+            if (squad.typeName === "supply_truck" || squad.typeName === "ammo_carrier") RTS.WorkerSystem._tickSupply(game, squad, delta);
             if (mode === "harvest")  RTS.WorkerSystem._tickHarvest(game, squad, delta);
             if (mode === "repair") {
                 if (squad.typeName === "combat_medic") RTS.WorkerSystem._tickMedic(game, squad, delta);
