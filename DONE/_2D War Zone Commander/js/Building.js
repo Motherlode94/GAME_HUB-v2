@@ -54,9 +54,9 @@ RTS.Building.COSTS = {
 // et médicaux (hospital) NE produisent PAS d'unités — leur rôle est passif/actif.
 RTS.Building.ALLOWED = {
     hq:       ["worker", "engineer"],
-    barracks: ["riflemen", "at_team", "sniper_team", "manpads"],
-    workshop: ["matv", "bradley", "m1a2", "paladin", "mlrs"],
-    hangar:   ["apache", "blackhawk"]
+    barracks: ["riflemen", "at_team", "sniper_team", "manpads", "assault_team", "recon_team"],
+    workshop: ["matv", "bradley", "m1a2", "paladin", "mlrs", "wheeled_ifv", "mobile_aa"],
+    hangar:   ["apache", "blackhawk", "recon_drone", "attack_drone"]
     // mine, refinery, arsenal, tower, hospital, wall : pas de production d'unités
 };
 
