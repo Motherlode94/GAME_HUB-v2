@@ -762,10 +762,11 @@ function showDeathScreen() {
 
 // ==================== COMBAT ====================
 function startCombat(enemy) {
-  combat = {enemy, log: [], turn: 'player'};
+  combat = {enemy, log: [], turn: 'player', guarding: false};
   addLog(`⚔️ ${enemy.isBoss ? '💀 BOSS ! ' : ''}Combat ! À toi d'attaquer.`);
   document.getElementById('combat-overlay').classList.add('active');
   document.getElementById('btn-attack').disabled = false;
+  document.getElementById('btn-guard').disabled = false;
   document.getElementById('btn-flee').disabled = false;
   updateCombatUI();
 }
@@ -801,6 +802,17 @@ function updateCombatUI() {
   document.getElementById('c-ebar').style.width   = Math.max(0, e.hp / e.maxhp * 100) + '%';
 }
 
+function guardHandler() {
+  if (!combat || combat.turn !== 'player') return;
+  combat.turn = 'resolving';
+  combat.guarding = true;
+  addLog('🛡 Tu prends une posture défensive : prochains dégâts réduits de 60 %.');
+  document.getElementById('btn-attack').disabled = true;
+  document.getElementById('btn-guard').disabled = true;
+  document.getElementById('btn-flee').disabled = true;
+  setTimeout(enemyAttack, 650);
+}
+
 function attackHandler() {
   if (!combat || combat.turn !== 'player') return;
   combat.turn = 'resolving';
@@ -831,6 +843,7 @@ function attackHandler() {
   }
 
   document.getElementById('btn-attack').disabled = true;
+  document.getElementById('btn-guard').disabled = true;
   document.getElementById('btn-flee').disabled   = true;
   setTimeout(enemyAttack, 1000);
 }
@@ -864,6 +877,14 @@ function enemyAttack() {
     addLog(`🔴 ${e.name} t'inflige ${dmg} dégâts !`);
   }
 
+  if (combat.guarding) {
+    const blocked = Math.max(0, dmg - Math.max(1, Math.ceil(dmg * 0.4)));
+    dmg -= blocked;
+    combat.guarding = false;
+    addLog('🛡 Parade : ' + blocked + ' dégâts absorbés !');
+    spawnFloatingText(player.x, player.y, '🛡 -' + blocked, '#68cfff');
+  }
+
   // Goblin poison
   if (e.skills.includes('poison') && Math.random() < 0.2) {
     player.poisonTurns += 3;
@@ -877,6 +898,7 @@ function enemyAttack() {
   updateCombatUI();
 
   document.getElementById('btn-attack').disabled = false;
+  document.getElementById('btn-guard').disabled = false;
   document.getElementById('btn-flee').disabled   = false;
   combat.turn = 'player';
 
@@ -884,6 +906,7 @@ function enemyAttack() {
     player.hp = 0;
     addLog("💀 Tu es mort...");
     document.getElementById('btn-attack').disabled = true;
+    document.getElementById('btn-guard').disabled = true;
     document.getElementById('btn-flee').disabled   = true;
     setTimeout(() => { endCombat(); showDeathScreen(); }, 2000);
   }
@@ -930,6 +953,7 @@ function initGame() {
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-attack').addEventListener('click', attackHandler);
+  document.getElementById('btn-guard').addEventListener('click', guardHandler);
   document.getElementById('btn-flee').addEventListener('click', fleeHandler);
   document.getElementById('btn-new-dungeon').addEventListener('click', () => {
     generateDungeon();
