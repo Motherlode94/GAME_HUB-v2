@@ -317,3 +317,14 @@ kbd {
         }
 
 
+
+
+/* Neon arena menu visual polish */
+.menu-panel{box-shadow:0 28px 75px rgba(0,0,0,.63),0 0 0 1px rgba(101,185,255,.2)}
+.menu-logo{text-shadow:0 0 22px rgba(86,206,255,.3)}
+.menu-btn{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.menu-btn:hover:not(:disabled){transform:translateX(3px);filter:brightness(1.15);box-shadow:0 6px 20px rgba(0,0,0,.26)}
+.score-row{box-shadow:inset 0 1px rgba(255,255,255,.06)}
+#gameCanvas{filter:saturate(1.08) contrast(1.025)}
+button:focus-visible{outline:2px solid #a3e9ff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.menu-btn{transition:none!important}.menu-btn:hover{transform:none!important}}
