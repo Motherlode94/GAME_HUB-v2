@@ -472,3 +472,18 @@ button:focus-visible {outline:2px solid #f9d78e;outline-offset:3px}
 @media(max-width:960px){#game-wrapper{flex-direction:column;align-items:center;width:100%}#canvas-container{max-width:100%}#side-panel{width:min(900px,100%);display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}}
 @media(max-width:520px){body{padding:10px 6px}#combat-window{padding:17px 13px}.fighters{gap:5px}.fighter-card{padding:10px 8px}.combat-btns button{font-size:.68em;min-width:90px}}
 @media(prefers-reduced-motion:reduce){button{transition:none!important}button:hover{transform:none!important}}
+
+
+/* Combat feedback: physical impact, spell glow, defense stance. */
+.fighter-card{position:relative;transform-origin:center;will-change:transform}
+.fighter-card.combat-hit{animation:dc-hit .4s ease both}
+.fighter-card.combat-critical{animation:dc-critical .48s ease both;box-shadow:0 0 30px #fa573c99,inset 0 0 35px #f43f5e44}
+.fighter-card.combat-guard{animation:dc-guard .48s ease both;box-shadow:0 0 25px #62c8f777,inset 0 0 25px #54bafa33}
+.fighter-card.combat-spell{animation:dc-spell .48s ease both;box-shadow:0 0 28px #ba7aff88}
+#combat-window.combat-impact{animation:dc-impact .36s ease both}
+@keyframes dc-hit{0%,100%{transform:translateX(0);filter:brightness(1)}20%{transform:translateX(-7px);filter:brightness(1.9)}45%{transform:translateX(5px)}70%{transform:translateX(-3px)}}
+@keyframes dc-critical{0%,100%{transform:scale(1);filter:brightness(1)}25%{transform:scale(1.045) rotate(-1deg);filter:brightness(2.1)}60%{transform:scale(.985) rotate(1deg)}}
+@keyframes dc-guard{0%,100%{transform:scale(1)}35%{transform:scale(1.03);filter:brightness(1.35)}}
+@keyframes dc-spell{0%,100%{filter:brightness(1)}40%{filter:brightness(1.75) hue-rotate(35deg)}}
+@keyframes dc-impact{0%,100%{transform:translateX(0)}30%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
+@media(prefers-reduced-motion:reduce){.fighter-card.combat-hit,.fighter-card.combat-critical,.fighter-card.combat-guard,.fighter-card.combat-spell,#combat-window.combat-impact{animation:none!important}}
