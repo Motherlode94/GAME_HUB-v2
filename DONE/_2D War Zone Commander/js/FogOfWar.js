@@ -31,6 +31,25 @@ RTS.FogOfWar = {
             }
         }
     },
+    isVisible: function(game, x, y) {
+        if (!game.fog || game.setupPhase) return true;
+        var cx = Math.floor(x / this.cell), cy = Math.floor(y / this.cell);
+        return cx >= 0 && cy >= 0 && cx < game.fog.cols && cy < game.fog.rows &&
+            !!game.fog.visible[cy * game.fog.cols + cx];
+    },
+    coverMultiplier: function(game, sx, sy, tx, ty) {
+        var dx=tx-sx, dy=ty-sy, len2=dx*dx+dy*dy;
+        if (len2 < 1) return 1;
+        for(var i=0;i<game.buildings.length;i++) {
+            var b=game.buildings[i];
+            if(b.hp<=0 || b.type!=="wall") continue;
+            var t=((b.x-sx)*dx+(b.y-sy)*dy)/len2;
+            if(t<=0.05 || t>=0.98) continue;
+            var px=sx+t*dx,py=sy+t*dy,rad=(b.size||52)/2+10;
+            if(Math.abs(px-b.x)<rad && Math.abs(py-b.y)<rad) return 0.45;
+        }
+        return 1;
+    },
     render: function(game, ctx) {
         if (!game.fog || game.setupPhase) return;
         var f = game.fog, cell = this.cell;
