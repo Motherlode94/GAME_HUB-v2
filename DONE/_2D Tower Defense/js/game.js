@@ -43,6 +43,7 @@ function resetGame() {
     towers = [];
     enemies = [];
     projectiles = [];
+    enemyProjectiles = [];
     resetEffects();
     resetGameSpeed();
 }
@@ -97,6 +98,7 @@ function update(dt) {
     updateEnemies(dt);
     updateTowers(dt);
     updateProjectiles(dt);
+    updateEnemyProjectiles(dt);
     updateEffects(dt);
     runAutoTowerManager(dt);
 
@@ -127,6 +129,7 @@ function draw() {
     drawTowers(ctx);
     drawEnemies(ctx);
     drawProjectiles(ctx);
+    drawEnemyProjectiles(ctx);
     drawAirEffects(ctx);
     if (gameState.placingTower) drawTowerPlacementPreview(ctx);
     ctx.restore();
