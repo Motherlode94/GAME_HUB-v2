@@ -55,7 +55,7 @@ RTS.Building.COSTS = {
 RTS.Building.ALLOWED = {
     hq:       ["worker", "engineer", "combat_medic", "supply_truck"],
     barracks: ["riflemen", "at_team", "sniper_team", "manpads", "assault_team", "recon_team", "heavy_mg", "grenadier_team", "combat_engineers", "special_forces", "paratroopers", "mortar_team"],
-    workshop: ["matv", "bradley", "m1a2", "paladin", "mlrs", "wheeled_ifv", "mobile_aa", "mechanized_scout", "rocket_artillery", "tank_destroyer", "armored_car", "heavy_aa", "apc", "armored_engineer", "selfpropelled_mortar", "long_range_aa"],
+    workshop: ["matv", "bradley", "m1a2", "paladin", "mlrs", "wheeled_ifv", "mobile_aa", "mechanized_scout", "rocket_artillery", "tank_destroyer", "armored_car", "heavy_aa", "apc", "armored_engineer", "selfpropelled_mortar", "long_range_aa", "heavy_mbt", "wheeled_at", "air_defense_radar", "ammo_carrier"],
     hangar:   ["apache", "blackhawk", "recon_drone", "attack_drone", "interceptor_drone", "ew_drone", "gunship", "light_attack_heli", "heavy_transport_heli", "fighter_aircraft", "strike_aircraft", "loitering_drone"]
     // mine, refinery, arsenal, tower, hospital, wall : pas de production d'unités
 };
