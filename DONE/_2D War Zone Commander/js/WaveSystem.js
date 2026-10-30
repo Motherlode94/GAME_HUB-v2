@@ -38,7 +38,17 @@ RTS.WaveSystem = {
         { type: "paladin",     cost: 4, minWave: 5 },
         { type: "mlrs",        cost: 5, minWave: 7 },
         { type: "apache",      cost: 4, minWave: 7 },
-        { type: "blackhawk",   cost: 3, minWave: 6 }
+        { type: "blackhawk",   cost: 3, minWave: 6 },
+        { type: "assault_team", cost: 2, minWave: 2 },
+        { type: "recon_team", cost: 2, minWave: 2 },
+        { type: "heavy_mg", cost: 2, minWave: 3 },
+        { type: "mechanized_scout", cost: 3, minWave: 3 },
+        { type: "wheeled_ifv", cost: 3, minWave: 4 },
+        { type: "combat_medic", cost: 2, minWave: 4 },
+        { type: "mobile_aa", cost: 4, minWave: 5 },
+        { type: "attack_drone", cost: 3, minWave: 5 },
+        { type: "rocket_artillery", cost: 4, minWave: 6 },
+        { type: "interceptor_drone", cost: 3, minWave: 7 }
     ],
 
     reset: function() {
@@ -140,7 +150,21 @@ RTS.WaveSystem = {
                   : isBoss ? Math.round(baseCount * 1.8)
                   : baseCount;
 
-        var avail = this.CATALOG.filter(function(e) { return e.minWave <= w; });
+        // Alternate infantry assaults, mechanized pushes, air raids and artillery.
+        // Support medics participate only when damage dealers are already present.
+        var doctrine = ["infantry", "mechanized", "air", "artillery"][(this._waveInLevel - 1) % 4];
+        var doctrineTypes = {
+            infantry: ["riflemen","assault_team","recon_team","heavy_mg","at_team","sniper_team"],
+            mechanized: ["matv","mechanized_scout","bradley","wheeled_ifv","m1a2","riflemen"],
+            air: ["apache","blackhawk","attack_drone","interceptor_drone","manpads","mobile_aa","riflemen"],
+            artillery: ["paladin","rocket_artillery","mlrs","at_team","heavy_mg","riflemen"]
+        };
+        var avail = this.CATALOG.filter(function(e) {
+            return e.minWave <= w && e.type !== "combat_medic";
+        });
+        var themed = avail.filter(function(e) { return doctrineTypes[doctrine].indexOf(e.type) !== -1; });
+        // Keep an accessible fallback in early waves.
+        if (!themed.length) themed = avail;
 
         // HP multiplicateur — escalade plus agressive
         var hpMult = Math.min(
@@ -175,6 +199,13 @@ RTS.WaveSystem = {
 
             if (!pool || pool.length === 0) pool = avail;
 
+            // Most attackers follow the wave doctrine, with mixed threats remaining.
+            if (!isBoss && i % 4 !== 0) {
+                var thematicPool = pool.filter(function(e) {
+                    return themed.some(function(t) { return t.type === e.type; });
+                });
+                if (thematicPool.length) pool = thematicPool;
+            }
             var entry = pool[Math.floor(Math.random() * pool.length)];
 
             // Flanc aléatoire parmi les flancs disponibles
