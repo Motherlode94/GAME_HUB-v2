@@ -153,6 +153,18 @@ RTS.InputManager = function(game) {
             game.selectedSquads = [];
             game.selectedBuildings = [];
         }
+        // T toggles priority on selected friendly combat squads.
+        if (k === "t" && !e.ctrlKey && !e.altKey &&
+            !/input|textarea|select/i.test((e.target && e.target.tagName) || "")) {
+            var selected = game.selectedSquads.filter(function(s) {
+                return s.team === "blue" && s.def && s.def.attackRange > 0;
+            });
+            if (selected.length) {
+                var newPriority = selected.some(function(s) { return s.targetPriority !== "armor"; }) ? "armor" : "nearest";
+                selected.forEach(function(s) { s.targetPriority = newPriority; });
+                e.preventDefault();
+            }
+        }
         if (k === "a" && !e.ctrlKey) {
             game.squads.forEach(function(s) { s.selected = s.team === "blue"; });
             game.selectedSquads = game.squads.filter(function(s) { return s.team === "blue"; });
