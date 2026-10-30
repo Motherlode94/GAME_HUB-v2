@@ -50,6 +50,14 @@ RTS.SquadRenderer = {
         var type = squad.typeName;
         var isBlue = squad.team === "blue" || squad.team === "ally";
 
+        // Contact shadow anchors each unit to the terrain.
+        ctx.save();
+        ctx.fillStyle = 'rgba(5,10,8,0.31)';
+        ctx.beginPath();
+        ctx.ellipse(m.x + 2, m.y + s * .33, Math.max(4, s * .48), Math.max(2, s * .22), 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
         // Flash de touche
         if (m.flashTimer > 0) {
             ctx.fillStyle = "rgba(255,255,255,0.9)";
