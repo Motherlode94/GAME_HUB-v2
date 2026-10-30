@@ -199,7 +199,7 @@ RTS.SquadCombatSystem = {
             tx:           target.x,
             ty:           target.y,
             speed:        def.projectileSpeed || 400,
-            damage:       def.attackDamage,
+            damage:       def.attackDamage * (squad.typeName === "tank_destroyer" && targetSquad.def && targetSquad.def.category === "vehicle" ? 1.35 : 1),
             aoeDamage:    def.aoeDamage  || 0,
             aoeRadius:    def.aoeRadius  || 0,
             arcHeight:    def.arcHeight  || 0,
