@@ -42,6 +42,15 @@ RTS.Squad = function(x, y, team, typeName, memberCount) {
     this.attackRange = def.attackRange;
     this.attackTimer = 0;
     this.burstQueue  = [];
+    // Ammunition is tracked per squad; sustained fire requires field resupply.
+    var weaponClass = def.ammoClass || ({
+        burst:"rifle", single:"precision", machinegun:"belt",
+        shell:"shell", artillery:"artillery", rocket:"rocket", missile:"missile"
+    }[def.combatMode] || "none");
+    this.weaponClass = weaponClass;
+    this.ammoCapacity = def.ammoCapacity != null ? def.ammoCapacity :
+        ({rifle:150,precision:35,belt:260,shell:28,artillery:18,rocket:24,missile:18,none:0}[weaponClass] || 0);
+    this.ammo = this.ammoCapacity;
 
     // Membres
     var count = memberCount || def.defaultCount;
