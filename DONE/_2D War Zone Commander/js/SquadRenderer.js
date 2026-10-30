@@ -94,6 +94,14 @@ RTS.SquadRenderer = {
             case "engineer":    RTS.SquadRenderer._drawEngineer(ctx, m, s, isBlue);   break;
             case "combat_medic": RTS.SquadRenderer._drawEngineer(ctx, m, s, isBlue); break;
             case "worker":      RTS.SquadRenderer._drawWorker(ctx, m, s, isBlue);     break;
+            case "grenadier_team": RTS.SquadRenderer._drawAtTeam(ctx,m,s,isBlue); break;
+            case "combat_engineers": RTS.SquadRenderer._drawEngineer(ctx,m,s,isBlue); break;
+            case "tank_destroyer": RTS.SquadRenderer._drawM1a2(ctx,m,s,isBlue); break;
+            case "armored_car": RTS.SquadRenderer._drawMatv(ctx,m,s,isBlue); break;
+            case "heavy_aa": RTS.SquadRenderer._drawMlrs(ctx,m,s,isBlue); break;
+            case "ew_drone": RTS.SquadRenderer._drawBlackhawk(ctx,m,s,isBlue); break;
+            case "gunship": RTS.SquadRenderer._drawApache(ctx,m,s,isBlue); break;
+            case "light_attack_heli": RTS.SquadRenderer._drawBlackhawk(ctx,m,s,isBlue); break;
             // Fallback (anciens noms ou inconnus)
             default:            RTS.SquadRenderer._drawRiflemen(ctx, m, s, isBlue);   break;
         }
