@@ -33,6 +33,9 @@ RTS.Squad = function(x, y, team, typeName, memberCount) {
     this.selected = false;
     this.target   = null;
     this.speed    = def.speed;
+    // Vehicle orientation and mobility are tracked per unit, not shared in SquadDefs.
+    this.heading  = 0;
+    this.engineDamage = 0;
 
     // Combat
     this.attackRange = def.attackRange;
@@ -111,6 +114,17 @@ RTS.Squad.prototype.takeDamage = function(damage, fromX, fromY, particles) {
     });
     if (!best) return;
 
+    // Directional armour: front absorbs more, rear is vulnerable.
+    if (this.def.category === 'vehicle') {
+        var angle = Math.atan2(fromY - this.y, fromX - this.x);
+        var relative = Math.atan2(Math.sin(angle - this.heading), Math.cos(angle - this.heading));
+        var arc = Math.abs(relative);
+        damage *= arc < Math.PI / 4 ? 0.60 : arc > 3 * Math.PI / 4 ? 1.35 : 0.88;
+        // Repeated penetrating hits can damage the engine, reducing mobility.
+        if (damage >= this.def.memberHp * 0.18) {
+            this.engineDamage = Math.min(0.65, this.engineDamage + 0.07);
+        }
+    }
     best.hp -= damage;
     best.flashTimer = 0.08;
 
