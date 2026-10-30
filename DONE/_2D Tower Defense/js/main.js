@@ -3,6 +3,7 @@ window.onload = function () {
     if (!canvas) return;
     canvas.width = MAP_COLS * TILE_SIZE;
     canvas.height = MAP_ROWS * TILE_SIZE;
+    canvas.style.setProperty('--map-aspect', MAP_COLS / MAP_ROWS);
     ctx = canvas.getContext('2d');
     if (!ctx) return;
 

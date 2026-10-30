@@ -2,11 +2,13 @@ const mapGrid = [];
 let mapCache = null;
 
 // Coins du chemin (en cases). Les ennemis suivent ces segments dans l'ordre.
+// Le chemin évite la barre du haut, la barre de construction (bas gauche)
+// et le panneau de sélection (haut droite).
 const PATH_CORNERS = [
-    { x: 0, y: 2 }, { x: 5, y: 2 }, { x: 5, y: 7 }, { x: 2, y: 7 },
-    { x: 2, y: 12 }, { x: 10, y: 12 }, { x: 10, y: 3 }, { x: 15, y: 3 },
-    { x: 15, y: 9 }, { x: 19, y: 9 }
-];
+    { x: 0, y: 3 }, { x: 4, y: 3 }, { x: 4, y: 10 }, { x: 9, y: 10 },
+    { x: 9, y: 2 }, { x: 14, y: 2 }, { x: 14, y: 12 }, { x: 19, y: 12 },
+    { x: 19, y: 6 }, { x: 24, y: 6 }, { x: 24, y: 11 }, { x: 27, y: 11 }
+]
 
 // Liste de toutes les cases du chemin
 const path = (() => {

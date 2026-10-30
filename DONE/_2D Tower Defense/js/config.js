@@ -2,7 +2,7 @@
 
 // TAILLE DES TUILES ET CARTE
 const TILE_SIZE = 40;
-const MAP_COLS = 20;
+const MAP_COLS = 28;
 const MAP_ROWS = 15;
 
 // TAILLES DES ENTITÉS
