@@ -5,11 +5,29 @@ RTS.WorkerSystem = {
         game.squads.forEach(function(squad) {
             if (squad.team !== "blue") return;
             var mode = squad.def && squad.def.combatMode;
+            if (squad.typeName === "supply_truck") RTS.WorkerSystem._tickSupply(game, squad, delta);
             if (mode === "harvest")  RTS.WorkerSystem._tickHarvest(game, squad, delta);
             if (mode === "repair") {
                 if (squad.typeName === "combat_medic") RTS.WorkerSystem._tickMedic(game, squad, delta);
                 else RTS.WorkerSystem._tickRepair(game, squad, delta);
             }
+        });
+    },
+
+    _tickSupply: function(game, truck, delta) {
+        // Automatic field replenishment for friendly combat units near supply trucks.
+        truck._supplyClock = (truck._supplyClock || 0) + delta;
+        if (truck._supplyClock < 1) return;
+        truck._supplyClock -= 1;
+        game.squads.forEach(function(s) {
+            if (s === truck || s.team !== truck.team || s.isDead() ||
+                !s.ammoCapacity || s.ammo >= s.ammoCapacity) return;
+            if (Math.hypot(s.x - truck.x, s.y - truck.y) > 115) return;
+            var available = Math.floor((game.resources && game.resources.ammo) || 0);
+            var transfer = Math.min(12, s.ammoCapacity - s.ammo, available);
+            if (transfer <= 0) return;
+            s.ammo += transfer;
+            game.resources.ammo -= transfer;
         });
     },
 
