@@ -17,11 +17,23 @@ RTS.Renderer.render = function(game) {
     // Nœuds ressources
     RTS.Renderer._drawResourceNodes(ctx, game.resourceNodes);
 
-    // Cratères
+    // Impact scars, scorched rim and displaced soil (single rendering pass).
     game.craters.forEach(function(c) {
-        ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
-        ctx.fillStyle = "rgba(0,0,0,0.38)"; ctx.fill();
-        ctx.strokeStyle = "rgba(80,60,40,0.4)"; ctx.lineWidth = 1.5; ctx.stroke();
+        var r = Math.max(2, c.r || 6);
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.fillStyle = 'rgba(19,23,18,0.19)';
+        ctx.beginPath(); ctx.ellipse(2, 3, r * 1.24, r * .92, -.18, 0, Math.PI * 2); ctx.fill();
+        var crater = ctx.createRadialGradient(-r * .17, -r * .2, 1, 0, 0, r);
+        crater.addColorStop(0, 'rgba(16,17,15,.79)');
+        crater.addColorStop(.56, 'rgba(38,31,26,.77)');
+        crater.addColorStop(.84, 'rgba(100,84,60,.53)');
+        crater.addColorStop(1, 'rgba(121,111,79,0)');
+        ctx.fillStyle = crater;
+        ctx.beginPath(); ctx.ellipse(0, 0, r, r * .78, -.18, 0, Math.PI * 2);ctx.fill();
+        ctx.strokeStyle = 'rgba(156,138,97,.39)'; ctx.lineWidth = Math.max(1,r*.085);
+        ctx.beginPath();ctx.ellipse(0, 0, r * .87, r * .65, -.18, Math.PI*.12, Math.PI*1.2);ctx.stroke();
+        ctx.restore();
     });
 
     // Particules (derrière)
