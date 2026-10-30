@@ -490,5 +490,14 @@ RTS.SquadDefs = {
         attackRange:330,attackDamage:30,attackRate:1.1,combatMode:"rocket",
         projectileSpeed:370,antiAirOnly:true,isAir:true,
         color:"#75aabc",cost:{gold:105,fuel:30,ammo:42},productionTime:8,icon:"INT"
-    }
+    },
+    // Renforts 2026 : spécialités complémentaires terrestres et aériennes.
+    grenadier_team: {label:"Grenadiers",category:"infantry",defaultCount:4,maxCount:4,memberHp:74,memberSize:13,speed:87,formationSpread:19,formationType:"wedge",attackRange:210,attackDamage:21,attackRate:0.65,combatMode:"burst",burstCount:2,burstDelay:0.1,projectileSpeed:470,color:"#6d96a0",cost:{gold:80,fuel:0,ammo:35},productionTime:7,icon:"GRN"},
+    combat_engineers: {label:"Sapeurs d'assaut",category:"infantry",defaultCount:4,maxCount:4,memberHp:83,memberSize:13,speed:78,formationSpread:19,formationType:"wedge",attackRange:145,attackDamage:14,attackRate:1.15,combatMode:"burst",burstCount:2,burstDelay:0.08,projectileSpeed:420,color:"#6d96a0",cost:{gold:85,fuel:0,ammo:36},productionTime:8,icon:"SAP"},
+    tank_destroyer: {label:"Chasseur de chars",category:"vehicle",defaultCount:1,maxCount:1,memberHp:280,memberSize:27,speed:62,formationSpread:0,formationType:"solo",attackRange:420,attackDamage:125,attackRate:0.19,combatMode:"shell",aoeDamage:26,aoeRadius:32,projectileSpeed:840,color:"#6d96a0",cost:{gold:185,fuel:66,ammo:65},productionTime:15,icon:"TD"},
+    armored_car: {label:"Automitrailleuse",category:"vehicle",defaultCount:1,maxCount:1,memberHp:120,memberSize:19,speed:145,formationSpread:0,formationType:"solo",attackRange:230,attackDamage:16,attackRate:2.9,combatMode:"machinegun",projectileSpeed:570,color:"#6d96a0",cost:{gold:85,fuel:28,ammo:26},productionTime:7,icon:"AC"},
+    heavy_aa: {label:"Canon antiaérien blindé",category:"vehicle",defaultCount:1,maxCount:1,memberHp:230,memberSize:25,speed:58,formationSpread:0,formationType:"solo",attackRange:485,attackDamage:69,attackRate:0.7,combatMode:"rocket",antiAirOnly:true,aoeDamage:12,aoeRadius:28,projectileSpeed:480,color:"#6d96a0",cost:{gold:175,fuel:65,ammo:72},productionTime:14,icon:"HAA"},
+    ew_drone: {label:"Drone de surveillance électronique",category:"air",defaultCount:1,maxCount:1,memberHp:67,memberSize:13,speed:170,formationSpread:0,formationType:"solo",attackRange:0,attackDamage:0,attackRate:0,combatMode:"none",isAir:true,projectileSpeed:0,color:"#6d96a0",cost:{gold:85,fuel:25,ammo:0},productionTime:7,icon:"EW"},
+    gunship: {label:"Hélicoptère d'appui lourd",category:"air",defaultCount:1,maxCount:1,memberHp:215,memberSize:24,speed:124,formationSpread:0,formationType:"solo",attackRange:345,attackDamage:72,attackRate:0.42,combatMode:"rocket",isAir:true,aoeDamage:27,aoeRadius:40,projectileSpeed:340,color:"#6d96a0",cost:{gold:215,fuel:93,ammo:74},productionTime:16,icon:"GUN"},
+    light_attack_heli: {label:"Hélicoptère léger",category:"air",defaultCount:1,maxCount:1,memberHp:115,memberSize:19,speed:175,formationSpread:0,formationType:"solo",attackRange:265,attackDamage:26,attackRate:1.6,combatMode:"machinegun",isAir:true,projectileSpeed:560,color:"#6d96a0",cost:{gold:125,fuel:52,ammo:33},productionTime:10,icon:"LHX"}
 };
