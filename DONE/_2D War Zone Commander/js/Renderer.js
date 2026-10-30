@@ -35,6 +35,8 @@ RTS.Renderer.render = function(game) {
     // Squads
     RTS.SquadRenderer.render(game.squads, ctx);
 
+    // Fog overlays the world, but does not obscure HUD controls.
+    RTS.FogOfWar.render(game, ctx);
     ctx.restore();
 
     // HUD
