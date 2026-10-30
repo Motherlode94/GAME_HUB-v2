@@ -1,271 +1,233 @@
 let enemies = [];
 
+// speed en pixels/seconde
 const ENEMY_TYPES = {
-    BASIC: {
-        name: "Normal",
-        color: "#ff4444",
-        speedBase: 0.05,
-        healthBase: 100,
-        rewardBase: 10,
-        scoreValue: 10
-    },
-    FAST: {
-        name: "Runner",
-        color: "#ff00aa",
-        speedBase: 0.085,
-        healthBase: 65,
-        rewardBase: 15,
-        scoreValue: 20
-    },
-    TANK: {
-        name: "Tank",
-        color: "#773300",
-        speedBase: 0.035,
-        healthBase: 280,
-        rewardBase: 25,
-        scoreValue: 50
-    },
-    BOSS: {
-        name: "Boss",
-        color: "#ff6600",
-        speedBase: 0.04,
-        healthBase: 500,
-        rewardBase: 100,
-        scoreValue: 200
-    }
+    BASIC:   { name: 'Soldat',  color: '#e74c3c', speed: 55, hp: 90,   armor: 0, reward: 6,   score: 10,  size: 20, lives: 1,  shape: 'square' },
+    FAST:    { name: 'Coureur', color: '#ff4fb0', speed: 95, hp: 55,   armor: 0, reward: 7,   score: 15,  size: 16, lives: 1,  shape: 'diamond' },
+    SWARM:   { name: 'Essaim',  color: '#f1c40f', speed: 75, hp: 28,   armor: 0, reward: 2,   score: 4,   size: 12, lives: 1,  shape: 'circle' },
+    ARMORED: { name: 'Blindé',  color: '#95a5a6', speed: 45, hp: 170,  armor: 8, reward: 12,  score: 30,  size: 22, lives: 1,  shape: 'hex' },
+    TANK:    { name: 'Tank',    color: '#8d5524', speed: 35, hp: 360,  armor: 3, reward: 15,  score: 40,  size: 26, lives: 2,  shape: 'square' },
+    BOSS:    { name: 'Boss',    color: '#ff6600', speed: 30, hp: 2400, armor: 5, reward: 120, score: 400, size: 34, lives: 10, shape: 'star' }
 };
 
-function getEnemyTypeForWave(wave) {
-    // Boss tous les 10 vagues
-    if (wave % 10 === 0 && wave > 0) {
-        return "BOSS";
-    }
-    
-    if (wave >= 15) {
-        const rand = Math.random();
-        if (rand < 0.3) return "TANK";
-        if (rand < 0.65) return "FAST";
-        return "BASIC";
-    }
-    if (wave >= 12) return Math.random() < 0.35 ? "TANK" : (Math.random() < 0.6 ? "FAST" : "BASIC");
-    if (wave >= 10) return Math.random() < 0.60 ? "FAST" : "BASIC";
-    if (wave >= 6)  return Math.random() < 0.45 ? "FAST" : "BASIC";
-    if (wave >= 3)  return Math.random() < 0.25 ? "FAST" : "BASIC";
-    return "BASIC";
+// Composition d'une vague : groupes successifs { type, count, delay }
+function buildWaveGroups(wave) {
+    const groups = [];
+    const add = (type, count, delay) => {
+        if (count > 0) groups.push({ type, count, delay });
+    };
+
+    add('BASIC', 6 + Math.floor(wave * 1.5), 750);
+    if (wave >= 3) add('FAST', Math.floor((wave - 1) * 0.9), 450);
+    if (wave >= 4 && wave % 2 === 0) add('SWARM', 8 + wave, 170);
+    if (wave >= 6) add('ARMORED', Math.floor((wave - 4) * 0.6), 1100);
+    if (wave >= 8) add('TANK', Math.floor((wave - 6) * 0.5), 1400);
+    if (wave % 10 === 0) add('BOSS', Math.floor(wave / 10), 2500);
+    else if (wave % 5 === 0) add('TANK', 2 + Math.floor(wave / 10), 1600);
+
+    return groups;
 }
 
-function spawnEnemy(wave) {
-    const spawn = getSpawnPoint();
-    const typeKey = getEnemyTypeForWave(wave);
-    const type = ENEMY_TYPES[typeKey];
+function buildWaveQueue(wave) {
+    const queue = [];
+    buildWaveGroups(wave).forEach((group) => {
+        for (let i = 0; i < group.count; i++) {
+            queue.push({ type: group.type, delay: i === 0 ? 1500 : group.delay });
+        }
+    });
+    if (queue.length) queue[0].delay = 0;
+    return queue;
+}
 
-    const healthMultiplier = 1 + (wave * 0.22);
-    const speedMultiplier = 1 + (wave * 0.10);
-    const isBoss = typeKey === "BOSS";
+function getWavePreview(wave) {
+    const counts = {};
+    buildWaveGroups(wave).forEach((g) => {
+        counts[g.type] = (counts[g.type] || 0) + g.count;
+    });
+    return counts;
+}
+
+function spawnEnemy(typeKey, wave) {
+    const t = ENEMY_TYPES[typeKey] || ENEMY_TYPES.BASIC;
+    const w = Math.max(0, wave - 1);
+    const hpMultiplier = (1 + w * 0.18) * Math.pow(1.035, w);
+    const speedMultiplier = Math.min(1.5, 1 + w * 0.012);
+    const hp = Math.round(t.hp * hpMultiplier);
+    const start = pathWaypoints[0];
 
     enemies.push({
-        x: spawn.x,
-        y: spawn.y,
+        x: start.x,
+        y: start.y,
         type: typeKey,
-        color: type.color,
-        speed: type.speedBase * speedMultiplier,
-        maxLife: Math.floor(type.healthBase * healthMultiplier * (isBoss ? 2 : 1)),
-        life: Math.floor(type.healthBase * healthMultiplier * (isBoss ? 2 : 1)),
-        pathIndex: 0,
-        reward: Math.floor(type.rewardBase + wave * 2),
-        scoreValue: type.scoreValue + wave * 5,
-        isBoss: isBoss,
-        size: isBoss ? ENEMY_SIZE * 1.5 : ENEMY_SIZE
+        name: t.name,
+        color: t.color,
+        shape: t.shape,
+        size: t.size,
+        speed: t.speed * speedMultiplier,
+        maxLife: hp,
+        life: hp,
+        armor: t.armor ? Math.round(t.armor * (1 + w * 0.05)) : 0,
+        reward: Math.round(t.reward * (1 + w * 0.06)),
+        scoreValue: t.score + w * 3,
+        livesCost: t.lives,
+        isBoss: typeKey === 'BOSS',
+        waypoint: 1,
+        traveled: 0,
+        slowFactor: 1,
+        slowTimer: 0,
+        hitFlash: 0,
+        wobble: Math.random() * Math.PI * 2
     });
 }
 
-function updateEnemies(deltaTime) {
-    enemies.forEach(enemy => {
-        if (enemy.pathIndex < path.length - 1) {
-            const target = {
-                x: gridToWorld(path[enemy.pathIndex + 1].x) + TILE_SIZE / 2,
-                y: gridToWorld(path[enemy.pathIndex + 1].y) + TILE_SIZE / 2
-            };
+function damageEnemy(enemy, amount, tower, pierceArmor = false) {
+    if (!enemy || enemy.life <= 0) return 0;
+    const effective = pierceArmor ? amount : Math.max(amount * 0.25, amount - enemy.armor);
+    enemy.life -= effective;
+    enemy.hitFlash = 80;
+    if (tower) {
+        tower.damageDealt += Math.min(effective, effective + enemy.life);
+        if (enemy.life <= 0) tower.kills += 1;
+    }
+    return effective;
+}
 
+function applySlow(enemy, factor, duration) {
+    if (!enemy || enemy.life <= 0) return;
+    const resisted = enemy.isBoss ? Math.max(factor, 0.75) : factor;
+    enemy.slowFactor = Math.min(enemy.slowFactor, resisted);
+    enemy.slowTimer = Math.max(enemy.slowTimer, duration);
+}
+
+function updateEnemies(dt) {
+    enemies.forEach((enemy) => {
+        if (enemy.slowTimer > 0) {
+            enemy.slowTimer -= dt;
+            if (enemy.slowTimer <= 0) enemy.slowFactor = 1;
+        }
+        if (enemy.hitFlash > 0) enemy.hitFlash -= dt;
+        enemy.wobble += dt * 0.01;
+
+        let move = (enemy.speed * enemy.slowFactor * dt) / 1000;
+        while (move > 0 && enemy.waypoint < pathWaypoints.length) {
+            const target = pathWaypoints[enemy.waypoint];
             const dx = target.x - enemy.x;
             const dy = target.y - enemy.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < 5) {
-                enemy.pathIndex++;
+            if (dist <= move) {
+                enemy.x = target.x;
+                enemy.y = target.y;
+                enemy.traveled += dist;
+                move -= dist;
+                enemy.waypoint += 1;
             } else {
-                enemy.x += (dx / dist) * enemy.speed * deltaTime;
-                enemy.y += (dy / dist) * enemy.speed * deltaTime;
+                enemy.x += (dx / dist) * move;
+                enemy.y += (dy / dist) * move;
+                enemy.traveled += move;
+                move = 0;
             }
-        } else {
-            enemy.reachedEnd = true;
         }
+        if (enemy.waypoint >= pathWaypoints.length) enemy.reachedEnd = true;
     });
 
-    enemies = enemies.filter(enemy => {
-        if (enemy.reachedEnd) {
-            gameState.lives -= (enemy.isBoss ? 5 : 1);
-            return false;
-        }
+    enemies = enemies.filter((enemy) => {
         if (enemy.life <= 0) {
             gameState.money += enemy.reward;
             gameState.score += enemy.scoreValue;
-            gameState.killCount++;
-            
-            // Effet visuel de mort
-            createDeathParticles(enemy.x, enemy.y, enemy.color);
+            gameState.killCount += 1;
+            createDeathParticles(enemy.x, enemy.y, enemy.color, enemy.isBoss ? 30 : 10);
+            addFloatingText(enemy.x, enemy.y - 10, `+${enemy.reward}$`);
+            return false;
+        }
+        if (enemy.reachedEnd) {
+            loseLives(enemy.livesCost);
             return false;
         }
         return true;
     });
 }
 
-function createDeathParticles(x, y, color) {
-    // Créer des particules à la mort de l'ennemi
-    if (!window.particles) window.particles = [];
-    
-    for (let i = 0; i < 8; i++) {
-        const angle = (Math.PI * 2 * i) / 8;
-        const speed = 2 + Math.random() * 2;
-        window.particles.push({
-            x: x,
-            y: y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            color: color,
-            life: 30,
-            maxLife: 30,
-            size: 4
-        });
+function traceEnemyShape(ctx, shape, size) {
+    const r = size / 2;
+    ctx.beginPath();
+    if (shape === 'circle') {
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+    } else if (shape === 'diamond') {
+        ctx.moveTo(0, -r);
+        ctx.lineTo(r, 0);
+        ctx.lineTo(0, r);
+        ctx.lineTo(-r, 0);
+        ctx.closePath();
+    } else if (shape === 'hex') {
+        for (let i = 0; i < 6; i++) {
+            const a = (Math.PI / 3) * i;
+            if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+            else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        }
+        ctx.closePath();
+    } else if (shape === 'star') {
+        for (let i = 0; i < 10; i++) {
+            const a = (Math.PI / 5) * i - Math.PI / 2;
+            const rr = i % 2 === 0 ? r : r * 0.5;
+            if (i === 0) ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+            else ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+        }
+        ctx.closePath();
+    } else {
+        ctx.rect(-r, -r, size, size);
     }
 }
 
-function updateParticles(deltaTime) {
-    if (!window.particles) return;
-    
-    window.particles = window.particles.filter(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.2; // Gravité
-        p.life--;
-        return p.life > 0;
-    });
-}
-
-function drawParticles(ctx) {
-    if (!window.particles) return;
-    
-    window.particles.forEach(p => {
-        const alpha = p.life / p.maxLife;
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
-    });
-    ctx.globalAlpha = 1;
-}
-
 function drawEnemies(ctx) {
-    enemies.forEach(enemy => {
-        const size = enemy.size || ENEMY_SIZE;
-        
-        // Ombre
+    enemies.forEach((enemy) => {
+        const size = enemy.size;
+        const bob = Math.sin(enemy.wobble) * 1.5;
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         ctx.beginPath();
-        ctx.ellipse(enemy.x, enemy.y + size/2 + 2, size/2, size/4, 0, 0, Math.PI * 2);
+        ctx.ellipse(enemy.x, enemy.y + size / 2 + 2, size / 2, size / 4, 0, 0, Math.PI * 2);
         ctx.fill();
-        
-        // Corps
-        ctx.fillStyle = enemy.color;
-        if (enemy.isBoss) {
-            // Boss en forme d'étoile
-            ctx.save();
-            ctx.translate(enemy.x, enemy.y);
-            ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                const angle = (Math.PI * 2 * i) / 5 - Math.PI / 2;
-                const x = Math.cos(angle) * size/2;
-                const y = Math.sin(angle) * size/2;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-                
-                const innerAngle = angle + Math.PI / 5;
-                const ix = Math.cos(innerAngle) * size/4;
-                const iy = Math.sin(innerAngle) * size/4;
-                ctx.lineTo(ix, iy);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.strokeStyle = '#ffaa00';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.restore();
-        } else {
-            ctx.fillRect(enemy.x - size / 2, enemy.y - size / 2, size, size);
-        }
 
-        // Indicateurs visuels
-        if (enemy.type === "FAST") {
-            ctx.strokeStyle = "white";
+        ctx.save();
+        ctx.translate(enemy.x, enemy.y + bob);
+        if (enemy.isBoss) ctx.rotate(enemy.wobble * 0.2);
+        traceEnemyShape(ctx, enemy.shape, size);
+        ctx.fillStyle = enemy.hitFlash > 0 ? '#ffffff' : enemy.color;
+        ctx.fill();
+        ctx.lineWidth = enemy.armor > 0 ? 3 : 1.5;
+        ctx.strokeStyle = enemy.isBoss ? '#ffd27a' : (enemy.armor > 0 ? '#2c3e50' : 'rgba(0,0,0,0.6)');
+        ctx.stroke();
+
+        if (enemy.slowFactor < 1) {
+            ctx.strokeStyle = 'rgba(120, 220, 255, 0.9)';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(enemy.x - 8, enemy.y);
-            ctx.lineTo(enemy.x + 8, enemy.y);
-            ctx.moveTo(enemy.x, enemy.y - 8);
-            ctx.lineTo(enemy.x, enemy.y + 8);
+            ctx.arc(0, 0, size / 2 + 4, 0, Math.PI * 2);
             ctx.stroke();
         }
+        ctx.restore();
 
-        if (enemy.type === "TANK" || enemy.isBoss) {
-            ctx.strokeStyle = enemy.isBoss ? "#ffaa00" : "#000";
-            ctx.lineWidth = enemy.isBoss ? 3 : 4;
-            ctx.strokeRect(enemy.x - size / 2 - 2, enemy.y - size / 2 - 2, size + 4, size + 4);
+        // Barre de vie (affichée dès que l'ennemi est touché, toujours pour les boss)
+        if (enemy.life < enemy.maxLife || enemy.isBoss) {
+            const barWidth = Math.max(20, size);
+            const barY = enemy.y - size / 2 - 10;
+            const pct = Math.max(0, enemy.life / enemy.maxLife);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(enemy.x - barWidth / 2, barY, barWidth, 4);
+            ctx.fillStyle = pct > 0.6 ? '#2ecc71' : (pct > 0.3 ? '#f1c40f' : '#e74c3c');
+            ctx.fillRect(enemy.x - barWidth / 2, barY, barWidth * pct, 4);
         }
 
-        // Barre de vie améliorée
-        const barWidth = size;
-        const barHeight = 5;
-        const healthPercent = Math.max(0, enemy.life / enemy.maxLife);
-
-        // Fond noir
-        ctx.fillStyle = "#000";
-        ctx.fillRect(enemy.x - barWidth / 2, enemy.y - size / 2 - 12, barWidth, barHeight);
-
-        // Barre de vie colorée
-        let healthColor;
-        if (healthPercent > 0.6) healthColor = "#0f0";
-        else if (healthPercent > 0.3) healthColor = "#ff0";
-        else healthColor = "#f00";
-        
-        ctx.fillStyle = healthColor;
-        ctx.fillRect(enemy.x - barWidth / 2, enemy.y - size / 2 - 12, barWidth * healthPercent, barHeight);
-
-        // Bordure
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(enemy.x - barWidth / 2, enemy.y - size / 2 - 12, barWidth, barHeight);
-        
-        // Nom du boss
         if (enemy.isBoss) {
-            ctx.fillStyle = "#ffaa00";
-            ctx.font = "bold 12px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("BOSS", enemy.x, enemy.y - size / 2 - 18);
-            ctx.textAlign = "left";
+            ctx.fillStyle = '#ffaa00';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('BOSS', enemy.x, enemy.y - size / 2 - 14);
+            ctx.textAlign = 'left';
         }
     });
 }
 
-function getNearestEnemy(x, y, range) {
-    let nearest = null;
-    let minDist = range;
-
-    enemies.forEach(enemy => {
-        const dist = distance(x, y, enemy.x, enemy.y);
-        if (dist < minDist) {
-            minDist = dist;
-            nearest = enemy;
-        }
-    });
-
-    return nearest;
+function getEnemiesInRange(x, y, range) {
+    return enemies.filter((e) => e.life > 0 && !e.reachedEnd && distance(x, y, e.x, e.y) <= range);
 }
