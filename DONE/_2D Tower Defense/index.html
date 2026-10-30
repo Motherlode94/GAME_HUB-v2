@@ -20,14 +20,11 @@
         <div class="instructions">
             <h2>Instructions</h2>
             <ul>
-                <li>Clique pour demarrer la premiere vague.</li>
-                <li>Bouton "Placer tour" en bas a gauche.</li>
-                <li>Touche <code>C</code>: change le type (Basique / Rapide / Sniper).</li>
-                <li><code>Shift+clic</code>: multi-selection de tours.</li>
-                <li><code>Ctrl+clic</code>: selectionne toutes les tours du meme type.</li>
-                <li><code>U</code>: ameliore la selection, <code>T</code>: re-selection meme type.</li>
-                <li><code>G</code>: profil IA (magnat, guerrier, scientifique, pacifique, neutre).</li>
-                <li><code>A</code>: active/desactive l'auto-amelioration IA.</li>
+                <li><code>1</code>–<code>5</code> ou barre du bas : Canon, Mitrailleuse, Sniper, Givre, Mortier.</li>
+                <li><code>Espace</code> : lancer la vague (appel anticipé = bonus $).</li>
+                <li>Clic sur une tour : <code>U</code> améliorer, <code>S</code> vendre, <code>F</code> mode de ciblage.</li>
+                <li><code>Shift+clic</code> : multi-sélection / placement en chaîne. <code>Ctrl+clic</code> : même type.</li>
+                <li><code>G</code> doctrine d'amélioration, <code>A</code> auto-amélioration, <code>V</code> vitesse, <code>P</code> pause.</li>
             </ul>
         </div>
 
@@ -42,15 +39,16 @@
     <script src="../../js/scores.js"></script>
 
     <script src="js/config.js"></script>
+    <script src="js/speedGame.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/effects.js"></script>
     <script src="js/map.js"></script>
     <script src="js/enemy.js"></script>
     <script src="js/projectile.js"></script>
     <script src="js/tower.js"></script>
     <script src="js/waveManager.js"></script>
     <script src="js/game.js"></script>
-    <script src="js/speedGame.js"></script>
-    <script src="js/main.js"></script>
+        <script src="js/main.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

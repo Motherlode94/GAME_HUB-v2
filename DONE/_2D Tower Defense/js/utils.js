@@ -66,3 +66,14 @@ function drawCircle(ctx, x, y, radius, color = "rgba(255,255,255,0.2)") {
     ctx.strokeStyle = color;
     ctx.stroke();
 }
+// -----------------------------
+// ALÉATOIRE DÉTERMINISTE (décor stable)
+// -----------------------------
+
+function createSeededRandom(seed) {
+    let s = seed >>> 0;
+    return function () {
+        s = (s * 1664525 + 1013904223) >>> 0;
+        return s / 4294967296;
+    };
+}
