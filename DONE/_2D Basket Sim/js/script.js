@@ -1479,7 +1479,7 @@ function endGame() {
     if (isNew && score > 0) spawnConfetti(70);
 
     const accuracy = shotsTaken > 0 ? Math.round((basketsMade / shotsTaken) * 100) : 0;
-    const titleMap = { classic: "BUZZER BEATER !", precision: "FIN DE SÉRIE !", survival: "GAME OVER !" };
+    const titleMap = { classic: "SESSION TERMINÉE !", timer: "BUZZER BEATER !", defense: "DÉFI TERMINÉ !", precision: "FIN DE SÉRIE !", survival: "GAME OVER !" };
 
     document.getElementById("goTitle").textContent     = titleMap[selectedMode] || "GAME OVER !";
     document.getElementById("goScore").textContent     = score;
@@ -1507,6 +1507,7 @@ function startGame() {
 }
 
 function restartGame() {
+    if (selectedMode === "classic" && gameRunning && score > 0) saveScore(score, "classic");
     document.getElementById("gameOverScreen").classList.add("hidden");
     if (!gameStarted) { startGame(); return; }
     lastTime = 0;
@@ -1514,6 +1515,7 @@ function restartGame() {
 }
 
 function goMenu() {
+    if (selectedMode === "classic" && gameRunning && score > 0) saveScore(score, "classic");
     gameStarted = false;
     gameRunning = false;
     paused = false;
