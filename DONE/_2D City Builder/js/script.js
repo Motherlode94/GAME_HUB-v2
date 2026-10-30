@@ -32,6 +32,15 @@ const BUILDINGS = {
 let budget = 10000;
 let population = 0;
 let satisfaction = 50;
+// Choix du maire : arbitrage entre niveau de vie et recettes fiscales.
+const CITY_POLICIES = {
+  social: {name:'Ville solidaire', tax:0.55, happy:12, desc:'Impôts réduits, habitants plus heureux.'},
+  balanced: {name:'Gestion équilibrée', tax:1, happy:0, desc:'Recettes et satisfaction stables.'},
+  growth: {name:'Développement intensif', tax:1.8, happy:-13, desc:'Recettes accrues mais mécontentement.'}
+};
+let cityPolicy = 'balanced';
+try { const savedPolicy = localStorage.getItem('warlike-city-policy'); if (CITY_POLICIES[savedPolicy]) cityPolicy = savedPolicy; } catch (_) {}
+
 let tool = 'road';
 let speed = 1;
 let tick = 0;
@@ -174,6 +183,8 @@ function selectTool(t, btn) {
     if (el) el.classList.add('active');
   }
   updateToolAffordability();
+  const policyInfo = document.getElementById('city-policy-status');
+  if (policyInfo) policyInfo.textContent = CITY_POLICIES[cityPolicy].name + ' · Fiscalité x' + CITY_POLICIES[cityPolicy].tax + ' · Satisfaction ' + (CITY_POLICIES[cityPolicy].happy >= 0 ? '+' : '') + CITY_POLICIES[cityPolicy].happy;
 }
 
 // Keyboard shortcuts
@@ -373,7 +384,7 @@ function recalcResources() {
   }
 
   // Satisfaction
-  let sat = 50 + hap;
+  let sat = 50 + hap + CITY_POLICIES[cityPolicy].happy;
   if (!hasPower) sat -= 15;
   if (!hasWater) sat -= 15;
   if (population > 0 && rd < population / 8) sat -= 5;
@@ -559,7 +570,7 @@ window.gameTick = function gameTick() {
 
       // Taxes
       const taxRate = satisfaction > 70 ? 2 : satisfaction > 40 ? 1 : 0;
-      budget += population * taxRate;
+      budget += Math.round(population * taxRate * CITY_POLICIES[cityPolicy].tax);
 
       // Growth
       if (satisfaction > 60 && population > 0) {
@@ -599,3 +610,47 @@ updateMinimap();
 window.addEventListener('resize', () => {
   if (gameStarted) centerCamera();
 });
+
+/* Municipal policy panel: one active choice, actual economy + satisfaction tradeoffs. */
+function initMunicipalPolicies() {
+  const sidePanel = document.getElementById('side-panel');
+  if (!sidePanel || document.getElementById('city-policy-panel')) return;
+  const panel = document.createElement('section');
+  panel.id = 'city-policy-panel';
+  panel.className = 'panel-section';
+  panel.innerHTML = '<div class="panel-header">🏛️ Décisions du maire</div>' +
+    '<p id="city-policy-status" style="font-size:11px;line-height:1.5;opacity:.86;margin:8px 0"></p>' +
+    '<div id="city-policy-options" style="display:grid;gap:6px"></div>';
+  sidePanel.appendChild(panel);
+  const options = panel.querySelector('#city-policy-options');
+  Object.keys(CITY_POLICIES).forEach(key => {
+    const policy = CITY_POLICIES[key];
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.style.cssText = 'width:100%;text-align:left;padding:9px;border:1px solid #64748b;border-radius:7px;background:#18212c;color:#e5edf5;cursor:pointer;font-size:12px';
+    button.textContent = policy.name + ' — ' + policy.desc;
+    button.addEventListener('click', () => {
+      cityPolicy = key;
+      try { localStorage.setItem('warlike-city-policy', cityPolicy); } catch (_) {}
+      recalcResources();
+      updateUI();
+      refreshPolicyButtons();
+      if (typeof notify === 'function') notify('🏛️ Nouvelle politique : ' + policy.name, 'success');
+    });
+    button.dataset.policy = key;
+    options.appendChild(button);
+  });
+  function refreshPolicyButtons() {
+    options.querySelectorAll('button').forEach(button => {
+      const active = button.dataset.policy === cityPolicy;
+      button.setAttribute('aria-pressed', String(active));
+      button.style.borderColor = active ? '#e6c16a' : '#64748b';
+      button.style.background = active ? '#35412e' : '#18212c';
+    });
+  }
+  refreshPolicyButtons();
+  const status = document.getElementById('city-policy-status');
+  if (status) status.textContent = CITY_POLICIES[cityPolicy].name + ' · Fiscalité x' + CITY_POLICIES[cityPolicy].tax;
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMunicipalPolicies);
+else initMunicipalPolicies();
