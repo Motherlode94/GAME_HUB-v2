@@ -280,7 +280,10 @@ var POLICIES = [
     { id:'conscription',name:'Conscription',        min:0, max:100, default:20, effectDesc:'Armée ↑ / Prod & Bonheur ↓' },
     { id:'education_p', name:'Budget Éducation',    min:0, max:100, default:30, effectDesc:'Science ↑ / Or ↓' },
     { id:'liberte',     name:'Liberté Civile',      min:0, max:100, default:50, effectDesc:'Bonheur & Culture ↑ / Stabilité ↓' },
-    { id:'religion',    name:'Influence Religieuse', min:0, max:100, default:40, effectDesc:'Stabilité ↑ / Science ↓' }
+    { id:'religion',    name:'Influence Religieuse', min:0, max:100, default:40, effectDesc:'Stabilité ↑ / Science ↓' },
+    { id:'sante', name:'Budget Santé', min:0, max:100, default:25, effectDesc:'Bonheur & population ↑ / Or ↓' },
+    { id:'infrastructure_p', name:'Investissement Public', min:0, max:100, default:30, effectDesc:'Production ↑ / Or ↓' },
+    { id:'securite_p', name:'Sécurité Intérieure', min:0, max:100, default:35, effectDesc:'Stabilité ↑ / Or & liberté ↓' }
 ];
 
 var DECREES = [
@@ -519,7 +522,7 @@ function createDefaultState(nName, rName, gov, diff) {
         resources:{gold:Math.floor(100*dm.r),food:Math.floor(80*dm.r),prod:Math.floor(50*dm.r),science:0,culture:0},
         rates:{gold:5,food:3,prod:2,science:1,culture:1},
         buildings:{}, techs:[], currentResearch:null, army:{},
-        policies:{taxes:30,conscription:20,education_p:30,liberte:50,religion:40},
+        policies:{taxes:30,conscription:20,education_p:30,liberte:50,religion:40,sante:25,infrastructure_p:30,securite_p:35},
         activeDecrees:[], tempBonuses:[],
         eventControl:{nextAllowedTurn:1,lastEventTurn:0},
         diplomacy:{},
@@ -1608,6 +1611,14 @@ var Game = {
         // Temp bonuses
         state.tempBonuses = state.tempBonuses.filter(function(b) { b.turns--; return b.turns>0; });
 
+        // Public-policy effects are applied once per turn rather than on slider input.
+        var healthBudget = state.policies.sante || 0;
+        var securityBudget = state.policies.securite_p || 0;
+        state.happiness += Math.round((healthBudget - 25) / 25) -
+            Math.round((securityBudget - 35) / 30);
+        state.stability += Math.round((securityBudget - 35) / 20);
+        if (healthBudget >= 60 && state.resources.food >= state.population * 0.1)
+            state.population += Math.max(1, Math.floor(state.population * 0.002));
         // Stability drift
         if (state.happiness < 30) state.stability -= 2;
         if (state.happiness > 70) state.stability += 1;
@@ -1975,7 +1986,15 @@ var Game = {
         UI.updateAll();
     },
 
-    setPolicy: function(pid, val) { state.policies[pid]=parseInt(val); this._recalc(); UI.updateAll(); },
+    setPolicy: function(pid, val) {
+        var def = POLICIES.find(function(p){return p.id===pid;});
+        if (!state || !def) return;
+        var parsed = Number(val);
+        if (!Number.isFinite(parsed)) return;
+        state.policies[pid] = Math.max(def.min, Math.min(def.max, Math.round(parsed)));
+        this._recalc();
+        UI.updateAll();
+    },
 
     saveGame: function() {
         try { localStorage.setItem('btk_save',JSON.stringify(state)); UI.toast('Sauvegarde ok !','success'); }
@@ -2493,6 +2512,12 @@ var Game = {
         r.culture += Math.floor(state.policies.liberte * 0.1);
         r.culture += Math.floor(state.policies.religion * 0.05);
         r.science -= Math.floor(state.policies.religion * 0.05);
+        // Expanded public budget: sector benefits carry recurring treasury costs.
+        var policy = state.policies;
+        r.gold -= Math.floor((policy.sante || 0) * 0.12);
+        r.gold -= Math.floor((policy.infrastructure_p || 0) * 0.17);
+        r.gold -= Math.floor((policy.securite_p || 0) * 0.10);
+        r.prod += Math.floor((policy.infrastructure_p || 0) * 0.13);
 
         // Decrees
         state.activeDecrees.forEach(function(ad) {
@@ -3076,7 +3101,8 @@ var UI = {
             conscription: 'Conscription',
             education_p: 'Budget Education',
             liberte: 'Liberte Civile',
-            religion: 'Influence Religieuse'
+            religion: 'Influence Religieuse',
+            sante: 'Budget Santé', infrastructure_p: 'Investissement Public', securite_p: 'Sécurité Intérieure'
         };
 
         var policyEffects = {
@@ -3084,7 +3110,8 @@ var UI = {
             conscription: 'Armee + / Prod & Bonheur -',
             education_p: 'Science + / Or -',
             liberte: 'Bonheur & Culture + / Stabilite -',
-            religion: 'Stabilite + / Science -'
+            religion: 'Stabilite + / Science -',
+            sante: 'Bonheur & population + / Or -', infrastructure_p: 'Production + / Or -', securite_p: 'Stabilite + / Or & liberte -'
         };
 
         var decreeNames = {
