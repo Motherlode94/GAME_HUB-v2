@@ -836,10 +836,26 @@ function updateCombatUI() {
   document.getElementById('c-ebar').style.width   = Math.max(0, e.hp / e.maxhp * 100) + '%';
 }
 
+// Short combat animations, restarted on each action without affecting turn timing.
+function animateCombat(side, effect) {
+  const panel = document.querySelector(side === 'player' ? '.fighter-card:first-child' : '.fighter-card:last-child');
+  const windowEl = document.getElementById('combat-window');
+  if (!panel || !windowEl) return;
+  panel.classList.remove('combat-strike', 'combat-hit', 'combat-guard', 'combat-critical', 'combat-spell');
+  void panel.offsetWidth;
+  panel.classList.add(effect);
+  windowEl.classList.toggle('combat-impact', effect === 'combat-critical');
+  setTimeout(() => {
+    panel.classList.remove(effect);
+    windowEl.classList.remove('combat-impact');
+  }, 520);
+}
+
 function guardHandler() {
   if (!combat || combat.turn !== 'player') return;
   combat.turn = 'resolving';
   combat.guarding = true;
+  animateCombat('player', 'combat-guard');
   addLog('🛡 Tu prends une posture défensive : prochains dégâts réduits de 60 %.');
   document.getElementById('btn-attack').disabled = true;
   document.getElementById('btn-guard').disabled = true;
@@ -858,6 +874,7 @@ function attackHandler() {
   if (combat.enemy.rageActive) dmg = Math.floor(dmg * 0.8); // rage also raises def
 
   combat.enemy.hp -= dmg;
+  animateCombat('enemy', isCrit ? 'combat-critical' : 'combat-hit');
   spawnParticles(combat.enemy.x, combat.enemy.y, '#cc2222', isCrit ? 12 : 6, 'blood');
   spawnFloatingText(combat.enemy.x, combat.enemy.y, isCrit ? `💥 CRIT! -${dmg}` : `-${dmg}`, isCrit ? '#ffdd44' : '#ff4444');
   addLog(isCrit ? `💥 Coup critique ! ${dmg} dégâts à ${combat.enemy.name} !` : `🗡️ Tu infliges ${dmg} dégâts à ${combat.enemy.name} !`);
@@ -912,6 +929,7 @@ function enemyAttack() {
   }
 
   if (combat.guarding) {
+    animateCombat('player', 'combat-guard');
     const blocked = Math.max(0, dmg - Math.max(1, Math.ceil(dmg * 0.4)));
     dmg -= blocked;
     combat.guarding = false;
@@ -926,6 +944,7 @@ function enemyAttack() {
   }
 
   player.hp -= dmg;
+  if (!combat.guarding) animateCombat('player', spellCast ? 'combat-spell' : 'combat-hit');
   spawnParticles(player.x, player.y, '#883333', 6, 'blood');
   spawnFloatingText(player.x, player.y, `-${dmg}`, '#ff4444');
   screenShake.dur = 6; screenShake.x = 4; screenShake.y = 0;
