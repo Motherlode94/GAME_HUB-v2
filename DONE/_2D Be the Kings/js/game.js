@@ -237,7 +237,18 @@ var UNITS = [
     { id:'cyber_unite',  name:'Unité Cyber',        icon:'💻', era:'contemporaine', type:'special',  power:40, cost:{gold:350,prod:150},upkeep:{gold:8,food:0}, tech:'ia' },
     { id:'stealth',      name:'Chasseur Furtif',    icon:'🦅', era:'contemporaine', type:'air',      power:70, cost:{gold:600,prod:300},upkeep:{gold:15,food:2}, tech:'ia' },
     { id:'railgun',      name:'Railgun Naval',      icon:'⚡', era:'contemporaine', type:'naval',    power:90, cost:{gold:800,prod:400},upkeep:{gold:20,food:3}, tech:'quantique' },
-    { id:'mecha',        name:'Exosquelette',       icon:'🦾', era:'contemporaine', type:'melee',    power:65, cost:{gold:500,prod:250},upkeep:{gold:12,food:2}, tech:'nanotechnologie' }
+    { id:'mecha',        name:'Exosquelette',       icon:'🦾', era:'contemporaine', type:'melee',    power:65, cost:{gold:500,prod:250},upkeep:{gold:12,food:2}, tech:'nanotechnologie' },
+    // Renforts militaires contemporains accessibles via les technologies existantes.
+    { id:"infanterie_mecanisee", name:"Infanterie mécanisée", icon:"🚙", era:'contemporaine', type:"special", power:42, cost:{gold:270,prod:140}, upkeep:{gold:8,food:4}, tech:"blindes" },
+    { id:"vci_moderne", name:"Véhicules de combat d'infanterie", icon:"🚜", era:'contemporaine', type:"cavalry", power:49, cost:{gold:330,prod:180}, upkeep:{gold:11,food:3}, tech:"blindes" },
+    { id:"artillerie_mobile", name:"Artillerie automotrice", icon:"💥", era:'contemporaine', type:"siege", power:64, cost:{gold:425,prod:245}, upkeep:{gold:13,food:3}, tech:"artillerie" },
+    { id:"dca_mobile", name:"Défense antiaérienne mobile", icon:"🛡️", era:'contemporaine', type:"special", power:47, cost:{gold:340,prod:190}, upkeep:{gold:10,food:3}, tech:"radar" },
+    { id:"helicoptere_attaque", name:"Hélicoptères d'attaque", icon:"🚁", era:'contemporaine', type:"air", power:57, cost:{gold:410,prod:220}, upkeep:{gold:13,food:3}, tech:"aviation" },
+    { id:"transport_logistique", name:"Convois logistiques", icon:"🚚", era:'contemporaine', type:"special", power:20, cost:{gold:160,prod:110}, upkeep:{gold:4,food:2}, tech:"blindes" },
+    { id:"drone_recon", name:"Drones de reconnaissance", icon:"📡", era:'contemporaine', type:"air", power:26, cost:{gold:230,prod:115}, upkeep:{gold:5,food:0}, tech:"informatique" },
+    { id:"lance_roquettes", name:"Lance-roquettes multiples", icon:"🚀", era:'contemporaine', type:"siege", power:72, cost:{gold:460,prod:280}, upkeep:{gold:15,food:2}, tech:"fusion_t" },
+    { id:"frégate_moderne", name:"Frégates modernes", icon:"🚢", era:'contemporaine', type:"naval", power:58, cost:{gold:460,prod:270}, upkeep:{gold:13,food:4}, tech:"radar" },
+    { id:"commando_moderne", name:"Commandos modernes", icon:"🎖️", era:'contemporaine', type:"special", power:52, cost:{gold:340,prod:180}, upkeep:{gold:10,food:4}, tech:"informatique" }
 ];
 
 // ============================
