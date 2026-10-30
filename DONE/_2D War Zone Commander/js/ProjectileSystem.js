@@ -54,7 +54,7 @@ RTS.ProjectileSystem = {
 
         if (proj.type === "bullet" || proj.type === "sniper") {
             if (ts && !ts.isDead()) {
-                ts.takeDamage(proj.damage * RTS.FogOfWar.coverMultiplier(game, proj.x, proj.y, ix, iy), ix, iy, game.particles);
+                ts.takeDamage(proj.damage * RTS.FogOfWar.coverMultiplier(game, proj.originX, proj.originY, ix, iy), ix, iy, game.particles);
             }
             RTS.ParticleSystem.spawnBulletImpact(game.particles, ix, iy, proj.team);
             if (proj.type === "bullet") RTS.ParticleSystem.spawnCasing(game.particles, proj.x, proj.y);
