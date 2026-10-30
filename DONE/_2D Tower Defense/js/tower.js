@@ -53,7 +53,10 @@ const TARGET_MODES = [
     { key: 'first', label: 'Premier' },
     { key: 'last', label: 'Dernier' },
     { key: 'strong', label: 'Plus fort' },
-    { key: 'close', label: 'Plus proche' }
+    { key: 'close', label: 'Plus proche' },
+    { key: 'weak', label: 'À achever' },
+    { key: 'fast', label: 'Plus rapide' },
+    { key: 'armor', label: 'Blindé prioritaire' }
 ];
 
 // Bonus d'amélioration selon la doctrine choisie (touche G)
@@ -111,6 +114,15 @@ function findTarget(tower) {
                 break;
             case 'close':
                 if (distance(tower.x, tower.y, e.x, e.y) < distance(tower.x, tower.y, best.x, best.y)) best = e;
+                break;
+            case 'weak':
+                if (e.life < best.life || (e.life === best.life && e.traveled > best.traveled)) best = e;
+                break;
+            case 'fast':
+                if (e.speed * e.slowFactor > best.speed * best.slowFactor || (e.speed * e.slowFactor === best.speed * best.slowFactor && e.traveled > best.traveled)) best = e;
+                break;
+            case 'armor':
+                if (e.armor > best.armor || (e.armor === best.armor && e.traveled > best.traveled)) best = e;
                 break;
             default:
                 if (e.traveled > best.traveled) best = e;
