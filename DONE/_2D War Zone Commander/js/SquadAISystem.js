@@ -1,61 +1,49 @@
 window.RTS = window.RTS || {};
-
-/**
- * SquadAISystem
- *
- * Règles de faction :
- *   blue / ally  → n'attaquent que "red"   (géré par SquadCombatSystem)
- *   red          → attaquent "blue" et "ally"
- *
- * Ce système gère uniquement le déplacement IA des squads rouges.
- * Le combat est géré par SquadCombatSystem.
- */
+/* Enemy squad tactical movement: staggered decisions, target weighting, flanks, retreat. */
 RTS.SquadAISystem = {
-
     update: function(game, delta) {
-        // Les ennemis restent immobiles pendant le compte à rebours initial
-        if (!RTS.WaveSystem._prepDone) return;
-
-        var squads = game.squads;
-
-        // Cibles potentielles des rouges = bleus + alliés vivants
-        var targets = squads.filter(function(s) {
-            return (s.team === "blue" || s.team === "ally") && !s.isDead();
-        });
-
-        squads.forEach(function(red) {
-            if (red.team !== "red") return;
-            if (red.isDead()) return;
-            if (!red.def) return;
-
-            if (targets.length === 0) return;
-
-            var closest  = null;
-            var closestD = Infinity;
-
-            targets.forEach(function(t) {
-                var dx = t.x - red.x;
-                var dy = t.y - red.y;
-                var d  = Math.sqrt(dx * dx + dy * dy);
-                if (d < closestD) { closestD = d; closest = t; }
+        if (game.setupPhase || !RTS.WaveSystem._prepDone) return;
+        var enemies = game.squads.filter(function(s) { return (s.team === "blue" || s.team === "ally") && !s.isDead(); });
+        if (!enemies.length) return;
+        game.squads.forEach(function(red) {
+            if (red.team !== "red" || red.isDead() || !red.def) return;
+            red._decisionTimer = (red._decisionTimer || 0) - delta;
+            if (red._decisionTimer > 0) return;
+            red._decisionTimer = 0.65 + (red.id % 5) * 0.13;
+            var range = red.def.attackRange || 80, min = red.def.minRange || 0;
+            var best = null, score = Infinity, distance = 0;
+            enemies.forEach(function(t) {
+                var d = Math.hypot(t.x - red.x, t.y - red.y);
+                var threat = t.def && t.def.category === "vehicle" ? 0.95 : 1;
+                var hp = t.getTotalHp && t.getMaxHp ? t.getTotalHp() / Math.max(1, t.getMaxHp()) : 1;
+                var value = d * threat * (0.85 + hp * 0.15);
+                if (value < score) { score = value; best = t; distance = d; }
             });
-
-            if (!closest) return;
-
-            var range = red.def.attackRange || 80;
-            var stop  = red.def.minRange    || 0;
-
-            if (stop > 0 && closestD < stop) {
+            if (!best) return;
+            var hpRatio = red.getTotalHp() / Math.max(1, red.getMaxHp());
+            var dx = red.x - best.x, dy = red.y - best.y;
+            var len = Math.max(1, Math.hypot(dx, dy)), nx = dx / len, ny = dy / len;
+            var tx, ty;
+            if (hpRatio < 0.27 && distance < range * 1.5) {
+                // Damaged units withdraw and preserve veterans instead of charging.
+                tx = red.x + nx * 150; ty = red.y + ny * 150;
+            } else if (min > 0 && distance < min * 1.15) {
+                tx = red.x + nx * (min - distance + 65);
+                ty = red.y + ny * (min - distance + 65);
+            } else if (distance > range * 0.86) {
+                // Alternating group flanks instead of piling up at the same point.
+                var side = red.id % 2 ? 1 : -1;
+                var offset = Math.min(125, distance * 0.28);
+                tx = best.x + nx * range * 0.72 + (-ny) * side * offset;
+                ty = best.y + ny * range * 0.72 + nx * side * offset;
+            } else {
                 red.target = null;
                 return;
             }
-
-            // Avancer si hors portée, s'arrêter dès qu'on peut tirer (92%)
-            if (closestD > range * 0.92) {
-                red.target = { x: closest.x, y: closest.y };
-            } else {
-                red.target = null;   // en portée → on tire, on ne bouge plus
-            }
+            red.target = {
+                x: Math.max(25, Math.min(RTS.WORLD_W - 25, tx)),
+                y: Math.max(25, Math.min(RTS.WORLD_H - 25, ty))
+            };
         });
     }
 };
