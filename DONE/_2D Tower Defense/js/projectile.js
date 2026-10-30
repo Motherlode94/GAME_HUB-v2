@@ -83,3 +83,32 @@ function drawProjectiles(ctx) {
         ctx.stroke();
     });
 }
+
+ 
+// Separate hostile ammunition: enemy gunmen can destroy player defenses.
+let enemyProjectiles = [];
+function updateEnemyProjectiles(dt) {
+    enemyProjectiles.forEach((p) => {
+        if (!towers.includes(p.target)) { p.done = true; return; }
+        const dx = p.target.x - p.x, dy = p.target.y - p.y;
+        const dist = Math.hypot(dx, dy), step = p.speed * dt / 1000;
+        if (dist <= Math.max(5, step)) {
+            p.target.hp -= p.damage;
+            createImpactEffect(p.target.x, p.target.y, p.color);
+            if (p.target.hp <= 0) {
+                const i = towers.indexOf(p.target);
+                if (i !== -1) towers.splice(i, 1);
+                gameState.selectedTowers = gameState.selectedTowers.filter(t => t !== p.target);
+                createExplosion(p.target.x, p.target.y, 30, 'rgba(255,110,50,.6)');
+            }
+            p.done = true;
+        } else { p.x += dx / dist * step; p.y += dy / dist * step; }
+    });
+    enemyProjectiles = enemyProjectiles.filter(p => !p.done);
+}
+function drawEnemyProjectiles(ctx) {
+    enemyProjectiles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
+    });
+}
