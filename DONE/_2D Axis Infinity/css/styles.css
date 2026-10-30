@@ -1501,3 +1501,12 @@ body {
 .axis-signature {position:absolute;right:2px;bottom:2px;padding:1px 4px;border-radius:5px;background:#0b1423e8;color:#fff;font:bold 9px Arial,sans-serif;letter-spacing:.05em;z-index:2;}
 .team-slot .axis-portrait {min-width:40px;min-height:40px;width:100%;height:100%;border-radius:10px;}
 .battle-creature-icon.axis-portrait {min-width:72px;min-height:72px;}
+
+
+/* Creature selection and battle interface polish */
+.start-container,.selection-header{filter:drop-shadow(0 12px 25px rgba(0,0,0,.25))}
+.game-title{text-shadow:0 0 28px rgba(173,118,255,.33),0 6px 27px rgba(0,0,0,.6)}
+.difficulty-btn{transition:filter .16s ease,transform .16s ease}
+.difficulty-btn:hover:not(:disabled){filter:brightness(1.16);transform:translateY(-2px)}
+.btn:focus-visible,.difficulty-btn:focus-visible{outline:2px solid #e4c2ff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.difficulty-btn{transition:none!important}.difficulty-btn:hover{transform:none!important}}
