@@ -54,14 +54,14 @@ RTS.ProjectileSystem = {
 
         if (proj.type === "bullet" || proj.type === "sniper") {
             if (ts && !ts.isDead()) {
-                ts.takeDamage(proj.damage, ix, iy, game.particles);
+                ts.takeDamage(proj.damage * RTS.FogOfWar.coverMultiplier(game, proj.x, proj.y, ix, iy), ix, iy, game.particles);
             }
             RTS.ParticleSystem.spawnBulletImpact(game.particles, ix, iy, proj.team);
             if (proj.type === "bullet") RTS.ParticleSystem.spawnCasing(game.particles, proj.x, proj.y);
 
         } else if (proj.type === "shell" || proj.type === "artillery" || proj.type === "rocket") {
             if (ts && !ts.isDead()) {
-                ts.takeDamage(proj.damage, ix, iy, game.particles);
+                ts.takeDamage(proj.damage * RTS.FogOfWar.coverMultiplier(game, proj.x, proj.y, ix, iy), ix, iy, game.particles);
             }
             // AoE — ne touche pas les alliés du tireur
             if (proj.aoeRadius > 0) {
