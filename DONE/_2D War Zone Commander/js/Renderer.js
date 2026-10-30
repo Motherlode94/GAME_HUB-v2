@@ -8,6 +8,7 @@ RTS.Renderer.render = function(game) {
     ctx.save();
     game.camera.applyTransform(ctx);
 
+    RTS.Renderer._drawTerrain(ctx);
     RTS.Renderer._drawGrid(ctx, game.camera);
     ctx.strokeStyle = "rgba(255,255,255,0.04)";
     ctx.lineWidth = 4;
@@ -108,4 +109,34 @@ RTS.Renderer._updateSelPanel = function(game) {
         panel.classList.add("hidden");
         panel.style.bottom = "18px";
     }
+};
+/* Cached procedural ground texture: reproducible terrain detail without external assets. */
+RTS.Renderer._terrainTexture = null;
+RTS.Renderer._drawTerrain = function(ctx) {
+    if (!RTS.Renderer._terrainTexture) {
+        var tile = document.createElement('canvas');
+        tile.width = 512; tile.height = 512;
+        var t = tile.getContext('2d');
+        t.fillStyle = '#404638';
+        t.fillRect(0, 0, 512, 512);
+        // Seeded randomness avoids flicker and is generated only once.
+        var seed = 74231;
+        function rand() { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; }
+        for (var i = 0; i < 1850; i++) {
+            var x = rand()*512, y = rand()*512;
+            var r = 1 + rand()*15;
+            t.fillStyle = rand() > .5 ? 'rgba(119,132,83,.14)' : 'rgba(19,29,23,.16)';
+            t.beginPath(); t.ellipse(x,y,r,r*(.3+rand()*.55),rand()*6.28,0,Math.PI*2);t.fill();
+        }
+        for (var j = 0; j < 85; j++) {
+            var px=rand()*512, py=rand()*512;
+            t.fillStyle='rgba(174,159,119,.13)';
+            t.fillRect(px,py,2+rand()*6,1+rand()*3);
+        }
+        RTS.Renderer._terrainTexture = tile;
+    }
+    // Restrict the procedural tile to the actual map; no gameplay collision changes.
+    var pattern = ctx.createPattern(RTS.Renderer._terrainTexture, 'repeat');
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, RTS.WORLD_W, RTS.WORLD_H);
 };
