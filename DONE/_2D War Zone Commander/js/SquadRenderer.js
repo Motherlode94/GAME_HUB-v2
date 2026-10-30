@@ -114,6 +114,10 @@ RTS.SquadRenderer = {
             case "fighter_aircraft": RTS.SquadRenderer._drawApache(ctx,m,s,isBlue); break;
             case "strike_aircraft": RTS.SquadRenderer._drawApache(ctx,m,s,isBlue); break;
             case "loitering_drone": RTS.SquadRenderer._drawApache(ctx,m,s,isBlue); break;
+            case "heavy_mbt": RTS.SquadRenderer._drawM1a2(ctx,m,s,isBlue); break;
+            case "wheeled_at": RTS.SquadRenderer._drawBradley(ctx,m,s,isBlue); break;
+            case "air_defense_radar": RTS.SquadRenderer._drawMlrs(ctx,m,s,isBlue); break;
+            case "ammo_carrier": RTS.SquadRenderer._drawMatv(ctx,m,s,isBlue); break;
             // Fallback (anciens noms ou inconnus)
             default:            RTS.SquadRenderer._drawRiflemen(ctx, m, s, isBlue);   break;
         }
