@@ -3,6 +3,8 @@ let enemies = [];
 // speed en pixels/seconde
 const ENEMY_TYPES = {
     BASIC:   { name: 'Soldat',  color: '#e74c3c', speed: 55, hp: 90,   armor: 0, reward: 6,   score: 10,  size: 20, lives: 1,  shape: 'square' },
+    GUNNER:  { name: 'Tireur', color: '#bf4343', speed: 48, hp: 105, armor: 1, reward: 10, score: 22, size: 20, lives: 1, shape: 'hex', range: 165, fireRate: 1300, damage: 12 },
+    ROCKET:  { name: 'Lance-roquettes', color: '#ab623e', speed: 34, hp: 135, armor: 2, reward: 17, score: 36, size: 23, lives: 1, shape: 'diamond', range: 190, fireRate: 2700, damage: 29 },
     FAST:    { name: 'Coureur', color: '#ff4fb0', speed: 95, hp: 55,   armor: 0, reward: 7,   score: 15,  size: 16, lives: 1,  shape: 'diamond' },
     SWARM:   { name: 'Essaim',  color: '#f1c40f', speed: 75, hp: 28,   armor: 0, reward: 2,   score: 4,   size: 12, lives: 1,  shape: 'circle' },
     ARMORED: { name: 'Blindé',  color: '#95a5a6', speed: 45, hp: 170,  armor: 8, reward: 12,  score: 30,  size: 22, lives: 1,  shape: 'hex' },
@@ -18,6 +20,8 @@ function buildWaveGroups(wave) {
     };
 
     add('BASIC', 6 + Math.floor(wave * 1.5), 750);
+    if (wave >= 2) add('GUNNER', Math.min(9, 1 + Math.floor(wave / 2)), 1100);
+    if (wave >= 5) add('ROCKET', Math.min(6, Math.floor(wave / 4)), 1650);
     if (wave >= 3) add('FAST', Math.floor((wave - 1) * 0.9), 450);
     if (wave >= 4 && wave % 2 === 0) add('SWARM', 8 + wave, 170);
     if (wave >= 6) add('ARMORED', Math.floor((wave - 4) * 0.6), 1100);
@@ -76,6 +80,7 @@ function spawnEnemy(typeKey, wave) {
         slowFactor: 1,
         slowTimer: 0,
         hitFlash: 0,
+        fireTimer: Math.random() * 800,
         wobble: Math.random() * Math.PI * 2
     });
 }
@@ -107,6 +112,21 @@ function updateEnemies(dt) {
         }
         if (enemy.hitFlash > 0) enemy.hitFlash -= dt;
         enemy.wobble += dt * 0.01;
+        const shooter = ENEMY_TYPES[enemy.type];
+        if (shooter.range && enemy.life > 0 && !enemy.reachedEnd && towers.length) {
+            enemy.fireTimer = Math.max(0, enemy.fireTimer - dt);
+            let target = null, best = shooter.range;
+            towers.forEach((tower) => {
+                if (tower.hp <= 0) return;
+                const dist = distance(enemy.x, enemy.y, tower.x, tower.y);
+                if (dist < best) { best = dist; target = tower; }
+            });
+            if (target && enemy.fireTimer <= 0) {
+                enemy.fireTimer = shooter.fireRate;
+                enemyProjectiles.push({ x: enemy.x, y: enemy.y, target, speed: enemy.type === 'ROCKET' ? 215 : 380,
+                    damage: shooter.damage, color: enemy.type === 'ROCKET' ? '#ff9748' : '#ff5555' });
+            }
+        }
 
         let move = (enemy.speed * enemy.slowFactor * dt) / 1000;
         while (move > 0 && enemy.waypoint < pathWaypoints.length) {
@@ -204,6 +224,10 @@ function drawEnemies(ctx) {
             ctx.beginPath();
             ctx.arc(0, 0, size / 2 + 4, 0, Math.PI * 2);
             ctx.stroke();
+        }
+        if (enemy.type === 'GUNNER' || enemy.type === 'ROCKET') {
+            ctx.strokeStyle = '#262626'; ctx.lineWidth = enemy.type === 'ROCKET' ? 6 : 3;
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(14, 0); ctx.stroke();
         }
         ctx.restore();
 
