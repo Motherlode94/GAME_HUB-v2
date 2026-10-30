@@ -34,17 +34,17 @@
           <div class="mode-card active" data-mode="classic" onclick="selectMode('classic')">
             <div class="mode-icon">&#9201;</div>
             <div class="mode-name">CLASSIQUE</div>
-            <div class="mode-desc">30 sec - Max de paniers - Combos</div>
+            <div class="mode-desc">30 s - Swish et 3 pts rallongent le temps</div>
           </div>
           <div class="mode-card" data-mode="precision" onclick="selectMode('precision')">
             <div class="mode-icon">&#127919;</div>
             <div class="mode-name">PRECISION</div>
-            <div class="mode-desc">10 tirs - Vise juste - Score parfait</div>
+            <div class="mode-desc">10 tirs - De plus en plus loin</div>
           </div>
           <div class="mode-card" data-mode="survival" onclick="selectMode('survival')">
             <div class="mode-icon">&#128128;</div>
             <div class="mode-name">SURVIE</div>
-            <div class="mode-desc">Temps infini - 3 rates = fin - Panier mobile</div>
+            <div class="mode-desc">3 ratés = fin - Panier mobile et vent</div>
           </div>
         </div>
       </div>
@@ -65,14 +65,14 @@
     <div class="overlay-box">
       <h2>COMMENT JOUER</h2>
       <ul class="how-list">
-        <li><strong>Vise</strong> - Clique n'importe ou pour lancer le ballon dans cette direction</li>
-        <li><strong>Astuce</strong> - Vise legerement au-dessus du panier pour une trajectoire en arc</li>
-        <li><strong>Combo</strong> - Marque plusieurs paniers d'affilee pour multiplier ton score</li>
-        <li><strong>Classique</strong> - 30 secondes. Fais le max !</li>
-        <li><strong>Precision</strong> - 10 tirs seulement. Vise parfait !</li>
-        <li><strong>Survie</strong> - Le panier bouge ! 3 rates et c'est termine</li>
-        <li><strong>Bonus</strong> - 2 pts depuis loin, 3 pts depuis tres loin</li>
-        <li><strong>Swish</strong> - Passe sans toucher les bords = bonus x1.5 !</li>
+        <li><strong>Viser</strong> - Maintiens le clic (ou le doigt) pour voir la trajectoire, relâche pour tirer. Plus tu vises loin du ballon, plus le tir est puissant</li>
+        <li><strong>Points</strong> - Selon la zone d'où tu tires : 1, 2 ou 3 pts (indiqué au-dessus du ballon)</li>
+        <li><strong>Combo</strong> - Les paniers d'affilée multiplient tes points (jusqu'à x10)</li>
+        <li><strong>Swish</strong> - Sans toucher le cercle ni la planche = points x1.5</li>
+        <li><strong>Classique</strong> - 30 s. Un swish donne +2 s, un 3 pts +1 s. Un panier marqué après la sirène compte double !</li>
+        <li><strong>Précision</strong> - 10 tirs, de plus en plus loin</li>
+        <li><strong>Survie</strong> - 3 ratés et c'est fini. Le panier bouge après 3 paniers, le vent se lève après 6</li>
+        <li><strong>Clavier</strong> - P / Échap : pause, R : rejouer, M : son</li>
       </ul>
       <button class="btn-primary" onclick="hideHowTo()">C'EST PARTI !</button>
     </div>
@@ -115,6 +115,8 @@
     <div id="bottomBar">
       <div id="streakDisplay"></div>
       <div class="game-btns">
+        <button class="btn-sm btn-grey" id="muteBtn" onclick="toggleMute()" aria-label="Son">🔊</button>
+        <button class="btn-sm btn-grey" id="pauseBtn" onclick="togglePause()">PAUSE</button>
         <button class="btn-sm btn-gold" onclick="restartGame()">RESTART</button>
         <button class="btn-sm btn-grey" onclick="goMenu()">MENU</button>
       </div>
@@ -125,6 +127,7 @@
   <div id="gameOverScreen" class="overlay hidden">
     <div class="overlay-box go-box">
       <h2 id="goTitle">BUZZER BEATER !</h2>
+      <p class="go-mode" id="goMode"></p>
       <div id="goNewRecord" class="record-badge hidden">NOUVEAU RECORD !</div>
       <p class="go-score">Score final : <strong id="goScore">0</strong></p>
       <div class="stats-grid">
@@ -133,7 +136,8 @@
         <div class="stat-cell"><span class="stat-label">PRECISION</span><span class="stat-val" id="goAccuracy">0%</span></div>
         <div class="stat-cell"><span class="stat-label">MEILLEUR COMBO</span><span class="stat-val" id="goCombo">x1</span></div>
         <div class="stat-cell"><span class="stat-label">SWISH</span><span class="stat-val" id="goSwish">0</span></div>
-        <div class="stat-cell"><span class="stat-label">RECORD</span><span class="stat-val" id="goHs">0</span></div>
+        <div class="stat-cell"><span class="stat-label">PANIERS À 3 PTS</span><span class="stat-val" id="goThrees">0</span></div>
+        <div class="stat-cell stat-wide"><span class="stat-label">RECORD</span><span class="stat-val" id="goHs">0</span></div>
       </div>
       <div class="go-btns">
         <button class="btn-primary" onclick="restartGame()">REJOUER</button>
@@ -142,6 +146,7 @@
     </div>
   </div>
 
+  <script src="../../js/scores.js"></script>
   <script src="js/script.js"></script>
 </body>
 </html>
