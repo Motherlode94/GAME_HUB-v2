@@ -69,6 +69,8 @@ function addTower(gridX, gridY, type = 'BASIC') {
     const template = TOWER_TYPES[type] || TOWER_TYPES.BASIC;
     const tower = {
         id: nextTowerId++,
+        hp: 150,
+        maxHp: 150,
         gridX,
         gridY,
         x: gridToWorld(gridX) + TILE_SIZE / 2,
@@ -271,6 +273,10 @@ function drawTowers(ctx) {
 
     towers.forEach((tower) => {
         drawTowerBody(ctx, tower.x, tower.y, tower.type, tower.angle, tower.level, tower.recoil);
+        if (tower.hp < tower.maxHp) {
+            ctx.fillStyle = '#371717'; ctx.fillRect(tower.x - 17, tower.y - 25, 34, 4);
+            ctx.fillStyle = '#65ca75'; ctx.fillRect(tower.x - 17, tower.y - 25, 34 * Math.max(0, tower.hp / tower.maxHp), 4);
+        }
         if (gameState.selectedTowers.includes(tower)) {
             ctx.strokeStyle = '#FFD700';
             ctx.lineWidth = 3;
