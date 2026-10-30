@@ -34,6 +34,9 @@ const WEAPONS_DATA = {
     shotgun: { label: 'SHOTGUN', icon: '💥', color: '#ff8800', fireRate: 22, ammoMax: 24,  ammoGrant: 12,  bulletSpeed: 12, spread: 0.28, pellets: 5, damage: 1 },
     rocket:  { label: 'ROCKET',  icon: '🚀', color: '#ff4400', fireRate: 40, ammoMax: 10,  ammoGrant: 5,   bulletSpeed: 9,  spread: 0, pellets: 1, damage: 5 },
     laser:   { label: 'LASER',   icon: '⚡', color: '#44ffff', fireRate: 14, ammoMax: 20,  ammoGrant: 10,  bulletSpeed: 22, spread: 0, pellets: 1, damage: 2 },
+    smg:     { label: 'SMG',     icon: '▸', color: '#a5f27b', fireRate: 4, ammoMax: 160, ammoGrant: 100, bulletSpeed: 16, spread: 0.11, pellets: 1, damage: 1 },
+    dmr:     { label: 'DMR',     icon: '⌖', color: '#dbb6ff', fireRate: 28, ammoMax: 36, ammoGrant: 24, bulletSpeed: 24, spread: 0.01, pellets: 1, damage: 4 },
+    lmg:     { label: 'LMG',     icon: '▰', color: '#ffca78', fireRate: 9, ammoMax: 220, ammoGrant: 120, bulletSpeed: 15, spread: 0.13, pellets: 1, damage: 2 },
 };
 
 // ── Resize ─────────────────────────────────────────
@@ -198,6 +201,9 @@ const POWERUP_TYPES = [
     { id: 'wpn_rocket',     color: '#ff4400', label: '🚀 ROCKET',       icon: 'RL' },
     { id: 'wpn_laser',      color: '#44ffff', label: '⚡ LASER',        icon: 'LZ' },
     { id: 'wpn_pistol',     color: '#ffff88', label: '◎ PISTOL',       icon: 'PT' },
+    { id: 'wpn_smg',        color: '#a5f27b', label: 'SMG', icon: 'SM' },
+    { id: 'wpn_dmr',        color: '#dbb6ff', label: 'DMR', icon: 'DM' },
+    { id: 'wpn_lmg',        color: '#ffca78', label: 'LMG', icon: 'LM' },
 ];
 
 class PowerUp {
@@ -259,7 +265,10 @@ function spawnPowerUp(x, y, forceAmmo) {
     else if (r < 0.72)   { typeId = 'rapid'; }
     else if (r < 0.80)   { typeId = 'wpn_shotgun'; }
     else if (r < 0.88)   { typeId = 'wpn_rocket'; }
-    else if (r < 0.95)   { typeId = 'wpn_laser'; }
+    else if (r < 0.93)   { typeId = 'wpn_laser'; }
+    else if (r < 0.955)  { typeId = 'wpn_smg'; }
+    else if (r < 0.975)  { typeId = 'wpn_dmr'; }
+    else if (r < 0.995)  { typeId = 'wpn_lmg'; }
     else                  { typeId = 'nuke'; }
     powerups.push(new PowerUp(x, y, typeId));
 }
