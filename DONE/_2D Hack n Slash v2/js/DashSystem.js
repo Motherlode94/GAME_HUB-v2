@@ -6,7 +6,7 @@ class DashSystem {
         this.dashTimer = 0;
 
         this.dashDuration = 10;
-        this.dashSpeed = 12;
+        this.dashSpeed = 3;
 
         this.cooldown = 0;
         this.maxCooldown = 60;
