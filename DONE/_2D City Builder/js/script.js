@@ -8,6 +8,7 @@ const GRID = 30;
 
 const BUILDINGS = {
   bus_stop: { cost: 150, emoji: '🚏', label: 'Arrêt de bus', pN: 0, wN: 0, pop: 0, income: 0, upkeep: 4, happy: 1, pG: 0, wG: 0 },
+  barracks: { cost: 1200, emoji:'🎖️', label:'Caserne', pN: 3, wN: 2, pop: 0, income: 0, upkeep: 20, happy: 1, pG: 0, wG: 0 },
   road:     { cost: 10,   emoji: '',    label: 'Route',         pN: 0, wN: 0, pop: 0,      income: 0,  upkeep: 0,  happy: 0,  pG: 0,  wG: 0  },
   house:    { cost: 100,  emoji: '🏠', label: 'Maison',        pN: 1, wN: 1, pop: [3,8],  income: 5,  upkeep: 1,  happy: 0,  pG: 0,  wG: 0  },
   shop:     { cost: 200,  emoji: '🏪', label: 'Commerce',      pN: 2, wN: 1, pop: [1,3],  income: 12, upkeep: 3,  happy: 2,  pG: 0,  wG: 0  },
