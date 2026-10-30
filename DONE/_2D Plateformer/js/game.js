@@ -238,6 +238,23 @@ var Game = (function () {
         }
     }
 
+    // Subtle cinematic screen-space lighting. Cached by viewport size.
+    var _lightOverlay = null;
+    function _drawAtmosphere() {
+        if (!_lightOverlay || _lightOverlay.width !== W || _lightOverlay.height !== H) {
+            _lightOverlay = document.createElement('canvas');
+            _lightOverlay.width = W; _lightOverlay.height = H;
+            var light = _lightOverlay.getContext('2d');
+            var vignette = light.createRadialGradient(W * .5, H * .43, H * .15, W * .5, H * .5, Math.max(W, H) * .72);
+            vignette.addColorStop(0, 'rgba(3,8,19,0)');
+            vignette.addColorStop(.65, 'rgba(5,8,19,.035)');
+            vignette.addColorStop(1, 'rgba(6,8,24,.35)');
+            light.fillStyle = vignette;
+            light.fillRect(0, 0, W, H);
+        }
+        ctx.drawImage(_lightOverlay, 0, 0);
+    }
+
     // ── Draw ──────────────────────────────────
     function _draw() {
         ctx.clearRect(0, 0, W, H);
@@ -281,6 +298,7 @@ var Game = (function () {
         player.draw(ctx);
 
         ctx.restore();
+        _drawAtmosphere();
 
         // ── HUD (always screen-space) ───────────
         HUD.draw(ctx, score, lives, totalCoins, lvl.name, W);
