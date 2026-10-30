@@ -34,12 +34,12 @@ function impactProjectile(p) {
     if (p.splash) {
         getEnemiesInRange(p.x, p.y, p.splash).forEach((enemy) => {
             const dmg = enemy === p.target ? p.damage : p.damage * 0.7;
-            damageEnemy(enemy, dmg, p.tower);
+            damageEnemy(enemy, dmg, p.tower, !!p.pierce);
             if (p.slow) applySlow(enemy, p.slow.factor, p.slow.duration);
         });
         createExplosion(p.x, p.y, p.splash, p.slow ? 'rgba(130, 220, 255, 0.6)' : 'rgba(255, 140, 40, 0.6)');
     } else if (p.target && p.target.life > 0) {
-        damageEnemy(p.target, p.damage, p.tower);
+        damageEnemy(p.target, p.damage, p.tower, !!p.pierce);
         if (p.slow) applySlow(p.target, p.slow.factor, p.slow.duration);
         createImpactEffect(p.x, p.y);
     }
