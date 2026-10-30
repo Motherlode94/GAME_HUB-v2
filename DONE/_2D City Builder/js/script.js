@@ -349,11 +349,47 @@ function countBuildingType(type) {
 
 function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 
+// Connected road network: only the largest road component is considered the
+// municipal backbone. Isolated roads still permit construction but limit output.
+function getMainRoadNetwork() {
+  const seen = new Set();
+  let largest = new Set();
+  const id = (x, y) => y * GRID + x;
+  for (let y = 0; y < GRID; y++) for (let x = 0; x < GRID; x++) {
+    if (grid[y][x].type !== 'road' || seen.has(id(x,y))) continue;
+    const network = new Set();
+    const queue = [[x,y]];
+    seen.add(id(x,y));
+    for (let i = 0; i < queue.length; i++) {
+      const [cx,cy] = queue[i];
+      network.add(id(cx,cy));
+      for (const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const nx=cx+dx, ny=cy+dy;
+        if (nx<0 || ny<0 || nx>=GRID || ny>=GRID) continue;
+        const k=id(nx,ny);
+        if (grid[ny][nx].type==='road' && !seen.has(k)) {
+          seen.add(k); queue.push([nx,ny]);
+        }
+      }
+    }
+    if (network.size > largest.size) largest = network;
+  }
+  return largest;
+}
+
+function isConnectedToMainRoad(x, y, network) {
+  return [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy]) => {
+    const nx=x+dx,ny=y+dy;
+    return nx>=0 && ny>=0 && nx<GRID && ny<GRID && network.has(ny*GRID+nx);
+  });
+}
+
 // ═══════════════════════════════════════
 //  RESOURCE SYSTEM
 // ═══════════════════════════════════════
 function recalcResources() {
-  let pG=0, pN=0, wG=0, wN=0, inc=0, up=0, hap=0, bld=0, rd=0;
+  let pG=0, pN=0, wG=0, wN=0, inc=0, up=0, hap=0, bld=0, rd=0, isolated=0;
+  const mainRoad = getMainRoadNetwork();
 
   for (let y = 0; y < GRID; y++) {
     for (let x = 0; x < GRID; x++) {
@@ -365,7 +401,11 @@ function recalcResources() {
       bld++;
       pG += b.pG; pN += b.pN;
       wG += b.wG; wN += b.wN;
-      inc += b.income; up += b.upkeep;
+      const connected = mainRoad.size===0 || isConnectedToMainRoad(x,y,mainRoad);
+      if (!connected) isolated++;
+      // Disconnected districts lose commercial access, not utility supply.
+      inc += connected ? b.income : Math.floor(b.income * 0.65);
+      up += b.upkeep;
       hap += b.happy;
     }
   }
@@ -381,6 +421,7 @@ function recalcResources() {
       const b = BUILDINGS[c.type];
       c.el.classList.toggle('no-power', !hasPower && b.pN > 0);
       c.el.classList.toggle('no-water', !hasWater && b.wN > 0);
+      c.el.classList.toggle('disconnected-road', mainRoad.size>0 && !isConnectedToMainRoad(x,y,mainRoad));
     }
   }
 
@@ -389,6 +430,7 @@ function recalcResources() {
   if (!hasPower) sat -= 15;
   if (!hasWater) sat -= 15;
   if (population > 0 && rd < population / 8) sat -= 5;
+  sat -= Math.min(12, isolated * 2);
   // Pénalités externes (crime, pollution) injectées par systems.js
   if (typeof window._satPenaltyCrime     === 'number') sat -= window._satPenaltyCrime;
   if (typeof window._satPenaltyPollution === 'number') sat -= window._satPenaltyPollution;
@@ -396,7 +438,7 @@ function recalcResources() {
   if (typeof window._satBonus            === 'number') sat += window._satBonus;
   satisfaction = clamp(Math.round(sat), 0, 100);
 
-  res = { pG, pN, wG, wN, income: inc, upkeep: up, buildings: bld, roads: rd };
+  res = { pG, pN, wG, wN, income: inc, upkeep: up, buildings: bld, roads: rd, isolated };
 }
 
 // ═══════════════════════════════════════
