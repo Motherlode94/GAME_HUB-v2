@@ -466,6 +466,39 @@ class Player {
             ctx.globalAlpha = 1;
         }
 
+        // Combat-state poses: guard silhouette and motion accents are visual only.
+        // Keep hitboxes and input handling entirely independent of these strokes.
+        if (this.guarding && this.guardBroken === 0) {
+            ctx.save();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(20,31,48,.65)';
+            ctx.beginPath();
+            ctx.ellipse(cx + this.facing * 17, this.y + 49, 9, 22, this.facing * -.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = this.glowColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(cx + this.facing * 17, this.y + 49, 9, 22, this.facing * -.2, -Math.PI * .65, Math.PI * .65);
+            ctx.stroke();
+            ctx.restore();
+        }
+        if (this.isAttacking || this.isDashing) {
+            ctx.save();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = this.glowColor;
+            ctx.globalAlpha = this.isDashing ? .42 : .28;
+            ctx.lineWidth = this.isDashing ? 3 : 2;
+            for (let streak = 0; streak < 3; streak++) {
+                const y = this.y + 31 + streak * 15;
+                const back = cx - this.facing * (19 + streak * 5);
+                ctx.beginPath();
+                ctx.moveTo(back, y);
+                ctx.lineTo(back - this.facing * (this.isDashing ? 29 : 17), y + 3);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
         // Jambes animées
         const legSwing = Math.sin(this.walkCycle) * 10;
         ctx.strokeStyle = shadeColor(this.color, -50);
