@@ -928,6 +928,7 @@ function enemyAttack() {
     addLog(`🔴 ${e.name} t'inflige ${dmg} dégâts !`);
   }
 
+  const wasGuarding = combat.guarding;
   if (combat.guarding) {
     animateCombat('player', 'combat-guard');
     const blocked = Math.max(0, dmg - Math.max(1, Math.ceil(dmg * 0.4)));
@@ -944,7 +945,7 @@ function enemyAttack() {
   }
 
   player.hp -= dmg;
-  if (!combat.guarding) animateCombat('player', spellCast ? 'combat-spell' : 'combat-hit');
+  if (!wasGuarding) animateCombat('player', spellCast ? 'combat-spell' : 'combat-hit');
   spawnParticles(player.x, player.y, '#883333', 6, 'blood');
   spawnFloatingText(player.x, player.y, `-${dmg}`, '#ff4444');
   screenShake.dur = 6; screenShake.x = 4; screenShake.y = 0;
