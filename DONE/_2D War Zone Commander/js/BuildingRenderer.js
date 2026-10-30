@@ -19,13 +19,7 @@ RTS.BuildingRenderer = {
     render: function(game) {
         var ctx = game.ctx;
 
-        // Cratères
-        game.craters.forEach(function(c){
-            ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
-            ctx.fillStyle = "rgba(0,0,0,.38)"; ctx.fill();
-            ctx.strokeStyle = "rgba(80,60,40,.4)"; ctx.lineWidth = 1.5; ctx.stroke();
-        });
-
+        // Craters are rendered once by RTS.Renderer beneath structures.
         game.buildings.forEach(function(b) {
             RTS.BuildingRenderer._drawBuilding(ctx, b);
         });
