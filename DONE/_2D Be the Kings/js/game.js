@@ -112,7 +112,18 @@ var BUILDINGS = [
     { id:'datacenter',    name:'Datacenter',         icon:'💾', cat:'science',        era:'contemporaine', cost:{gold:500,prod:300},  effect:{scienceRate:15,goldRate:10}, desc:'Puissance de calcul', tech:'informatique' },
     { id:'station_orbitale',name:'Station Orbitale', icon:'🛸', cat:'science',        era:'contemporaine', cost:{gold:2000,prod:1000},effect:{scienceRate:50,prestige:20}, desc:'Avant-poste spatial', tech:'fusion_t' },
     { id:'reseau_5g',     name:'Réseau 6G',          icon:'📡', cat:'infrastructure', era:'contemporaine', cost:{gold:400,prod:200},  effect:{goldRate:12,cultureRate:8,scienceRate:5}, desc:'Connectivité totale', tech:'ia' },
-    { id:'arcologie',     name:'Arcologie',          icon:'🏙️', cat:'culture',        era:'contemporaine', cost:{gold:1200,prod:700}, effect:{happiness:15,popGrowth:0.04,prestige:10}, desc:'Cité autosuffisante', tech:'fusion_t' }
+    { id:'arcologie',     name:'Arcologie',          icon:'🏙️', cat:'culture',        era:'contemporaine', cost:{gold:1200,prod:700}, effect:{happiness:15,popGrowth:0.04,prestige:10}, desc:'Cité autosuffisante', tech:'fusion_t' },
+    // Economic infrastructure, progressing from food security to automated industry.
+    { id:'cooperative_agricole', name:'Coopérative agricole', icon:'🌽', cat:'nourriture', era:'antiquite', cost:{gold:65,prod:45}, effect:{foodRate:6,goldRate:1}, desc:'Production vivrière mutualisée', tech:'agriculture' },
+    { id:'route_commerciale', name:'Relais commercial', icon:'🛤️', cat:'economie', era:'medieval', cost:{gold:115,prod:75}, effect:{goldRate:8,prodRate:2}, desc:'Échanges terrestres et marchés régionaux', tech:'navigation' },
+    { id:'bourse_marchande', name:'Bourse marchande', icon:'📈', cat:'economie', era:'renaissance', cost:{gold:230,prod:140}, effect:{goldRate:18,scienceRate:2}, desc:'Financement du négoce et des manufactures', tech:'economie_t' },
+    { id:'entrepot_industriel', name:'Entrepôt industriel', icon:'📦', cat:'economie', era:'industrielle', cost:{gold:270,prod:170}, effect:{prodRate:11,goldRate:4}, desc:'Distribution des biens industriels', tech:'acier' },
+    { id:'centrale_logistique', name:'Plateforme logistique', icon:'🚛', cat:'economie', era:'moderne', cost:{gold:470,prod:280}, effect:{prodRate:16,goldRate:10}, desc:'Chaîne d'approvisionnement civile et militaire', tech:'blindes' },
+    { id:'zone_france', name:'Zone franche', icon:'🏢', cat:'economie', era:'moderne', cost:{gold:520,prod:310}, effect:{goldRate:25,prodRate:8}, desc:'Zone de commerce et d'investissement', tech:'economie_t' },
+    { id:'industrie_robotisee', name:'Usine robotisée', icon:'🦾', cat:'economie', era:'contemporaine', cost:{gold:850,prod:520}, effect:{prodRate:36,goldRate:12}, desc:'Production automatisée à haut rendement', tech:'ia' },
+    { id:'fintech', name:'Centre financier numérique', icon:'💳', cat:'economie', era:'contemporaine', cost:{gold:760,prod:410}, effect:{goldRate:32,scienceRate:8}, desc:'Services financiers numériques', tech:'informatique' },
+    { id:'reseau_fret', name:'Réseau de fret intelligent', icon:'🚆', cat:'economie', era:'contemporaine', cost:{gold:900,prod:570}, effect:{prodRate:25,foodRate:10,goldRate:15}, desc:'Optimisation des transports et du commerce', tech:'ia' },
+    { id:'agrotechnologie', name:'Centre agrotechnologique', icon:'🌿', cat:'nourriture', era:'contemporaine', cost:{gold:710,prod:390}, effect:{foodRate:32,scienceRate:6}, desc:'Recherche et production agricole avancées', tech:'informatique' }
 ];
 
 // ============================
