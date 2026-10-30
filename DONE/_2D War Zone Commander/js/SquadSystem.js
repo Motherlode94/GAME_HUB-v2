@@ -116,7 +116,7 @@ RTS.SquadSystem = {
         var alive   = squad.aliveMembers();
         var count   = alive.length;
         var spread  = squad.def.formationSpread || 0;
-        var ftype   = squad.def.formationType;
+        var ftype   = squad.formation || squad.def.formationType;
 
         if (ftype === "solo" || count <= 1) {
             alive.forEach(function(m) {
@@ -124,6 +124,25 @@ RTS.SquadSystem = {
                 m.offsetY = 0;
                 m.x = squad.x;
                 m.y = squad.y;
+            });
+            return;
+        }
+
+        // Formation tactique : coin pour l'assaut, ligne pour tenir un front.
+        if (ftype === "wedge" || ftype === "line") {
+            alive.forEach(function(m, i) {
+                var ox, oy;
+                if (ftype === "line") {
+                    ox = (i - (count - 1) / 2) * spread;
+                    oy = 0;
+                } else {
+                    var row = Math.floor(Math.sqrt(i));
+                    var position = i - row * row;
+                    ox = (position - row) * spread * .7;
+                    oy = row * spread * .85;
+                }
+                m.offsetX = ox; m.offsetY = oy;
+                m.x = squad.x + ox; m.y = squad.y + oy;
             });
             return;
         }
