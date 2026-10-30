@@ -7,6 +7,7 @@
 const GRID = 30;
 
 const BUILDINGS = {
+  bus_stop: { cost: 150, emoji: '🚏', label: 'Arrêt de bus', pN: 0, wN: 0, pop: 0, income: 0, upkeep: 4, happy: 1, pG: 0, wG: 0 },
   road:     { cost: 10,   emoji: '',    label: 'Route',         pN: 0, wN: 0, pop: 0,      income: 0,  upkeep: 0,  happy: 0,  pG: 0,  wG: 0  },
   house:    { cost: 100,  emoji: '🏠', label: 'Maison',        pN: 1, wN: 1, pop: [3,8],  income: 5,  upkeep: 1,  happy: 0,  pG: 0,  wG: 0  },
   shop:     { cost: 200,  emoji: '🏪', label: 'Commerce',      pN: 2, wN: 1, pop: [1,3],  income: 12, upkeep: 3,  happy: 2,  pG: 0,  wG: 0  },
@@ -390,6 +391,11 @@ function isConnectedToMainRoad(x, y, network) {
 function recalcResources() {
   let pG=0, pN=0, wG=0, wN=0, inc=0, up=0, hap=0, bld=0, rd=0, isolated=0;
   const mainRoad = getMainRoadNetwork();
+  const transitStops = [];
+  for (let y=0;y<GRID;y++) for (let x=0;x<GRID;x++) {
+    if (grid[y][x].type==='bus_stop' && isConnectedToMainRoad(x,y,mainRoad)) transitStops.push([x,y]);
+  }
+  let transitServed=0;
 
   for (let y = 0; y < GRID; y++) {
     for (let x = 0; x < GRID; x++) {
@@ -404,7 +410,9 @@ function recalcResources() {
       const connected = mainRoad.size===0 || isConnectedToMainRoad(x,y,mainRoad);
       if (!connected) isolated++;
       // Disconnected districts lose commercial access, not utility supply.
-      inc += connected ? b.income : Math.floor(b.income * 0.65);
+      const servedByBus = connected && c.type !== 'bus_stop' && transitStops.some(([bx,by]) => Math.abs(bx-x)+Math.abs(by-y)<=5);
+      if (servedByBus) transitServed++;
+      inc += connected ? b.income + (servedByBus ? Math.floor(b.income * 0.08) : 0) : Math.floor(b.income * 0.65);
       up += b.upkeep;
       hap += b.happy;
     }
@@ -422,6 +430,7 @@ function recalcResources() {
       c.el.classList.toggle('no-power', !hasPower && b.pN > 0);
       c.el.classList.toggle('no-water', !hasWater && b.wN > 0);
       c.el.classList.toggle('disconnected-road', mainRoad.size>0 && !isConnectedToMainRoad(x,y,mainRoad));
+      c.el.classList.toggle('transit-served', c.type!=='bus_stop' && isConnectedToMainRoad(x,y,mainRoad) && transitStops.some(([bx,by])=>Math.abs(bx-x)+Math.abs(by-y)<=5));
     }
   }
 
@@ -431,6 +440,7 @@ function recalcResources() {
   if (!hasWater) sat -= 15;
   if (population > 0 && rd < population / 8) sat -= 5;
   sat -= Math.min(12, isolated * 2);
+  sat += Math.min(10, Math.floor(transitServed/3));
   // Pénalités externes (crime, pollution) injectées par systems.js
   if (typeof window._satPenaltyCrime     === 'number') sat -= window._satPenaltyCrime;
   if (typeof window._satPenaltyPollution === 'number') sat -= window._satPenaltyPollution;
@@ -438,7 +448,7 @@ function recalcResources() {
   if (typeof window._satBonus            === 'number') sat += window._satBonus;
   satisfaction = clamp(Math.round(sat), 0, 100);
 
-  res = { pG, pN, wG, wN, income: inc, upkeep: up, buildings: bld, roads: rd, isolated };
+  res = { pG, pN, wG, wN, income: inc, upkeep: up, buildings: bld, roads: rd, isolated, transitStops:transitStops.length, transitServed };
 }
 
 // ═══════════════════════════════════════
