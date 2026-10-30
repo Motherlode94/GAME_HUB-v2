@@ -36,7 +36,8 @@ let satisfaction = 50;
 const CITY_POLICIES = {
   social: {name:'Ville solidaire', tax:0.55, happy:12, desc:'Impôts réduits, habitants plus heureux.'},
   balanced: {name:'Gestion équilibrée', tax:1, happy:0, desc:'Recettes et satisfaction stables.'},
-  growth: {name:'Développement intensif', tax:1.8, happy:-13, desc:'Recettes accrues mais mécontentement.'}
+  growth: {name:'Développement intensif', tax:1.8, happy:-13, desc:'Recettes accrues mais mécontentement.'},
+  safety: {name:'Ville sécurisée', tax:0.85, happy:4, desc:'Prévention de la criminalité : recettes réduites, sécurité renforcée.'}
 };
 let cityPolicy = 'balanced';
 try { const savedPolicy = localStorage.getItem('warlike-city-policy'); if (CITY_POLICIES[savedPolicy]) cityPolicy = savedPolicy; } catch (_) {}
