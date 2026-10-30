@@ -297,34 +297,10 @@ if (proj.pos.distance(player.pos) < player.radius + proj.radius) {
     }
 
     // Update ennemis et collisions
-    const attackCenter = player.weaponSystem.getAttackCenter();
     
     enemies = enemies.filter(enemy => {
         enemy.update(player);
         
-        // Attaque du joueur
-        if (player && player.weaponSystem.attacking) {
-            const dx = enemy.pos.x - attackCenter.x;
-            const dy = enemy.pos.y - attackCenter.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const attackRadius =
-    player.weaponSystem.attackRadius +
-    (player.progression.combo * 0.5);
-            
-            if (dist < attackRadius) {
-                const damage =
-    player.weaponSystem.weapon.damage +
-    Math.floor(player.progression.combo / 8) +
-    Math.floor(player.progression.level / 5);
-
-                if (enemy.takeDamage(damage)) {
-                    player.rewards.onEnemyKilled(enemy);
-                    enemy.deathTimer = 30;
-                    return false;
-                }
-            }
-        }
-
         // Collision joueur-ennemi
         const dx = player.pos.x - enemy.pos.x;
         const dy = player.pos.y - enemy.pos.y;
