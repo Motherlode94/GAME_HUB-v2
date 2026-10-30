@@ -184,6 +184,17 @@ class UIController extends EventEmitter {
         });
     }
 
+    // Each species gets a deterministic signature, even when its emoji is shared.
+    _portrait(creature, battle = false) {
+        const id = String(creature.id || creature.name || '0');
+        let hash = 2166136261;
+        for (let i = 0; i < id.length; i++) hash = Math.imul(hash ^ id.charCodeAt(i), 16777619);
+        const hue = (hash >>> 0) % 360;
+        const initials = String(creature.name || '?').slice(0, 2).toUpperCase().replace(/[^A-ZÀ-ÿ]/g, '');
+        const cls = battle ? 'battle-creature-icon' : 'creature-icon';
+        return `<div class="${cls} axis-portrait" style="--axis-hue:${hue}" title="${String(creature.name || 'Créature').replace(/"/g,'&quot;')}"><span class="axis-emblem">${creature.icon || '◆'}</span><span class="axis-signature">${initials || id.slice(-2)}</span></div>`;
+    }
+
     _createCreatureCard(template, isSelected = false, isDisabled = false) {
         const TYPE_NAMES = window.TYPE_NAMES || {};
         
@@ -200,7 +211,7 @@ class UIController extends EventEmitter {
         
         card.innerHTML = `
             ${levelBadge}
-            <div class="creature-icon">${template.icon || '?'}</div>
+            ${this._portrait(template)}
             <div class="creature-name">${template.name || 'Sans nom'}</div>
             <div class="creature-type type-${template.type}">${TYPE_NAMES[template.type] || template.type}</div>
             <div class="creature-stats">
@@ -240,7 +251,7 @@ class UIController extends EventEmitter {
             if (template) {
                 slot.classList.remove('empty');
                 slot.classList.add('filled');
-                slot.innerHTML = template.icon;
+                slot.innerHTML = this._portrait(template);
             } else {
                 slot.classList.add('empty');
                 slot.classList.remove('filled');
@@ -297,7 +308,7 @@ class UIController extends EventEmitter {
         }
         
         card.innerHTML = `
-            <div class="battle-creature-icon">${creature.icon}</div>
+            ${this._portrait(creature, true)}
             <div class="battle-creature-info">
                 <div class="battle-creature-name">${creature.name}</div>
                 <div class="creature-type type-${creature.type}">${TYPE_NAMES[creature.type] || creature.type}</div>
