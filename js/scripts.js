@@ -183,7 +183,7 @@ function renderGrid() {
                     <span class="card-category">${game.category}</span>
                 </div>
                 <h3>${escapeHtml(game.title)}</h3>
-                <p>${escapeHtml(game.description ?? '')}</p>
+    
                 <div class="card-tags">
                     ${game.tags.filter(Boolean).map(t => `<span class="card-tag">${escapeHtml(t)}</span>`).join('')}
                 </div>
@@ -218,7 +218,7 @@ function openModal(id) {
 
     document.getElementById('modal-badge').textContent = game.category.toUpperCase();
     document.getElementById('modal-title').textContent = game.title;
-    document.getElementById('modal-desc').textContent  = game.description ?? '';
+    document.getElementById('modal-desc').textContent = '';
     document.getElementById('modal-meta').innerHTML = `
         <span>🎮 ${capitalize(game.category)}</span>
     `;
@@ -431,7 +431,7 @@ if (pgSkipBtn) pgSkipBtn.addEventListener('click', closeReviewPanel);
 // ── Session banner ─────────────────────────────────────────────────────────
 function syncSessionBanner() {
     if (!sessionBanner) return;
-    if (!lastPlayedGame || !postgamePanel?.classList.contains('hidden')) {
+    if (!lastPlayedGame || (postgamePanel && !postgamePanel.classList.contains('hidden'))) {
         sessionBanner.classList.add('hidden');
         return;
     }
