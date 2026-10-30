@@ -25,14 +25,11 @@ class Movement {
         // Dash (avant déplacement)
         this.player.dash.update(keys, dir);
 
-        // Déplacement
-        if (dir.length() > 0) {
-            const speed =
-                this.baseSpeed * this.player.dash.getSpeedMultiplier();
-
-            this.player.pos = this.player.pos.add(
-                dir.normalize().mul(speed)
-            );
+        // During a dash, continue in the direction captured at activation.
+        const movementDir = this.player.dash.dashing ? this.player.lastDir : dir;
+        if (movementDir.length() > 0) {
+            const speed = this.baseSpeed * this.player.dash.getSpeedMultiplier();
+            this.player.pos = this.player.pos.add(movementDir.normalize().mul(speed));
         }
 
         this.handleBounds();
