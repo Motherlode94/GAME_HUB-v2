@@ -375,12 +375,18 @@ let timeUp = false;
 let lastTickSecond = 0;
 let courtCache = null;
 
+function setDefenderHands(n) {
+    defender.handMode = n === 2 ? 2 : 1;
+    document.getElementById("defenseOne")?.classList.toggle("active", defender.handMode === 1);
+    document.getElementById("defenseTwo")?.classList.toggle("active", defender.handMode === 2);
+}
 // ── Mode selection ──────────────────────────────────────────────
 function selectMode(mode) {
     selectedMode = mode;
     document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("active"));
     document.querySelector(`.mode-card[data-mode="${mode}"]`)?.classList.add("active");
     renderTitleScores();
+    document.getElementById("defenseControls")?.classList.toggle("hidden", mode !== "defense");
 }
 
 // ── Reset ───────────────────────────────────────────────────────
@@ -442,6 +448,8 @@ function resetGame() {
 
     resetHoop();
     resetBall();
+    setDefenderHands(1);
+    document.getElementById("defenseControls")?.classList.toggle("hidden", selectedMode !== "defense");
     defender.x = hoopConfig.x - 75;
     defender.y = hoopConfig.y + 70;
     defender.cooldown = 0;
@@ -614,7 +622,7 @@ document.addEventListener("keydown", e => {
     if (k === "p" || k === "escape") { togglePause(); e.preventDefault(); }
     else if (k === "r") restartGame();
     else if (k === "m") toggleMute();
-    else if (selectedMode === "defense" && (k === "1" || k === "2")) defender.handMode = Number(k);
+    else if (selectedMode === "defense" && (k === "1" || k === "2")) setDefenderHands(Number(k));
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -685,7 +693,7 @@ function drawDefender() {
     ctx.moveTo(7,-19); ctx.lineTo(10,0); ctx.stroke();
     ctx.fillStyle = "#d14553"; ctx.fillRect(-13,-48,26,29);
     ctx.fillStyle = "#dca47b"; ctx.beginPath(); ctx.arc(0,-57,10,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle = "#dca47b"; ctx.lineWidth = 7;
+    ctx.strokeStyle = "#ffdfb3"; ctx.lineWidth = 10;
     ctx.beginPath();
     if (defender.handMode === 2) {
         ctx.moveTo(-11,-43); ctx.lineTo(-17,-73);
