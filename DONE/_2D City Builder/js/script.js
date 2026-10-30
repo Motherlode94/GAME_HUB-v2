@@ -384,7 +384,7 @@ function recalcResources() {
   }
 
   // Satisfaction
-  let sat = 50 + hap + CITY_POLICIES[cityPolicy].happy;
+  let sat = 50 + hap + CITY_POLICIES[cityPolicy].happy + municipalProjectHappiness();
   if (!hasPower) sat -= 15;
   if (!hasWater) sat -= 15;
   if (population > 0 && rd < population / 8) sat -= 5;
@@ -571,6 +571,7 @@ window.gameTick = function gameTick() {
       // Taxes
       const taxRate = satisfaction > 70 ? 2 : satisfaction > 40 ? 1 : 0;
       budget += Math.round(population * taxRate * CITY_POLICIES[cityPolicy].tax);
+      budget += municipalProjectIncome();
 
       // Growth
       if (satisfaction > 60 && population > 0) {
@@ -654,3 +655,69 @@ function initMunicipalPolicies() {
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMunicipalPolicies);
 else initMunicipalPolicies();
+
+/* Municipal investment projects: optional, permanent benefits with up-front costs.
+   Different from milestone missions: the mayor chooses when to spend money. */
+const MUNICIPAL_PROJECTS = [
+  { id:'gardens', name:'🌳 Jardins communautaires', cost:650, happiness:8, income:0,
+    description:'Espaces verts et qualité de vie : +8 satisfaction.' },
+  { id:'logistics', name:'🚚 Plateforme logistique', cost:1600, happiness:-3, income:95,
+    description:'Activité économique : +95 $ par cycle fiscal, -3 satisfaction.' },
+  { id:'tramway', name:'🚋 Transport collectif', cost:2300, happiness:6, income:35,
+    description:'Mobilité et attractivité : +6 satisfaction, +35 $ par cycle.' }
+];
+let municipalInvestments = [];
+try {
+  const saved = JSON.parse(localStorage.getItem('warlike-municipal-projects') || '[]');
+  if (Array.isArray(saved)) municipalInvestments = saved.filter(id => MUNICIPAL_PROJECTS.some(p => p.id === id));
+} catch (_) {}
+function municipalProjectHappiness() {
+  return MUNICIPAL_PROJECTS.reduce((sum,p) => sum + (municipalInvestments.includes(p.id) ? p.happiness : 0), 0);
+}
+function municipalProjectIncome() {
+  return MUNICIPAL_PROJECTS.reduce((sum,p) => sum + (municipalInvestments.includes(p.id) ? p.income : 0), 0);
+}
+function initMunicipalProjects() {
+  const parent = document.getElementById('side-panel');
+  if (!parent || document.getElementById('municipal-investments')) return;
+  const section = document.createElement('section');
+  section.id = 'municipal-investments';
+  section.className = 'panel-section';
+  section.innerHTML = '<div class="panel-header">🏗️ Projets municipaux</div><div class="municipal-project-list" style="display:grid;gap:8px;padding:8px 0"></div>';
+  parent.appendChild(section);
+  const list = section.querySelector('.municipal-project-list');
+  const buttons = [];
+  MUNICIPAL_PROJECTS.forEach(project => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.style.cssText = 'text-align:left;width:100%;padding:10px;border-radius:8px;border:1px solid #637084;color:#f0f4fa;background:#1b2834;cursor:pointer;white-space:normal;font-size:12px;line-height:1.5';
+    button.addEventListener('click', () => {
+      if (!gameStarted || municipalInvestments.includes(project.id) || budget < project.cost) return;
+      budget -= project.cost;
+      municipalInvestments.push(project.id);
+      try { localStorage.setItem('warlike-municipal-projects', JSON.stringify(municipalInvestments)); } catch (_) {}
+      recalcResources();
+      updateUI();
+      refresh();
+      if (typeof notify === 'function') notify('🏗️ Projet inauguré : ' + project.name, 'success');
+    });
+    buttons.push({project,button});
+    list.appendChild(button);
+  });
+  function refresh() {
+    buttons.forEach(({project,button}) => {
+      const done = municipalInvestments.includes(project.id);
+      button.disabled = done || !gameStarted || budget < project.cost;
+      button.style.opacity = done ? '.65' : button.disabled ? '.55' : '1';
+      button.style.borderColor = done ? '#63b88c' : '#637084';
+      button.textContent = project.name + ' — ' + (done ? '✓ Réalisé' : project.cost.toLocaleString('fr-FR') + ' $') + ' · ' + project.description;
+    });
+  }
+  refresh();
+  // Re-evaluate affordability only once per simulation tick, never per animation frame.
+  window._gameTickExtensions = window._gameTickExtensions || [];
+  window._gameTickExtensions.push(refresh);
+  section.addEventListener('pointerenter', refresh);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMunicipalProjects);
+else initMunicipalProjects();
