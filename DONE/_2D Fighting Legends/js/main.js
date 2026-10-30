@@ -131,6 +131,7 @@ class Player {
 
         this.facing    = color === '#ff5555' ? 1 : -1;
         this.walkCycle = 0;
+        this.landPoseFrames = 0;
 
         // Double saut
         this.jumpsLeft  = 2;
@@ -274,6 +275,8 @@ class Player {
         this.knockX    *= 0.65;
         if (Math.abs(this.knockX) < 0.1) this.knockX = 0;
 
+        if (this.landPoseFrames > 0) this.landPoseFrames--;
+
         // Physique
         this.velocityY += this.gravity;
         this.x         += this.velocityX;
@@ -288,6 +291,7 @@ class Player {
 
         if (this.y + this.height >= FLOOR_Y) {
             if (!wasOnGround) {
+                this.landPoseFrames = 9;
                 spawnLandingDust(this.x + this.width / 2, FLOOR_Y, this.color);
                 safeSoundLand();
             }
@@ -307,7 +311,7 @@ class Player {
                     this.x + this.width  >  p.x &&
                     this.x               <  p.x + p.w
                 ) {
-                    if (!wasOnGround) { spawnLandingDust(this.x + this.width / 2, p.y, this.color); safeSoundLand(); }
+                    if (!wasOnGround) { this.landPoseFrames = 9; spawnLandingDust(this.x + this.width / 2, p.y, this.color); safeSoundLand(); }
                     this.y         = p.y - this.height;
                     this.velocityY = 0;
                     this.onGround  = true;
@@ -499,8 +503,14 @@ class Player {
             ctx.restore();
         }
 
-        // Jambes animées
-        const legSwing = Math.sin(this.walkCycle) * 10;
+        // Five contextual poses: walk, airborne, landing, guarding, attacking.
+        // Only the rendered limb positions change; physical hitboxes stay fixed.
+        const isAirborne = !this.onGround;
+        const landing = this.landPoseFrames > 0 && this.onGround;
+        const guarded = this.guarding && this.guardBroken === 0;
+        const legSwing = isAirborne ? (this.velocityY < 0 ? 9 : -7) :
+            landing ? -9 : guarded ? -5 : this.isAttacking ? 5 : Math.sin(this.walkCycle) * 10;
+        const kneeLift = isAirborne ? 13 : landing ? 9 : guarded ? 5 : 0;
         ctx.strokeStyle = shadeColor(this.color, -50);
         ctx.lineWidth   = 8;
         ctx.lineCap     = 'round';
@@ -508,27 +518,30 @@ class Player {
 
         ctx.beginPath();
         ctx.moveTo(cx - 8, this.y + this.height - 28);
-        ctx.lineTo(cx - 8 + legSwing, this.y + this.height);
+        ctx.lineTo(cx - 8 + legSwing, this.y + this.height - kneeLift);
         ctx.stroke();
 
         ctx.beginPath();
         ctx.moveTo(cx + 8, this.y + this.height - 28);
-        ctx.lineTo(cx + 8 - legSwing, this.y + this.height);
+        ctx.lineTo(cx + 8 - legSwing, this.y + this.height - (isAirborne ? 9 : kneeLift));
         ctx.stroke();
 
         // Bras + arme
-        const armSwing  = this.isAttacking ? -this.facing * (this.isCharging ? 11 : 8) : -Math.sin(this.walkCycle) * 8;
+        const armSwing = guarded ? this.facing * 12 :
+            this.isAttacking ? -this.facing * (this.isCharging ? 15 : 12) :
+            isAirborne ? this.facing * 9 : landing ? -7 : -Math.sin(this.walkCycle) * 8;
+        const armRaise = guarded ? -17 : this.isAttacking ? -12 : isAirborne ? -9 : 0;
         ctx.strokeStyle = shadeColor(this.color, -30);
         ctx.lineWidth   = 7;
         ctx.lineCap     = 'round';
         ctx.shadowBlur  = 0;
         ctx.beginPath();
         ctx.moveTo(this.x + 6, this.y + 38);
-        ctx.lineTo(this.x + 6 + armSwing, this.y + 62);
+        ctx.lineTo(this.x + 6 + armSwing, this.y + 62 + armRaise);
         ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(this.x + this.width - 6, this.y + 38);
-        ctx.lineTo(this.x + this.width - 6 - armSwing, this.y + 62);
+        ctx.lineTo(this.x + this.width - 6 - armSwing, this.y + 62 + armRaise);
         ctx.stroke();
 
         this.drawWeapon();
