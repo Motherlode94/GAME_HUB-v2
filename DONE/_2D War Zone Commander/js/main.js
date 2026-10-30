@@ -100,54 +100,52 @@ window.onload = function() {
         if (RTS.MissionSystem) RTS.MissionSystem.init(game);
         if (RTS.EventSystem)   RTS.EventSystem.init(game);
 
-        // ── Patch BuildingSystem.place pour missions + setup hook ─────────
-        var _origPlace = RTS.BuildingSystem.place;
-        RTS.BuildingSystem.place = function(g, x, y) {
-            var type = this._placingType;
-            var ok   = _origPlace.call(this, g, x, y);
-            if (ok) {
-                // Missions
-                if (RTS.MissionSystem) RTS.MissionSystem.onBuild(game, type);
-
-                // ── Premier QG posé → spawner les squads et lancer les vagues ──
-                if (game.setupPhase) {
-                    _onFirstBuilding(x, y, type);
+        // Hooks installed once: restart must not wrap the same functions again.
+        // Each callback uses the game passed to the system, never a stale closure.
+        game._onFirstBuilding = _onFirstBuilding;
+        if (!RTS._missionHooksInstalled) {
+            RTS._missionHooksInstalled = true;
+            var basePlace = RTS.BuildingSystem.place;
+            RTS.BuildingSystem.place = function(g, x, y) {
+                var type = this._placingType;
+                var ok = basePlace.call(this, g, x, y);
+                if (ok) {
+                    if (RTS.MissionSystem) RTS.MissionSystem.onBuild(g, type);
+                    if (g.setupPhase && typeof g._onFirstBuilding === "function")
+                        g._onFirstBuilding(x, y, type);
                 }
+                return ok;
+            };
+
+            if (RTS.WorkerSystem && RTS.WorkerSystem._tickHarvest) {
+                var baseHarvest = RTS.WorkerSystem._tickHarvest;
+                RTS.WorkerSystem._tickHarvest = function(g, sq, node, delta) {
+                    var before = g.resources.gold + g.resources.fuel + g.resources.ammo;
+                    var result = baseHarvest.call(this, g, sq, node, delta);
+                    var gained = g.resources.gold + g.resources.fuel + g.resources.ammo - before;
+                    if (gained > 0 && RTS.MissionSystem) RTS.MissionSystem.onHarvest(g, gained);
+                    return result;
+                };
             }
-            return ok;
-        };
 
-        // ── Patch WorkerSystem harvest → missions ─────────────────────────
-        if (RTS.WorkerSystem && RTS.WorkerSystem._tickHarvest) {
-            var _origHarvest = RTS.WorkerSystem._tickHarvest;
-            RTS.WorkerSystem._tickHarvest = function(game, sq, node, delta) {
-                var before = game.resources.gold + game.resources.fuel + game.resources.ammo;
-                _origHarvest.call(this, game, sq, node, delta);
-                var after  = game.resources.gold + game.resources.fuel + game.resources.ammo;
-                var gained = after - before;
-                if (gained > 0 && RTS.MissionSystem) RTS.MissionSystem.onHarvest(game, gained);
-            };
+            if (RTS.SquadCombatSystem) {
+                var baseCombat = RTS.SquadCombatSystem.update;
+                RTS.SquadCombatSystem.update = function(g, delta) {
+                    var before = g.squads.filter(function(s) {
+                        return s.team === "red" && s.isDead && s.isDead();
+                    }).length;
+                    var result = baseCombat.call(this, g, delta);
+                    var after = g.squads.filter(function(s) {
+                        return s.team === "red" && s.isDead && s.isDead();
+                    }).length;
+                    for (var k = 0; k < Math.max(0, after - before); k++)
+                        if (RTS.MissionSystem) RTS.MissionSystem.onKill(g);
+                    return result;
+                };
+            }
         }
 
-        // ── Patch SquadCombatSystem → compteur kills ──────────────────────
-        if (RTS.SquadCombatSystem) {
-            var _origCSUpdate = RTS.SquadCombatSystem.update;
-            RTS.SquadCombatSystem.update = function(g, d) {
-                var before = g.squads.filter(function(s) {
-                    return s.team === "red" && s.isDead && s.isDead();
-                }).length;
-                _origCSUpdate.call(this, g, d);
-                var after = g.squads.filter(function(s) {
-                    return s.team === "red" && s.isDead && s.isDead();
-                }).length;
-                var killed = after - before;
-                for (var k = 0; k < killed; k++) {
-                    if (RTS.MissionSystem) RTS.MissionSystem.onKill(game);
-                }
-            };
-        }
-
-        // ── Caméra : commence au centre-gauche du monde ───────────────────
+                // ── Caméra : commence au centre-gauche du monde ───────────────────
         if (game.camera) {
             game.camera.x = 400;
             game.camera.y = RTS.WORLD_H / 2 - canvas.height / 2;
