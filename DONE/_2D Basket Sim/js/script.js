@@ -262,7 +262,7 @@ function drawFloatTexts() {
 }
 
 // ── Highscores ─────────────────────────────────────────────────
-const MODE_LABELS = { classic: "CLASSIQUE", precision: "PRÉCISION", survival: "SURVIE" };
+const MODE_LABELS = { classic: "CLASSIQUE", timer: "TIMER", defense: "DÉFENSEUR", precision: "PRÉCISION", survival: "SURVIE" };
 
 function getScores(mode = "classic") {
     try { return JSON.parse(localStorage.getItem(`basket_scores_${mode}`)) || []; }
@@ -460,15 +460,17 @@ function resetGame() {
 
     const timerCell = document.getElementById("hudTimerCell");
     const livesCell = document.getElementById("hudLivesCell");
-    timerCell.classList.toggle("hidden", selectedMode !== "classic" && selectedMode !== "defense");
+    timerCell.classList.toggle("hidden", selectedMode !== "timer" && selectedMode !== "defense");
     livesCell.classList.toggle("hidden", selectedMode !== "survival");
 
     const tag = document.getElementById("modeTag");
-    if (tag) tag.textContent = { classic:"⏱ CLASSIQUE", precision:"🎯 PRÉCISION", survival:"💀 SURVIE", defense:"🛡️ DÉFENSE" }[selectedMode] || "";
+    if (tag) tag.textContent = { classic:"🏀 CLASSIQUE", timer:"⏱ TIMER", precision:"🎯 PRÉCISION", survival:"💀 SURVIE", defense:"🛡️ DÉFENSE" }[selectedMode] || "";
     updatePauseButton();
 }
 
 function getModeStartMsg() {
+    if (selectedMode === "classic") return "🏀 Mode libre : marque des points, le panier bouge à 20 points !";
+    if (selectedMode === "timer") return "⏱ 30 secondes : swish et tirs à 3 points ajoutent du temps !";
     if (selectedMode === "precision") return `🎯 ${precisionShotsLeft} tirs — de plus en plus loin !`;
     if (selectedMode === "survival")  return "💀 3 ratés et c'est fini !";
     if (selectedMode === "defense") return "🛡️ Défenseur : touches 1 / 2 pour changer les mains !";
@@ -646,10 +648,10 @@ function toggleMute() {
 
 // ── Survival hoop movement ─────────────────────────────────────
 function updateHoopMovement(dt) {
-    if (selectedMode !== "survival" || basketsMade < 3) return;
+    if (!((selectedMode === "classic" && score >= 20) || (selectedMode === "survival" && basketsMade >= 3))) return;
 
     // Smooth figure-eight path; speed and amplitude grow with baskets
-    const level = Math.min(basketsMade - 3, 20);
+    const level = Math.min(selectedMode === "classic" ? Math.floor((score - 20) / 5) : basketsMade - 3, 20);
     hoopConfig.movePhase += dt * (0.012 + level * 0.0012);
     const ampX = Math.min(30 + level * 5, 70);
     const ampY = Math.min(15 + level * 3, 60);
@@ -703,7 +705,7 @@ function drawDefender() {
         ctx.moveTo(11,-43); ctx.lineTo(15,-72);
     }
     ctx.stroke();
-    ctx.fillStyle = "#fff"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center";
+    ctx.fillStyle = "#f7d586"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center";
     ctx.fillText(defender.handMode === 2 ? "2 MAINS" : "1 MAIN",0,25);
     ctx.restore();
 }
@@ -807,7 +809,7 @@ function update(dt) {
 }
 
 function updateClock(dt) {
-    if ((selectedMode !== "classic" && selectedMode !== "defense") || timeUp) return;
+    if ((selectedMode !== "timer" && selectedMode !== "defense") || timeUp) return;
     timeLeft -= dt / 60;
     const sec = Math.ceil(timeLeft);
     if (sec !== lastTickSecond) {
@@ -918,7 +920,7 @@ function handleScore() {
 
     const isSwish = ball.rimHits === 0;
     const pts = ball.shotPts || zonePoints(ball.startX, ball.startY);
-    const buzzer = timeUp && selectedMode === "classic";
+    const buzzer = timeUp && selectedMode === "timer";
 
     let totalPts = pts * combo;
     let label    = pts === 3 ? "🔥 3 PTS !" : pts === 2 ? "2 PTS" : "1 PT";
@@ -945,7 +947,7 @@ function handleScore() {
     crowdHype   = Math.min(1, crowdHype + (pts === 3 ? .9 : .6) + (isSwish ? .3 : 0));
 
     // Classic: time bonus
-    if (selectedMode === "classic" && !timeUp) {
+    if (selectedMode === "timer" && !timeUp) {
         const bonus = (isSwish ? 2 : 0) + (pts === 3 ? 1 : 0);
         if (bonus > 0) {
             timeLeft += bonus;
@@ -995,7 +997,8 @@ function finishScoredShot() {
 
 function isGameDone() {
     if (selectedMode === "precision") return precisionShotsLeft <= 0;
-    if (selectedMode === "classic" || selectedMode === "defense") return timeUp;
+    if (selectedMode === "timer" || selectedMode === "defense") return timeUp;
+    if (selectedMode === "classic") return false;
     return lives <= 0;
 }
 
@@ -1020,7 +1023,8 @@ function handleMiss() {
     const msgMap = {
         survival: `💀 Raté ! ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}`,
         precision: `Raté ! ${precisionShotsLeft} tir${precisionShotsLeft>1?'s':''} restant${precisionShotsLeft>1?'s':''}`,
-        classic: timeUp ? "⏰ Temps écoulé !" : "Raté ! Réessaie...",
+        classic: "Continue ! Tu peux battre ton record.",
+        timer: timeUp ? "⏰ Temps écoulé !" : "Raté ! Réessaie...",
         defense: timeUp ? "⏰ Temps écoulé !" : "Défenseur en place — retente ton tir !"
     };
     setMsg(msgMap[selectedMode] || "Raté !");
@@ -1043,6 +1047,7 @@ function draw() {
     drawCourt();
     drawCrowd();
     drawSpotMarker();
+    drawPlayerHands();
     drawAimLine();
     drawHoopBack();
     if (selectedMode === "defense") drawDefender();
@@ -1203,6 +1208,28 @@ function drawCrowd() {
             ctx.fillRect(x + 6, crowdY - h - 14, 3, 12);
         }
     }
+}
+
+// Visible shooter hands follow the ball before release, with a shooting gesture.
+function drawPlayerHands() {
+    if (!ball || !gameRunning) return;
+    const x = ball.isMoving ? ball.startX : ball.x;
+    const y = ball.isMoving ? ball.startY : ball.y;
+    const fade = ball.isMoving ? Math.max(0, 1 - ball.flightTime / 12) : 1;
+    if (fade <= 0) return;
+    ctx.save(); ctx.globalAlpha = fade;
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.strokeStyle = "#d8a178"; ctx.lineWidth = 13;
+    ctx.beginPath(); ctx.moveTo(x - 34, y + 66); ctx.lineTo(x - 19, y + 25);
+    ctx.moveTo(x + 34, y + 66); ctx.lineTo(x + 19, y + 25); ctx.stroke();
+    ctx.fillStyle = "#e9b58b";
+    for (let side of [-1,1]) {
+        ctx.save(); ctx.translate(x + side * 17, y + 16);
+        ctx.rotate(side * -0.28);
+        ctx.beginPath(); ctx.ellipse(0, 0, 9, 16, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+    ctx.restore();
 }
 
 function drawSpotMarker() {
