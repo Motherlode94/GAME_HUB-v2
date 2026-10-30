@@ -83,21 +83,49 @@ RTS.WorkerSystem = {
     },
 
     _tickRepair: function(game, squad, delta) {
-        var best = null, bestD = Infinity;
+        // Engineers maintain both structures and damaged land/air vehicles.
+        // Explicit move orders take precedence over automatic servicing.
+        if (squad.target && !squad._autoRepairTarget) return;
+        var best = null, bestD = Infinity, kind = null;
         game.buildings.forEach(function(b) {
-            if (b.team !== "blue" || b.hp >= b.maxHp) return;
-            var dx = b.x - squad.x, dy = b.y - squad.y;
-            var d  = Math.sqrt(dx*dx + dy*dy);
-            if (d < bestD) { bestD = d; best = b; }
+            if (b.team !== squad.team || b.hp <= 0 || b.hp >= b.maxHp) return;
+            var d = Math.hypot(b.x - squad.x, b.y - squad.y);
+            if (d < bestD) { best = b; bestD = d; kind = "building"; }
         });
-        if (!best) return;
+        game.squads.forEach(function(other) {
+            if (other === squad || other.team !== squad.team || other.isDead() || !other.def) return;
+            if (other.def.category !== "vehicle" && other.def.category !== "air") return;
+            var damaged = other.aliveMembers().some(function(m) { return m.hp < m.maxHp; }) ||
+                (other.engineDamage || 0) > 0 || (other.rotorDamage || 0) > 0;
+            if (!damaged) return;
+            var d = Math.hypot(other.x - squad.x, other.y - squad.y);
+            if (d < bestD) { best = other; bestD = d; kind = "unit"; }
+        });
+        if (!best) {
+            if (squad._autoRepairTarget) squad.target = null;
+            squad._autoRepairTarget = null;
+            return;
+        }
         var rr = squad.def.repairRange || 30;
         if (bestD > rr) {
-            squad.target = { x: best.x, y: best.y };
+            squad.target = {x:best.x,y:best.y};
+            squad._autoRepairTarget = best;
+            return;
+        }
+        if (squad._autoRepairTarget) squad.target = null;
+        squad._autoRepairTarget = null;
+        var amount = (squad.def.repairRate || 20) * delta;
+        if (kind === "building") {
+            best.hp = Math.min(best.maxHp, best.hp + amount);
         } else {
-            squad.target = null;
-            best.hp = Math.min(best.maxHp, best.hp + (squad.def.repairRate||20)*delta);
-            RTS.ParticleSystem.spawnHarvest(game.particles, squad.x, squad.y, "gold");
+            var wounded = best.aliveMembers().filter(function(m) { return m.hp < m.maxHp; });
+            if (wounded.length) {
+                var each = amount / wounded.length;
+                wounded.forEach(function(m) { m.hp = Math.min(m.maxHp, m.hp + each); });
+            }
+            // Field service gradually restores engine/rotor mobility.
+            best.engineDamage = Math.max(0, (best.engineDamage || 0) - delta * 0.07);
+            best.rotorDamage = Math.max(0, (best.rotorDamage || 0) - delta * 0.07);
         }
     },
 
