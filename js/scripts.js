@@ -60,6 +60,18 @@ let searchQuery    = '';
 let sortMode       = 'default';
 let currentGameId  = null;
 let lastPlayedGame = null;
+const RECENT_KEY = 'wgc_recent_games';
+function recentIds() { try { const a=JSON.parse(localStorage.getItem(RECENT_KEY)||'[]'); return Array.isArray(a)?a:[]; } catch {return [];} }
+function rememberGame(id) { localStorage.setItem(RECENT_KEY, JSON.stringify([id,...recentIds().filter(x=>x!==id)].slice(0,6))); renderDiscovery(); }
+function renderDiscovery() {
+    const ids=recentIds();
+    const entries=ids.map(id=>GAMES.find(g=>g.id===id)).filter(Boolean);
+    const section=document.getElementById('hub-recent');
+    const resume=document.getElementById('hub-continue');
+    if(resume){resume.hidden=!entries.length;resume.onclick=entries[0]?()=>launchGame(entries[0]):null;}
+    if(section){section.hidden=!entries.length;section.innerHTML=entries.length?'<strong>Joués récemment</strong><div class="recent-links">'+entries.map(g=>'<button type="button" data-recent="'+g.id+'">'+escapeHtml(g.title)+'</button>').join('')+'</div>':'';section.querySelectorAll('[data-recent]').forEach(btn=>btn.addEventListener('click',()=>launchGame(GAMES.find(g=>g.id===Number(btn.dataset.recent)))));}
+}
+
 
 function getFavorites() {
     try { return JSON.parse(localStorage.getItem('wgc_favorites') || '[]'); } catch { return []; }
@@ -137,7 +149,8 @@ function getFiltered() {
         list = list.filter(g =>
             g.title.toLowerCase().includes(q) ||
             (g.description ?? '').toLowerCase().includes(q) ||
-            g.tags.some(t => t.toLowerCase().includes(q))
+            (g.tags || []).some(t => String(t).toLowerCase().includes(q)) ||
+            String(g.category || '').toLowerCase().includes(q)
         );
     }
     switch (sortMode) {
@@ -161,10 +174,10 @@ function renderGrid() {
     }
 
     noResults.classList.add('hidden');
-    resultsInfo.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${GAMES.length}</strong> games`;
+    resultsInfo.innerHTML = `<strong>${filtered.length}</strong> jeu(x) affiché(s) sur <strong>${GAMES.length}</strong>`;
 
     grid.innerHTML = filtered.map((game, i) => `
-        <div class="game-card${game.playUrl ? ' game-card--playable' : ''}" data-id="${game.id}" style="animation-delay:${i * 0.05}s">
+        <div role="button" tabindex="0" aria-label="Voir ${escapeAttr(game.title)}" class="game-card${game.playUrl ? ' game-card--playable' : ''}" data-id="${game.id}" style="animation-delay:${i * 0.05}s">
             <button class="card-fav-btn${isFavorite(game.id) ? ' active' : ''}" data-fav-id="${game.id}" title="Ajouter aux favoris">&#10084;</button>
             ${renderCardMedia(game)}
             <div class="card-content">
@@ -179,15 +192,17 @@ function renderGrid() {
                 </div>
                 <div class="card-footer">
                     <span class="card-year">${game.year}</span>
-                    ${game.playUrl ? `<span class="card-play">&#9654; Play</span>` : `<span class="card-more">Details &rarr;</span>`}
+                    ${game.playUrl ? `<button type="button" class="card-launch" data-play-id="${game.id}" aria-label="Jouer à ${escapeAttr(game.title)}">&#9654; Jouer</button>` : `<span class="card-more">Details &rarr;</span>`}
                 </div>
             </div>
         </div>
     `).join('');
 
     grid.querySelectorAll('.game-card').forEach(card => {
-        card.addEventListener('click', () => openModal(parseInt(card.dataset.id, 10)));
+        card.addEventListener('click', e => { if(e.target.closest('.card-launch')) return; openModal(parseInt(card.dataset.id, 10)); });
+        card.addEventListener('keydown', e => { if(e.target===card && (e.key==='Enter'||e.key===' ')){e.preventDefault();openModal(Number(card.dataset.id));} });
     });
+    grid.querySelectorAll('.card-launch').forEach(btn => btn.addEventListener('click', e => {e.stopPropagation(); const g=GAMES.find(x=>x.id===Number(btn.dataset.playId));if(g)launchGame(g); }));
     grid.querySelectorAll('.card-fav-btn').forEach(btn => {
         btn.addEventListener('click', e => {
             e.stopPropagation();
@@ -320,6 +335,7 @@ function launchGame(game) {
     }
 
     lastPlayedGame = game;
+    rememberGame(game.id);
     sessionStorage.setItem('wgc_activeGameId', String(game.id));
     syncSessionBanner();
 }
@@ -434,6 +450,8 @@ if (sessionFinishBtn) sessionFinishBtn.addEventListener('click', () => { if (las
 if (sessionCancelBtn) sessionCancelBtn.addEventListener('click', () => { clearActiveSession(); lastPlayedGame = null; syncSessionBanner(); });
 
 // ── Events ─────────────────────────────────────────────────────────────────
+document.getElementById('hub-random')?.addEventListener('click',()=>{ const playable=GAMES.filter(g=>g.playUrl); if(playable.length) openModal(playable[Math.floor(Math.random()*playable.length)].id); });
+document.addEventListener('keydown',e=>{if(e.key==='/' && !['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)){e.preventDefault();searchInput.focus();} });
 searchInput.addEventListener('input', debounce(() => {
     searchQuery = searchInput.value.trim();
     clearBtn.classList.toggle('visible', searchQuery.length > 0);
@@ -476,5 +494,6 @@ const activeGameId = Number(sessionStorage.getItem('wgc_activeGameId'));
 if (activeGameId) lastPlayedGame = GAMES.find(g => g.id === activeGameId) || null;
 syncSessionBanner();
 renderGrid();
+renderDiscovery();
 
 }); // end DOMContentLoaded
