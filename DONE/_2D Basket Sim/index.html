@@ -34,7 +34,12 @@
           <div class="mode-card active" data-mode="classic" onclick="selectMode('classic')">
             <div class="mode-icon">&#9201;</div>
             <div class="mode-name">CLASSIQUE</div>
-            <div class="mode-desc">30 s - Swish et 3 pts rallongent le temps</div>
+            <div class="mode-desc">Mode libre sans chrono - panier mobile à 20 points</div>
+          </div>
+          <div class="mode-card" data-mode="timer" onclick="selectMode('timer')">
+            <div class="mode-icon">⏱️</div>
+            <div class="mode-name">TIMER</div>
+            <div class="mode-desc">30 s - Swish et tirs à 3 pts ajoutent du temps</div>
           </div>
           <div class="mode-card" data-mode="precision" onclick="selectMode('precision')">
             <div class="mode-icon">&#127919;</div>
@@ -74,10 +79,11 @@
         <li><strong>Points</strong> - Selon la zone d'où tu tires : 1, 2 ou 3 pts (indiqué au-dessus du ballon)</li>
         <li><strong>Combo</strong> - Les paniers d'affilée multiplient tes points (jusqu'à x10)</li>
         <li><strong>Swish</strong> - Sans toucher le cercle ni la planche = points x1.5</li>
-        <li><strong>Classique</strong> - 30 s. Un swish donne +2 s, un 3 pts +1 s. Un panier marqué après la sirène compte double !</li>
+        <li><strong>Classique</strong> - Sans chrono, marque le plus possible. Dès 20 points, le panier commence à bouger.</li>
+        <li><strong>Timer</strong> - 30 s. Swish +2 s, 3 points +1 s, buzzer beater x2.</li>
         <li><strong>Précision</strong> - 10 tirs, de plus en plus loin</li>
         <li><strong>Survie</strong> - 3 ratés et c'est fini. Le panier bouge après 3 paniers, le vent se lève après 6</li>
-        <li><strong>Défenseur</strong> - Mode DÉFENSEUR : touche 1 pour une main levée, touche 2 pour deux mains levées. Le défenseur tente de bloquer le ballon.</li>
+        <li><strong>Défenseur</strong> - Mode DÉFENSEUR : boutons 1 MAIN / 2 MAINS (ou clavier 1/2) pour régler le contre adverse. Les mains du joueur apparaissent au tir.</li>
         <li><strong>Clavier</strong> - P / Échap : pause, R : rejouer, M : son</li>
       </ul>
       <button class="btn-primary" onclick="hideHowTo()">C'EST PARTI !</button>
