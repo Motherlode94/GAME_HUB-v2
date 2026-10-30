@@ -273,6 +273,35 @@ function drawTile(x, y) {
     if (y % 3 === 0) { ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + TS, py); ctx.stroke(); }
   }
 
+  // Deterministic stonework: worn joints, chipped edges and faint floor dust.
+  // No randomness per frame, so surfaces never shimmer while animating.
+  const grain = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+  if (tile === 0) {
+    ctx.fillStyle = 'rgba(0,0,0,.30)';
+    ctx.fillRect(px, py + TS - 4, TS, 4);
+    ctx.fillStyle = 'rgba(171,137,103,.19)';
+    ctx.fillRect(px + 3, py + 2, TS - 6, 2);
+    ctx.strokeStyle = 'rgba(8,7,7,.44)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px + 13, py + 3);ctx.lineTo(px + 13, py + 14);
+    ctx.lineTo(px + 10 + (grain % 5), py + 19);
+    ctx.moveTo(px + 3, py + 23);ctx.lineTo(px + 18, py + 23);
+    ctx.stroke();
+  } else {
+    ctx.strokeStyle = tile === 3 ? 'rgba(141,105,173,.18)' : 'rgba(158,126,89,.18)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 3, py + 3, TS - 6, TS - 6);
+    ctx.fillStyle = tile === 3 ? 'rgba(164,124,198,.13)' : 'rgba(177,153,116,.13)';
+    for (let g = 0; g < 4; g++) {
+      const gx = 4 + ((grain >>> (g * 5)) % (TS - 8));
+      const gy = 4 + ((grain >>> (g * 4 + 2)) % (TS - 8));
+      ctx.fillRect(px + gx, py + gy, (g % 2) + 1, 1);
+    }
+    ctx.fillStyle = 'rgba(0,0,0,.12)';
+    ctx.fillRect(px, py + TS - 2, TS, 2);
+  }
+
   // Exit portal
   if (tile === 2) {
     let pulse = 0.7 + 0.3 * Math.sin(animTick * 0.05);
