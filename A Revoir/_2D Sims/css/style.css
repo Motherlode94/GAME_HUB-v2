@@ -9,9 +9,9 @@ html, body {
     padding: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* EmpÃªche tout scroll */
+    overflow: hidden; /* Empêche tout scroll */
     position: fixed; /* Fixe la page */
-    user-select: none; /* EmpÃªche la sÃ©lection de texte */
+    user-select: none; /* Empêche la sélection de texte */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

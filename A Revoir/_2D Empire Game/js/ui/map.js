@@ -116,11 +116,11 @@ const Map = {
             Mine: { color: "#95a5a6", symbol: "M" },
             "Marche": { color: "#f1c40f", symbol: "$" },
             "Marché": { color: "#f1c40f", symbol: "$" },
-            "MarchÃ©": { color: "#f1c40f", symbol: "$" },
+            "Marché": { color: "#f1c40f", symbol: "$" },
             Barracks: { color: "#e74c3c", symbol: "B" },
             "Chateau": { color: "#8e44ad", symbol: "C" },
             "Château": { color: "#8e44ad", symbol: "C" },
-            "ChÃ¢teau": { color: "#8e44ad", symbol: "C" }
+            "Château": { color: "#8e44ad", symbol: "C" }
         };
 
         const style = styles[name] || { color: "#34495e", symbol: "?" };

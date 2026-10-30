@@ -1,9 +1,9 @@
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   BE THE KING â€” Style Principal
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════════════════════════════════════════════
+   BE THE KING — Style Principal
+   ═══════════════════════════════════════════════════ */
 
 :root {
-    /* Palette par dÃ©faut - AntiquitÃ© */
+    /* Palette par défaut - Antiquité */
     --bg-primary: #0a0e17;
     --bg-secondary: #111827;
     --bg-card: #1a2234;
@@ -64,7 +64,7 @@
     --bg-secondary: #0c1220;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• RESET & BASE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════════ RESET & BASE ═══════════════ */
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -89,7 +89,7 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• Ã‰CRANS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════════ ÉCRANS ═══════════════ */
 .screen {
     display: none;
     width: 100vw;
@@ -99,7 +99,7 @@ body {
     display: flex;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â• Ã‰CRAN TITRE â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ ÉCRAN TITRE ═══════════ */
 #title-screen {
     flex-direction: column;
     align-items: center;
@@ -225,7 +225,7 @@ body {
     color: var(--text-primary);
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â• CRÃ‰ATION NATION â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ CRÉATION NATION ═══════════ */
 #new-game-screen {
     align-items: center;
     justify-content: center;
@@ -378,7 +378,7 @@ body {
     box-shadow: 0 4px 20px var(--accent-glow);
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â• BARRE SUPÃ‰RIEURE â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ BARRE SUPÉRIEURE ═══════════ */
 #top-bar {
     display: flex;
     align-items: center;
@@ -524,7 +524,7 @@ body {
 
 .meter-fill.happy { background: var(--food); }
 
-/* â•â•â•â•â•â•â•â•â•â•â• JEU PRINCIPAL â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ JEU PRINCIPAL ═══════════ */
 #game-screen {
     flex-direction: column;
 }
@@ -639,7 +639,7 @@ body {
 
 .stat-label { color: var(--text-muted); font-size: 0.9rem; }
 
-/* BÃ‚TIMENTS */
+/* BÂTIMENTS */
 .build-categories {
     display: flex;
     gap: 6px;
@@ -803,7 +803,7 @@ body {
     transition: width 0.5s;
 }
 
-/* ARMÃ‰E */
+/* ARMÉE */
 .military-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1132,7 +1132,7 @@ body {
     color: var(--text-muted);
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â• BARRE DU BAS â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ BARRE DU BAS ═══════════ */
 #bottom-bar {
     display: flex;
     justify-content: space-between;
@@ -1197,7 +1197,7 @@ body {
 .btn-footer:hover { border-color: var(--accent); color: var(--accent); }
 .btn-footer.btn-danger:hover { border-color: var(--danger); color: var(--danger); }
 
-/* â•â•â•â•â•â•â•â•â•â•â• MODALE â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ MODALE ═══════════ */
 .modal {
     position: fixed;
     inset: 0;
@@ -1288,7 +1288,7 @@ body {
     margin-top: 2px;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â• TOASTS â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ TOASTS ═══════════ */
 #toast-container {
     position: fixed;
     top: 60px;
@@ -1329,7 +1329,7 @@ body {
     to { opacity: 0; transform: translateX(30px); }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â• RESPONSIVE â•â•â•â•â•â•â•â•â•â•â• */
+/* ═══════════ RESPONSIVE ═══════════ */
 @media (max-width: 768px) {
     .game-title { font-size: 2.5rem; }
     .btn-title { width: 260px; padding: 12px 24px; }

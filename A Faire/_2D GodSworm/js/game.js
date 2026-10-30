@@ -37,7 +37,7 @@ const godCursor = {
   pulseTime: 0
 };
 
-// === SÃ‰LECTION ===
+// === SÉLECTION ===
 let selectedTerritory = null;
 let hoveredTerritory = null;
 let selectedUnit = null;
@@ -49,9 +49,9 @@ let buildMode = null;
 let buildPreviewX = 0;
 let buildPreviewY = 0;
 
-// === SYSTÃˆME DE SPAWN ===
+// === SYSTÈME DE SPAWN ===
 const SPAWN_CONFIG = {
-  ENEMY_SPAWN_INTERVAL: 15000, // Spawn toutes les 15 secondes (rÃ©duit)
+  ENEMY_SPAWN_INTERVAL: 15000, // Spawn toutes les 15 secondes (réduit)
   ENEMY_SPAWN_COUNT: 2,
   MAX_ENEMIES: 15
 };
@@ -1073,7 +1073,7 @@ canvas.addEventListener("mousemove", (e) => {
   });
 });
 
-// CLIC GAUCHE - SÃ©lection
+// CLIC GAUCHE - Sélection
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
@@ -1115,7 +1115,7 @@ canvas.addEventListener("click", (e) => {
     return;
   }
 
-  // SÃ©lection de bÃ¢timent
+  // Sélection de bâtiment
   const clickedBuilding = getBuildingAt(mouseX, mouseY);
   if (clickedBuilding) {
     buildings.forEach(b => b.selected = false);
@@ -1130,7 +1130,7 @@ canvas.addEventListener("click", (e) => {
     return;
   }
 
-  // SÃ©lection d'unitÃ©
+  // Sélection d'unité
   const clickedUnit = getUnitAt(mouseX, mouseY);
   if (clickedUnit) {
     if (clickedUnit.faction !== PLAYER_FACTION) {
@@ -1167,7 +1167,7 @@ canvas.addEventListener("click", (e) => {
     return;
   }
 
-  // SÃ©lection de territoire
+  // Sélection de territoire
   const clickedTerritory = getTerritoryAt(mouseX, mouseY);
   if (clickedTerritory) {
     buildings.forEach(b => b.selected = false);
@@ -1196,7 +1196,7 @@ canvas.addEventListener("contextmenu", (e) => {
   if (commandUnits.length > 0) {
     const primaryUnit = commandUnits[0];
 
-    // VÃ©rifier si on clique sur une ressource
+    // Vérifier si on clique sur une ressource
     const clickedResource = getResourceNodeAt(mouseX, mouseY);
     if (clickedResource) {
       const workers = commandUnits.filter((unit) => unit.canHarvest);
@@ -1227,7 +1227,7 @@ canvas.addEventListener("contextmenu", (e) => {
       return;
     }
 
-    // VÃ©rifier si on clique sur un ennemi pour attaquer
+    // Vérifier si on clique sur un ennemi pour attaquer
     const clickedEnemy = getUnitAt(mouseX, mouseY);
     if (
       clickedEnemy &&
@@ -1250,7 +1250,7 @@ canvas.addEventListener("contextmenu", (e) => {
       return;
     }
 
-    // Sinon, dÃ©placement en formation simple
+    // Sinon, déplacement en formation simple
     const cols = Math.max(1, Math.ceil(Math.sqrt(commandUnits.length)));
     const spacing = 24;
     commandUnits.forEach((unit, index) => {
@@ -1338,7 +1338,7 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  // H - Invoquer un hÃ©ros
+  // H - Invoquer un héros
   if (key === "h") {
     const heroClass = HERO_CLASSES.PALADIN;
     const cost = HERO_COSTS[heroClass];
@@ -1361,7 +1361,7 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  // 1-4 - CapacitÃ©s du hÃ©ros sÃ©lectionnÃ©
+  // 1-4 - Capacités du héros sélectionné
   if (["1", "2", "3", "4"].includes(key)) {
     if (selectedUnit && selectedUnit.isHero) {
       const abilityIndex = parseInt(key) - 1;
@@ -1408,7 +1408,7 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  // Q - EntraÃ®ner unitÃ©
+  // Q - Entraîner unité
   if (key === "q") {
     if (selectedBuilding && selectedBuilding.canProduce) {
       const unitType = selectedBuilding.produceTypes[0];
@@ -1881,7 +1881,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   territories.forEach(t => t.draw(ctx));
-  drawMapDecorations(ctx); // DÃ©corations de la carte
+  drawMapDecorations(ctx); // Décorations de la carte
   drawResourceNodes(ctx);
   drawAllBuildings(ctx);
   drawAllUnits(ctx);

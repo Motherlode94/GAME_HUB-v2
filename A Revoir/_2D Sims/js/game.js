@@ -3,59 +3,59 @@ let player, npc1, npc2, chars;
 
 // Setup du quartier avec les maisons
 function setupNeighborhood() {
-    // Zone rÃ©sidentielle Nord-Ouest
+    // Zone résidentielle Nord-Ouest
     const playerBuilding = new Building('player_building', 300, 400, 'player_house', {
-        name: 'ðŸ  Maison d\'Alex',
+        name: '🏠 Maison d\'Alex',
         color: '#4a9eff',
         roofColor: '#3a7fbf',
         locked: false
     });
     
     const sophieBuilding = new Building('sophie_building', 800, 350, 'sophie_house', {
-        name: 'ðŸ  Maison de Sophie',
+        name: '🏠 Maison de Sophie',
         color: '#ff6b9d',
         roofColor: '#cc5580',
         locked: true
     });
     
     const marcBuilding = new Building('marc_building', 1300, 450, 'marc_house', {
-        name: 'ðŸ  Maison de Marc',
+        name: '🏠 Maison de Marc',
         color: '#ffa500',
         roofColor: '#cc8400',
         locked: true
     });
     
-    // Maisons supplÃ©mentaires (NPCs invisibles)
+    // Maisons supplémentaires (NPCs invisibles)
     const house4 = new Building('house4', 600, 800, null, {
-        name: 'ðŸ  Maison',
+        name: '🏠 Maison',
         color: '#9b59b6',
         roofColor: '#7d3c98',
         locked: true
     });
     
     const house5 = new Building('house5', 1100, 850, null, {
-        name: 'ðŸ  Maison',
+        name: '🏠 Maison',
         color: '#e74c3c',
         roofColor: '#c0392b',
         locked: true
     });
     
     const house6 = new Building('house6', 1600, 700, null, {
-        name: 'ðŸ  Maison',
+        name: '🏠 Maison',
         color: '#1abc9c',
         roofColor: '#16a085',
         locked: true
     });
     
     const house7 = new Building('house7', 400, 1200, null, {
-        name: 'ðŸ  Maison',
+        name: '🏠 Maison',
         color: '#f39c12',
         roofColor: '#d68910',
         locked: true
     });
     
     const house8 = new Building('house8', 1800, 1100, null, {
-        name: 'ðŸ  Maison',
+        name: '🏠 Maison',
         color: '#3498db',
         roofColor: '#2980b9',
         locked: true
@@ -72,7 +72,7 @@ function setupNeighborhood() {
         house8
     ];
     
-    // Ajoute des Ã©lÃ©ments dÃ©coratifs partout dans le monde
+    // Ajoute des éléments décoratifs partout dans le monde
     createOutdoorDecoration();
 }
 
@@ -91,14 +91,14 @@ function createOutdoorDecoration() {
         // Zone Sud
         {x: 300, y: 1400}, {x: 800, y: 1350}, {x: 1300, y: 1450}, {x: 1800, y: 1380},
         {x: 600, y: 1500}, {x: 1100, y: 1520}, {x: 1600, y: 1480},
-        // Zones intermÃ©diaires
+        // Zones intermédiaires
         {x: 350, y: 950}, {x: 850, y: 1000}, {x: 1350, y: 980}, {x: 1850, y: 1050}
     ];
     
     treePositions.forEach(pos => {
         const tree = document.createElement('div');
         tree.className = 'decoration tree';
-        tree.textContent = 'ðŸŒ³';
+        tree.textContent = '🌳';
         tree.style.left = pos.x + 'px';
         tree.style.top = pos.y + 'px';
         tree.style.position = 'absolute';
@@ -110,9 +110,9 @@ function createOutdoorDecoration() {
     
     // Bancs publics
     const benchPositions = [
-        {x: 600, y: 900, label: 'ðŸª‘ Banc public'},
-        {x: 1400, y: 600, label: 'ðŸª‘ Banc public'},
-        {x: 900, y: 1200, label: 'ðŸª‘ Aire de repos'}
+        {x: 600, y: 900, label: '🪑 Banc public'},
+        {x: 1400, y: 600, label: '🪑 Banc public'},
+        {x: 900, y: 1200, label: '🪑 Aire de repos'}
     ];
     
     benchPositions.forEach(pos => {
@@ -133,8 +133,8 @@ function createOutdoorDecoration() {
     
     // Fontaines
     const fountains = [
-        {x: 1000, y: 750, label: 'â›² Fontaine'},
-        {x: 500, y: 1100, label: 'â›² Fontaine'}
+        {x: 1000, y: 750, label: '⛲ Fontaine'},
+        {x: 500, y: 1100, label: '⛲ Fontaine'}
     ];
     
     fountains.forEach(pos => {
@@ -176,11 +176,11 @@ function createOutdoorDecoration() {
         world.appendChild(road);
     });
     
-    // Fleurs alÃ©atoires
+    // Fleurs aléatoires
     for (let i = 0; i < 30; i++) {
         const flower = document.createElement('div');
         flower.className = 'decoration flower';
-        flower.textContent = ['ðŸŒ¸', 'ðŸŒº', 'ðŸŒ»', 'ðŸŒ·'][Math.floor(Math.random() * 4)];
+        flower.textContent = ['🌸', '🌺', '🌻', '🌷'][Math.floor(Math.random() * 4)];
         flower.style.left = (Math.random() * 2200 + 100) + 'px';
         flower.style.top = (Math.random() * 1600 + 100) + 'px';
         flower.style.position = 'absolute';
@@ -191,7 +191,7 @@ function createOutdoorDecoration() {
     }
 }
 
-// Setup de la maison du joueur (intÃ©rieur)
+// Setup de la maison du joueur (intérieur)
 function setupPlayerHouse() {
     const location = 'player_house';
     
@@ -278,9 +278,9 @@ function createObjectWithLocation(obj, location) {
     return obj;
 }
 
-// Ancienne fonction setupHouse supprimÃ©e
+// Ancienne fonction setupHouse supprimée
 
-// Variables de contrÃ´le
+// Variables de contrôle
 let gameSpeed = 1;
 let isPaused = false;
 let selectedObject = null;
@@ -366,7 +366,7 @@ function showObjectMenu(obj) {
     // Affiche un menu d'interactions
     const menu = document.getElementById('interaction-menu');
     if (!menu) {
-        console.error('Menu interaction non trouvÃ©');
+        console.error('Menu interaction non trouvé');
         return;
     }
     
@@ -389,7 +389,7 @@ function showObjectMenu(obj) {
     
     // Bouton fermer
     const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'âœ– Fermer';
+    closeBtn.textContent = '✖ Fermer';
     closeBtn.style.marginTop = '5px';
     closeBtn.onclick = () => {
         menu.style.display = 'none';
@@ -400,18 +400,18 @@ function showObjectMenu(obj) {
     menu.style.left = obj.x + 'px';
     menu.style.top = (obj.y - 100) + 'px';
     
-    console.log('Menu affichÃ© pour:', obj.type, 'avec', obj.interactions.length, 'interactions');
+    console.log('Menu affiché pour:', obj.type, 'avec', obj.interactions.length, 'interactions');
 }
 
-// Attendre que le DOM soit prÃªt avant d'initialiser
+// Attendre que le DOM soit prêt avant d'initialiser
 document.addEventListener('DOMContentLoaded', function() {
     initGameControls();
-    console.log('ðŸŽ® Initialisation du jeu...');
+    console.log('🎮 Initialisation du jeu...');
     
-    // CrÃ©ation des personnages avec traits et aspirations
+    // Création des personnages avec traits et aspirations
 player = new Character('P', 100, 100, 'player', {
     name: 'Alex',
-    age: 25, // â­ AJOUTER
+    age: 25, // ⭐ AJOUTER
     traits: ['outgoing', 'creative'],
     money: 500,
     aspiration: new Aspiration('creativity'),
@@ -421,7 +421,7 @@ player = new Character('P', 100, 100, 'player', {
 
 npc1 = new Character('N1', 300, 150, 'npc', {
     name: 'Sophie',
-    age: 28, // â­ AJOUTER
+    age: 28, // ⭐ AJOUTER
     traits: ['neat', 'bookworm'],
     money: 300,
     aspiration: new Aspiration('knowledge'),
@@ -431,7 +431,7 @@ npc1 = new Character('N1', 300, 150, 'npc', {
 
 npc2 = new Character('N2', 500, 200, 'npc', {
     name: 'Marc',
-    age: 22, // â­ AJOUTER
+    age: 22, // ⭐ AJOUTER
     traits: ['lazy', 'foodie'],
     money: 200,
     aspiration: new Aspiration('fortune'),
@@ -460,11 +460,11 @@ npc2 = new Character('N2', 500, 200, 'npc', {
     // Initialise le gestionnaire de monde
     WorldManager.init();
     
-    // Initialise la camÃ©ra et la mini-map
+    // Initialise la caméra et la mini-map
     Camera.init();
     MiniMap.init();
     
-    // Setup du quartier (extÃ©rieur)
+    // Setup du quartier (extérieur)
     setupNeighborhood();
     
     // Setup de la maison du joueur
@@ -473,7 +473,7 @@ npc2 = new Character('N2', 500, 200, 'npc', {
     // Setup des maisons des NPCs
     setupNPCHouses();
     
-    // DÃ©marre dans le quartier
+    // Démarre dans le quartier
     WorldManager.changeLocation('neighborhood', player);
     
     // Gestion du clic sur les objets
@@ -498,9 +498,9 @@ npc2 = new Character('N2', 500, 200, 'npc', {
 
         if (interactionMenu) interactionMenu.style.display = 'none';
     });
-// DÃ©marrage
-    console.log('ðŸŽ® Sims 2D - Jeu dÃ©marrÃ©!');
-    console.log('ContrÃ´les: FlÃ¨ches/ZQSD = Bouger, Espace = Interagir, R = Reposer, P = Pause');
+// Démarrage
+    console.log('🎮 Sims 2D - Jeu démarré!');
+    console.log('Contrôles: Flèches/ZQSD = Bouger, Espace = Interagir, R = Reposer, P = Pause');
     console.log('Vitesse: 1/2/3, Debug: 0');
     
     loop();
@@ -558,16 +558,16 @@ function loop() {
 function checkDeath(c) {
     if (c.isDead) return;
     
-    // â­ NOUVEAU : VÃ©rifier mort naturelle d'abord
+    // ⭐ NOUVEAU : Vérifier mort naturelle d'abord
     const naturalDeath = Aging.checkNaturalDeath(c.id);
     if (naturalDeath) {
         handleDeath(c, 'old_age');
         return;
     }
     
-    // VÃ©rifier mort par besoins (code existant)
+    // Vérifier mort par besoins (code existant)
     if (c.needs.energy <= 0) {
-        handleDeath(c, 'starvation'); // â­ Utiliser handleDeath au lieu du code direct
+        handleDeath(c, 'starvation'); // ⭐ Utiliser handleDeath au lieu du code direct
     }
 }
 
@@ -620,7 +620,7 @@ function addMoney(characterId, amount) {
     }
 }
 
-// ========== FONCTIONS POUR TESTER LES NOUVEAUX SYSTÃˆMES ==========
+// ========== FONCTIONS POUR TESTER LES NOUVEAUX SYSTÈMES ==========
 
 // Tester le mariage entre deux personnages
 window.testMarriage = function() {
@@ -639,7 +639,7 @@ window.testMarriage = function() {
         }
         
         handleMarriage(char1, char2);
-        console.log(`ðŸ’’ ${char1.name} et ${char2.name} se sont mariÃ©s!`);
+        console.log(`💒 ${char1.name} et ${char2.name} se sont mariés!`);
     }
 };
 
@@ -651,7 +651,7 @@ window.testBirth = function() {
         
         const babyId = 'baby_' + Date.now();
         const baby = new Character(babyId, parent1.x + 30, parent1.y, 'npc', {
-            name: 'BÃ©bÃ©',
+            name: 'Bébé',
             age: 0,
             money: 0,
             autonomous: false
@@ -660,27 +660,27 @@ window.testBirth = function() {
         chars.push(baby);
         
         handleBirth(parent1, parent2, baby.id);
-        console.log(`ðŸ‘¶ ${parent1.name} et ${parent2.name} ont eu un bÃ©bÃ©!`);
+        console.log(`👶 ${parent1.name} et ${parent2.name} ont eu un bébé!`);
     }
 };
 
-// Voir les infos complÃ¨tes d'un personnage
+// Voir les infos complètes d'un personnage
 window.showCharInfo = function(index = 0) {
     const char = chars[index];
     if (!char) return;
     
     const summary = getCharacterSummary(char.id);
-    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
-    console.log(`ðŸ‘¤ ${char.name}`);
-    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
-    console.log(`ðŸ“… Ã‚ge: ${summary.age} ans (${summary.stage})`);
-    console.log(`â­ RÃ©putation: ${summary.socialClass}`);
-    console.log(`ðŸ’­ Ã‰tat social: ${summary.socialStatus}`);
-    console.log(`ðŸ“‹ ActivitÃ©: ${summary.currentActivity ? summary.currentActivity.activity : 'Aucune'}`);
-    console.log(`ðŸ§  Souvenirs: ${summary.memoryCount}`);
-    console.log(`ðŸ‘¨â€ðŸ‘©â€ðŸ‘§ Famille: ${summary.family || 'Aucune'}`);
-    console.log(`âš”ï¸ Rivaux: ${summary.rivals}`);
-    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`👤 ${char.name}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`📅 Âge: ${summary.age} ans (${summary.stage})`);
+    console.log(`⭐ Réputation: ${summary.socialClass}`);
+    console.log(`💭 État social: ${summary.socialStatus}`);
+    console.log(`📋 Activité: ${summary.currentActivity ? summary.currentActivity.activity : 'Aucune'}`);
+    console.log(`🧠 Souvenirs: ${summary.memoryCount}`);
+    console.log(`👨‍👩‍👧 Famille: ${summary.family || 'Aucune'}`);
+    console.log(`⚔️ Rivaux: ${summary.rivals}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━');
     
     return summary;
 };
@@ -693,7 +693,7 @@ window.ageCharacter = function(index = 0, years = 5) {
     const data = Aging.characters[char.id];
     if (data) {
         data.age += years;
-        console.log(`â° ${char.name} a maintenant ${Math.floor(data.age)} ans`);
+        console.log(`⏰ ${char.name} a maintenant ${Math.floor(data.age)} ans`);
     }
 };
 
@@ -702,11 +702,11 @@ window.showRelations = function(index = 0) {
     const char = chars[index];
     if (!char) return;
     
-    console.log(`â”â”â” Relations de ${char.name} â”â”â”`);
+    console.log(`━━━ Relations de ${char.name} ━━━`);
     Object.values(char.relations).forEach(rel => {
         const other = chars.find(c => c.id === rel.targetId);
         if (other && !other.isDead) {
-            const status = rel.affection > 70 ? 'ðŸ’š Ami' : rel.affection > 40 ? 'ðŸ’› Connaissance' : 'ðŸ’” Ennemi';
+            const status = rel.affection > 70 ? '💚 Ami' : rel.affection > 40 ? '💛 Connaissance' : '💔 Ennemi';
             console.log(`${other.name}: ${Math.floor(rel.affection)}/100 ${status}`);
         }
     });
@@ -715,23 +715,23 @@ window.showRelations = function(index = 0) {
 // Info sur la saison actuelle
 window.showSeason = function() {
     const info = Season.getInfo();
-    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
-    console.log(`ðŸŒ¸ Saison: ${info.season}`);
-    console.log(`ðŸ“… Jour: ${info.day}/${info.totalDays}`);
-    console.log(`ðŸŒ¤ï¸ MÃ©tÃ©o: ${info.weather}`);
-    console.log(`ðŸŒ¡ï¸ TempÃ©rature: ${info.temperature}Â°C`);
-    console.log(`ðŸ˜Š Effet humeur: ${info.moodEffect > 0 ? '+' : ''}${info.moodEffect}`);
-    console.log('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`🌸 Saison: ${info.season}`);
+    console.log(`📅 Jour: ${info.day}/${info.totalDays}`);
+    console.log(`🌤️ Météo: ${info.weather}`);
+    console.log(`🌡️ Température: ${info.temperature}°C`);
+    console.log(`😊 Effet humeur: ${info.moodEffect > 0 ? '+' : ''}${info.moodEffect}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━');
 };
 
-// CrÃ©er une rivalitÃ©
+// Créer une rivalité
 window.createRivalry = function(index1 = 0, index2 = 1) {
     const char1 = chars[index1];
     const char2 = chars[index2];
     
     if (char1 && char2) {
         Jealousy.createRivalry(char1.id, char2.id, 'test_rivalry', 'personal');
-        console.log(`âš”ï¸ RivalitÃ© crÃ©Ã©e entre ${char1.name} et ${char2.name}`);
+        console.log(`⚔️ Rivalité créée entre ${char1.name} et ${char2.name}`);
     }
 };
 
