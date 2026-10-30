@@ -67,7 +67,10 @@ RTS.WaveSystem = {
         { type: "heavy_transport_heli", cost: 4, minWave: 6 },
         { type: "fighter_aircraft", cost: 5, minWave: 7 },
         { type: "strike_aircraft", cost: 5, minWave: 7 },
-        { type: "loitering_drone", cost: 3, minWave: 5 }
+        { type: "loitering_drone", cost: 3, minWave: 5 },
+        { type: "heavy_mbt", cost: 5, minWave: 7 },
+        { type: "wheeled_at", cost: 4, minWave: 5 },
+        { type: "air_defense_radar", cost: 4, minWave: 6 }
     ],
 
     reset: function() {
