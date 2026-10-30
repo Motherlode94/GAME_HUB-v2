@@ -413,5 +413,48 @@ RTS.SquadDefs = {
         cost:            { gold: 25, fuel: 0, ammo: 0 },
         productionTime:  3,
         icon:            "LOG"
+    },
+    // Renforts contemporains 2026 : équilibrage de jeu, non simulation matérielle.
+    assault_team: {
+        label:"Section d'assaut 2026", category:"infantry", defaultCount:5, maxCount:5,
+        memberHp:82, memberSize:13, speed:96, formationSpread:20, formationType:"wedge",
+        attackRange:195, attackDamage:11, attackRate:0.95, combatMode:"burst",
+        burstCount:3, burstDelay:0.07, projectileSpeed:470,
+        color:"#4d91de", cost:{gold:78,fuel:0,ammo:34}, productionTime:7, icon:"AST"
+    },
+    recon_team: {
+        label:"Éclaireurs 2026", category:"infantry", defaultCount:3, maxCount:3,
+        memberHp:58, memberSize:12, speed:115, formationSpread:23, formationType:"line",
+        attackRange:255, attackDamage:12, attackRate:0.65, combatMode:"single",
+        projectileSpeed:620,
+        color:"#6aa98e", cost:{gold:72,fuel:0,ammo:27}, productionTime:6, icon:"REC"
+    },
+    wheeled_ifv: {
+        label:"Blindé 8x8 moderne", category:"vehicle", defaultCount:1, maxCount:1,
+        memberHp:245, memberSize:25, speed:110, formationSpread:0, formationType:"solo",
+        attackRange:275, attackDamage:24, attackRate:2.2, combatMode:"machinegun",
+        projectileSpeed:550,
+        color:"#4e857a", cost:{gold:125,fuel:45,ammo:35}, productionTime:10, icon:"8X8"
+    },
+    mobile_aa: {
+        label:"Défense antiaérienne mobile", category:"vehicle", defaultCount:1, maxCount:1,
+        memberHp:185, memberSize:24, speed:76, formationSpread:0, formationType:"solo",
+        attackRange:440, attackDamage:54, attackRate:0.65, combatMode:"rocket",
+        aoeDamage:12, aoeRadius:25, projectileSpeed:450, antiAirOnly:true,
+        color:"#8aa26e", cost:{gold:145,fuel:48,ammo:60}, productionTime:12, icon:"AA"
+    },
+    recon_drone: {
+        label:"Drone de reconnaissance", category:"air", defaultCount:1, maxCount:1,
+        memberHp:60, memberSize:12, speed:180, formationSpread:0, formationType:"solo",
+        attackRange:0, attackDamage:0, attackRate:0, combatMode:"none",
+        projectileSpeed:0, isAir:true,
+        color:"#73b9cf", cost:{gold:60,fuel:18,ammo:0}, productionTime:5, icon:"UAV"
+    },
+    attack_drone: {
+        label:"Drone d'appui", category:"air", defaultCount:1, maxCount:1,
+        memberHp:85, memberSize:14, speed:145, formationSpread:0, formationType:"solo",
+        attackRange:290, attackDamage:28, attackRate:0.7, combatMode:"rocket",
+        aoeDamage:12, aoeRadius:26, projectileSpeed:330, isAir:true,
+        color:"#c38d72", cost:{gold:100,fuel:35,ammo:38}, productionTime:9, icon:"UCV"
     }
 };
