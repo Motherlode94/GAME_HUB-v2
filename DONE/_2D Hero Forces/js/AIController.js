@@ -277,11 +277,11 @@ RTS.Game.AIController.prototype._assignObjective = function(squad, phase) {
         // In phase 1, do not push directly into Allied HQ.
         if (phase === 1 && cp.isHQ && cp.owner === 'allied') continue;
 
-        // Avoid over-stacking too many squads on one point.
+        // Penalize crowded objectives without making every point ineligible.
+        // Otherwise surplus squads can freeze when all capture points have two assignments.
         var crowding = this._assignedCPs[i] || 0;
-        if (crowding >= 2) continue;
 
-        var score = 0;
+        var score = -crowding * 42;
 
         if      (cp.owner === 'allied')  score += phase === 1 ? 60 : phase === 2 ? 90 : 120;
         else if (cp.owner === 'neutral') score += phase === 1 ? 80 : 60;
