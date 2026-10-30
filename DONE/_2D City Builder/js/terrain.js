@@ -256,28 +256,49 @@ function injectTerrainStyles() {
       filter: saturate(0.6);
     }
 
-    .tile.terrain-water {
-      background: linear-gradient(145deg, #0d3a5a, #082040) !important;
-      cursor: not-allowed !important;
-      animation: waterShimmer 3s ease infinite;
+    /* Layered biomes: deterministic detail, zero network assets or frame timers. */
+    .tile.terrain-grass {
+      background:
+        radial-gradient(ellipse at 18% 24%, rgba(125,155,83,.24) 0 2px, transparent 5px),
+        radial-gradient(ellipse at 73% 75%, rgba(23,50,23,.38) 0 5px, transparent 9px),
+        repeating-linear-gradient(125deg, transparent 0 10px, rgba(146,155,92,.07) 11px 12px),
+        linear-gradient(135deg,#263a21,#192c19) !important;
     }
-    @keyframes waterShimmer {
-      0%,100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+    .tile.terrain-water {
+      background:
+        repeating-linear-gradient(160deg,transparent 0 9px,rgba(143,210,222,.11) 10px 11px,transparent 13px 23px),
+        radial-gradient(ellipse at 35% 20%,rgba(86,172,192,.24),transparent 65%),
+        linear-gradient(145deg,#12506a,#08273e) !important;
+      cursor: not-allowed !important;
     }
     .tile.terrain-forest {
-      background: linear-gradient(145deg, #0d3a12, #082008) !important;
+      background:
+        radial-gradient(circle at 22% 30%,#376c31 0 5px,transparent 7px),
+        radial-gradient(circle at 76% 30%,#234f28 0 7px,transparent 9px),
+        radial-gradient(circle at 48% 76%,#326338 0 8px,transparent 10px),
+        linear-gradient(145deg,#1f4826,#0e291b) !important;
       cursor: not-allowed !important;
     }
     .tile.terrain-hill {
-      background: linear-gradient(145deg, #3a2e1e, #2a2012) !important;
+      background:
+        linear-gradient(143deg,transparent 45%,rgba(0,0,0,.23) 46% 57%,transparent 58%),
+        linear-gradient(22deg,transparent 43%,rgba(198,169,113,.22) 44% 47%,transparent 48%),
+        linear-gradient(145deg,#594b31,#2f2a20) !important;
     }
     .tile.terrain-sand {
-      background: linear-gradient(145deg, #3a3218, #2a2410) !important;
+      background:
+        repeating-linear-gradient(164deg,transparent 0 9px,rgba(225,188,111,.13) 10px 11px,transparent 12px 20px),
+        linear-gradient(145deg,#665334,#423620) !important;
     }
     .tile.terrain-wetland {
-      background: linear-gradient(145deg, #152e18, #0d2010) !important;
+      background:
+        radial-gradient(ellipse at 65% 60%,rgba(55,109,95,.55) 0 9px,transparent 12px),
+        repeating-linear-gradient(80deg,transparent 0 7px,rgba(104,147,87,.23) 8px 9px,transparent 11px 16px),
+        linear-gradient(145deg,#284737,#102c29) !important;
       cursor: not-allowed !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .tile.terrain-water { animation: none !important; }
     }
 
     /* Non-buildable hover */
