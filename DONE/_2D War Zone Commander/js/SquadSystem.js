@@ -100,7 +100,14 @@ RTS.SquadSystem = {
         }
         var point = nav.points.length ? nav.points[0] : dest;
         var dx = point.x - squad.x, dy = point.y - squad.y, dist = Math.hypot(dx, dy);
-        var step = Math.max(0, squad.speed * delta);
+        // Mobile vehicles lose speed as their engine takes damage.
+        // Heading follows travel direction so directional armour is meaningful.
+        var vehicle = squad.def && squad.def.category === "vehicle";
+        var mobility = vehicle ? Math.max(0.35, 1 - (squad.engineDamage || 0)) : 1;
+        var step = Math.max(0, squad.speed * mobility * delta);
+        if (vehicle && dist > 0.001 && step > 0) {
+            squad.heading = Math.atan2(dy, dx);
+        }
         if (dist <= Math.max(3, step)) {
             squad.x = point.x; squad.y = point.y;
             if (nav.points.length) nav.points.shift();
