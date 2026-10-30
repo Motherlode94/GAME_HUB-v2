@@ -43,12 +43,41 @@ RTS.BuildingRenderer = {
             ctx.fillRect(hx, hy, w, h); return;
         }
 
+        // Grounding: compacted earth apron, cast shadow and scattered rubble.
+        // Purely visual: no collision, production or faction logic changes.
+        ctx.save();
+        ctx.fillStyle = "rgba(120,108,78,.24)";
+        ctx.beginPath(); ctx.ellipse(b.x, b.y+4, w*.76, h*.65, -.12, 0, Math.PI*2);ctx.fill();
+        ctx.fillStyle = "rgba(7,11,10,.37)";
+        ctx.beginPath();ctx.ellipse(b.x+5,b.y+7,w*.62,h*.55,-.12,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle = "rgba(176,163,132,.35)";
+        for(var debris=0;debris<7;debris++){
+            var a=debris*2.39996+(b.x+b.y)*.001;
+            var d=w*.62+(debris%3)*4;
+            ctx.fillRect(b.x+Math.cos(a)*d,b.y+Math.sin(a)*h*.62,2+(debris%2)*2,2);
+        }
+        ctx.restore();
+
         // Corps principal
         ctx.fillStyle   = isBlue ? def.fill : isAlly ? "#0a1e0a" : "#2a0a0a";
         ctx.strokeStyle = isBlue ? def.stroke : isAlly ? "#2ecc71" : "#e74c3c";
         ctx.lineWidth   = 2;
         ctx.fillRect(hx, hy, w, h);
         ctx.strokeRect(hx, hy, w, h);
+
+        // Roofing: desaturated metal panels with seams and edge highlights.
+        ctx.save();
+        ctx.beginPath();ctx.rect(hx+3,hy+3,w-6,h-6);ctx.clip();
+        ctx.fillStyle = "rgba(148,155,141,.15)";
+        ctx.fillRect(hx+3,hy+3,w-6,Math.max(5,h*.24));
+        ctx.strokeStyle = "rgba(194,203,186,.22)";
+        ctx.lineWidth = 1;
+        for(var seam=hx+10;seam<hx+w-4;seam+=11){
+            ctx.beginPath();ctx.moveTo(seam,hy+4);ctx.lineTo(seam,hy+h-4);ctx.stroke();
+        }
+        ctx.fillStyle="rgba(0,0,0,.19)";
+        ctx.fillRect(hx+4,hy+h-8,w-8,4);
+        ctx.restore();
 
         // Détails spécifiques
         RTS.BuildingRenderer["_detail_" + b.type]
