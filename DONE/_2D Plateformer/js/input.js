@@ -18,6 +18,12 @@ var Input = (function () {
         _keys[e.code] = false;
     });
 
+    // Release all controls if the browser loses focus.
+    window.addEventListener('blur', function () {
+        for (var key in _keys) _keys[key] = false;
+        for (var code in _just) delete _just[code];
+    });
+
     window.addEventListener('click', function () {
         _clicked = true;
     });
