@@ -31,15 +31,15 @@ RTS.SquadDefs = {
      * 4 soldats, polyvalents, col vertébrale de toute force.
      */
     riflemen: {
-        label:           "Escouade Riflemen",
+        label:           "Groupe de combat (6 soldats)",
         category:        "infantry",
-        defaultCount:    4,
+        defaultCount:    6,
         maxCount:        6,
         memberHp:        75,
         memberSize:      13,
         speed:           90,
         formationSpread: 20,
-        formationType:   "grid",
+        formationType:   "wedge",
 
         attackRange:     220,
         attackDamage:    9,
@@ -60,7 +60,7 @@ RTS.SquadDefs = {
      * Missiles guidés, efficaces contre blindés et hélicooptères bas.
      */
     at_team: {
-        label:           "Équipe AT Javelin",
+        label:           "Binôme antichar",
         category:        "infantry",
         defaultCount:    2,
         maxCount:        2,
@@ -89,7 +89,7 @@ RTS.SquadDefs = {
      * Extrême portée, tir unique dévastateur sur infanterie.
      */
     sniper_team: {
-        label:           "Sniper Team",
+        label:           "Binôme tireur-observateur",
         category:        "infantry",
         defaultCount:    2,
         maxCount:        2,
@@ -116,7 +116,7 @@ RTS.SquadDefs = {
      * Sol-air guidé, contre hélicoptères et drones uniquement.
      */
     manpads: {
-        label:           "MANPADS Stinger",
+        label:           "Binôme défense aérienne",
         category:        "infantry",
         defaultCount:    2,
         maxCount:        2,
