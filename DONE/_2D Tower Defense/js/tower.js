@@ -28,6 +28,19 @@ const TOWER_TYPES = {
         slow: { factor: 0.5, duration: 1600 },
         desc: 'Ralentit les ennemis dans une zone.'
     },
+    RIFLEMAN: {
+        name: 'Fusilier', short: 'F', key: '6',
+        cost: 60, range: 150, damage: 12, fireRate: 320,
+        color: '#7bbf71', projectileSpeed: 620,
+        desc: 'Fantassin déployé : tir rapide sur les ennemis proches.'
+    },
+    ANTITANK: {
+        name: 'Antichar', short: 'AT', key: '7',
+        cost: 135, range: 195, damage: 105, fireRate: 1900,
+        color: '#d69a54', projectileSpeed: 360, splash: 22,
+        pierce: true,
+        desc: 'Soldat lance-roquettes : tir puissant contre les blindés.'
+    },
     MORTAR: {
         name: 'Mortier', short: 'M', key: '5',
         cost: 130, range: 165, damage: 45, fireRate: 1500,
@@ -145,8 +158,8 @@ function fireTower(tower, target) {
         damage: tower.damage,
         splash: tower.splash,
         slow: tower.slow,
-        color: tower.type === 'FROST' ? '#bff3ff' : (tower.type === 'MORTAR' ? '#333' : '#ffff66'),
-        size: tower.type === 'MORTAR' ? 6 : (tower.type === 'RAPID' ? 3 : PROJECTILE_SIZE),
+        color: tower.type === 'FROST' ? '#bff3ff' : (tower.type === 'MORTAR' ? '#333' : (tower.type === 'ANTITANK' ? '#ff9b40' : '#ffff66')),
+        size: tower.type === 'MORTAR' || tower.type === 'ANTITANK' ? 6 : (tower.type === 'RAPID' || tower.type === 'RIFLEMAN' ? 3 : PROJECTILE_SIZE),
         arc: tower.type === 'MORTAR',
         startDist: distance(mx, my, target.x, target.y),
         trail: []
@@ -166,6 +179,31 @@ function drawTowerRange(ctx, tower, color = 'rgba(255, 255, 255, 0.12)') {
 function drawTowerBody(ctx, x, y, type, angle, level, recoil) {
     const template = TOWER_TYPES[type] || TOWER_TYPES.BASIC;
     const half = TOWER_SIZE / 2;
+
+    // Les unités d'infanterie ont un personnage et une arme, pas une tourelle.
+    if (type === 'RIFLEMAN' || type === 'ANTITANK') {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = 'rgba(0,0,0,.35)';
+        ctx.beginPath(); ctx.ellipse(0, 10, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = type === 'RIFLEMAN' ? '#496848' : '#80613b';
+        ctx.fillRect(-7, -8, 14, 17);
+        ctx.fillStyle = '#c9aa85';
+        ctx.beginPath(); ctx.arc(0, -10, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = type === 'RIFLEMAN' ? '#324b31' : '#6f5535';
+        ctx.fillRect(-8, -16, 16, 5);
+        ctx.rotate(angle);
+        ctx.fillStyle = '#242b30';
+        if (type === 'ANTITANK') {
+            ctx.fillRect(0, -5, 23, 10);
+            ctx.fillStyle = '#555'; ctx.fillRect(16, -6, 8, 12);
+        } else {
+            ctx.fillRect(0, -3, 21, 6);
+            ctx.fillRect(8, 3, 5, 6);
+        }
+        ctx.restore();
+        return;
+    }
 
     // Socle
     ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
