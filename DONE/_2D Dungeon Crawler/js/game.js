@@ -22,6 +22,8 @@ let particles = [];
 let screenShake = {x:0, y:0, dur:0};
 let floatingTexts = [];
 let dungeonLevel = 1;
+// Visual-only tween: logical tile coordinates continue to drive collisions and combat.
+let heroVisual = null;
 
 // ==================== ENEMY TEMPLATES ====================
 const enemyTemplates = {
@@ -167,6 +169,7 @@ function generateDungeon() {
   let start = rooms[0];
   player.x = start.x + Math.floor(start.w / 2);
   player.y = start.y + Math.floor(start.h / 2);
+  heroVisual = {x: player.x, y: player.y};
 
   // Place special items in special rooms
   rooms.forEach((r, i) => {
@@ -534,9 +537,21 @@ function drawBoss(px, py, bob, e) {
 
 // ==================== PLAYER RENDERING ====================
 function drawPlayer() {
-  const px = player.x * TS + TS / 2;
-  const py = player.y * TS + TS / 2;
-  const bob = Math.sin(animTick * 0.08) * 1.5;
+  if (!heroVisual) heroVisual = {x:player.x,y:player.y};
+  // Smooth short steps; snap on floor regeneration or large jumps.
+  const dx = player.x - heroVisual.x, dy = player.y - heroVisual.y;
+  if (Math.abs(dx) > 1.1 || Math.abs(dy) > 1.1) {
+    heroVisual.x=player.x;heroVisual.y=player.y;
+  } else {
+    heroVisual.x += dx * .34;
+    heroVisual.y += dy * .34;
+    if (Math.abs(player.x - heroVisual.x) < .015) heroVisual.x = player.x;
+    if (Math.abs(player.y - heroVisual.y) < .015) heroVisual.y = player.y;
+  }
+  const px = heroVisual.x * TS + TS / 2;
+  const py = heroVisual.y * TS + TS / 2;
+  const moving = Math.abs(dx) + Math.abs(dy) > .03;
+  const bob = Math.sin(animTick * (moving ? .34 : .08)) * (moving ? 2.4 : 1.5);
 
   // Hero contact shadow, drawn below armor and cloak.
   ctx.save();
@@ -948,6 +963,8 @@ function attackHandler() {
   let dmg = isCrit ? Math.floor(baseDmg * 2) : baseDmg;
   if (combat.enemy.rageActive) dmg = Math.floor(dmg * 0.8); // rage also raises def
 
+  // World-space attack arc, independent of combat overlay and damage logic.
+  spawnParticles(combat.enemy.x, combat.enemy.y, isCrit ? '#ffe4a0' : '#dbeaff', isCrit ? 9 : 4, 'spark');
   combat.enemy.hp -= dmg;
   animateCombat('enemy', isCrit ? 'combat-critical' : 'combat-hit');
   spawnParticles(combat.enemy.x, combat.enemy.y, '#cc2222', isCrit ? 12 : 6, 'blood');
