@@ -452,7 +452,7 @@ function resetGame() {
 
     const timerCell = document.getElementById("hudTimerCell");
     const livesCell = document.getElementById("hudLivesCell");
-    timerCell.classList.toggle("hidden", selectedMode !== "classic");
+    timerCell.classList.toggle("hidden", selectedMode !== "classic" && selectedMode !== "defense");
     livesCell.classList.toggle("hidden", selectedMode !== "survival");
 
     const tag = document.getElementById("modeTag");
@@ -799,7 +799,7 @@ function update(dt) {
 }
 
 function updateClock(dt) {
-    if (selectedMode !== "classic" || timeUp) return;
+    if ((selectedMode !== "classic" && selectedMode !== "defense") || timeUp) return;
     timeLeft -= dt / 60;
     const sec = Math.ceil(timeLeft);
     if (sec !== lastTickSecond) {
@@ -987,7 +987,7 @@ function finishScoredShot() {
 
 function isGameDone() {
     if (selectedMode === "precision") return precisionShotsLeft <= 0;
-    if (selectedMode === "classic")   return timeUp;
+    if (selectedMode === "classic" || selectedMode === "defense") return timeUp;
     return lives <= 0;
 }
 
@@ -1012,7 +1012,8 @@ function handleMiss() {
     const msgMap = {
         survival: `💀 Raté ! ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}`,
         precision: `Raté ! ${precisionShotsLeft} tir${precisionShotsLeft>1?'s':''} restant${precisionShotsLeft>1?'s':''}`,
-        classic: timeUp ? "⏰ Temps écoulé !" : "Raté ! Réessaie..."
+        classic: timeUp ? "⏰ Temps écoulé !" : "Raté ! Réessaie...",
+        defense: timeUp ? "⏰ Temps écoulé !" : "Défenseur en place — retente ton tir !"
     };
     setMsg(msgMap[selectedMode] || "Raté !");
     updateHUD();
