@@ -629,6 +629,14 @@ window.addEventListener('keyup', e => {
 });
 
 
+// Keep input states consistent when focus leaves the game tab.
+window.addEventListener('blur', () => {
+    Object.keys(keys).forEach(key => { keys[key] = false; });
+    Object.keys(keysDown).forEach(key => { keysDown[key] = false; });
+    player1.guarding = false;
+    player2.guarding = false;
+});
+
 // HELPERS
 function boxOverlap(a, b) {
     return a.x < b.x + b.w &&
@@ -750,8 +758,12 @@ function handleSoloAI(bot, target) {
         bot.guarding = true;
         bot.guardWindow = Math.max(bot.guardWindow, 5);
     }
-    if (distance > bot.attackReach * .68 && !bot.guarding) bot.velocityX = Math.sign(dx) * bot.speed * (difficulty === 'hard' ? 0.92 : 0.68);
-    else if (distance < 34 && !bot.guarding) bot.velocityX = -Math.sign(dx) * bot.speed * .38;
+    // Always neutralise horizontal movement inside the preferred attack range;
+    // otherwise the previous velocity makes the bot slide into its opponent.
+    if (bot.guarding) bot.velocityX = 0;
+    else if (distance > bot.attackReach * .68) bot.velocityX = Math.sign(dx) * bot.speed * (difficulty === 'hard' ? .92 : .68);
+    else if (distance < 34) bot.velocityX = -Math.sign(dx) * bot.speed * .38;
+    else bot.velocityX *= .35;
     if (distance < bot.attackReach + 18 && bot.attackCooldown <= 0 && !bot.guarding && Math.random() < reaction * .085) {
         bot.attack(difficulty === 'hard' && Math.random() < .25);
     }
