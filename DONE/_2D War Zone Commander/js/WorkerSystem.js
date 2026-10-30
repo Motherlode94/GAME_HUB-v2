@@ -6,7 +6,10 @@ RTS.WorkerSystem = {
             if (squad.team !== "blue") return;
             var mode = squad.def && squad.def.combatMode;
             if (mode === "harvest")  RTS.WorkerSystem._tickHarvest(game, squad, delta);
-            if (mode === "repair")   RTS.WorkerSystem._tickRepair(game, squad, delta);
+            if (mode === "repair") {
+                if (squad.typeName === "combat_medic") RTS.WorkerSystem._tickMedic(game, squad, delta);
+                else RTS.WorkerSystem._tickRepair(game, squad, delta);
+            }
         });
     },
 
@@ -52,6 +55,31 @@ RTS.WorkerSystem = {
             }
             if (squad.carrying.amount >= (def.carryMax||50)) squad.returning = true;
         }
+    },
+
+    // Medical teams heal existing infantry members without resurrecting casualties.
+    _tickMedic: function(game, medic, delta) {
+        var target = null, bestDist = Infinity;
+        game.squads.forEach(function(squad) {
+            if (squad === medic || squad.team !== medic.team || !squad.def ||
+                squad.def.category !== "infantry" || squad.isDead()) return;
+            var injured = squad.aliveMembers().some(function(m) { return m.hp < m.maxHp; });
+            if (!injured) return;
+            var d = Math.hypot(squad.x - medic.x, squad.y - medic.y);
+            if (d < bestDist) { bestDist = d; target = squad; }
+        });
+        if (!target) return;
+        var radius = medic.def.repairRange || 65;
+        if (bestDist > radius) {
+            // Do not override a move order issued by the player.
+            if (!medic.target) medic.target = {x:target.x,y:target.y};
+            return;
+        }
+        var healing = (medic.def.repairRate || 16) * delta;
+        var wounded = target.aliveMembers().filter(function(m) { return m.hp < m.maxHp; });
+        if (!wounded.length) return;
+        var perMember = healing / wounded.length;
+        wounded.forEach(function(m) { m.hp = Math.min(m.maxHp, m.hp + perMember); });
     },
 
     _tickRepair: function(game, squad, delta) {
