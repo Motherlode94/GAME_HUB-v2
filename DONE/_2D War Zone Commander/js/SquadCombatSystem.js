@@ -30,13 +30,15 @@ RTS.SquadCombatSystem = {
                 next.delay -= delta;
                 if (next.delay <= 0) {
                     squad.burstQueue.shift();
-                    if (next.targetSquad && !next.targetSquad.isDead()) {
+                    if (next.targetSquad && !next.targetSquad.isDead() && squad.ammo > 0) {
+                        squad.ammo--;
                         self._emitProjectile(game, squad, next.targetSquad, next.projType || "bullet");
                     }
                 }
             }
 
             if (squad.attackTimer > 0) return;
+            if (squad.ammoCapacity > 0 && squad.ammo <= 0) return;
 
             var mode = squad.def.combatMode;
             if (mode === "repair" || mode === "harvest" || mode === "none") return;
@@ -83,6 +85,8 @@ RTS.SquadCombatSystem = {
                 case "rocket":     self._rocket(game, squad, target);     break;
             }
 
+            // Fire cost is paid on trigger. A burst consumes additional rounds as queued.
+            squad.ammo = Math.max(0, squad.ammo - 1);
             squad.attackTimer = 1 / (squad.def.attackRate || 1);
         });
 
