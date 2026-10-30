@@ -294,7 +294,10 @@ var DECREES = [
     { id:'grand_projet',    name:'Grand Projet National', cost:{gold:200,prod:100}, effect:{prestige:15,prodRate:-8}, duration:8 },
     { id:'espionnage',      name:'Réseau d\'Espionnage',  cost:{gold:120}, effect:{stability:5,scienceRate:5}, duration:10 },
     { id:'libre_echange',   name:'Libre-Échange',        cost:{gold:60},  effect:{goldRate:12,prodRate:-3}, duration:10 },
-    { id:'austerite',       name:'Plan d\'Austérité',    cost:{gold:0},   effect:{goldRate:15,happiness:-12}, duration:8 }
+    { id:'austerite',       name:'Plan d\'Austérité',    cost:{gold:0},   effect:{goldRate:15,happiness:-12}, duration:8 },
+    { id:'couverture_sante', name:'Couverture Sanitaire', cost:{gold:130,prod:40}, effect:{happiness:6,foodRate:2,scienceRate:3}, duration:8 },
+    { id:'plan_infrastructures', name:'Plan d’Infrastructures', cost:{gold:180,prod:100}, effect:{prodRate:12,goldRate:3}, duration:10 },
+    { id:'dialogue_social', name:'Dialogue Social', cost:{gold:95}, effect:{happiness:7,stability:5,goldRate:-2}, duration:6 }
 ];
 
 var EVENTS = [
@@ -1982,6 +1985,9 @@ var Game = {
         if (d.cost.gold) state.resources.gold -= d.cost.gold;
         if (d.cost.prod) state.resources.prod -= d.cost.prod;
         state.activeDecrees.push({id:did,name:d.name,turnsLeft:d.duration});
+        // One-time social effects are not recurring income modifiers.
+        if (d.effect.happiness) state.happiness = Math.max(0, Math.min(100, state.happiness + d.effect.happiness));
+        if (d.effect.stability) state.stability = Math.max(0, Math.min(100, state.stability + d.effect.stability));
         UI.toast('Decret : '+safeLabel(d.name, humanizeId(d.id)),'success');
         UI.updateAll();
     },
@@ -3122,12 +3128,13 @@ var UI = {
             grand_projet: 'Grand Projet National',
             espionnage: "Reseau d'Espionnage",
             libre_echange: 'Libre-echange',
-            austerite: "Plan d'Austerite"
+            austerite: "Plan d'Austerite",
+            couverture_sante: 'Couverture Sanitaire', plan_infrastructures: 'Plan d’Infrastructures', dialogue_social: 'Dialogue Social'
         };
 
         var sHtml = '<h4 style="font-family:var(--font-display);color:var(--accent);margin-bottom:10px">Politiques</h4>';
         POLICIES.forEach(function(p){
-            var v = state.policies[p.id];
+            var v = state.policies[p.id] == null ? p.default : state.policies[p.id];
             var pName = safeLabel(p.name, policyNames[p.id] || humanizeId(p.id));
             if (!pName || /\?/.test(pName) || /[ÃÂâð]/.test(pName)) pName = policyNames[p.id] || humanizeId(p.id);
             var pEff = safeLabel(p.effectDesc, policyEffects[p.id] || '');
