@@ -384,6 +384,54 @@ class Player {
         ctx.arc(cx, this.y + 14, 18, 0, Math.PI * 2);
         ctx.fill();
 
+        // Character-specific costume silhouettes, drawn over the base body.
+        // All decorative geometry stays within the existing fighter draw path.
+        const archetype = this.character ? this.character.id : 'bruiser';
+        ctx.save();
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 2;
+        if (archetype === 'bruiser') {
+            // Broad armored pauldrons and heavy chest plate.
+            ctx.fillStyle = '#4e343a';
+            ctx.beginPath();ctx.ellipse(this.x+5,this.y+37,12,9,-.3,0,Math.PI*2);ctx.fill();
+            ctx.beginPath();ctx.ellipse(this.x+this.width-5,this.y+37,12,9,.3,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='rgba(255,204,168,.36)';
+            ctx.fillRect(cx-10,this.y+40,20,13);
+        } else if (archetype === 'assassin') {
+            // Pointed hood and trailing scarf.
+            ctx.fillStyle='#173d36';
+            ctx.beginPath();ctx.moveTo(cx-18,this.y+11);ctx.lineTo(cx,this.y-13);
+            ctx.lineTo(cx+18,this.y+11);ctx.closePath();ctx.fill();
+            ctx.strokeStyle='#7dffb3';
+            ctx.beginPath();ctx.moveTo(cx-10,this.y+32);
+            ctx.lineTo(cx-22-this.facing*6,this.y+51);ctx.stroke();
+        } else if (archetype === 'sniper') {
+            // Narrow visor and aerodynamic shoulder armor.
+            ctx.fillStyle='#173656';
+            ctx.fillRect(cx-16,this.y+8,32,8);
+            ctx.fillStyle='#b4edff';ctx.fillRect(cx+this.facing*3-7,this.y+10,15,3);
+            ctx.strokeStyle='#6cbbe9';
+            ctx.beginPath();ctx.moveTo(cx-15,this.y+33);ctx.lineTo(cx,this.y+43);
+            ctx.lineTo(cx+15,this.y+33);ctx.stroke();
+        } else if (archetype === 'pyro') {
+            // Furnace collar and blazing mantle.
+            ctx.fillStyle='#682716';
+            ctx.beginPath();ctx.moveTo(cx-19,this.y+29);ctx.lineTo(cx-14,this.y+18);
+            ctx.lineTo(cx,this.y+27);ctx.lineTo(cx+14,this.y+18);
+            ctx.lineTo(cx+19,this.y+29);ctx.closePath();ctx.fill();
+            ctx.strokeStyle='#ffb256';
+            ctx.beginPath();ctx.moveTo(cx-13,this.y+47);ctx.lineTo(cx+13,this.y+47);ctx.stroke();
+        } else if (archetype === 'monk') {
+            // Layered ceremonial collar and waist sash.
+            ctx.strokeStyle='#e3b9ff';
+            ctx.lineWidth=5;
+            ctx.beginPath();ctx.moveTo(cx-13,this.y+34);
+            ctx.lineTo(cx,this.y+46);ctx.lineTo(cx+13,this.y+34);ctx.stroke();
+            ctx.fillStyle='#3e235e';ctx.fillRect(cx-13,this.y+65,26,6);
+            ctx.fillStyle='#d9acff';ctx.fillRect(cx-4,this.y+65,8,6);
+        }
+        ctx.restore();
+
         // Yeux
         ctx.fillStyle  = 'white';
         ctx.shadowBlur = 0;
