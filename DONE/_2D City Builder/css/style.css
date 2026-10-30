@@ -843,3 +843,12 @@ html, body {
   .tool-btn { min-width: 44px; }
   .tool-btn .t-label { display: none; }
 }
+
+/* Visual polish: readable management panels and controls */
+.welcome-card{box-shadow:0 24px 75px rgba(0,0,0,.48),0 0 0 1px rgba(122,203,255,.18);backdrop-filter:blur(12px)}
+#topbar{box-shadow:0 7px 28px rgba(0,0,0,.28)}
+#side-panel{box-shadow:10px 0 35px rgba(0,0,0,.22)}
+.spd-btn,#btn-start,.pg-item{transition:transform .15s ease,filter .15s ease,box-shadow .15s ease}
+.spd-btn:hover:not(:disabled),#btn-start:hover:not(:disabled),.pg-item:hover{filter:brightness(1.14);transform:translateY(-2px)}
+button:focus-visible{outline:2px solid #9be8ff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.spd-btn,#btn-start,.pg-item{transition:none!important;transform:none!important}}
