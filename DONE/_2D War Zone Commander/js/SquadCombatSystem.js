@@ -48,6 +48,7 @@ RTS.SquadCombatSystem = {
             squads.forEach(function(other) {
                 if (!self._isEnemy(squad.team, other.team)) return;
                 if (other.isDead()) return;
+                if (squad.team !== "red" && !RTS.FogOfWar.isVisible(game, other.x, other.y)) return;
                 var dx = other.x - squad.x;
                 var dy = other.y - squad.y;
                 var d  = Math.sqrt(dx * dx + dy * dy);
