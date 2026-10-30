@@ -441,3 +441,34 @@ button:disabled {
 @keyframes menuFadeOut {
   to { opacity: 0; pointer-events: none; }
 }
+/* WarLike dark-fantasy visual refresh */
+:root { --gold:#e0ba65; --dark-gold:#8c6227; --panel:#141018; --border:#684d32; --text:#eee0cd; }
+body { background:radial-gradient(ellipse at 50% 0%,#382b32 0%,#130e19 42%,#07090e 90%); }
+#canvas-container { border:2px solid #8e6840; border-radius:12px; overflow:hidden; box-shadow:0 0 0 5px #0008,0 22px 65px #000c,0 0 28px #d6954436; }
+#gameCanvas { max-width:100%; height:auto; image-rendering:pixelated; }
+.panel-box,#message-box { background:linear-gradient(155deg,#241c29f2,#100d16fa);border:1px solid #79593688; border-radius:12px; box-shadow:inset 0 1px #fff1,0 8px 20px #0006; }
+.panel-box h3 {color:#f3ca7b;letter-spacing:.13em;}
+.stat-label {color:#b4a3a0}.stat-val {color:#ffe3aa}
+.bar-wrap {height:11px;border-radius:99px;background:#0b0b13;border:1px solid #7c624b66}
+.bar-fill {border-radius:99px;box-shadow:0 0 10px #ffffff22}
+.hp-bar {background:linear-gradient(90deg,#8f1525,#f35a4e)}
+.xp-bar {background:linear-gradient(90deg,#26549e,#53d6e5)}
+button {border-radius:9px;min-height:41px;transition:transform .16s,background .16s,border-color .16s,box-shadow .16s}
+button:hover:not(:disabled) {transform:translateY(-2px)}
+button:focus-visible {outline:2px solid #f9d78e;outline-offset:3px}
+#combat-overlay {background:radial-gradient(ellipse at center,rgba(31,15,29,.82),rgba(0,0,0,.94));backdrop-filter:blur(7px)}
+#combat-window {width:min(660px,95vw);max-height:94vh;overflow-y:auto;background:linear-gradient(155deg,#241d29,#0b101c);border:1px solid #c19a5a;border-radius:18px;box-shadow:0 30px 100px #000e,0 0 45px #cc92502a}
+.fighter-card {background:linear-gradient(155deg,#35252e,#111321);border:1px solid #735a51;border-radius:12px;padding:17px}
+.fighter-card:first-child {border-color:#3b9bac88}
+.fighter-card:last-child {border-color:#d35d5d88}
+.vs-label {color:#f9ca7a;text-shadow:0 0 16px #ff9d4d88;font-weight:800}
+#combat-log {background:#090c15;border:1px solid #7e664855;border-radius:10px;min-height:125px}
+.log-entry {color:#dfc5ae;border-bottom:1px solid #a08b6a25;padding:6px 2px}
+.combat-btns {flex-wrap:wrap}
+.combat-btns button {min-width:125px;flex:1}
+#btn-attack {background:linear-gradient(#69442c,#342119);border-color:#d2a057;color:#ffe3a9}
+#btn-guard {background:linear-gradient(#264c64,#162636);border-color:#66bfe8;color:#c9f1ff}
+#btn-flee {background:linear-gradient(#58232d,#2b141b);border-color:#ac5965;color:#ffc2c8}
+@media(max-width:960px){#game-wrapper{flex-direction:column;align-items:center;width:100%}#canvas-container{max-width:100%}#side-panel{width:min(900px,100%);display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}}
+@media(max-width:520px){body{padding:10px 6px}#combat-window{padding:17px 13px}.fighters{gap:5px}.fighter-card{padding:10px 8px}.combat-btns button{font-size:.68em;min-width:90px}}
+@media(prefers-reduced-motion:reduce){button{transition:none!important}button:hover{transform:none!important}}
