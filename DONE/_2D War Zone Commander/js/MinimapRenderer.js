@@ -25,6 +25,7 @@ RTS.MinimapRenderer = {
         if (game.squads) {
             game.squads.forEach(function(s) {
                 if (s.isDead && s.isDead()) return;
+                if (s.team === 'red' && !RTS.FogOfWar.isVisible(game, s.x, s.y)) return;
                 ctx.fillStyle = s.team === "blue"  ? "#3d8ef5"
                               : s.team === "ally"  ? "#2ecc71"
                               : "#e74c3c";
