@@ -524,26 +524,35 @@ function drawPlayer() {
 }
 
 // Atmospheric lighting: torch radius follows the hero; special locations shimmer.
+const dungeonLightCanvas = document.createElement('canvas');
+dungeonLightCanvas.width = canvas.width;
+dungeonLightCanvas.height = canvas.height;
+const dungeonLightCtx = dungeonLightCanvas.getContext('2d');
 function drawDungeonLighting() {
-  const px = (player.x + 0.5) * TS, py = (player.y + 0.5) * TS;
-  const flicker = Math.sin(animTick * 0.13) * 7 + Math.sin(animTick * 0.37) * 3;
+  if (!player || !Number.isFinite(player.x) || !Number.isFinite(player.y)) return;
+  const px=(player.x+.5)*TS, py=(player.y+.5)*TS;
+  const flicker=Math.sin(animTick*.13)*6+Math.sin(animTick*.37)*3;
+  const l=dungeonLightCtx;
+  l.globalCompositeOperation='source-over';
+  l.clearRect(0,0,canvas.width,canvas.height);
+  l.fillStyle='rgba(3,4,11,.80)';
+  l.fillRect(0,0,canvas.width,canvas.height);
+  l.globalCompositeOperation='destination-out';
+  const radius=205+flicker;
+  const g=l.createRadialGradient(px,py,20,px,py,radius);
+  g.addColorStop(0,'rgba(0,0,0,1)');
+  g.addColorStop(.35,'rgba(0,0,0,.97)');
+  g.addColorStop(.73,'rgba(0,0,0,.55)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  l.fillStyle=g;
+  l.beginPath();l.arc(px,py,radius,0,Math.PI*2);l.fill();
+  l.globalCompositeOperation='source-over';
+  ctx.drawImage(dungeonLightCanvas,0,0);
   ctx.save();
-  ctx.fillStyle = 'rgba(3, 4, 11, 0.74)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalCompositeOperation = 'destination-out';
-  const light = ctx.createRadialGradient(px, py, 18, px, py, 205 + flicker);
-  light.addColorStop(0, 'rgba(0,0,0,1)');
-  light.addColorStop(0.35, 'rgba(0,0,0,.96)');
-  light.addColorStop(0.72, 'rgba(0,0,0,.52)');
-  light.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = light; ctx.beginPath(); ctx.arc(px, py, 210 + flicker, 0, Math.PI * 2); ctx.fill();
-  ctx.restore();
-  ctx.save();
-  ctx.globalCompositeOperation = 'screen';
-  const warm = ctx.createRadialGradient(px, py, 4, px, py, 125 + flicker);
-  warm.addColorStop(0, 'rgba(255,174,80,.17)');
-  warm.addColorStop(1, 'rgba(255,174,80,0)');
-  ctx.fillStyle = warm; ctx.fillRect(px-145,py-145,290,290);
+  const glow=ctx.createRadialGradient(px,py,2,px,py,115);
+  glow.addColorStop(0,'rgba(252,176,86,.14)');
+  glow.addColorStop(1,'rgba(252,176,86,0)');
+  ctx.fillStyle=glow;ctx.fillRect(px-115,py-115,230,230);
   ctx.restore();
 }
 
