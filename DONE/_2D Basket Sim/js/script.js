@@ -366,6 +366,7 @@ let shakeAmount = 0;
 let flashTimer  = 0;
 let flashColor  = "rgba(255,140,0,0)";
 let selectedMode = "classic";
+let defender = { x: 0, y: 0, handMode: 1, cooldown: 0, blocked: false };
 let lives = 3;
 let precisionShotsLeft = 10;
 let wind = 0;
@@ -400,6 +401,7 @@ function resetBall() {
         flightTime: 0
     };
     if (selectedMode === "survival") rollWind();
+    defender.blocked = false;
 }
 
 function rollWind() {
@@ -440,6 +442,9 @@ function resetGame() {
 
     resetHoop();
     resetBall();
+    defender.x = hoopConfig.x - 75;
+    defender.y = hoopConfig.y + 70;
+    defender.cooldown = 0;
     updateHUD();
     setMsg(getModeStartMsg());
     updateStreakDisplay();
@@ -451,13 +456,14 @@ function resetGame() {
     livesCell.classList.toggle("hidden", selectedMode !== "survival");
 
     const tag = document.getElementById("modeTag");
-    if (tag) tag.textContent = { classic:"⏱ CLASSIQUE", precision:"🎯 PRÉCISION", survival:"💀 SURVIE" }[selectedMode] || "";
+    if (tag) tag.textContent = { classic:"⏱ CLASSIQUE", precision:"🎯 PRÉCISION", survival:"💀 SURVIE", defense:"🛡️ DÉFENSE" }[selectedMode] || "";
     updatePauseButton();
 }
 
 function getModeStartMsg() {
     if (selectedMode === "precision") return `🎯 ${precisionShotsLeft} tirs — de plus en plus loin !`;
     if (selectedMode === "survival")  return "💀 3 ratés et c'est fini !";
+    if (selectedMode === "defense") return "🛡️ Défenseur : touches 1 / 2 pour changer les mains !";
     return "Clique pour tirer ! Swish = +2 s, 3 pts = +1 s";
 }
 
@@ -608,6 +614,7 @@ document.addEventListener("keydown", e => {
     if (k === "p" || k === "escape") { togglePause(); e.preventDefault(); }
     else if (k === "r") restartGame();
     else if (k === "m") toggleMute();
+    else if (selectedMode === "defense" && (k === "1" || k === "2")) defender.handMode = Number(k);
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -643,6 +650,56 @@ function updateHoopMovement(dt) {
     syncHoopGeometry();
 }
 
+// Defensive challenge: a moving opponent attempts a legal-looking shot contest.
+function updateDefender(dt) {
+    defender.cooldown = Math.max(0, defender.cooldown - dt);
+    const desiredX = ball.isMoving && ball.vx > 0
+        ? Math.max(hoopConfig.x - 110, Math.min(hoopConfig.x - 22, ball.x + 22))
+        : hoopConfig.x - 65;
+    defender.x += (desiredX - defender.x) * Math.min(1, dt * 0.065);
+    defender.y = hoopConfig.y + 70;
+}
+function checkDefenderBlock() {
+    if (!ball.isMoving || ball.scored || defender.blocked || defender.cooldown > 0 || ball.vy <= -7) return false;
+    const reach = defender.handMode === 2 ? 43 : 32;
+    const handY = defender.y - (defender.handMode === 2 ? 70 : 62);
+    const handX = defender.x + (defender.handMode === 2 ? 3 : 12);
+    if (Math.hypot(ball.x - handX, ball.y - handY) > reach) return false;
+    defender.blocked = true;
+    defender.cooldown = 65;
+    ball.isMoving = false;
+    ball.vx = 0; ball.vy = 0;
+    spawnParticles(ball.x, ball.y, "#65c7ff", 15, 5);
+    spawnFloatText(ball.x, ball.y - 40, "CONTRE !", "#65c7ff", 23);
+    soundBounce();
+    handleMiss();
+    return true;
+}
+function drawDefender() {
+    const x = defender.x, y = defender.y;
+    ctx.save(); ctx.translate(x,y);
+    ctx.fillStyle = "rgba(0,0,0,.28)";
+    ctx.beginPath(); ctx.ellipse(0, 5, 18, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = "#263a62"; ctx.lineWidth = 9; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(-7,-19); ctx.lineTo(-10,0);
+    ctx.moveTo(7,-19); ctx.lineTo(10,0); ctx.stroke();
+    ctx.fillStyle = "#d14553"; ctx.fillRect(-13,-48,26,29);
+    ctx.fillStyle = "#dca47b"; ctx.beginPath(); ctx.arc(0,-57,10,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = "#dca47b"; ctx.lineWidth = 7;
+    ctx.beginPath();
+    if (defender.handMode === 2) {
+        ctx.moveTo(-11,-43); ctx.lineTo(-17,-73);
+        ctx.moveTo(11,-43); ctx.lineTo(17,-73);
+    } else {
+        ctx.moveTo(-11,-43); ctx.lineTo(-15,-27);
+        ctx.moveTo(11,-43); ctx.lineTo(15,-72);
+    }
+    ctx.stroke();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 12px Arial"; ctx.textAlign = "center";
+    ctx.fillText(defender.handMode === 2 ? "2 MAINS" : "1 MAIN",0,25);
+    ctx.restore();
+}
+
 // ── Game loop ───────────────────────────────────────────────────
 let animId = null;
 function gameLoop(timestamp) {
@@ -668,6 +725,7 @@ function update(dt) {
 
     updateClock(dt);
     updateHoopMovement(dt);
+    if (selectedMode === "defense") updateDefender(dt);
 
     if (ball.isMoving) {
         ball.flightTime += dt;
@@ -706,6 +764,7 @@ function update(dt) {
         }
 
         if (!ball.scored) {
+            if (selectedMode === "defense" && checkDefenderBlock()) return;
             collideBackboard();
             checkRimCollision(hoopConfig.rimLeft,  hoopConfig.y);
             checkRimCollision(hoopConfig.rimRight, hoopConfig.y);
@@ -977,6 +1036,7 @@ function draw() {
     drawSpotMarker();
     drawAimLine();
     drawHoopBack();
+    if (selectedMode === "defense") drawDefender();
     drawBallTrail();
     drawBall();
     drawHoopFront();
