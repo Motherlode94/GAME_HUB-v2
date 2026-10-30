@@ -1,4 +1,4 @@
-﻿// resources.js - SystÃ¨me de ressources
+﻿// resources.js - Système de ressources
 
 const RESOURCES = {
   FAITH: "faith",
@@ -80,20 +80,20 @@ class ResourceNode {
     if (this.amount <= 0) return;
 
     const size = 25;
-    let icon = "ðŸ’°";
+    let icon = "💰";
     let color = "#ffd700";
 
     switch(this.type) {
       case RESOURCES.GOLD:
-        icon = "ðŸ’°";
+        icon = "💰";
         color = "#ffd700";
         break;
       case RESOURCES.FOOD:
-        icon = "ðŸŒ¾";
+        icon = "🌾";
         color = "#8bc34a";
         break;
       case RESOURCES.WOOD:
-        icon = "ðŸŒ²";
+        icon = "🌲";
         color = "#795548";
         break;
     }

@@ -1,11 +1,11 @@
-﻿// Vehicle.js - SystÃ¨me de vÃ©hicules avancÃ© avec physique rÃ©aliste
-// Version amÃ©liorÃ©e avec meilleure gestion des collisions, drifting, et effets visuels
+﻿// Vehicle.js - Système de véhicules avancé avec physique réaliste
+// Version améliorée avec meilleure gestion des collisions, drifting, et effets visuels
 
 Game.VehicleManager = {
   vehicles: [],
   playerVehicle: null,
 
-  // Types de vÃ©hicules
+  // Types de véhicules
   vehicleTypes: {
     sedan: {
       width: 50, height: 30, maxSpeed: 3.6, acceleration: 0.1, brakePower: 0.4,
@@ -96,7 +96,7 @@ Game.VehicleManager = {
       if (vehicle.smokeTimer > 0) vehicle.smokeTimer--;
       if (vehicle.collisionCooldown > 0) vehicle.collisionCooldown--;
       
-      // Nettoyer les marques de dÃ©rapage
+      // Nettoyer les marques de dérapage
       vehicle.skidMarks = vehicle.skidMarks.filter(m => m && m.life-- > 0);
 
       if (vehicle.occupied) {
@@ -172,7 +172,7 @@ Game.VehicleManager = {
     if (Input.moveLeft()) turnInput -= 1;
     if (Input.moveRight()) turnInput += 1;
 
-    // Force d'Ã©vitement
+    // Force d'évitement
     let finalTurn = turnInput;
     if (vehicle.isColliding && Math.abs(vehicle.avoidForce.x) > 0.1) {
       finalTurn += vehicle.avoidForce.x * 0.3;
@@ -257,7 +257,7 @@ Game.VehicleManager = {
       player.y = v.y + v.height/2 + Math.sin(rad) * 50 - (player.size || 20) / 2;
       
       this.playerVehicle = null;
-      if (Game.HUD) Game.HUD.showMessage("ðŸš¶ VÃ©hicule quittÃ©", 60);
+      if (Game.HUD) Game.HUD.showMessage("🚶 Véhicule quitté", 60);
     } else {
       // Entrer
       let found = null;
@@ -286,9 +286,9 @@ Game.VehicleManager = {
         player.x = found.x + found.width / 2 - (player.size || 20) / 2;
         player.y = found.y + found.height / 2 - (player.size || 20) / 2;
         player.angle = found.angle;
-        if (Game.HUD) Game.HUD.showMessage(`${found.icon} ${found.type} entrÃ©`, 60);
+        if (Game.HUD) Game.HUD.showMessage(`${found.icon} ${found.type} entré`, 60);
       } else {
-        if (Game.HUD) Game.HUD.showMessage("âŒ Aucun vÃ©hicule Ã  proximitÃ©", 60);
+        if (Game.HUD) Game.HUD.showMessage("❌ Aucun véhicule à proximité", 60);
       }
     }
   },
@@ -375,7 +375,7 @@ Game.VehicleManager = {
     const overlapX = (v1.width + v2.width) / 2 - Math.abs(dx);
     const overlapY = (v1.height + v2.height) / 2 - Math.abs(dy);
     
-    // SÃ©paration
+    // Séparation
     if (Math.abs(overlapX - overlapY) < 5) {
       v1.x += nx * 1.5;
       v1.y += ny * 1.5;
@@ -389,7 +389,7 @@ Game.VehicleManager = {
       v2.y += dy > 0 ? -overlapY : overlapY;
     }
     
-    // DÃ©gÃ¢ts
+    // Dégâts
     const speedDiff = Math.abs(v1.speed - v2.speed) * Math.abs(nx + ny);
     const damage = Math.floor(speedDiff * 6);
     v1.health -= damage;
@@ -397,7 +397,7 @@ Game.VehicleManager = {
     v1.damage += damage;
     v2.damage += damage;
     
-    // Transfert d'Ã©lan
+    // Transfert d'élan
     if (speedDiff > 1) {
       const impulse = 0.5;
       v1.speed = (v1.speed * (1 - impulse) + v2.speed * impulse) * 0.7;
@@ -415,7 +415,7 @@ Game.VehicleManager = {
       Game.Camera.shake(Math.min(speedDiff, 20), 12);
     }
     if (speedDiff > 2 && Game.HUD) {
-      Game.HUD.showMessage(speedDiff > 8 ? "ðŸ’¥ CHOC!" : "ðŸ’¥ Impact!", 30);
+      Game.HUD.showMessage(speedDiff > 8 ? "💥 CHOC!" : "💥 Impact!", 30);
     }
     if (speedDiff > 5) {
       this.addSkidMark(v1);
@@ -474,7 +474,7 @@ Game.VehicleManager = {
       if (Game.HUD) {
         const bonus = Math.floor(relSpeed * 5);
         Game.HUD.money = (Game.HUD.money || 0) + bonus;
-        Game.HUD.showMessage(`ðŸ’¥ Accident! +$${bonus}`, 60);
+        Game.HUD.showMessage(`💥 Accident! +$${bonus}`, 60);
       }
     }
     
@@ -492,7 +492,7 @@ Game.VehicleManager = {
       }
     }
     if (Game.Camera) Game.Camera.shake(10, 15);
-    if (Game.HUD) Game.HUD.showMessage("ðŸ’¥ VÃ©hicule dÃ©truit!", 60);
+    if (Game.HUD) Game.HUD.showMessage("💥 Véhicule détruit!", 60);
   },
 
   handleBuildingCollisions() {
@@ -520,7 +520,7 @@ Game.VehicleManager = {
           
           if (v.occupied && Game.Camera) {
             Game.Camera.shake(Math.min(damage / 2, 25), 20);
-            if (Game.HUD) Game.HUD.showMessage("ðŸ’¥ Impact!", 30);
+            if (Game.HUD) Game.HUD.showMessage("💥 Impact!", 30);
           }
         }
       }
@@ -539,7 +539,7 @@ Game.VehicleManager = {
           
           if (Game.HUD) {
             const bonus = 50 + Math.floor(Math.abs(v.speed) * 10);
-            Game.HUD.showMessage(`ðŸ’€ Ã‰crasÃ©! +$${bonus}`, 60);
+            Game.HUD.showMessage(`💀 Écrasé! +$${bonus}`, 60);
             Game.HUD.money = (Game.HUD.money || 0) + bonus;
           }
           
@@ -553,7 +553,7 @@ Game.VehicleManager = {
     if (!vehicle) return;
     
     if (Game.Camera) Game.Camera.shake(20, 30);
-    if (Game.HUD) Game.HUD.showMessage("ðŸ’¥ VÃ‰HICULE DÃ‰TRUIT!", 90);
+    if (Game.HUD) Game.HUD.showMessage("💥 VÉHICULE DÉTRUIT!", 90);
 
     if (vehicle.occupied) {
       const player = Game.player || Game.Player;
@@ -571,7 +571,7 @@ Game.VehicleManager = {
   },
 
   draw(ctx) {
-    // Marques de dÃ©rapage
+    // Marques de dérapage
     for (const v of this.vehicles) {
       for (const mark of v.skidMarks) {
         ctx.save();
@@ -584,7 +584,7 @@ Game.VehicleManager = {
       }
     }
 
-    // VÃ©hicules
+    // Véhicules
     for (const v of this.vehicles) {
       ctx.save();
       ctx.translate(v.x + v.width / 2, v.y + v.height / 2);
@@ -630,7 +630,7 @@ Game.VehicleManager = {
         ctx.fillRect(-v.width / 2 - 5, -v.height / 2 + 5, 8, v.height - 10);
       }
       
-      // DÃ©gÃ¢ts visuels
+      // Dégâts visuels
       if (v.damage > 20) {
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 1;
@@ -649,7 +649,7 @@ Game.VehicleManager = {
       
       ctx.restore();
 
-      // FumÃ©e
+      // Fumée
       if (v.smokeTimer > 0 && v.health < v.maxHealth * 0.3) {
         ctx.fillStyle = "rgba(50, 50, 50, 0.4)";
         ctx.beginPath();
@@ -668,7 +668,7 @@ Game.VehicleManager = {
         ctx.fillRect(v.x, v.y - 15, barW * ratio, 4);
       }
 
-      // IcÃ´ne et infos
+      // Icône et infos
       if (!v.occupied) {
         ctx.fillStyle = "#ffffff";
         ctx.font = "20px Arial";
@@ -682,7 +682,7 @@ Game.VehicleManager = {
         ctx.fillText(`${speedKmh} km/h`, v.x + v.width + 5, v.y + v.height / 2);
         
         ctx.fillStyle = v.speed > 1 ? "#00ff00" : v.speed < -1 ? "#ff0000" : "#888888";
-        ctx.fillText(v.speed > 1 ? "â–²" : v.speed < -1 ? "â–¼" : "â—", v.x + v.width + 5, v.y + v.height / 2 + 15);
+        ctx.fillText(v.speed > 1 ? "▲" : v.speed < -1 ? "▼" : "●", v.x + v.width + 5, v.y + v.height / 2 + 15);
       }
     }
   },

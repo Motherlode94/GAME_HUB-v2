@@ -1,5 +1,5 @@
-﻿// Map.js - SystÃ¨me de carte avancÃ© avec zones, grille de navigation, et Ã©vÃ©nements
-// Version amÃ©liorÃ©e avec support du pathfinding, minimap, et limites dynamiques
+﻿// Map.js - Système de carte avancé avec zones, grille de navigation, et événements
+// Version améliorée avec support du pathfinding, minimap, et limites dynamiques
 
 Game.Map = {
   // Dimensions du monde
@@ -11,13 +11,13 @@ Game.Map = {
     tileSize: 64,              // Taille des tuiles pour la grille
     boundaryPadding: 50,       // Marge avant limite dure
     softBoundary: true,        // Ralentissement progressif aux bords
-    wrapAround: false          // TÃ©lÃ©portation aux bords (style Pac-Man)
+    wrapAround: false          // Téléportation aux bords (style Pac-Man)
   },
 
   // Grille de navigation pour le pathfinding
   navGrid: null,
   
-  // Zones dÃ©finies
+  // Zones définies
   zones: {
     downtown: { 
       x: 800, y: 800, w: 1400, h: 1400,
@@ -49,14 +49,14 @@ Game.Map = {
     },
     residential: {
       x: 100, y: 1500, w: 600, h: 1400,
-      name: "RÃ©sidentiel",
+      name: "Résidentiel",
       color: "#d94a90",
       spawnRate: 0.4,
       policePresence: 0.6
     }
   },
 
-  // Points d'intÃ©rÃªt
+  // Points d'intérêt
   pointsOfInterest: [],
 
   /**
@@ -69,7 +69,7 @@ Game.Map = {
   },
 
   /**
-   * GÃ©nÃ¨re la grille de navigation
+   * Génère la grille de navigation
    */
   generateNavGrid() {
     const cols = Math.ceil(this.width / this.config.tileSize);
@@ -97,7 +97,7 @@ Game.Map = {
   },
 
   /**
-   * Marque une zone comme non-navigable (pour les bÃ¢timents)
+   * Marque une zone comme non-navigable (pour les bâtiments)
    */
   blockArea(x, y, w, h, options = {}) {
     const { walkable = false, drivable = false, cost = Infinity } = options;
@@ -119,14 +119,14 @@ Game.Map = {
   },
 
   /**
-   * DÃ©finit les routes comme navigables avec coÃ»t rÃ©duit
+   * Définit les routes comme navigables avec coût réduit
    */
   markRoad(x, y, w, h) {
     this.markArea(x, y, w, h, { walkable: true, drivable: true, cost: 0.5 });
   },
 
   /**
-   * Marque une zone avec des propriÃ©tÃ©s spÃ©cifiques
+   * Marque une zone avec des propriétés spécifiques
    */
   markArea(x, y, w, h, properties) {
     const startCol = Math.floor(x / this.config.tileSize);
@@ -144,7 +144,7 @@ Game.Map = {
   },
 
   /**
-   * Configure les points d'intÃ©rÃªt par dÃ©faut
+   * Configure les points d'intérêt par défaut
    */
   setupDefaultPOIs() {
     const w = this.width;
@@ -159,14 +159,14 @@ Game.Map = {
   },
 
   /**
-   * Ajoute un point d'intÃ©rÃªt
+   * Ajoute un point d'intérêt
    */
-  addPOI(x, y, type, name, icon = 'ðŸ“') {
+  addPOI(x, y, type, name, icon = '📍') {
     this.pointsOfInterest.push({ x, y, type, name, icon });
   },
 
   /**
-   * Limite la camÃ©ra aux bords de la carte
+   * Limite la caméra aux bords de la carte
    */
   clampCamera(canvas) {
     if (!Game.camera) return;
@@ -184,7 +184,7 @@ Game.Map = {
   },
 
   /**
-   * VÃ©rifie si une position est dans les limites
+   * Vérifie si une position est dans les limites
    */
   isInBounds(x, y, size = 0) {
     return x >= 0 && 
@@ -204,8 +204,8 @@ Game.Map = {
   },
 
   /**
-   * Applique les limites de la carte Ã  une entitÃ©
-   * @param {Object} entity - EntitÃ© avec x, y, width/size, height/size, vx, vy
+   * Applique les limites de la carte à une entité
+   * @param {Object} entity - Entité avec x, y, width/size, height/size, vx, vy
    * @param {Object} options - Options de comportement aux bords
    */
   constrainEntity(entity, options = {}) {
@@ -220,7 +220,7 @@ Game.Map = {
     const height = entity.height || entity.size || 0;
     const padding = this.config.boundaryPadding;
 
-    // Wrap around (tÃ©lÃ©portation)
+    // Wrap around (téléportation)
     if (this.config.wrapAround) {
       if (entity.x < -width) entity.x = this.width;
       if (entity.x > this.width) entity.x = -width;
@@ -271,7 +271,7 @@ Game.Map = {
   },
 
   /**
-   * Obtient la zone Ã  une position donnÃ©e
+   * Obtient la zone à une position donnée
    */
   getZoneAt(x, y) {
     for (const [name, zone] of Object.entries(this.zones)) {
@@ -292,7 +292,7 @@ Game.Map = {
   },
 
   /**
-   * VÃ©rifie si une tuile est navigable
+   * Vérifie si une tuile est navigable
    */
   isTileWalkable(x, y) {
     const col = Math.floor(x / this.config.tileSize);
@@ -306,7 +306,7 @@ Game.Map = {
   },
 
   /**
-   * VÃ©rifie si une tuile est accessible en vÃ©hicule
+   * Vérifie si une tuile est accessible en véhicule
    */
   isTileDrivable(x, y) {
     const col = Math.floor(x / this.config.tileSize);
@@ -320,7 +320,7 @@ Game.Map = {
   },
 
   /**
-   * Obtient le coÃ»t de dÃ©placement d'une tuile
+   * Obtient le coût de déplacement d'une tuile
    */
   getTileCost(x, y) {
     const col = Math.floor(x / this.config.tileSize);
@@ -334,7 +334,7 @@ Game.Map = {
   },
 
   /**
-   * Trouve le point d'intÃ©rÃªt le plus proche
+   * Trouve le point d'intérêt le plus proche
    */
   getNearestPOI(x, y, type = null) {
     let nearest = null;
@@ -354,7 +354,7 @@ Game.Map = {
   },
 
   /**
-   * Obtient une position alÃ©atoire valide sur la carte
+   * Obtient une position aléatoire valide sur la carte
    */
   getRandomPosition(options = {}) {
     const { 
@@ -376,7 +376,7 @@ Game.Map = {
         y = padding + Math.random() * (this.height - padding * 2);
       }
 
-      // VÃ©rifier si la position est valide
+      // Vérifier si la position est valide
       if (avoidBuildings && !this.isTileWalkable(x, y)) {
         continue;
       }
@@ -384,12 +384,12 @@ Game.Map = {
       return { x, y };
     }
 
-    // Fallback si aucune position trouvÃ©e
+    // Fallback si aucune position trouvée
     return { x: this.width / 2, y: this.height / 2 };
   },
 
   /**
-   * Obtient une position alÃ©atoire sur une route
+   * Obtient une position aléatoire sur une route
    */
   getRandomRoadPosition(roads) {
     if (!roads || roads.length === 0) {
@@ -413,14 +413,14 @@ Game.Map = {
   },
 
   /**
-   * Calcule l'angle entre deux points (en degrÃ©s)
+   * Calcule l'angle entre deux points (en degrés)
    */
   angleBetween(x1, y1, x2, y2) {
     return Utils.radToDeg(Math.atan2(y2 - y1, x2 - x1));
   },
 
   /**
-   * Conversion coordonnÃ©es monde -> Ã©cran
+   * Conversion coordonnées monde -> écran
    */
   worldToScreen(worldX, worldY) {
     if (!Game.camera) return { x: worldX, y: worldY };
@@ -431,7 +431,7 @@ Game.Map = {
   },
 
   /**
-   * Conversion coordonnÃ©es Ã©cran -> monde
+   * Conversion coordonnées écran -> monde
    */
   screenToWorld(screenX, screenY) {
     if (!Game.camera) return { x: screenX, y: screenY };
@@ -470,7 +470,7 @@ Game.Map = {
       );
     }
 
-    // Points d'intÃ©rÃªt
+    // Points d'intérêt
     ctx.font = "8px Arial";
     for (const poi of this.pointsOfInterest) {
       ctx.fillStyle = "#ffffff";

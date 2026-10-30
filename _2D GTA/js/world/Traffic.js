@@ -1,10 +1,10 @@
-﻿// Traffic.js - SystÃ¨me de trafic avancÃ© avec IA, comportements rÃ©alistes et optimisations
-// Version amÃ©liorÃ©e avec respect du code de la route, dÃ©tection de dangers, et pooling d'objets
+﻿// Traffic.js - Système de trafic avancé avec IA, comportements réalistes et optimisations
+// Version améliorée avec respect du code de la route, détection de dangers, et pooling d'objets
 
 Game.Traffic = {
   vehicles: [],
-  vehiclePool: [],      // Pool de vÃ©hicules rÃ©utilisables
-  maxVehicles: 20,      // Nombre maximum de vÃ©hicules
+  vehiclePool: [],      // Pool de véhicules réutilisables
+  maxVehicles: 20,      // Nombre maximum de véhicules
   spawnTimer: 0,
   spawnInterval: 180,   // Frames entre spawns
 
@@ -28,7 +28,7 @@ Game.Traffic = {
     }
   ],
 
-  // Types de vÃ©hicules PNJ
+  // Types de véhicules PNJ
   vehicleTypes: [
     { type: 'sedan', width: 50, height: 30, speedRange: [1.0, 1.8], color: null, icon: 'SD' },
     { type: 'suv', width: 55, height: 32, speedRange: [1.1, 2.0], color: null, icon: 'SV' },
@@ -45,7 +45,7 @@ Game.Traffic = {
   ],
 
   /**
-   * Initialise le systÃ¨me de trafic
+   * Initialise le système de trafic
    */
   init() {
     this.vehicles = [];
@@ -61,7 +61,7 @@ Game.Traffic = {
   },
 
   /**
-   * Obtient un vÃ©hicule du pool ou en crÃ©e un nouveau
+   * Obtient un véhicule du pool ou en crée un nouveau
    */
   getFromPool() {
     if (this.vehiclePool.length > 0) {
@@ -71,7 +71,7 @@ Game.Traffic = {
   },
 
   /**
-   * Retourne un vÃ©hicule au pool
+   * Retourne un véhicule au pool
    */
   returnToPool(vehicle) {
     if (this.vehiclePool.length < 20) {
@@ -81,7 +81,7 @@ Game.Traffic = {
   },
 
   /**
-   * CrÃ©e un nouveau vÃ©hicule
+   * Crée un nouveau véhicule
    */
   createVehicle() {
     return {
@@ -103,7 +103,7 @@ Game.Traffic = {
       braking: false,
       turning: false,
       honkCooldown: 0,
-      awareness: 100,        // Distance de dÃ©tection
+      awareness: 100,        // Distance de détection
       patience: 100,         // Patience avant klaxon
       aggressiveness: 0.5,   // 0 = prudent, 1 = agressif
       state: 'driving',      // 'driving', 'stopping', 'avoiding', 'waiting'
@@ -121,7 +121,7 @@ Game.Traffic = {
   },
 
   /**
-   * RÃ©initialise un vÃ©hicule pour rÃ©utilisation
+   * Réinitialise un véhicule pour réutilisation
    */
   resetVehicle(vehicle) {
     vehicle.health = 100;
@@ -138,7 +138,7 @@ Game.Traffic = {
   },
 
   /**
-   * Spawn un vÃ©hicule sur une route
+   * Spawn un véhicule sur une route
    */
   spawn() {
     if (this.vehicles.length >= this.maxVehicles) return null;
@@ -156,7 +156,7 @@ Game.Traffic = {
     vehicle.maxHealth = vType.type === 'truck' || vType.type === 'bus' ? 150 : 100;
     vehicle.health = vehicle.maxHealth;
     
-    // PersonnalitÃ© alÃ©atoire
+    // Personnalité aléatoire
     vehicle.aggressiveness = Utils.randomFloat(0.2, 0.8);
     vehicle.patience = Utils.randomFloat(60, 200);
     vehicle.awareness = Utils.randomFloat(80, 150);
@@ -180,7 +180,7 @@ Game.Traffic = {
   },
 
   /**
-   * Positionne un vÃ©hicule sur une voie
+   * Positionne un véhicule sur une voie
    */
   positionOnLane(vehicle, road, lane) {
     if (road.direction === 'vertical') {
@@ -195,22 +195,22 @@ Game.Traffic = {
   },
 
   /**
-   * Met Ã  jour tous les vÃ©hicules
+   * Met à jour tous les véhicules
    */
   update() {
-    // Spawn pÃ©riodique
+    // Spawn périodique
     this.spawnTimer++;
     if (this.spawnTimer >= this.spawnInterval && this.vehicles.length < this.maxVehicles) {
       this.spawn();
       this.spawnTimer = 0;
     }
 
-    // Mise Ã  jour des vÃ©hicules
+    // Mise à jour des véhicules
     for (let i = this.vehicles.length - 1; i >= 0; i--) {
       const vehicle = this.vehicles[i];
       if (!vehicle) continue;
       
-      // Mettre Ã  jour les timers
+      // Mettre à jour les timers
       vehicle.changeTimer--;
       if (vehicle.honkCooldown > 0) vehicle.honkCooldown--;
       if (vehicle.stateTimer > 0) vehicle.stateTimer--;
@@ -222,20 +222,20 @@ Game.Traffic = {
       // IA de conduite
       this.updateAI(vehicle);
       
-      // Mise Ã  jour physique
+      // Mise à jour physique
       this.updatePhysics(vehicle);
       const movedDistance = Utils.distance(prevX, prevY, vehicle.x, vehicle.y);
       this.resolveTrafficJam(vehicle, movedDistance, i);
       vehicle.lastX = vehicle.x;
       vehicle.lastY = vehicle.y;
       
-      // VÃ©rifier les limites
+      // Vérifier les limites
       if (this.isOutOfBounds(vehicle)) {
         this.respawnVehicle(vehicle, i);
         continue;
       }
       
-      // Destruction si santÃ© Ã©puisÃ©e
+      // Destruction si santé épuisée
       if (vehicle.health <= 0) {
         this.destroyVehicle(vehicle, i);
         continue;
@@ -244,7 +244,7 @@ Game.Traffic = {
   },
 
   /**
-   * IA de conduite avancÃ©e
+   * IA de conduite avancée
    */
 updateAI(vehicle) {
   const obstacles = this.detectObstacles(vehicle);
@@ -258,7 +258,7 @@ updateAI(vehicle) {
     this.normalDrivingImproved(vehicle);
   }
 
-  // Tentative de dÃ©passement si on est lent ou bloquÃ©
+  // Tentative de dépassement si on est lent ou bloqué
   if (vehicle.speed < vehicle.targetSpeed * 0.7 || vehicle.state === 'waiting') {
     if (Math.random() < 0.15) {  // Plus souvent en cas de ralentissement
       this.tryChangeLaneSafely(vehicle);
@@ -270,7 +270,7 @@ updateAI(vehicle) {
     vehicle.changeTimer = Utils.randomInt(500, 1000);
   }
 
-  // ðŸ”“ DÃ©blocage forcÃ© si bloquÃ© trop longtemps
+  // 🔓 Déblocage forcé si bloqué trop longtemps
 if (vehicle.state === 'waiting') {
   vehicle.stateTimer++;
 
@@ -287,16 +287,16 @@ if (vehicle.state === 'waiting') {
 handleObstaclesImproved(vehicle, obstacles) {
   const nearest = obstacles[0];
   
-  // Distance de sÃ©curitÃ© proportionnelle Ã  la vitesse + marge fixe
-  const safeDistance = vehicle.speed * 12 + 30;  // Plus espacÃ©e que avant
+  // Distance de sécurité proportionnelle à la vitesse + marge fixe
+  const safeDistance = vehicle.speed * 12 + 30;  // Plus espacée que avant
 
   if (nearest.distance < safeDistance * 0.5) {
-    // TrÃ¨s proche â†’ freinage fort
+    // Très proche → freinage fort
     vehicle.speed = Math.max(0, vehicle.speed - vehicle.brakePower * 2);
     vehicle.braking = true;
     vehicle.state = 'stopping';
 
-    // Klaxon si bloquÃ© longtemps
+    // Klaxon si bloqué longtemps
     vehicle.patience--;
     if (vehicle.patience <= 0 && vehicle.honkCooldown <= 0) {
       this.honk(vehicle, 0.5);
@@ -315,7 +315,7 @@ handleObstaclesImproved(vehicle, obstacles) {
     vehicle.state = 'waiting';
 
   } else {
-    // LÃ©gÃ¨re correction latÃ©rale si trop alignÃ©
+    // Légère correction latérale si trop aligné
     if (nearest.perpDist < 30 && nearest.distance < safeDistance * 1.5) {
       this.applyLateralAvoidance(vehicle, nearest);
     }
@@ -326,13 +326,13 @@ handleObstaclesImproved(vehicle, obstacles) {
 applyLateralAvoidance(vehicle, obstacle) {
   vehicle.state = 'avoiding';
 
-  // DÃ©calage voulu, stockÃ© comme intention
+  // Décalage voulu, stocké comme intention
   vehicle.lateralIntent = (obstacle.perpDist > 0 ? 1 : -1) * 1;
 
-  // Freinage modÃ©rÃ© (PAS brutal)
+  // Freinage modéré (PAS brutal)
   vehicle.speed *= 0.85;
 
-  // LÃ©gÃ¨re rotation visuelle
+  // Légère rotation visuelle
   vehicle.angle += vehicle.lateralIntent * 0.5;
 },
 
@@ -341,10 +341,10 @@ normalDrivingImproved(vehicle) {
   vehicle.state = 'driving';
   vehicle.braking = false;
 
-  // AccÃ©lÃ©ration plus vive quand la voie est libre
+  // Accélération plus vive quand la voie est libre
   if (vehicle.speed < vehicle.targetSpeed) {
-    vehicle.speed += vehicle.acceleration;  // Plus rÃ©actif
-    vehicle.speed = Math.min(vehicle.speed, vehicle.targetSpeed * 1.05); // Petit dÃ©passement temporaire
+    vehicle.speed += vehicle.acceleration;  // Plus réactif
+    vehicle.speed = Math.min(vehicle.speed, vehicle.targetSpeed * 1.05); // Petit dépassement temporaire
   }
 },
 
@@ -396,7 +396,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
     const distAlong = dx * Math.cos(rad) + dy * Math.sin(rad);
 
     if (Math.abs(distAlong) < checkDist) {
-      // Si quelqu'un est trop prÃ¨s dans la voie cible â†’ refus
+      // Si quelqu'un est trop près dans la voie cible → refus
       const lateralDist = road.direction === 'vertical' 
         ? Math.abs(ox - (road.x + targetLane.offset))
         : Math.abs(oy - (road.y + targetLane.offset));
@@ -406,18 +406,18 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
   return true;
 },
   /**
-   * DÃ©tecte les obstacles devant le vÃ©hicule
+   * Détecte les obstacles devant le véhicule
    */
   detectObstacles(vehicle) {
     const obstacles = [];
     const road = vehicle.onRoad;
     if (!road || !vehicle.lane) return obstacles;
     
-    // Centre du vÃ©hicule
+    // Centre du véhicule
     const cx = vehicle.x + vehicle.width / 2;
     const cy = vehicle.y + vehicle.height / 2;
 
-    // VÃ©rifier les autres vÃ©hicules du trafic
+    // Vérifier les autres véhicules du trafic
     for (const other of this.vehicles) {
       if (other === vehicle) continue;
       if (vehicle.ghostTimer > 0 || other.ghostTimer > 0) continue;
@@ -454,7 +454,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
       }
     }
 
-    // VÃ©rifier les bÃ¢timents
+    // Vérifier les bâtiments
     if (Game.Buildings && Game.Buildings.list) {
       const rad = Utils.degToRad(vehicle.angle);
       const dirX = Math.cos(rad);
@@ -482,7 +482,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
   },
 
   /**
-   * DÃ©tecte si le joueur est une menace
+   * Détecte si le joueur est une menace
    */
   detectPlayerThreat(vehicle) {
     if (!Game.VehicleManager || !Game.VehicleManager.playerVehicle) return null;
@@ -512,7 +512,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
   },
 
   /**
-   * RÃ©agit Ã  la menace du joueur
+   * Réagit à la menace du joueur
    */
   handlePlayerThreat(vehicle, threat) {
     vehicle.state = 'avoiding';
@@ -529,14 +529,14 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
       vehicle.honkCooldown = 60;
     }
     
-    // Essayer de s'Ã©carter
+    // Essayer de s'écarter
     const rad = Utils.degToRad(vehicle.angle + 90);
     vehicle.x += Math.cos(rad) * 0.5;
     vehicle.y += Math.sin(rad) * 0.5;
   },
 
   /**
-   * GÃ¨re les obstacles dÃ©tectÃ©s
+   * Gère les obstacles détectés
    */
   handleObstacles(vehicle, obstacles) {
     const nearest = obstacles[0];
@@ -572,14 +572,14 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
     vehicle.state = 'driving';
     vehicle.braking = false;
     
-    // AccÃ©lÃ©rer vers la vitesse cible
+    // Accélérer vers la vitesse cible
     if (vehicle.speed < vehicle.targetSpeed) {
       vehicle.speed += vehicle.acceleration;
     } else if (vehicle.speed > vehicle.targetSpeed) {
       vehicle.speed -= vehicle.acceleration * 0.5;
     }
     
-    // LÃ©gÃ¨res variations de vitesse
+    // Légères variations de vitesse
     if (Math.random() < 0.01) {
       vehicle.targetSpeed += Utils.randomFloat(-0.3, 0.3);
       vehicle.targetSpeed = Utils.clamp(vehicle.targetSpeed, 1.5, 5);
@@ -595,7 +595,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
     const road = vehicle.onRoad;
     const currentLane = vehicle.lane;
     
-    // Trouver une autre voie dans la mÃªme direction
+    // Trouver une autre voie dans la même direction
     const sameDirLanes = road.lanes.filter(l => 
       l !== currentLane && Math.abs(l.direction - currentLane.direction) < 45
     );
@@ -604,7 +604,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
     
     const newLane = sameDirLanes[0];
     
-    // VÃ©rifier si la voie est libre
+    // Vérifier si la voie est libre
     const newPos = road.direction === 'vertical' ? 
                    road.x + newLane.offset : 
                    road.y + newLane.offset;
@@ -623,7 +623,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
   },
 
   /**
-   * Met Ã  jour la physique du vÃ©hicule
+   * Met à jour la physique du véhicule
    */
   updatePhysics(vehicle) {
   const rad = Utils.degToRad(vehicle.angle);
@@ -657,7 +657,7 @@ isLaneClear(vehicle, road, targetLane, checkDist = 120) {
     }
   }
 
-  // Petit nudge pour Ã©viter les overlaps
+  // Petit nudge pour éviter les overlaps
   this.avoidOverlap(vehicle);
 
   this.keepOnRoad(vehicle);
@@ -724,7 +724,7 @@ avoidOverlap(vehicle) {
     }
   },
   /**
-   * Garde le vÃ©hicule sur la route
+   * Garde le véhicule sur la route
    */
   keepOnRoad(vehicle) {
     if (!vehicle.onRoad || !vehicle.lane) return;
@@ -747,7 +747,7 @@ avoidOverlap(vehicle) {
   },
 
   /**
-   * VÃ©rifie si le vÃ©hicule est hors limites
+   * Vérifie si le véhicule est hors limites
    */
   isOutOfBounds(vehicle) {
     const margin = 100;
@@ -758,18 +758,18 @@ avoidOverlap(vehicle) {
   },
 
   /**
-   * Respawn un vÃ©hicule
+   * Respawn un véhicule
    */
   respawnVehicle(vehicle, index) {
     this.returnToPool(vehicle);
     this.vehicles.splice(index, 1);
     
-    // Spawn un nouveau aprÃ¨s un dÃ©lai
+    // Spawn un nouveau après un délai
     setTimeout(() => this.spawn(), 1000);
   },
 
   /**
-   * DÃ©truit un vÃ©hicule
+   * Détruit un véhicule
    */
   destroyVehicle(vehicle, index) {
     // Effets
@@ -781,7 +781,7 @@ avoidOverlap(vehicle) {
     this.returnToPool(vehicle);
     this.vehicles.splice(index, 1);
     
-    // Respawn aprÃ¨s un dÃ©lai
+    // Respawn après un délai
     setTimeout(() => this.spawn(), 3000);
   },
 
@@ -795,7 +795,7 @@ avoidOverlap(vehicle) {
   },
 
   /**
-   * Ã‰vitement mutuel entre vÃ©hicules du trafic
+   * Évitement mutuel entre véhicules du trafic
    */
   avoidOtherTraffic(vehicle) {
     const cx = vehicle.x + vehicle.width / 2;
@@ -822,7 +822,7 @@ avoidOverlap(vehicle) {
   },
 
   /**
-   * VÃ©rifie si un vÃ©hicule est sur une route
+   * Vérifie si un véhicule est sur une route
    */
   isOnRoad(vehicle) {
     for (const road of this.roads) {
@@ -837,7 +837,7 @@ avoidOverlap(vehicle) {
   },
 
   /**
-   * Dessine tous les vÃ©hicules
+   * Dessine tous les véhicules
    */
   draw(ctx) {
     for (const v of this.vehicles) {
@@ -846,7 +846,7 @@ avoidOverlap(vehicle) {
   },
 
   /**
-   * Dessine un vÃ©hicule individuel
+   * Dessine un véhicule individuel
    */
   drawVehicle(ctx, v) {
     ctx.save();
@@ -886,7 +886,7 @@ avoidOverlap(vehicle) {
     
     ctx.restore();
 
-    // Barre de vie si endommagÃ©
+    // Barre de vie si endommagé
     if (v.health < v.maxHealth) {
       const barWidth = v.width;
       const barHeight = 4;
@@ -900,14 +900,14 @@ avoidOverlap(vehicle) {
       ctx.fillRect(v.x, v.y - 10, barWidth * healthRatio, barHeight);
     }
     
-    // IcÃ´ne
+    // Icône
     ctx.fillStyle = "#ffffff";
     ctx.font = "11px Arial";
     ctx.textAlign = "center";
     const trafficLabel = (v.icon || (v.type || "C").slice(0, 2).toUpperCase());
     ctx.fillText(trafficLabel, v.x + v.width / 2, v.y + v.height / 2 + 4);
     
-    // Debug: afficher l'Ã©tat
+    // Debug: afficher l'état
     if (Game.debug) {
       ctx.fillStyle = "#ffffff";
       ctx.font = "10px Arial";
@@ -918,7 +918,7 @@ avoidOverlap(vehicle) {
   }
 };
 
-// Utilitaire lerp si pas dÃ©fini
+// Utilitaire lerp si pas défini
 Utils.lerp = Utils.lerp || function(a, b, t) {
   return a + (b - a) * t;
 };

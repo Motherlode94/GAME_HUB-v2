@@ -1,364 +1,364 @@
-﻿/* ÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚Â
-   BE THE KING ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Moteur Complet v2
-   60+ bÃƒÆ’Ã‚Â¢timents, 50+ technologies, 30+ unitÃƒÆ’Ã‚Â©s, carte 2D interactive
-   ÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚ÂÃƒÂ¢Ã¢â‚¬Â¢Ã‚Â */
+﻿/* ═══════════════════════════════════════════════════════════════════
+   BE THE KING — Moteur Complet v2
+   60+ bâtiments, 50+ technologies, 30+ unités, carte 2D interactive
+   ═══════════════════════════════════════════════════════════════════ */
 
 // ============================
-//  DONNÃƒÆ’Ã¢â‚¬Â°ES ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ÃƒÆ’Ã‹â€ RES
+//  DONNÉES — ÈRES
 // ============================
 var ERAS = [
-    { id:'antiquite',    name:'AntiquitÃƒÆ’Ã‚Â©',       yearStart:-4000, yearPerTurn:50,  cssClass:'' },
-    { id:'medieval',     name:'Moyen-ÃƒÆ’Ã¢â‚¬Å¡ge',       yearStart:500,   yearPerTurn:25,  cssClass:'era-medieval' },
+    { id:'antiquite',    name:'Antiquité',       yearStart:-4000, yearPerTurn:50,  cssClass:'' },
+    { id:'medieval',     name:'Moyen-Âge',       yearStart:500,   yearPerTurn:25,  cssClass:'era-medieval' },
     { id:'renaissance',  name:'Renaissance',      yearStart:1400,  yearPerTurn:10,  cssClass:'era-renaissance' },
-    { id:'industrielle', name:'ÃƒÆ’Ã‹â€ re Industrielle', yearStart:1750,  yearPerTurn:5,   cssClass:'era-industrielle' },
-    { id:'moderne',      name:'ÃƒÆ’Ã‹â€ re Moderne',      yearStart:1900,  yearPerTurn:2,   cssClass:'era-moderne' },
+    { id:'industrielle', name:'Ère Industrielle', yearStart:1750,  yearPerTurn:5,   cssClass:'era-industrielle' },
+    { id:'moderne',      name:'Ère Moderne',      yearStart:1900,  yearPerTurn:2,   cssClass:'era-moderne' },
     { id:'contemporaine',name:'Contemporaine',    yearStart:1990,  yearPerTurn:1,   cssClass:'era-contemporaine' }
 ];
 
 var GOVERNMENTS = {
-    monarchie:  { name:'Monarchie',       icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ¢â‚¬Ëœ', bonuses:{ goldRate:0.10, stability:5 } },
-    republique: { name:'RÃƒÆ’Ã‚Â©publique',      icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬â€œÃƒÂ¯Ã‚Â¸Ã‚Â', bonuses:{ scienceRate:0.10, cultureRate:0.05 } },
-    theocratie: { name:'ThÃƒÆ’Ã‚Â©ocratie',      icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', bonuses:{ cultureRate:0.15, stability:10 } },
-    militaire:  { name:'ÃƒÆ’Ã¢â‚¬Â°tat Militaire',  icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬ÂÃƒÂ¯Ã‚Â¸Ã‚Â', bonuses:{ militaryPower:0.15, prodRate:0.05 } },
-    democratie: { name:'DÃƒÆ’Ã‚Â©mocratie',      icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â€Ã‚Â³ÃƒÂ¯Ã‚Â¸Ã‚Â', bonuses:{ happiness:10, scienceRate:0.10 } },
-    communisme: { name:'Communisme',      icon:'ÃƒÂ¢Ã‹Å“Ã‚Â­',  bonuses:{ prodRate:0.20, foodRate:0.10, happiness:-10 } },
-    fascisme:   { name:'Fascisme',        icon:'ÃƒÂ°Ã…Â¸Ã‚Â¦Ã¢â‚¬Â¦', bonuses:{ militaryPower:0.25, prodRate:0.15, happiness:-15 } },
-    oligarchie: { name:'Oligarchie',      icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã…Â½', bonuses:{ goldRate:0.20, happiness:-5 } }
+    monarchie:  { name:'Monarchie',       icon:'👑', bonuses:{ goldRate:0.10, stability:5 } },
+    republique: { name:'République',      icon:'⚖️', bonuses:{ scienceRate:0.10, cultureRate:0.05 } },
+    theocratie: { name:'Théocratie',      icon:'🏛️', bonuses:{ cultureRate:0.15, stability:10 } },
+    militaire:  { name:'État Militaire',  icon:'⚔️', bonuses:{ militaryPower:0.15, prodRate:0.05 } },
+    democratie: { name:'Démocratie',      icon:'🗳️', bonuses:{ happiness:10, scienceRate:0.10 } },
+    communisme: { name:'Communisme',      icon:'☭',  bonuses:{ prodRate:0.20, foodRate:0.10, happiness:-10 } },
+    fascisme:   { name:'Fascisme',        icon:'🦅', bonuses:{ militaryPower:0.25, prodRate:0.15, happiness:-15 } },
+    oligarchie: { name:'Oligarchie',      icon:'💎', bonuses:{ goldRate:0.20, happiness:-5 } }
 };
 
 // ============================
-//  DONNÃƒÆ’Ã¢â‚¬Â°ES ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â BÃƒÆ’Ã¢â‚¬Å¡TIMENTS (60+)
+//  DONNÉES — BÂTIMENTS (60+)
 // ============================
 var BUILDINGS = [
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ ANTIQUITÃƒÆ’Ã¢â‚¬Â° ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'ferme',         name:'Ferme',              icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â¾', cat:'nourriture',     era:'antiquite', cost:{gold:30,prod:20},   effect:{foodRate:3}, desc:'Culture des terres', tech:null },
-    { id:'grenier',       name:'Grenier',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚ ', cat:'nourriture',     era:'antiquite', cost:{gold:35,prod:25},   effect:{foodRate:2}, desc:'Stockage de nourriture', tech:'agriculture' },
-    { id:'irrigation',    name:'Canal d\'Irrigation', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â§', cat:'nourriture',     era:'antiquite', cost:{gold:50,prod:35},   effect:{foodRate:4}, desc:'Irrigue les champs', tech:'agriculture' },
-    { id:'mine',          name:'Mine',               icon:'ÃƒÂ¢Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'economie',       era:'antiquite', cost:{gold:40,prod:30},   effect:{prodRate:3}, desc:'Extraction de minerai', tech:null },
-    { id:'carriere',      name:'CarriÃƒÆ’Ã‚Â¨re',           icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ‚Â¨', cat:'economie',       era:'antiquite', cost:{gold:45,prod:35},   effect:{prodRate:4}, desc:'Pierre de construction', tech:'extraction' },
-    { id:'marche',        name:'MarchÃƒÆ’Ã‚Â©',             icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Âª', cat:'economie',       era:'antiquite', cost:{gold:50,prod:20},   effect:{goldRate:5}, desc:'Commerce local', tech:'poterie' },
-    { id:'temple',        name:'Temple',             icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'religion',       era:'antiquite', cost:{gold:60,prod:30},   effect:{cultureRate:2,stability:3}, desc:'Lieu de culte', tech:'mystique' },
-    { id:'autel',         name:'Autel SacrÃƒÆ’Ã‚Â©',        icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¢Ã‚Â¯ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'religion',       era:'antiquite', cost:{gold:40,prod:20},   effect:{stability:4}, desc:'Apaise le peuple', tech:'mystique' },
-    { id:'bibliotheque',  name:'BibliothÃƒÆ’Ã‚Â¨que',       icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â¡', cat:'science',        era:'antiquite', cost:{gold:70,prod:40},   effect:{scienceRate:4}, desc:'Savoir ancestral', tech:'ecriture' },
-    { id:'academie',      name:'AcadÃƒÆ’Ã‚Â©mie',           icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â«', cat:'science',        era:'antiquite', cost:{gold:90,prod:50},   effect:{scienceRate:6}, desc:'Centre de pensÃƒÆ’Ã‚Â©e', tech:'philosophie' },
-    { id:'caserne',       name:'Caserne',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬Â¢ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'militaire',      era:'antiquite', cost:{gold:50,prod:40},   effect:{militaryPower:5}, desc:'EntraÃƒÆ’Ã‚Â®nement', tech:'bronze' },
-    { id:'murailles',     name:'Murailles',          icon:'ÃƒÂ°Ã…Â¸Ã‚Â§Ã‚Â±', cat:'militaire',      era:'antiquite', cost:{gold:80,prod:60},   effect:{defense:10,stability:3}, desc:'DÃƒÆ’Ã‚Â©fense de la citÃƒÆ’Ã‚Â©', tech:'maconnerie' },
-    { id:'palissade',     name:'Palissade',          icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ‚Âµ', cat:'militaire',      era:'antiquite', cost:{gold:25,prod:20},   effect:{defense:5}, desc:'Protection basique', tech:null },
-    { id:'agora',         name:'Agora',              icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'culture',        era:'antiquite', cost:{gold:55,prod:30},   effect:{cultureRate:3,happiness:2}, desc:'Place publique', tech:'ecriture' },
-    { id:'atelier',       name:'Atelier d\'Artisan', icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Âº', cat:'economie',       era:'antiquite', cost:{gold:45,prod:30},   effect:{prodRate:2,goldRate:2}, desc:'Artisanat', tech:'poterie' },
-    { id:'aqueduc',       name:'Aqueduc',            icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã… ', cat:'infrastructure', era:'antiquite', cost:{gold:100,prod:70},  effect:{foodRate:3,happiness:3,popGrowth:0.01}, desc:'Eau courante', tech:'maconnerie' },
+    // ── ANTIQUITÉ ──
+    { id:'ferme',         name:'Ferme',              icon:'🌾', cat:'nourriture',     era:'antiquite', cost:{gold:30,prod:20},   effect:{foodRate:3}, desc:'Culture des terres', tech:null },
+    { id:'grenier',       name:'Grenier',            icon:'🏠', cat:'nourriture',     era:'antiquite', cost:{gold:35,prod:25},   effect:{foodRate:2}, desc:'Stockage de nourriture', tech:'agriculture' },
+    { id:'irrigation',    name:'Canal d\'Irrigation', icon:'💧', cat:'nourriture',     era:'antiquite', cost:{gold:50,prod:35},   effect:{foodRate:4}, desc:'Irrigue les champs', tech:'agriculture' },
+    { id:'mine',          name:'Mine',               icon:'⛏️', cat:'economie',       era:'antiquite', cost:{gold:40,prod:30},   effect:{prodRate:3}, desc:'Extraction de minerai', tech:null },
+    { id:'carriere',      name:'Carrière',           icon:'🪨', cat:'economie',       era:'antiquite', cost:{gold:45,prod:35},   effect:{prodRate:4}, desc:'Pierre de construction', tech:'extraction' },
+    { id:'marche',        name:'Marché',             icon:'🏪', cat:'economie',       era:'antiquite', cost:{gold:50,prod:20},   effect:{goldRate:5}, desc:'Commerce local', tech:'poterie' },
+    { id:'temple',        name:'Temple',             icon:'🏛️', cat:'religion',       era:'antiquite', cost:{gold:60,prod:30},   effect:{cultureRate:2,stability:3}, desc:'Lieu de culte', tech:'mystique' },
+    { id:'autel',         name:'Autel Sacré',        icon:'🕯️', cat:'religion',       era:'antiquite', cost:{gold:40,prod:20},   effect:{stability:4}, desc:'Apaise le peuple', tech:'mystique' },
+    { id:'bibliotheque',  name:'Bibliothèque',       icon:'📚', cat:'science',        era:'antiquite', cost:{gold:70,prod:40},   effect:{scienceRate:4}, desc:'Savoir ancestral', tech:'ecriture' },
+    { id:'academie',      name:'Académie',           icon:'🏫', cat:'science',        era:'antiquite', cost:{gold:90,prod:50},   effect:{scienceRate:6}, desc:'Centre de pensée', tech:'philosophie' },
+    { id:'caserne',       name:'Caserne',            icon:'🏕️', cat:'militaire',      era:'antiquite', cost:{gold:50,prod:40},   effect:{militaryPower:5}, desc:'Entraînement', tech:'bronze' },
+    { id:'murailles',     name:'Murailles',          icon:'🧱', cat:'militaire',      era:'antiquite', cost:{gold:80,prod:60},   effect:{defense:10,stability:3}, desc:'Défense de la cité', tech:'maconnerie' },
+    { id:'palissade',     name:'Palissade',          icon:'🪵', cat:'militaire',      era:'antiquite', cost:{gold:25,prod:20},   effect:{defense:5}, desc:'Protection basique', tech:null },
+    { id:'agora',         name:'Agora',              icon:'🏛️', cat:'culture',        era:'antiquite', cost:{gold:55,prod:30},   effect:{cultureRate:3,happiness:2}, desc:'Place publique', tech:'ecriture' },
+    { id:'atelier',       name:'Atelier d\'Artisan', icon:'🏺', cat:'economie',       era:'antiquite', cost:{gold:45,prod:30},   effect:{prodRate:2,goldRate:2}, desc:'Artisanat', tech:'poterie' },
+    { id:'aqueduc',       name:'Aqueduc',            icon:'🌊', cat:'infrastructure', era:'antiquite', cost:{gold:100,prod:70},  effect:{foodRate:3,happiness:3,popGrowth:0.01}, desc:'Eau courante', tech:'maconnerie' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ MOYEN-ÃƒÆ’Ã¢â‚¬Å¡GE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'cathedrale',    name:'CathÃƒÆ’Ã‚Â©drale',         icon:'ÃƒÂ¢Ã¢â‚¬ÂºÃ‚Âª', cat:'religion',       era:'medieval', cost:{gold:200,prod:120}, effect:{cultureRate:8,stability:5,happiness:3}, desc:'Merveille religieuse', tech:'theologie' },
-    { id:'monastere',     name:'MonastÃƒÆ’Ã‚Â¨re',          icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¿', cat:'religion',       era:'medieval', cost:{gold:100,prod:60},  effect:{scienceRate:3,cultureRate:3,stability:3}, desc:'Moines copistes', tech:'theologie' },
-    { id:'forge',         name:'Forge',              icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â¨', cat:'economie',       era:'medieval', cost:{gold:80,prod:50},   effect:{prodRate:5,militaryPower:3}, desc:'Travail du fer', tech:'metallurgie' },
-    { id:'universite',    name:'UniversitÃƒÆ’Ã‚Â©',         icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“', cat:'science',        era:'medieval', cost:{gold:120,prod:70},  effect:{scienceRate:8}, desc:'Centre de savoir', tech:'education' },
-    { id:'chateau_fort',  name:'ChÃƒÆ’Ã‚Â¢teau Fort',       icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â°', cat:'militaire',      era:'medieval', cost:{gold:200,prod:120}, effect:{defense:25,stability:5,militaryPower:8}, desc:'Forteresse', tech:'feodalisme' },
-    { id:'port',          name:'Port Commercial',    icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬Å“', cat:'economie',       era:'medieval', cost:{gold:130,prod:80},  effect:{goldRate:10,foodRate:3}, desc:'Commerce maritime', tech:'navigation' },
-    { id:'moulin',        name:'Moulin',             icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã¢â€šÂ¬', cat:'nourriture',     era:'medieval', cost:{gold:60,prod:40},   effect:{foodRate:5,prodRate:2}, desc:'Transforme cÃƒÆ’Ã‚Â©rÃƒÆ’Ã‚Â©ales', tech:'mecanique' },
-    { id:'guilde',        name:'Guilde des Marchands',icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¼', cat:'economie',      era:'medieval', cost:{gold:100,prod:50},  effect:{goldRate:8}, desc:'Organisation marchande', tech:'navigation' },
-    { id:'ecurie',        name:'ÃƒÆ’Ã¢â‚¬Â°curie Royale',      icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â´', cat:'militaire',      era:'medieval', cost:{gold:90,prod:60},   effect:{militaryPower:6}, desc:'Cavalerie montÃƒÆ’Ã‚Â©e', tech:'feodalisme' },
-    { id:'rempart',       name:'Remparts',           icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'militaire',      era:'medieval', cost:{gold:150,prod:100}, effect:{defense:20}, desc:'Murs renforcÃƒÆ’Ã‚Â©s', tech:'feodalisme' },
-    { id:'auberge',       name:'Auberge',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Âº', cat:'culture',        era:'medieval', cost:{gold:50,prod:30},   effect:{happiness:4,goldRate:2}, desc:'Repos du voyageur', tech:null },
-    { id:'marche_couvert',name:'MarchÃƒÆ’Ã‚Â© Couvert',     icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¬', cat:'economie',       era:'medieval', cost:{gold:80,prod:45},   effect:{goldRate:6,foodRate:2}, desc:'Commerce abritÃƒÆ’Ã‚Â©', tech:'mecanique' },
-    { id:'hopital_medieval',name:'Hospice',           icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¥', cat:'infrastructure', era:'medieval', cost:{gold:110,prod:70},  effect:{happiness:4,popGrowth:0.01}, desc:'Soins aux malades', tech:'education' },
-    { id:'scriptorium',   name:'Scriptorium',        icon:'ÃƒÂ¢Ã…â€œÃ‚ÂÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'science',        era:'medieval', cost:{gold:90,prod:50},   effect:{scienceRate:5,cultureRate:2}, desc:'Copie de manuscrits', tech:'theologie' },
+    // ── MOYEN-ÂGE ──
+    { id:'cathedrale',    name:'Cathédrale',         icon:'⛪', cat:'religion',       era:'medieval', cost:{gold:200,prod:120}, effect:{cultureRate:8,stability:5,happiness:3}, desc:'Merveille religieuse', tech:'theologie' },
+    { id:'monastere',     name:'Monastère',          icon:'📿', cat:'religion',       era:'medieval', cost:{gold:100,prod:60},  effect:{scienceRate:3,cultureRate:3,stability:3}, desc:'Moines copistes', tech:'theologie' },
+    { id:'forge',         name:'Forge',              icon:'🔨', cat:'economie',       era:'medieval', cost:{gold:80,prod:50},   effect:{prodRate:5,militaryPower:3}, desc:'Travail du fer', tech:'metallurgie' },
+    { id:'universite',    name:'Université',         icon:'🎓', cat:'science',        era:'medieval', cost:{gold:120,prod:70},  effect:{scienceRate:8}, desc:'Centre de savoir', tech:'education' },
+    { id:'chateau_fort',  name:'Château Fort',       icon:'🏰', cat:'militaire',      era:'medieval', cost:{gold:200,prod:120}, effect:{defense:25,stability:5,militaryPower:8}, desc:'Forteresse', tech:'feodalisme' },
+    { id:'port',          name:'Port Commercial',    icon:'⚓', cat:'economie',       era:'medieval', cost:{gold:130,prod:80},  effect:{goldRate:10,foodRate:3}, desc:'Commerce maritime', tech:'navigation' },
+    { id:'moulin',        name:'Moulin',             icon:'🌀', cat:'nourriture',     era:'medieval', cost:{gold:60,prod:40},   effect:{foodRate:5,prodRate:2}, desc:'Transforme céréales', tech:'mecanique' },
+    { id:'guilde',        name:'Guilde des Marchands',icon:'💼', cat:'economie',      era:'medieval', cost:{gold:100,prod:50},  effect:{goldRate:8}, desc:'Organisation marchande', tech:'navigation' },
+    { id:'ecurie',        name:'Écurie Royale',      icon:'🐴', cat:'militaire',      era:'medieval', cost:{gold:90,prod:60},   effect:{militaryPower:6}, desc:'Cavalerie montée', tech:'feodalisme' },
+    { id:'rempart',       name:'Remparts',           icon:'🛡️', cat:'militaire',      era:'medieval', cost:{gold:150,prod:100}, effect:{defense:20}, desc:'Murs renforcés', tech:'feodalisme' },
+    { id:'auberge',       name:'Auberge',            icon:'🍺', cat:'culture',        era:'medieval', cost:{gold:50,prod:30},   effect:{happiness:4,goldRate:2}, desc:'Repos du voyageur', tech:null },
+    { id:'marche_couvert',name:'Marché Couvert',     icon:'🏬', cat:'economie',       era:'medieval', cost:{gold:80,prod:45},   effect:{goldRate:6,foodRate:2}, desc:'Commerce abrité', tech:'mecanique' },
+    { id:'hopital_medieval',name:'Hospice',           icon:'🏥', cat:'infrastructure', era:'medieval', cost:{gold:110,prod:70},  effect:{happiness:4,popGrowth:0.01}, desc:'Soins aux malades', tech:'education' },
+    { id:'scriptorium',   name:'Scriptorium',        icon:'✍️', cat:'science',        era:'medieval', cost:{gold:90,prod:50},   effect:{scienceRate:5,cultureRate:2}, desc:'Copie de manuscrits', tech:'theologie' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ RENAISSANCE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'banque',        name:'Banque',             icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¦', cat:'economie',       era:'renaissance', cost:{gold:200,prod:100}, effect:{goldRate:15}, desc:'Institution financiÃƒÆ’Ã‚Â¨re', tech:'economie_t' },
-    { id:'observatoire',  name:'Observatoire',       icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â­', cat:'science',        era:'renaissance', cost:{gold:180,prod:90},  effect:{scienceRate:12}, desc:'Scrute les cieux', tech:'astronomie' },
-    { id:'theatre',       name:'ThÃƒÆ’Ã‚Â©ÃƒÆ’Ã‚Â¢tre',            icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â­', cat:'culture',        era:'renaissance', cost:{gold:120,prod:70},  effect:{cultureRate:10,happiness:5}, desc:'Art dramatique', tech:'art' },
-    { id:'arsenal',       name:'Arsenal',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â­', cat:'militaire',      era:'renaissance', cost:{gold:180,prod:110}, effect:{militaryPower:15,prodRate:5}, desc:'Armes ÃƒÆ’Ã‚  feu', tech:'poudre' },
-    { id:'imprimerie',    name:'Imprimerie',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â°', cat:'science',        era:'renaissance', cost:{gold:140,prod:60},  effect:{scienceRate:6,cultureRate:6}, desc:'Diffusion du savoir', tech:'imprimerie_t' },
-    { id:'manufacture',   name:'Manufacture',        icon:'ÃƒÂ°Ã…Â¸Ã‚Â§Ã‚Âµ', cat:'economie',       era:'renaissance', cost:{gold:160,prod:90},  effect:{prodRate:8,goldRate:6}, desc:'Proto-industrie', tech:'economie_t' },
-    { id:'chantier_naval',name:'Chantier Naval',     icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã‚Â¢', cat:'militaire',      era:'renaissance', cost:{gold:200,prod:120}, effect:{militaryPower:10,goldRate:5}, desc:'Construction navale', tech:'navigation_avancee' },
-    { id:'galerie_art',   name:'Galerie d\'Art',     icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â€œÃ‚Â¼ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'culture',        era:'renaissance', cost:{gold:150,prod:80},  effect:{cultureRate:12,prestige:3}, desc:'Collection d\'Ãƒâ€¦Ã¢â‚¬Å“uvres', tech:'art' },
-    { id:'fortification', name:'Fortification Star', icon:'ÃƒÂ¢Ã‚Â­Ã‚Â', cat:'militaire',      era:'renaissance', cost:{gold:250,prod:150}, effect:{defense:35}, desc:'Fort en ÃƒÆ’Ã‚Â©toile', tech:'poudre' },
-    { id:'comptoir',      name:'Comptoir Commercial',icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Âª', cat:'economie',       era:'renaissance', cost:{gold:120,prod:60},  effect:{goldRate:10}, desc:'Commerce lointain', tech:'navigation_avancee' },
-    { id:'academie_royale',name:'AcadÃƒÆ’Ã‚Â©mie Royale',   icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â«', cat:'science',        era:'renaissance', cost:{gold:200,prod:100}, effect:{scienceRate:10,cultureRate:4}, desc:'ÃƒÆ’Ã¢â‚¬Â°lite du savoir', tech:'imprimerie_t' },
-    { id:'palais',        name:'Palais',             icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â°', cat:'culture',        era:'renaissance', cost:{gold:300,prod:180}, effect:{prestige:8,stability:5,happiness:3}, desc:'SiÃƒÆ’Ã‚Â¨ge du pouvoir', tech:'art' },
+    // ── RENAISSANCE ──
+    { id:'banque',        name:'Banque',             icon:'🏦', cat:'economie',       era:'renaissance', cost:{gold:200,prod:100}, effect:{goldRate:15}, desc:'Institution financière', tech:'economie_t' },
+    { id:'observatoire',  name:'Observatoire',       icon:'🔭', cat:'science',        era:'renaissance', cost:{gold:180,prod:90},  effect:{scienceRate:12}, desc:'Scrute les cieux', tech:'astronomie' },
+    { id:'theatre',       name:'Théâtre',            icon:'🎭', cat:'culture',        era:'renaissance', cost:{gold:120,prod:70},  effect:{cultureRate:10,happiness:5}, desc:'Art dramatique', tech:'art' },
+    { id:'arsenal',       name:'Arsenal',            icon:'🏭', cat:'militaire',      era:'renaissance', cost:{gold:180,prod:110}, effect:{militaryPower:15,prodRate:5}, desc:'Armes à feu', tech:'poudre' },
+    { id:'imprimerie',    name:'Imprimerie',         icon:'📰', cat:'science',        era:'renaissance', cost:{gold:140,prod:60},  effect:{scienceRate:6,cultureRate:6}, desc:'Diffusion du savoir', tech:'imprimerie_t' },
+    { id:'manufacture',   name:'Manufacture',        icon:'🧵', cat:'economie',       era:'renaissance', cost:{gold:160,prod:90},  effect:{prodRate:8,goldRate:6}, desc:'Proto-industrie', tech:'economie_t' },
+    { id:'chantier_naval',name:'Chantier Naval',     icon:'🚢', cat:'militaire',      era:'renaissance', cost:{gold:200,prod:120}, effect:{militaryPower:10,goldRate:5}, desc:'Construction navale', tech:'navigation_avancee' },
+    { id:'galerie_art',   name:'Galerie d\'Art',     icon:'🖼️', cat:'culture',        era:'renaissance', cost:{gold:150,prod:80},  effect:{cultureRate:12,prestige:3}, desc:'Collection d\'œuvres', tech:'art' },
+    { id:'fortification', name:'Fortification Star', icon:'⭐', cat:'militaire',      era:'renaissance', cost:{gold:250,prod:150}, effect:{defense:35}, desc:'Fort en étoile', tech:'poudre' },
+    { id:'comptoir',      name:'Comptoir Commercial',icon:'🏪', cat:'economie',       era:'renaissance', cost:{gold:120,prod:60},  effect:{goldRate:10}, desc:'Commerce lointain', tech:'navigation_avancee' },
+    { id:'academie_royale',name:'Académie Royale',   icon:'🏫', cat:'science',        era:'renaissance', cost:{gold:200,prod:100}, effect:{scienceRate:10,cultureRate:4}, desc:'Élite du savoir', tech:'imprimerie_t' },
+    { id:'palais',        name:'Palais',             icon:'🏰', cat:'culture',        era:'renaissance', cost:{gold:300,prod:180}, effect:{prestige:8,stability:5,happiness:3}, desc:'Siège du pouvoir', tech:'art' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ ÃƒÆ’Ã‹â€ RE INDUSTRIELLE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'usine',         name:'Usine',              icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â­', cat:'economie',       era:'industrielle', cost:{gold:300,prod:200}, effect:{prodRate:15,goldRate:8,happiness:-3}, desc:'Production de masse', tech:'vapeur' },
-    { id:'gare',          name:'Gare Ferroviaire',   icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â‚¬Å¡', cat:'infrastructure', era:'industrielle', cost:{gold:250,prod:150}, effect:{goldRate:12,prodRate:5}, desc:'RÃƒÆ’Ã‚Â©seau ferrÃƒÆ’Ã‚Â©', tech:'vapeur' },
-    { id:'hopital',       name:'HÃƒÆ’Ã‚Â´pital Moderne',    icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¥', cat:'infrastructure', era:'industrielle', cost:{gold:200,prod:120}, effect:{happiness:8,popGrowth:0.02}, desc:'Soins modernes', tech:'medecine' },
-    { id:'fort_moderne',  name:'Fort Moderne',       icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â°', cat:'militaire',      era:'industrielle', cost:{gold:350,prod:200}, effect:{defense:40,militaryPower:15}, desc:'Fortification avancÃƒÆ’Ã‚Â©e', tech:'artillerie' },
-    { id:'labo',          name:'Laboratoire',        icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â¬', cat:'science',        era:'industrielle', cost:{gold:280,prod:150}, effect:{scienceRate:18}, desc:'Recherche', tech:'chimie' },
-    { id:'centrale',      name:'Centrale ÃƒÆ’Ã¢â‚¬Â°lectrique',icon:'ÃƒÂ¢Ã…Â¡Ã‚Â¡', cat:'infrastructure', era:'industrielle', cost:{gold:350,prod:200}, effect:{prodRate:10,goldRate:8}, desc:'ÃƒÆ’Ã¢â‚¬Â°nergie', tech:'electricite_t' },
-    { id:'depot',         name:'DÃƒÆ’Ã‚Â©pÃƒÆ’Ã‚Â´t Militaire',    icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¦', cat:'militaire',      era:'industrielle', cost:{gold:200,prod:130}, effect:{militaryPower:12}, desc:'Logistique militaire', tech:'artillerie' },
-    { id:'journal',       name:'Journal',            icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â°', cat:'culture',        era:'industrielle', cost:{gold:150,prod:60},  effect:{cultureRate:8,happiness:3}, desc:'Presse ÃƒÆ’Ã‚Â©crite', tech:'medecine' },
-    { id:'musee',         name:'MusÃƒÆ’Ã‚Â©e National',     icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'culture',        era:'industrielle', cost:{gold:250,prod:120}, effect:{cultureRate:12,prestige:5}, desc:'Conservation du patrimoine', tech:'chimie' },
-    { id:'plantation',    name:'Plantation Industrielle',icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â¿', cat:'nourriture', era:'industrielle', cost:{gold:180,prod:100}, effect:{foodRate:12,goldRate:5}, desc:'Agriculture ÃƒÆ’Ã‚  grande ÃƒÆ’Ã‚Â©chelle', tech:'vapeur' },
+    // ── ÈRE INDUSTRIELLE ──
+    { id:'usine',         name:'Usine',              icon:'🏭', cat:'economie',       era:'industrielle', cost:{gold:300,prod:200}, effect:{prodRate:15,goldRate:8,happiness:-3}, desc:'Production de masse', tech:'vapeur' },
+    { id:'gare',          name:'Gare Ferroviaire',   icon:'🚂', cat:'infrastructure', era:'industrielle', cost:{gold:250,prod:150}, effect:{goldRate:12,prodRate:5}, desc:'Réseau ferré', tech:'vapeur' },
+    { id:'hopital',       name:'Hôpital Moderne',    icon:'🏥', cat:'infrastructure', era:'industrielle', cost:{gold:200,prod:120}, effect:{happiness:8,popGrowth:0.02}, desc:'Soins modernes', tech:'medecine' },
+    { id:'fort_moderne',  name:'Fort Moderne',       icon:'🏰', cat:'militaire',      era:'industrielle', cost:{gold:350,prod:200}, effect:{defense:40,militaryPower:15}, desc:'Fortification avancée', tech:'artillerie' },
+    { id:'labo',          name:'Laboratoire',        icon:'🔬', cat:'science',        era:'industrielle', cost:{gold:280,prod:150}, effect:{scienceRate:18}, desc:'Recherche', tech:'chimie' },
+    { id:'centrale',      name:'Centrale Électrique',icon:'⚡', cat:'infrastructure', era:'industrielle', cost:{gold:350,prod:200}, effect:{prodRate:10,goldRate:8}, desc:'Énergie', tech:'electricite_t' },
+    { id:'depot',         name:'Dépôt Militaire',    icon:'📦', cat:'militaire',      era:'industrielle', cost:{gold:200,prod:130}, effect:{militaryPower:12}, desc:'Logistique militaire', tech:'artillerie' },
+    { id:'journal',       name:'Journal',            icon:'📰', cat:'culture',        era:'industrielle', cost:{gold:150,prod:60},  effect:{cultureRate:8,happiness:3}, desc:'Presse écrite', tech:'medecine' },
+    { id:'musee',         name:'Musée National',     icon:'🏛️', cat:'culture',        era:'industrielle', cost:{gold:250,prod:120}, effect:{cultureRate:12,prestige:5}, desc:'Conservation du patrimoine', tech:'chimie' },
+    { id:'plantation',    name:'Plantation Industrielle',icon:'🌿', cat:'nourriture', era:'industrielle', cost:{gold:180,prod:100}, effect:{foodRate:12,goldRate:5}, desc:'Agriculture à grande échelle', tech:'vapeur' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ ÃƒÆ’Ã‹â€ RE MODERNE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'bourse',        name:'Bourse',             icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‹â€ ', cat:'economie',       era:'moderne', cost:{gold:500,prod:250}, effect:{goldRate:25}, desc:'MarchÃƒÆ’Ã‚Â© financier', tech:'telecom' },
-    { id:'media',         name:'Centre MÃƒÆ’Ã‚Â©dias',      icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Âº', cat:'culture',        era:'moderne', cost:{gold:350,prod:180}, effect:{cultureRate:15,happiness:5,stability:3}, desc:'Radio & TV', tech:'telecom' },
-    { id:'base_militaire',name:'Base Militaire',     icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬â€œÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'militaire',      era:'moderne', cost:{gold:600,prod:350}, effect:{militaryPower:30,defense:20}, desc:'Complexe militaire', tech:'aviation' },
-    { id:'centre_spatial',name:'Centre Spatial',     icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â€šÂ¬', cat:'science',        era:'moderne', cost:{gold:800,prod:500}, effect:{scienceRate:30,prestige:10}, desc:'Exploration spatiale', tech:'fusee' },
-    { id:'aeroport',      name:'AÃƒÆ’Ã‚Â©roport Int.',      icon:'ÃƒÂ¢Ã…â€œÃ‹â€ ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'infrastructure', era:'moderne', cost:{gold:450,prod:250}, effect:{goldRate:15,cultureRate:5}, desc:'Hub aÃƒÆ’Ã‚Â©rien', tech:'aviation' },
-    { id:'stade',         name:'Grand Stade',        icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ…Â¸ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'culture',        era:'moderne', cost:{gold:300,prod:200}, effect:{happiness:10,prestige:5}, desc:'ÃƒÆ’Ã¢â‚¬Â°vÃƒÆ’Ã‚Â©nements sportifs', tech:'telecom' },
-    { id:'gratte_ciel',   name:'Gratte-Ciel',        icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¢', cat:'economie',       era:'moderne', cost:{gold:500,prod:300}, effect:{goldRate:18,prestige:3}, desc:'Quartier d\'affaires', tech:'electricite_t' },
-    { id:'nucleaire',     name:'Centrale NuclÃƒÆ’Ã‚Â©aire', icon:'ÃƒÂ¢Ã‹Å“Ã‚Â¢ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'infrastructure', era:'moderne', cost:{gold:700,prod:400}, effect:{prodRate:20,scienceRate:5,happiness:-5}, desc:'ÃƒÆ’Ã¢â‚¬Â°nergie atomique', tech:'nucleaire_t' },
-    { id:'universite_mod',name:'UniversitÃƒÆ’Ã‚Â© Moderne', icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“', cat:'science',        era:'moderne', cost:{gold:400,prod:200}, effect:{scienceRate:20}, desc:'Recherche de pointe', tech:'telecom' },
-    { id:'bunker',        name:'Bunker',             icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'militaire',      era:'moderne', cost:{gold:400,prod:250}, effect:{defense:35}, desc:'Abri fortifiÃƒÆ’Ã‚Â©', tech:'nucleaire_t' },
-    { id:'hopital_mod',   name:'HÃƒÆ’Ã‚Â´pital Universitaire',icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¥', cat:'infrastructure', era:'moderne', cost:{gold:350,prod:200}, effect:{happiness:10,popGrowth:0.03}, desc:'MÃƒÆ’Ã‚Â©decine avancÃƒÆ’Ã‚Â©e', tech:'nucleaire_t' },
+    // ── ÈRE MODERNE ──
+    { id:'bourse',        name:'Bourse',             icon:'📈', cat:'economie',       era:'moderne', cost:{gold:500,prod:250}, effect:{goldRate:25}, desc:'Marché financier', tech:'telecom' },
+    { id:'media',         name:'Centre Médias',      icon:'📺', cat:'culture',        era:'moderne', cost:{gold:350,prod:180}, effect:{cultureRate:15,happiness:5,stability:3}, desc:'Radio & TV', tech:'telecom' },
+    { id:'base_militaire',name:'Base Militaire',     icon:'🎖️', cat:'militaire',      era:'moderne', cost:{gold:600,prod:350}, effect:{militaryPower:30,defense:20}, desc:'Complexe militaire', tech:'aviation' },
+    { id:'centre_spatial',name:'Centre Spatial',     icon:'🚀', cat:'science',        era:'moderne', cost:{gold:800,prod:500}, effect:{scienceRate:30,prestige:10}, desc:'Exploration spatiale', tech:'fusee' },
+    { id:'aeroport',      name:'Aéroport Int.',      icon:'✈️', cat:'infrastructure', era:'moderne', cost:{gold:450,prod:250}, effect:{goldRate:15,cultureRate:5}, desc:'Hub aérien', tech:'aviation' },
+    { id:'stade',         name:'Grand Stade',        icon:'🏟️', cat:'culture',        era:'moderne', cost:{gold:300,prod:200}, effect:{happiness:10,prestige:5}, desc:'Événements sportifs', tech:'telecom' },
+    { id:'gratte_ciel',   name:'Gratte-Ciel',        icon:'🏢', cat:'economie',       era:'moderne', cost:{gold:500,prod:300}, effect:{goldRate:18,prestige:3}, desc:'Quartier d\'affaires', tech:'electricite_t' },
+    { id:'nucleaire',     name:'Centrale Nucléaire', icon:'☢️', cat:'infrastructure', era:'moderne', cost:{gold:700,prod:400}, effect:{prodRate:20,scienceRate:5,happiness:-5}, desc:'Énergie atomique', tech:'nucleaire_t' },
+    { id:'universite_mod',name:'Université Moderne', icon:'🎓', cat:'science',        era:'moderne', cost:{gold:400,prod:200}, effect:{scienceRate:20}, desc:'Recherche de pointe', tech:'telecom' },
+    { id:'bunker',        name:'Bunker',             icon:'🛡️', cat:'militaire',      era:'moderne', cost:{gold:400,prod:250}, effect:{defense:35}, desc:'Abri fortifié', tech:'nucleaire_t' },
+    { id:'hopital_mod',   name:'Hôpital Universitaire',icon:'🏥', cat:'infrastructure', era:'moderne', cost:{gold:350,prod:200}, effect:{happiness:10,popGrowth:0.03}, desc:'Médecine avancée', tech:'nucleaire_t' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ CONTEMPORAINE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'ia_center',     name:'Centre IA',          icon:'ÃƒÂ°Ã…Â¸Ã‚Â¤Ã¢â‚¬â€œ', cat:'science',        era:'contemporaine', cost:{gold:1000,prod:600}, effect:{scienceRate:40,prodRate:10}, desc:'Intelligence artificielle', tech:'ia' },
-    { id:'smart_city',    name:'Ville ConnectÃƒÆ’Ã‚Â©e',    icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â', cat:'infrastructure', era:'contemporaine', cost:{gold:800,prod:400},  effect:{happiness:10,goldRate:15,cultureRate:10}, desc:'Ville du futur', tech:'informatique' },
-    { id:'cyber_defense', name:'CyberdÃƒÆ’Ã‚Â©fense',       icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'militaire',      era:'contemporaine', cost:{gold:700,prod:400},  effect:{defense:50,militaryPower:20}, desc:'Guerre numÃƒÆ’Ã‚Â©rique', tech:'informatique' },
-    { id:'fusion',        name:'RÃƒÆ’Ã‚Â©acteur ÃƒÆ’Ã‚  Fusion',  icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'science',        era:'contemporaine', cost:{gold:1500,prod:800}, effect:{prodRate:30,scienceRate:20,happiness:5}, desc:'ÃƒÆ’Ã¢â‚¬Â°nergie illimitÃƒÆ’Ã‚Â©e', tech:'fusion_t' },
-    { id:'ferme_vert',    name:'Ferme Verticale',    icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â±', cat:'nourriture',     era:'contemporaine', cost:{gold:600,prod:300},  effect:{foodRate:25}, desc:'Agriculture high-tech', tech:'informatique' },
-    { id:'datacenter',    name:'Datacenter',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¾', cat:'science',        era:'contemporaine', cost:{gold:500,prod:300},  effect:{scienceRate:15,goldRate:10}, desc:'Puissance de calcul', tech:'informatique' },
-    { id:'station_orbitale',name:'Station Orbitale', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¸', cat:'science',        era:'contemporaine', cost:{gold:2000,prod:1000},effect:{scienceRate:50,prestige:20}, desc:'Avant-poste spatial', tech:'fusion_t' },
-    { id:'reseau_5g',     name:'RÃƒÆ’Ã‚Â©seau 6G',          icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¡', cat:'infrastructure', era:'contemporaine', cost:{gold:400,prod:200},  effect:{goldRate:12,cultureRate:8,scienceRate:5}, desc:'ConnectivitÃƒÆ’Ã‚Â© totale', tech:'ia' },
-    { id:'arcologie',     name:'Arcologie',          icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â€žÂ¢ÃƒÂ¯Ã‚Â¸Ã‚Â', cat:'culture',        era:'contemporaine', cost:{gold:1200,prod:700}, effect:{happiness:15,popGrowth:0.04,prestige:10}, desc:'CitÃƒÆ’Ã‚Â© autosuffisante', tech:'fusion_t' }
+    // ── CONTEMPORAINE ──
+    { id:'ia_center',     name:'Centre IA',          icon:'🤖', cat:'science',        era:'contemporaine', cost:{gold:1000,prod:600}, effect:{scienceRate:40,prodRate:10}, desc:'Intelligence artificielle', tech:'ia' },
+    { id:'smart_city',    name:'Ville Connectée',    icon:'🌐', cat:'infrastructure', era:'contemporaine', cost:{gold:800,prod:400},  effect:{happiness:10,goldRate:15,cultureRate:10}, desc:'Ville du futur', tech:'informatique' },
+    { id:'cyber_defense', name:'Cyberdéfense',       icon:'🛡️', cat:'militaire',      era:'contemporaine', cost:{gold:700,prod:400},  effect:{defense:50,militaryPower:20}, desc:'Guerre numérique', tech:'informatique' },
+    { id:'fusion',        name:'Réacteur à Fusion',  icon:'⚛️', cat:'science',        era:'contemporaine', cost:{gold:1500,prod:800}, effect:{prodRate:30,scienceRate:20,happiness:5}, desc:'Énergie illimitée', tech:'fusion_t' },
+    { id:'ferme_vert',    name:'Ferme Verticale',    icon:'🌱', cat:'nourriture',     era:'contemporaine', cost:{gold:600,prod:300},  effect:{foodRate:25}, desc:'Agriculture high-tech', tech:'informatique' },
+    { id:'datacenter',    name:'Datacenter',         icon:'💾', cat:'science',        era:'contemporaine', cost:{gold:500,prod:300},  effect:{scienceRate:15,goldRate:10}, desc:'Puissance de calcul', tech:'informatique' },
+    { id:'station_orbitale',name:'Station Orbitale', icon:'🛸', cat:'science',        era:'contemporaine', cost:{gold:2000,prod:1000},effect:{scienceRate:50,prestige:20}, desc:'Avant-poste spatial', tech:'fusion_t' },
+    { id:'reseau_5g',     name:'Réseau 6G',          icon:'📡', cat:'infrastructure', era:'contemporaine', cost:{gold:400,prod:200},  effect:{goldRate:12,cultureRate:8,scienceRate:5}, desc:'Connectivité totale', tech:'ia' },
+    { id:'arcologie',     name:'Arcologie',          icon:'🏙️', cat:'culture',        era:'contemporaine', cost:{gold:1200,prod:700}, effect:{happiness:15,popGrowth:0.04,prestige:10}, desc:'Cité autosuffisante', tech:'fusion_t' }
 ];
 
 // ============================
-//  DONNÃƒÆ’Ã¢â‚¬Â°ES ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â TECHNOLOGIES (50+)
+//  DONNÉES — TECHNOLOGIES (50+)
 // ============================
 var TECHNOLOGIES = [
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ ANTIQUITÃƒÆ’Ã¢â‚¬Â° ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'agriculture',  name:'Agriculture',        icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â±', era:'antiquite', cost:20,  prereqs:[], unlocks:['grenier','irrigation'] },
-    { id:'poterie',      name:'Poterie',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Âº', era:'antiquite', cost:25,  prereqs:[], unlocks:['marche','atelier'] },
-    { id:'mystique',     name:'Mysticisme',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¢Ã‚Â¯ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'antiquite', cost:25,  prereqs:[], unlocks:['temple','autel'] },
-    { id:'extraction',   name:'Extraction MiniÃƒÆ’Ã‚Â¨re', icon:'ÃƒÂ¢Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¯Ã‚Â¸Ã‚Â', era:'antiquite', cost:30,  prereqs:[], unlocks:['carriere'] },
-    { id:'ecriture',     name:'ÃƒÆ’Ã¢â‚¬Â°criture',           icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â', era:'antiquite', cost:40,  prereqs:['poterie'], unlocks:['bibliotheque','agora'] },
-    { id:'bronze',       name:'Travail du Bronze',  icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â€Ã‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'antiquite', cost:35,  prereqs:['extraction'], unlocks:['caserne'] },
-    { id:'maconnerie',   name:'MaÃƒÆ’Ã‚Â§onnerie',         icon:'ÃƒÂ°Ã…Â¸Ã‚Â§Ã‚Â±', era:'antiquite', cost:45,  prereqs:['extraction'], unlocks:['murailles','aqueduc'] },
-    { id:'philosophie',  name:'Philosophie',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â­', era:'antiquite', cost:50,  prereqs:['ecriture','mystique'], unlocks:['academie'] },
-    { id:'mathematiques',name:'MathÃƒÆ’Ã‚Â©matiques',       icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â', era:'antiquite', cost:45,  prereqs:['ecriture'], unlocks:[] },
-    { id:'roue',         name:'La Roue',            icon:'ÃƒÂ¢Ã‹Å“Ã‚Â¸ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'antiquite', cost:30,  prereqs:['poterie'], unlocks:[] },
+    // ── ANTIQUITÉ ──
+    { id:'agriculture',  name:'Agriculture',        icon:'🌱', era:'antiquite', cost:20,  prereqs:[], unlocks:['grenier','irrigation'] },
+    { id:'poterie',      name:'Poterie',            icon:'🏺', era:'antiquite', cost:25,  prereqs:[], unlocks:['marche','atelier'] },
+    { id:'mystique',     name:'Mysticisme',         icon:'🕯️', era:'antiquite', cost:25,  prereqs:[], unlocks:['temple','autel'] },
+    { id:'extraction',   name:'Extraction Minière', icon:'⛏️', era:'antiquite', cost:30,  prereqs:[], unlocks:['carriere'] },
+    { id:'ecriture',     name:'Écriture',           icon:'📝', era:'antiquite', cost:40,  prereqs:['poterie'], unlocks:['bibliotheque','agora'] },
+    { id:'bronze',       name:'Travail du Bronze',  icon:'🗡️', era:'antiquite', cost:35,  prereqs:['extraction'], unlocks:['caserne'] },
+    { id:'maconnerie',   name:'Maçonnerie',         icon:'🧱', era:'antiquite', cost:45,  prereqs:['extraction'], unlocks:['murailles','aqueduc'] },
+    { id:'philosophie',  name:'Philosophie',         icon:'💭', era:'antiquite', cost:50,  prereqs:['ecriture','mystique'], unlocks:['academie'] },
+    { id:'mathematiques',name:'Mathématiques',       icon:'📐', era:'antiquite', cost:45,  prereqs:['ecriture'], unlocks:[] },
+    { id:'roue',         name:'La Roue',            icon:'☸️', era:'antiquite', cost:30,  prereqs:['poterie'], unlocks:[] },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ MOYEN-ÃƒÆ’Ã¢â‚¬Å¡GE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'feodalisme',   name:'FÃƒÆ’Ã‚Â©odalisme',         icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â°', era:'medieval', cost:80,  prereqs:['ecriture','bronze'], unlocks:['chateau_fort','ecurie','rempart'] },
-    { id:'theologie',    name:'ThÃƒÆ’Ã‚Â©ologie',          icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã¢â‚¬â€œ', era:'medieval', cost:70,  prereqs:['mystique','ecriture'], unlocks:['cathedrale','monastere','scriptorium'] },
-    { id:'metallurgie',  name:'MÃƒÆ’Ã‚Â©tallurgie',        icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â¨', era:'medieval', cost:60,  prereqs:['bronze'], unlocks:['forge'] },
-    { id:'navigation',   name:'Navigation',         icon:'ÃƒÂ°Ã…Â¸Ã‚Â§Ã‚Â­', era:'medieval', cost:75,  prereqs:['poterie','maconnerie'], unlocks:['port','guilde'] },
-    { id:'education',    name:'ÃƒÆ’Ã¢â‚¬Â°ducation',          icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“', era:'medieval', cost:90,  prereqs:['theologie','ecriture'], unlocks:['universite','hopital_medieval'] },
-    { id:'mecanique',    name:'MÃƒÆ’Ã‚Â©canique',          icon:'ÃƒÂ¢Ã…Â¡Ã¢â€žÂ¢ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'medieval', cost:65,  prereqs:['extraction','roue'], unlocks:['moulin','marche_couvert'] },
-    { id:'arbalete',     name:'ArbalÃƒÆ’Ã‚Â¨te',           icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¹', era:'medieval', cost:55,  prereqs:['metallurgie'], unlocks:[] },
-    { id:'chevalerie',   name:'Chevalerie',         icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬ÂÃƒÂ¯Ã‚Â¸Ã‚Â', era:'medieval', cost:85,  prereqs:['feodalisme','metallurgie'], unlocks:[] },
-    { id:'architecture', name:'Architecture',       icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬â€ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'medieval', cost:80,  prereqs:['maconnerie','mathematiques'], unlocks:['auberge'] },
-    { id:'siege_t',      name:'Engins de SiÃƒÆ’Ã‚Â¨ge',    icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ‚Â¨', era:'medieval', cost:70,  prereqs:['mecanique','metallurgie'], unlocks:[] },
+    // ── MOYEN-ÂGE ──
+    { id:'feodalisme',   name:'Féodalisme',         icon:'🏰', era:'medieval', cost:80,  prereqs:['ecriture','bronze'], unlocks:['chateau_fort','ecurie','rempart'] },
+    { id:'theologie',    name:'Théologie',          icon:'📖', era:'medieval', cost:70,  prereqs:['mystique','ecriture'], unlocks:['cathedrale','monastere','scriptorium'] },
+    { id:'metallurgie',  name:'Métallurgie',        icon:'🔨', era:'medieval', cost:60,  prereqs:['bronze'], unlocks:['forge'] },
+    { id:'navigation',   name:'Navigation',         icon:'🧭', era:'medieval', cost:75,  prereqs:['poterie','maconnerie'], unlocks:['port','guilde'] },
+    { id:'education',    name:'Éducation',          icon:'🎓', era:'medieval', cost:90,  prereqs:['theologie','ecriture'], unlocks:['universite','hopital_medieval'] },
+    { id:'mecanique',    name:'Mécanique',          icon:'⚙️', era:'medieval', cost:65,  prereqs:['extraction','roue'], unlocks:['moulin','marche_couvert'] },
+    { id:'arbalete',     name:'Arbalète',           icon:'🏹', era:'medieval', cost:55,  prereqs:['metallurgie'], unlocks:[] },
+    { id:'chevalerie',   name:'Chevalerie',         icon:'⚔️', era:'medieval', cost:85,  prereqs:['feodalisme','metallurgie'], unlocks:[] },
+    { id:'architecture', name:'Architecture',       icon:'🏗️', era:'medieval', cost:80,  prereqs:['maconnerie','mathematiques'], unlocks:['auberge'] },
+    { id:'siege_t',      name:'Engins de Siège',    icon:'🪨', era:'medieval', cost:70,  prereqs:['mecanique','metallurgie'], unlocks:[] },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ RENAISSANCE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'imprimerie_t', name:'Imprimerie',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â°', era:'renaissance', cost:130, prereqs:['education'], unlocks:['imprimerie','academie_royale'] },
-    { id:'astronomie',   name:'Astronomie',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â­', era:'renaissance', cost:140, prereqs:['education','mathematiques'], unlocks:['observatoire'] },
-    { id:'economie_t',   name:'ÃƒÆ’Ã¢â‚¬Â°conomie',           icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¦', era:'renaissance', cost:150, prereqs:['navigation','imprimerie_t'], unlocks:['banque','manufacture'] },
-    { id:'art',          name:'Beaux-Arts',         icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â¨', era:'renaissance', cost:120, prereqs:['theologie','education'], unlocks:['theatre','galerie_art','palais'] },
-    { id:'poudre',       name:'Poudre ÃƒÆ’Ã‚  Canon',     icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¥', era:'renaissance', cost:160, prereqs:['metallurgie','chimie_base'], unlocks:['arsenal','fortification'] },
-    { id:'navigation_avancee',name:'Navigation AvancÃƒÆ’Ã‚Â©e',icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â€Ã‚ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', era:'renaissance', cost:140, prereqs:['navigation','astronomie'], unlocks:['chantier_naval','comptoir'] },
-    { id:'chimie_base',  name:'Alchimie',           icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬â€ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'renaissance', cost:110, prereqs:['philosophie','metallurgie'], unlocks:[] },
-    { id:'diplomatie_t', name:'Diplomatie Formelle', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…â€œ', era:'renaissance', cost:100, prereqs:['imprimerie_t'], unlocks:[] },
-    { id:'tactique',     name:'Tactique Moderne',   icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã¢â‚¬Â¹', era:'renaissance', cost:130, prereqs:['poudre','chevalerie'], unlocks:[] },
+    // ── RENAISSANCE ──
+    { id:'imprimerie_t', name:'Imprimerie',         icon:'📰', era:'renaissance', cost:130, prereqs:['education'], unlocks:['imprimerie','academie_royale'] },
+    { id:'astronomie',   name:'Astronomie',         icon:'🔭', era:'renaissance', cost:140, prereqs:['education','mathematiques'], unlocks:['observatoire'] },
+    { id:'economie_t',   name:'Économie',           icon:'🏦', era:'renaissance', cost:150, prereqs:['navigation','imprimerie_t'], unlocks:['banque','manufacture'] },
+    { id:'art',          name:'Beaux-Arts',         icon:'🎨', era:'renaissance', cost:120, prereqs:['theologie','education'], unlocks:['theatre','galerie_art','palais'] },
+    { id:'poudre',       name:'Poudre à Canon',     icon:'💥', era:'renaissance', cost:160, prereqs:['metallurgie','chimie_base'], unlocks:['arsenal','fortification'] },
+    { id:'navigation_avancee',name:'Navigation Avancée',icon:'🗺️', era:'renaissance', cost:140, prereqs:['navigation','astronomie'], unlocks:['chantier_naval','comptoir'] },
+    { id:'chimie_base',  name:'Alchimie',           icon:'⚗️', era:'renaissance', cost:110, prereqs:['philosophie','metallurgie'], unlocks:[] },
+    { id:'diplomatie_t', name:'Diplomatie Formelle', icon:'📜', era:'renaissance', cost:100, prereqs:['imprimerie_t'], unlocks:[] },
+    { id:'tactique',     name:'Tactique Moderne',   icon:'📋', era:'renaissance', cost:130, prereqs:['poudre','chevalerie'], unlocks:[] },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ INDUSTRIELLE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'vapeur',       name:'Machine ÃƒÆ’Ã‚  Vapeur',   icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â‚¬Å¡', era:'industrielle', cost:250, prereqs:['mecanique','metallurgie'], unlocks:['usine','gare','plantation'] },
-    { id:'medecine',     name:'MÃƒÆ’Ã‚Â©decine',           icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã… ', era:'industrielle', cost:200, prereqs:['astronomie','chimie_base'], unlocks:['hopital','journal'] },
-    { id:'chimie',       name:'Chimie Moderne',     icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬â€ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'industrielle', cost:230, prereqs:['chimie_base','astronomie'], unlocks:['labo','musee'] },
-    { id:'artillerie',   name:'Artillerie',         icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â¯', era:'industrielle', cost:280, prereqs:['poudre','vapeur'], unlocks:['fort_moderne','depot'] },
-    { id:'electricite_t',name:'ÃƒÆ’Ã¢â‚¬Â°lectricitÃƒÆ’Ã‚Â©',        icon:'ÃƒÂ¢Ã…Â¡Ã‚Â¡', era:'industrielle', cost:300, prereqs:['chimie','vapeur'], unlocks:['centrale','gratte_ciel'] },
-    { id:'acier',        name:'Acier',              icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â©', era:'industrielle', cost:220, prereqs:['metallurgie','vapeur'], unlocks:[] },
-    { id:'chemin_fer',   name:'Chemin de Fer',      icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¤ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'industrielle', cost:240, prereqs:['vapeur','acier'], unlocks:[] },
-    { id:'explosifs',    name:'Explosifs',          icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â£', era:'industrielle', cost:260, prereqs:['chimie','artillerie'], unlocks:[] },
+    // ── INDUSTRIELLE ──
+    { id:'vapeur',       name:'Machine à Vapeur',   icon:'🚂', era:'industrielle', cost:250, prereqs:['mecanique','metallurgie'], unlocks:['usine','gare','plantation'] },
+    { id:'medecine',     name:'Médecine',           icon:'💊', era:'industrielle', cost:200, prereqs:['astronomie','chimie_base'], unlocks:['hopital','journal'] },
+    { id:'chimie',       name:'Chimie Moderne',     icon:'⚗️', era:'industrielle', cost:230, prereqs:['chimie_base','astronomie'], unlocks:['labo','musee'] },
+    { id:'artillerie',   name:'Artillerie',         icon:'🎯', era:'industrielle', cost:280, prereqs:['poudre','vapeur'], unlocks:['fort_moderne','depot'] },
+    { id:'electricite_t',name:'Électricité',        icon:'⚡', era:'industrielle', cost:300, prereqs:['chimie','vapeur'], unlocks:['centrale','gratte_ciel'] },
+    { id:'acier',        name:'Acier',              icon:'🔩', era:'industrielle', cost:220, prereqs:['metallurgie','vapeur'], unlocks:[] },
+    { id:'chemin_fer',   name:'Chemin de Fer',      icon:'🛤️', era:'industrielle', cost:240, prereqs:['vapeur','acier'], unlocks:[] },
+    { id:'explosifs',    name:'Explosifs',          icon:'💣', era:'industrielle', cost:260, prereqs:['chimie','artillerie'], unlocks:[] },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ MODERNE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'telecom',      name:'TÃƒÆ’Ã‚Â©lÃƒÆ’Ã‚Â©communications', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¡', era:'moderne', cost:380, prereqs:['electricite_t'], unlocks:['media','bourse','stade','universite_mod'] },
-    { id:'aviation',     name:'Aviation',           icon:'ÃƒÂ¢Ã…â€œÃ‹â€ ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'moderne', cost:420, prereqs:['artillerie','electricite_t'], unlocks:['aeroport','base_militaire'] },
-    { id:'fusee',        name:'FusÃƒÆ’Ã‚Â©es',             icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â€šÂ¬', era:'moderne', cost:500, prereqs:['aviation','explosifs'], unlocks:['centre_spatial'] },
-    { id:'nucleaire_t',  name:'Fission NuclÃƒÆ’Ã‚Â©aire',  icon:'ÃƒÂ¢Ã‹Å“Ã‚Â¢ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'moderne', cost:550, prereqs:['chimie','fusee'], unlocks:['nucleaire','bunker','hopital_mod'] },
-    { id:'radar',        name:'Radar',              icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¡', era:'moderne', cost:350, prereqs:['telecom','aviation'], unlocks:[] },
-    { id:'antibiotiques',name:'Antibiotiques',      icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã¢â‚¬Â°', era:'moderne', cost:300, prereqs:['medecine','chimie'], unlocks:[] },
-    { id:'transistor',   name:'Transistor',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â²', era:'moderne', cost:400, prereqs:['electricite_t','telecom'], unlocks:[] },
-    { id:'blindes',      name:'BlindÃƒÆ’Ã‚Â©s',            icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'moderne', cost:450, prereqs:['acier','aviation'], unlocks:[] },
+    // ── MODERNE ──
+    { id:'telecom',      name:'Télécommunications', icon:'📡', era:'moderne', cost:380, prereqs:['electricite_t'], unlocks:['media','bourse','stade','universite_mod'] },
+    { id:'aviation',     name:'Aviation',           icon:'✈️', era:'moderne', cost:420, prereqs:['artillerie','electricite_t'], unlocks:['aeroport','base_militaire'] },
+    { id:'fusee',        name:'Fusées',             icon:'🚀', era:'moderne', cost:500, prereqs:['aviation','explosifs'], unlocks:['centre_spatial'] },
+    { id:'nucleaire_t',  name:'Fission Nucléaire',  icon:'☢️', era:'moderne', cost:550, prereqs:['chimie','fusee'], unlocks:['nucleaire','bunker','hopital_mod'] },
+    { id:'radar',        name:'Radar',              icon:'📡', era:'moderne', cost:350, prereqs:['telecom','aviation'], unlocks:[] },
+    { id:'antibiotiques',name:'Antibiotiques',      icon:'💉', era:'moderne', cost:300, prereqs:['medecine','chimie'], unlocks:[] },
+    { id:'transistor',   name:'Transistor',         icon:'🔲', era:'moderne', cost:400, prereqs:['electricite_t','telecom'], unlocks:[] },
+    { id:'blindes',      name:'Blindés',            icon:'🛡️', era:'moderne', cost:450, prereqs:['acier','aviation'], unlocks:[] },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ CONTEMPORAINE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'informatique', name:'Informatique',       icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â»', era:'contemporaine', cost:600, prereqs:['telecom','transistor'], unlocks:['smart_city','cyber_defense','datacenter'] },
-    { id:'ia',           name:'Intelligence Art.',   icon:'ÃƒÂ°Ã…Â¸Ã‚Â¤Ã¢â‚¬â€œ', era:'contemporaine', cost:800, prereqs:['informatique'], unlocks:['ia_center','reseau_5g'] },
-    { id:'fusion_t',     name:'Fusion NuclÃƒÆ’Ã‚Â©aire',   icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', era:'contemporaine', cost:1000, prereqs:['nucleaire_t','fusee'], unlocks:['fusion','station_orbitale','arcologie'] },
-    { id:'biotech',      name:'Biotechnologie',     icon:'ÃƒÂ°Ã…Â¸Ã‚Â§Ã‚Â¬', era:'contemporaine', cost:700, prereqs:['informatique','antibiotiques'], unlocks:['ferme_vert'] },
-    { id:'quantique',    name:'Calcul Quantique',   icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â®', era:'contemporaine', cost:900, prereqs:['ia'], unlocks:[] },
-    { id:'nanotechnologie',name:'Nanotechnologie',  icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â¬', era:'contemporaine', cost:850, prereqs:['biotech','ia'], unlocks:[] }
+    // ── CONTEMPORAINE ──
+    { id:'informatique', name:'Informatique',       icon:'💻', era:'contemporaine', cost:600, prereqs:['telecom','transistor'], unlocks:['smart_city','cyber_defense','datacenter'] },
+    { id:'ia',           name:'Intelligence Art.',   icon:'🤖', era:'contemporaine', cost:800, prereqs:['informatique'], unlocks:['ia_center','reseau_5g'] },
+    { id:'fusion_t',     name:'Fusion Nucléaire',   icon:'⚛️', era:'contemporaine', cost:1000, prereqs:['nucleaire_t','fusee'], unlocks:['fusion','station_orbitale','arcologie'] },
+    { id:'biotech',      name:'Biotechnologie',     icon:'🧬', era:'contemporaine', cost:700, prereqs:['informatique','antibiotiques'], unlocks:['ferme_vert'] },
+    { id:'quantique',    name:'Calcul Quantique',   icon:'🔮', era:'contemporaine', cost:900, prereqs:['ia'], unlocks:[] },
+    { id:'nanotechnologie',name:'Nanotechnologie',  icon:'🔬', era:'contemporaine', cost:850, prereqs:['biotech','ia'], unlocks:[] }
 ];
 
 // ============================
-//  DONNÃƒÆ’Ã¢â‚¬Â°ES ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â UNITÃƒÆ’Ã¢â‚¬Â°S (30+)
+//  DONNÉES — UNITÉS (30+)
 // ============================
 var UNITS = [
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ ANTIQUITÃƒÆ’Ã¢â‚¬Â° ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'milicien',     name:'Miliciens',          icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‚Â¤', era:'antiquite',     type:'melee',    power:2,  cost:{gold:10,food:8},   upkeep:{gold:0,food:1}, tech:null },
-    { id:'guerrier',     name:'Guerriers',          icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â€Ã‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'antiquite',     type:'melee',    power:4,  cost:{gold:20,food:10},  upkeep:{gold:1,food:2}, tech:'bronze' },
-    { id:'archer',       name:'Archers',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â¹', era:'antiquite',     type:'ranged',   power:3,  cost:{gold:25,food:10},  upkeep:{gold:1,food:2}, tech:'bronze' },
-    { id:'frondeur',     name:'Frondeurs',          icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ‚Â¨', era:'antiquite',     type:'ranged',   power:2,  cost:{gold:15,food:8},   upkeep:{gold:0,food:1}, tech:null },
-    { id:'chariot',      name:'Chars de Guerre',    icon:'ÃƒÂ¢Ã‹Å“Ã‚Â¸ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'antiquite',     type:'cavalry',  power:6,  cost:{gold:40,food:15},  upkeep:{gold:2,food:3}, tech:'roue' },
-    { id:'lancier',      name:'Lanciers',           icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â±', era:'antiquite',     type:'melee',    power:5,  cost:{gold:25,food:12},  upkeep:{gold:1,food:2}, tech:'bronze' },
-    { id:'galere',       name:'GalÃƒÆ’Ã‚Â¨res',            icon:'ÃƒÂ¢Ã¢â‚¬ÂºÃ‚Âµ', era:'antiquite',     type:'naval',    power:5,  cost:{gold:50,prod:30},  upkeep:{gold:2,food:3}, tech:'maconnerie' },
+    // ── ANTIQUITÉ ──
+    { id:'milicien',     name:'Miliciens',          icon:'👤', era:'antiquite',     type:'melee',    power:2,  cost:{gold:10,food:8},   upkeep:{gold:0,food:1}, tech:null },
+    { id:'guerrier',     name:'Guerriers',          icon:'🗡️', era:'antiquite',     type:'melee',    power:4,  cost:{gold:20,food:10},  upkeep:{gold:1,food:2}, tech:'bronze' },
+    { id:'archer',       name:'Archers',            icon:'🏹', era:'antiquite',     type:'ranged',   power:3,  cost:{gold:25,food:10},  upkeep:{gold:1,food:2}, tech:'bronze' },
+    { id:'frondeur',     name:'Frondeurs',          icon:'🪨', era:'antiquite',     type:'ranged',   power:2,  cost:{gold:15,food:8},   upkeep:{gold:0,food:1}, tech:null },
+    { id:'chariot',      name:'Chars de Guerre',    icon:'☸️', era:'antiquite',     type:'cavalry',  power:6,  cost:{gold:40,food:15},  upkeep:{gold:2,food:3}, tech:'roue' },
+    { id:'lancier',      name:'Lanciers',           icon:'🔱', era:'antiquite',     type:'melee',    power:5,  cost:{gold:25,food:12},  upkeep:{gold:1,food:2}, tech:'bronze' },
+    { id:'galere',       name:'Galères',            icon:'⛵', era:'antiquite',     type:'naval',    power:5,  cost:{gold:50,prod:30},  upkeep:{gold:2,food:3}, tech:'maconnerie' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ MOYEN-ÃƒÆ’Ã¢â‚¬Å¡GE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'homme_armes',  name:'Hommes d\'Armes',    icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬ÂÃƒÂ¯Ã‚Â¸Ã‚Â', era:'medieval',      type:'melee',    power:8,  cost:{gold:40,food:15},  upkeep:{gold:2,food:3}, tech:'metallurgie' },
-    { id:'arbaletrier',  name:'ArbalÃƒÆ’Ã‚Â©triers',       icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â¯', era:'medieval',      type:'ranged',   power:7,  cost:{gold:35,food:12},  upkeep:{gold:2,food:2}, tech:'arbalete' },
-    { id:'cavalier',     name:'Cavalerie LÃƒÆ’Ã‚Â©gÃƒÆ’Ã‚Â¨re',   icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â´', era:'medieval',      type:'cavalry',  power:9,  cost:{gold:50,food:20},  upkeep:{gold:3,food:4}, tech:'feodalisme' },
-    { id:'chevalier',    name:'Chevaliers',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'medieval',      type:'cavalry',  power:14, cost:{gold:80,food:25},  upkeep:{gold:4,food:5}, tech:'chevalerie' },
-    { id:'belier',       name:'BÃƒÆ’Ã‚Â©liers',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ‚Âµ', era:'medieval',      type:'siege',    power:6,  cost:{gold:60,prod:40},  upkeep:{gold:2,food:2}, tech:'siege_t' },
-    { id:'trebuchet',    name:'TrÃƒÆ’Ã‚Â©buchets',         icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬â€ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'medieval',      type:'siege',    power:12, cost:{gold:100,prod:60}, upkeep:{gold:3,food:2}, tech:'siege_t' },
-    { id:'cogge',        name:'Cogges',             icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã‚Â¢', era:'medieval',      type:'naval',    power:10, cost:{gold:80,prod:50},  upkeep:{gold:3,food:3}, tech:'navigation' },
+    // ── MOYEN-ÂGE ──
+    { id:'homme_armes',  name:'Hommes d\'Armes',    icon:'⚔️', era:'medieval',      type:'melee',    power:8,  cost:{gold:40,food:15},  upkeep:{gold:2,food:3}, tech:'metallurgie' },
+    { id:'arbaletrier',  name:'Arbalétriers',       icon:'🎯', era:'medieval',      type:'ranged',   power:7,  cost:{gold:35,food:12},  upkeep:{gold:2,food:2}, tech:'arbalete' },
+    { id:'cavalier',     name:'Cavalerie Légère',   icon:'🐴', era:'medieval',      type:'cavalry',  power:9,  cost:{gold:50,food:20},  upkeep:{gold:3,food:4}, tech:'feodalisme' },
+    { id:'chevalier',    name:'Chevaliers',         icon:'🛡️', era:'medieval',      type:'cavalry',  power:14, cost:{gold:80,food:25},  upkeep:{gold:4,food:5}, tech:'chevalerie' },
+    { id:'belier',       name:'Béliers',            icon:'🪵', era:'medieval',      type:'siege',    power:6,  cost:{gold:60,prod:40},  upkeep:{gold:2,food:2}, tech:'siege_t' },
+    { id:'trebuchet',    name:'Trébuchets',         icon:'🏗️', era:'medieval',      type:'siege',    power:12, cost:{gold:100,prod:60}, upkeep:{gold:3,food:2}, tech:'siege_t' },
+    { id:'cogge',        name:'Cogges',             icon:'🚢', era:'medieval',      type:'naval',    power:10, cost:{gold:80,prod:50},  upkeep:{gold:3,food:3}, tech:'navigation' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ RENAISSANCE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'mousquetaire', name:'Mousquetaires',      icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â«', era:'renaissance',   type:'ranged',   power:14, cost:{gold:60,food:15},  upkeep:{gold:3,food:3}, tech:'poudre' },
-    { id:'piquier',      name:'Piquiers',           icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â±', era:'renaissance',   type:'melee',    power:10, cost:{gold:40,food:12},  upkeep:{gold:2,food:2}, tech:'tactique' },
-    { id:'canon',        name:'Canons',             icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¥', era:'renaissance',   type:'siege',    power:20, cost:{gold:120,prod:50}, upkeep:{gold:5,food:2}, tech:'poudre' },
-    { id:'corsaire',     name:'Corsaires',          icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â´ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã‹Å“Ã‚ ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'renaissance',   type:'naval',    power:15, cost:{gold:100,prod:60}, upkeep:{gold:4,food:3}, tech:'navigation_avancee' },
-    { id:'hussard',      name:'Hussards',           icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ…Â½', era:'renaissance',   type:'cavalry',  power:13, cost:{gold:70,food:20},  upkeep:{gold:3,food:4}, tech:'tactique' },
-    { id:'grenadier',    name:'Grenadiers',         icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â£', era:'renaissance',   type:'melee',    power:16, cost:{gold:70,food:15},  upkeep:{gold:3,food:3}, tech:'poudre' },
+    // ── RENAISSANCE ──
+    { id:'mousquetaire', name:'Mousquetaires',      icon:'🔫', era:'renaissance',   type:'ranged',   power:14, cost:{gold:60,food:15},  upkeep:{gold:3,food:3}, tech:'poudre' },
+    { id:'piquier',      name:'Piquiers',           icon:'🔱', era:'renaissance',   type:'melee',    power:10, cost:{gold:40,food:12},  upkeep:{gold:2,food:2}, tech:'tactique' },
+    { id:'canon',        name:'Canons',             icon:'💥', era:'renaissance',   type:'siege',    power:20, cost:{gold:120,prod:50}, upkeep:{gold:5,food:2}, tech:'poudre' },
+    { id:'corsaire',     name:'Corsaires',          icon:'🏴‍☠️', era:'renaissance',   type:'naval',    power:15, cost:{gold:100,prod:60}, upkeep:{gold:4,food:3}, tech:'navigation_avancee' },
+    { id:'hussard',      name:'Hussards',           icon:'🐎', era:'renaissance',   type:'cavalry',  power:13, cost:{gold:70,food:20},  upkeep:{gold:3,food:4}, tech:'tactique' },
+    { id:'grenadier',    name:'Grenadiers',         icon:'💣', era:'renaissance',   type:'melee',    power:16, cost:{gold:70,food:15},  upkeep:{gold:3,food:3}, tech:'poudre' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ INDUSTRIELLE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'infanterie',   name:'Infanterie de Ligne',icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬â€œÃƒÂ¯Ã‚Â¸Ã‚Â', era:'industrielle',  type:'ranged',   power:18, cost:{gold:80,food:20},  upkeep:{gold:4,food:4}, tech:'artillerie' },
-    { id:'artillerie_u', name:'Batterie d\'Artillerie',icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â¯',era:'industrielle', type:'siege',    power:30, cost:{gold:150,prod:80}, upkeep:{gold:6,food:3}, tech:'artillerie' },
-    { id:'cavalerie_l',  name:'Dragons',            icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â´', era:'industrielle',  type:'cavalry',  power:20, cost:{gold:100,food:25}, upkeep:{gold:5,food:5}, tech:'acier' },
-    { id:'cuirasse',     name:'CuirassÃƒÆ’Ã‚Â©',           icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã‚Â¢', era:'industrielle',  type:'naval',    power:35, cost:{gold:250,prod:150},upkeep:{gold:8,food:4}, tech:'acier' },
-    { id:'tirailleur',   name:'Tirailleurs',        icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â¯', era:'industrielle',  type:'ranged',   power:15, cost:{gold:60,food:15},  upkeep:{gold:3,food:3}, tech:'explosifs' },
-    { id:'sapeur',       name:'Sapeurs',            icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â£', era:'industrielle',  type:'special',  power:12, cost:{gold:70,prod:40},  upkeep:{gold:3,food:2}, tech:'explosifs' },
+    // ── INDUSTRIELLE ──
+    { id:'infanterie',   name:'Infanterie de Ligne',icon:'🎖️', era:'industrielle',  type:'ranged',   power:18, cost:{gold:80,food:20},  upkeep:{gold:4,food:4}, tech:'artillerie' },
+    { id:'artillerie_u', name:'Batterie d\'Artillerie',icon:'🎯',era:'industrielle', type:'siege',    power:30, cost:{gold:150,prod:80}, upkeep:{gold:6,food:3}, tech:'artillerie' },
+    { id:'cavalerie_l',  name:'Dragons',            icon:'🐴', era:'industrielle',  type:'cavalry',  power:20, cost:{gold:100,food:25}, upkeep:{gold:5,food:5}, tech:'acier' },
+    { id:'cuirasse',     name:'Cuirassé',           icon:'🚢', era:'industrielle',  type:'naval',    power:35, cost:{gold:250,prod:150},upkeep:{gold:8,food:4}, tech:'acier' },
+    { id:'tirailleur',   name:'Tirailleurs',        icon:'🎯', era:'industrielle',  type:'ranged',   power:15, cost:{gold:60,food:15},  upkeep:{gold:3,food:3}, tech:'explosifs' },
+    { id:'sapeur',       name:'Sapeurs',            icon:'💣', era:'industrielle',  type:'special',  power:12, cost:{gold:70,prod:40},  upkeep:{gold:3,food:2}, tech:'explosifs' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ MODERNE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'char',         name:'Chars d\'Assaut',    icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¡ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'moderne',       type:'cavalry',  power:50, cost:{gold:300,prod:150},upkeep:{gold:10,food:5}, tech:'blindes' },
-    { id:'avion_chasse', name:'Chasseurs',          icon:'ÃƒÂ¢Ã…â€œÃ‹â€ ÃƒÂ¯Ã‚Â¸Ã‚Â', era:'moderne',       type:'air',      power:45, cost:{gold:350,prod:180},upkeep:{gold:12,food:3}, tech:'aviation' },
-    { id:'bombardier',   name:'Bombardiers',        icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â£', era:'moderne',       type:'air',      power:55, cost:{gold:400,prod:200},upkeep:{gold:14,food:3}, tech:'aviation' },
-    { id:'sous_marin',   name:'Sous-Marins',        icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ…Â¸', era:'moderne',       type:'naval',    power:40, cost:{gold:300,prod:200},upkeep:{gold:10,food:4}, tech:'radar' },
-    { id:'parachutiste', name:'Parachutistes',      icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ¢â‚¬Å¡', era:'moderne',       type:'special',  power:30, cost:{gold:200,food:30}, upkeep:{gold:8,food:5}, tech:'aviation' },
-    { id:'marine',       name:'Marines',            icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬Å“', era:'moderne',       type:'special',  power:35, cost:{gold:250,food:30}, upkeep:{gold:8,food:5}, tech:'radar' },
-    { id:'porte_avions', name:'Porte-Avions',       icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã‚Â¢', era:'moderne',       type:'naval',    power:70, cost:{gold:600,prod:350},upkeep:{gold:20,food:8}, tech:'radar' },
+    // ── MODERNE ──
+    { id:'char',         name:'Chars d\'Assaut',    icon:'🛡️', era:'moderne',       type:'cavalry',  power:50, cost:{gold:300,prod:150},upkeep:{gold:10,food:5}, tech:'blindes' },
+    { id:'avion_chasse', name:'Chasseurs',          icon:'✈️', era:'moderne',       type:'air',      power:45, cost:{gold:350,prod:180},upkeep:{gold:12,food:3}, tech:'aviation' },
+    { id:'bombardier',   name:'Bombardiers',        icon:'💣', era:'moderne',       type:'air',      power:55, cost:{gold:400,prod:200},upkeep:{gold:14,food:3}, tech:'aviation' },
+    { id:'sous_marin',   name:'Sous-Marins',        icon:'🐟', era:'moderne',       type:'naval',    power:40, cost:{gold:300,prod:200},upkeep:{gold:10,food:4}, tech:'radar' },
+    { id:'parachutiste', name:'Parachutistes',      icon:'🪂', era:'moderne',       type:'special',  power:30, cost:{gold:200,food:30}, upkeep:{gold:8,food:5}, tech:'aviation' },
+    { id:'marine',       name:'Marines',            icon:'⚓', era:'moderne',       type:'special',  power:35, cost:{gold:250,food:30}, upkeep:{gold:8,food:5}, tech:'radar' },
+    { id:'porte_avions', name:'Porte-Avions',       icon:'🚢', era:'moderne',       type:'naval',    power:70, cost:{gold:600,prod:350},upkeep:{gold:20,food:8}, tech:'radar' },
 
-    // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ CONTEMPORAINE ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-    { id:'drone',        name:'Drones de Combat',   icon:'ÃƒÂ°Ã…Â¸Ã‚Â¤Ã¢â‚¬â€œ', era:'contemporaine', type:'air',      power:55, cost:{gold:400,prod:200},upkeep:{gold:8,food:0}, tech:'informatique' },
-    { id:'missile',      name:'Missiles Balistiques',icon:'ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â€šÂ¬',era:'contemporaine', type:'siege',    power:80, cost:{gold:500,prod:300},upkeep:{gold:15,food:0}, tech:'fusion_t' },
-    { id:'forces_spec',  name:'Forces SpÃƒÆ’Ã‚Â©ciales',   icon:'ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â¯', era:'contemporaine', type:'special',  power:50, cost:{gold:300,food:20}, upkeep:{gold:10,food:3}, tech:'informatique' },
-    { id:'cyber_unite',  name:'UnitÃƒÆ’Ã‚Â© Cyber',        icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â»', era:'contemporaine', type:'special',  power:40, cost:{gold:350,prod:150},upkeep:{gold:8,food:0}, tech:'ia' },
-    { id:'stealth',      name:'Chasseur Furtif',    icon:'ÃƒÂ°Ã…Â¸Ã‚Â¦Ã¢â‚¬Â¦', era:'contemporaine', type:'air',      power:70, cost:{gold:600,prod:300},upkeep:{gold:15,food:2}, tech:'ia' },
-    { id:'railgun',      name:'Railgun Naval',      icon:'ÃƒÂ¢Ã…Â¡Ã‚Â¡', era:'contemporaine', type:'naval',    power:90, cost:{gold:800,prod:400},upkeep:{gold:20,food:3}, tech:'quantique' },
-    { id:'mecha',        name:'Exosquelette',       icon:'ÃƒÂ°Ã…Â¸Ã‚Â¦Ã‚Â¾', era:'contemporaine', type:'melee',    power:65, cost:{gold:500,prod:250},upkeep:{gold:12,food:2}, tech:'nanotechnologie' }
+    // ── CONTEMPORAINE ──
+    { id:'drone',        name:'Drones de Combat',   icon:'🤖', era:'contemporaine', type:'air',      power:55, cost:{gold:400,prod:200},upkeep:{gold:8,food:0}, tech:'informatique' },
+    { id:'missile',      name:'Missiles Balistiques',icon:'🚀',era:'contemporaine', type:'siege',    power:80, cost:{gold:500,prod:300},upkeep:{gold:15,food:0}, tech:'fusion_t' },
+    { id:'forces_spec',  name:'Forces Spéciales',   icon:'🎯', era:'contemporaine', type:'special',  power:50, cost:{gold:300,food:20}, upkeep:{gold:10,food:3}, tech:'informatique' },
+    { id:'cyber_unite',  name:'Unité Cyber',        icon:'💻', era:'contemporaine', type:'special',  power:40, cost:{gold:350,prod:150},upkeep:{gold:8,food:0}, tech:'ia' },
+    { id:'stealth',      name:'Chasseur Furtif',    icon:'🦅', era:'contemporaine', type:'air',      power:70, cost:{gold:600,prod:300},upkeep:{gold:15,food:2}, tech:'ia' },
+    { id:'railgun',      name:'Railgun Naval',      icon:'⚡', era:'contemporaine', type:'naval',    power:90, cost:{gold:800,prod:400},upkeep:{gold:20,food:3}, tech:'quantique' },
+    { id:'mecha',        name:'Exosquelette',       icon:'🦾', era:'contemporaine', type:'melee',    power:65, cost:{gold:500,prod:250},upkeep:{gold:12,food:2}, tech:'nanotechnologie' }
 ];
 
 // ============================
-//  DONNÃƒÆ’Ã¢â‚¬Â°ES ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â NATIONS IA
+//  DONNÉES — NATIONS IA
 // ============================
 var AI_NATIONS = [
     { id:'empire_soleil',  name:'Empire du Soleil Levant', ruler:'Empereur Akira',   personality:'aggressive',   polity:'empire',   dynasty:'Maison Hoshida', color:'#dc2626' },
     { id:'royaume_nord',   name:'Royaume du Nord',        ruler:'Roi Bjorn',         personality:'militarist',   polity:'royaume',  dynasty:'Clan Bjornson', color:'#3b82f6' },
-    { id:'federation_sud', name:'FÃƒÆ’Ã‚Â©dÃƒÆ’Ã‚Â©ration du Sud',      ruler:'Consul Marcus',     personality:'diplomatic',   polity:'federation',dynasty:'Maison Civique', color:'#16a34a' },
+    { id:'federation_sud', name:'Fédération du Sud',      ruler:'Consul Marcus',     personality:'diplomatic',   polity:'federation',dynasty:'Maison Civique', color:'#16a34a' },
     { id:'union_ouest',    name:'Union de l\'Ouest',      ruler:'Reine Isabelle',    personality:'economic',     polity:'royaume',  dynasty:'Maison Valen', color:'#f59e0b' },
-    { id:'confederation',  name:'ConfÃƒÆ’Ã‚Â©dÃƒÆ’Ã‚Â©ration Orientale',ruler:'Khan TemÃƒÆ’Ã‚Â¼jin',      personality:'expansionist', polity:'tribu',    dynasty:'Lignee Temujin', color:'#8b5cf6' },
-    { id:'republique_iles',name:'RÃƒÆ’Ã‚Â©publique des ÃƒÆ’Ã…Â½les',    ruler:'Doge Enrico',       personality:'economic',     polity:'republique',dynasty:'Maison Marchande', color:'#06b6d4' },
-    { id:'empire_desert',  name:'Empire du DÃƒÆ’Ã‚Â©sert',       ruler:'Sultan Harun',      personality:'diplomatic',   polity:'sultanat', dynasty:'Maison Harun', color:'#d97706' }
+    { id:'confederation',  name:'Confédération Orientale',ruler:'Khan Temüjin',      personality:'expansionist', polity:'tribu',    dynasty:'Lignee Temujin', color:'#8b5cf6' },
+    { id:'republique_iles',name:'République des Îles',    ruler:'Doge Enrico',       personality:'economic',     polity:'republique',dynasty:'Maison Marchande', color:'#06b6d4' },
+    { id:'empire_desert',  name:'Empire du Désert',       ruler:'Sultan Harun',      personality:'diplomatic',   polity:'sultanat', dynasty:'Maison Harun', color:'#d97706' }
 ];
 
 var POLICIES = [
-    { id:'taxes',       name:'Taux d\'Imposition', min:0, max:100, default:30, effectDesc:'Or ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Ëœ / Bonheur ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Å“' },
-    { id:'conscription',name:'Conscription',        min:0, max:100, default:20, effectDesc:'ArmÃƒÆ’Ã‚Â©e ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Ëœ / Prod & Bonheur ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Å“' },
-    { id:'education_p', name:'Budget ÃƒÆ’Ã¢â‚¬Â°ducation',    min:0, max:100, default:30, effectDesc:'Science ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Ëœ / Or ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Å“' },
-    { id:'liberte',     name:'LibertÃƒÆ’Ã‚Â© Civile',      min:0, max:100, default:50, effectDesc:'Bonheur & Culture ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Ëœ / StabilitÃƒÆ’Ã‚Â© ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Å“' },
-    { id:'religion',    name:'Influence Religieuse', min:0, max:100, default:40, effectDesc:'StabilitÃƒÆ’Ã‚Â© ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Ëœ / Science ÃƒÂ¢Ã¢â‚¬ Ã¢â‚¬Å“' }
+    { id:'taxes',       name:'Taux d\'Imposition', min:0, max:100, default:30, effectDesc:'Or ↑ / Bonheur ↓' },
+    { id:'conscription',name:'Conscription',        min:0, max:100, default:20, effectDesc:'Armée ↑ / Prod & Bonheur ↓' },
+    { id:'education_p', name:'Budget Éducation',    min:0, max:100, default:30, effectDesc:'Science ↑ / Or ↓' },
+    { id:'liberte',     name:'Liberté Civile',      min:0, max:100, default:50, effectDesc:'Bonheur & Culture ↑ / Stabilité ↓' },
+    { id:'religion',    name:'Influence Religieuse', min:0, max:100, default:40, effectDesc:'Stabilité ↑ / Science ↓' }
 ];
 
 var DECREES = [
-    { id:'fete_nationale',  name:'FÃƒÆ’Ã‚Âªte Nationale',       cost:{gold:50},  effect:{happiness:10,stability:5}, duration:3 },
-    { id:'mobilisation',    name:'Mobilisation GÃƒÆ’Ã‚Â©nÃƒÆ’Ã‚Â©rale', cost:{gold:80},  effect:{militaryPower:20,happiness:-10,prodRate:-5}, duration:5 },
-    { id:'reforme_agraire', name:'RÃƒÆ’Ã‚Â©forme Agraire',      cost:{gold:100}, effect:{foodRate:8,happiness:5}, duration:10 },
+    { id:'fete_nationale',  name:'Fête Nationale',       cost:{gold:50},  effect:{happiness:10,stability:5}, duration:3 },
+    { id:'mobilisation',    name:'Mobilisation Générale', cost:{gold:80},  effect:{militaryPower:20,happiness:-10,prodRate:-5}, duration:5 },
+    { id:'reforme_agraire', name:'Réforme Agraire',      cost:{gold:100}, effect:{foodRate:8,happiness:5}, duration:10 },
     { id:'censure',         name:'Censure',              cost:{gold:40},  effect:{stability:10,happiness:-8,cultureRate:-5}, duration:5 },
     { id:'grand_projet',    name:'Grand Projet National', cost:{gold:200,prod:100}, effect:{prestige:15,prodRate:-8}, duration:8 },
-    { id:'espionnage',      name:'RÃƒÆ’Ã‚Â©seau d\'Espionnage',  cost:{gold:120}, effect:{stability:5,scienceRate:5}, duration:10 },
-    { id:'libre_echange',   name:'Libre-ÃƒÆ’Ã¢â‚¬Â°change',        cost:{gold:60},  effect:{goldRate:12,prodRate:-3}, duration:10 },
-    { id:'austerite',       name:'Plan d\'AustÃƒÆ’Ã‚Â©ritÃƒÆ’Ã‚Â©',    cost:{gold:0},   effect:{goldRate:15,happiness:-12}, duration:8 }
+    { id:'espionnage',      name:'Réseau d\'Espionnage',  cost:{gold:120}, effect:{stability:5,scienceRate:5}, duration:10 },
+    { id:'libre_echange',   name:'Libre-Échange',        cost:{gold:60},  effect:{goldRate:12,prodRate:-3}, duration:10 },
+    { id:'austerite',       name:'Plan d\'Austérité',    cost:{gold:0},   effect:{goldRate:15,happiness:-12}, duration:8 }
 ];
 
 var EVENTS = [
-    { id:'famine', title:'Famine', icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â¾', desc:'Une terrible famine frappe votre nation !',
+    { id:'famine', title:'Famine', icon:'🌾', desc:'Une terrible famine frappe votre nation !',
       condition:function(s){return s.resources.food<30&&Math.random()<0.3;},
       choices:[
-        {text:'Rationner',effect:'Nourriture -20, StabilitÃƒÆ’Ã‚Â© -5',apply:function(s){s.resources.food-=20;s.stability-=5;}},
-        {text:'Importer (coÃƒÆ’Ã‚Â»teux)',effect:'Or -80, +30 Nourr.',apply:function(s){s.resources.gold-=80;s.resources.food+=30;}},
+        {text:'Rationner',effect:'Nourriture -20, Stabilité -5',apply:function(s){s.resources.food-=20;s.stability-=5;}},
+        {text:'Importer (coûteux)',effect:'Or -80, +30 Nourr.',apply:function(s){s.resources.gold-=80;s.resources.food+=30;}},
         {text:'Ignorer',effect:'Pop -5%, Bonheur -15',apply:function(s){s.population=Math.floor(s.population*0.95);s.happiness-=15;}}
     ]},
-    { id:'decouverte', title:'DÃƒÆ’Ã‚Â©couverte Scientifique', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â¬', desc:'Vos chercheurs ont fait une percÃƒÆ’Ã‚Â©e !',
+    { id:'decouverte', title:'Découverte Scientifique', icon:'🔬', desc:'Vos chercheurs ont fait une percée !',
       condition:function(s){return s.rates.science>5&&Math.random()<0.15;},
       choices:[
         {text:'Investir',effect:'Science +50, Or -40',apply:function(s){s.resources.science+=50;s.resources.gold-=40;}},
         {text:'Publier',effect:'Science +20, Prestige +5',apply:function(s){s.resources.science+=20;s.prestige+=5;}}
     ]},
-    { id:'rebellion', title:'RÃƒÆ’Ã‚Â©bellion Populaire', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â¥', desc:'Le peuple gronde ! Des ÃƒÆ’Ã‚Â©meutes ÃƒÆ’Ã‚Â©clatent.',
+    { id:'rebellion', title:'Rébellion Populaire', icon:'🔥', desc:'Le peuple gronde ! Des émeutes éclatent.',
       condition:function(s){return s.happiness<30&&Math.random()<0.35;},
       choices:[
-        {text:'RÃƒÆ’Ã‚Â©primer',effect:'Stab +10, Bonheur -10',apply:function(s){s.stability+=10;s.happiness-=10;}},
-        {text:'NÃƒÆ’Ã‚Â©gocier',effect:'Or -60, Bonheur +15',apply:function(s){s.resources.gold-=60;s.happiness+=15;}},
+        {text:'Réprimer',effect:'Stab +10, Bonheur -10',apply:function(s){s.stability+=10;s.happiness-=10;}},
+        {text:'Négocier',effect:'Or -60, Bonheur +15',apply:function(s){s.resources.gold-=60;s.happiness+=15;}},
         {text:'Concessions',effect:'Bonheur +20, Or -100',apply:function(s){s.happiness+=20;s.resources.gold-=100;}}
     ]},
-    { id:'epidemie', title:'ÃƒÆ’Ã¢â‚¬Â°pidÃƒÆ’Ã‚Â©mie', icon:'ÃƒÂ°Ã…Â¸Ã‚Â¦Ã‚ ', desc:'Une maladie se rÃƒÆ’Ã‚Â©pand !',
+    { id:'epidemie', title:'Épidémie', icon:'🦠', desc:'Une maladie se répand !',
       condition:function(s){return s.population>500&&Math.random()<0.08;},
       choices:[
         {text:'Quarantaine',effect:'Pop -3%, Stab +5',apply:function(s){s.population=Math.floor(s.population*0.97);s.stability+=5;}},
-        {text:'RemÃƒÆ’Ã‚Â¨de (cher)',effect:'Or -100, Science +30',apply:function(s){s.resources.gold-=100;s.resources.science+=30;}}
+        {text:'Remède (cher)',effect:'Or -100, Science +30',apply:function(s){s.resources.gold-=100;s.resources.science+=30;}}
     ]},
-    { id:'age_or', title:'ÃƒÆ’Ã¢â‚¬Å¡ge d\'Or', icon:'ÃƒÂ¢Ã…â€œÃ‚Â¨', desc:'ProspÃƒÆ’Ã‚Â©ritÃƒÆ’Ã‚Â© partout !',
+    { id:'age_or', title:'Âge d\'Or', icon:'✨', desc:'Prospérité partout !',
       condition:function(s){return s.happiness>75&&s.stability>70&&Math.random()<0.12;},
       choices:[
         {text:'Culture',effect:'Culture +50, Prestige +10',apply:function(s){s.resources.culture+=50;s.prestige+=10;}},
-        {text:'ÃƒÆ’Ã¢â‚¬Â°conomie',effect:'Or +100, Prod +30',apply:function(s){s.resources.gold+=100;s.resources.prod+=30;}}
+        {text:'Économie',effect:'Or +100, Prod +30',apply:function(s){s.resources.gold+=100;s.resources.prod+=30;}}
     ]},
-    { id:'tresor', title:'TrÃƒÆ’Ã‚Â©sor DÃƒÆ’Ã‚Â©couvert', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã…Â½', desc:'Un trÃƒÆ’Ã‚Â©sor enfoui trouvÃƒÆ’Ã‚Â© !',
+    { id:'tresor', title:'Trésor Découvert', icon:'💎', desc:'Un trésor enfoui trouvé !',
       condition:function(s){return Math.random()<0.07;},
       choices:[
-        {text:'Enrichir le trÃƒÆ’Ã‚Â©sor',effect:'Or +150',apply:function(s){s.resources.gold+=150;}},
+        {text:'Enrichir le trésor',effect:'Or +150',apply:function(s){s.resources.gold+=150;}},
         {text:'Distribuer',effect:'Or +50, Bonheur +15',apply:function(s){s.resources.gold+=50;s.happiness+=15;}}
     ]},
-    { id:'commerce', title:'Caravane Marchande', icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â«', desc:'Des marchands proposent un accord.',
+    { id:'commerce', title:'Caravane Marchande', icon:'🐫', desc:'Des marchands proposent un accord.',
       condition:function(s){return s.resources.gold>50&&Math.random()<0.1;},
       choices:[
         {text:'Accepter',effect:'Or -50, +8 Or/tour 5 tours',apply:function(s){s.resources.gold-=50;s.tempBonuses.push({stat:'goldRate',value:8,turns:5});}},
-        {text:'DÃƒÆ’Ã‚Â©cliner',effect:'Rien',apply:function(s){}}
+        {text:'Décliner',effect:'Rien',apply:function(s){}}
     ]},
-    { id:'catastrophe', title:'Catastrophe Naturelle', icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã… ', desc:'SÃƒÆ’Ã‚Â©isme dÃƒÆ’Ã‚Â©vastateur !',
+    { id:'catastrophe', title:'Catastrophe Naturelle', icon:'🌊', desc:'Séisme dévastateur !',
       condition:function(s){return Math.random()<0.05;},
       choices:[
         {text:'Reconstruire',effect:'Or -120, Stab +5',apply:function(s){s.resources.gold-=120;s.stability+=5;}},
         {text:'Aide internationale',effect:'Prestige -5, Or +50',apply:function(s){s.prestige-=5;s.resources.gold+=50;}}
     ]},
-    { id:'immigrants', title:'Vague d\'Immigrants', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‚Â¥', desc:'Des rÃƒÆ’Ã‚Â©fugiÃƒÆ’Ã‚Â©s cherchent asile.',
+    { id:'immigrants', title:'Vague d\'Immigrants', icon:'👥', desc:'Des réfugiés cherchent asile.',
       condition:function(s){return s.stability>50&&Math.random()<0.08;},
       choices:[
         {text:'Accueillir',effect:'Pop +10%, Bonheur -5',apply:function(s){s.population=Math.floor(s.population*1.1);s.happiness-=5;}},
         {text:'Refuser',effect:'Prestige -3',apply:function(s){s.prestige-=3;}}
     ]},
-    { id:'espion', title:'Espion CapturÃƒÆ’Ã‚Â©', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¢Ã‚ÂµÃƒÂ¯Ã‚Â¸Ã‚Â', desc:'Un espion ÃƒÆ’Ã‚Â©tranger a ÃƒÆ’Ã‚Â©tÃƒÆ’Ã‚Â© capturÃƒÆ’Ã‚Â© !',
+    { id:'espion', title:'Espion Capturé', icon:'🕵️', desc:'Un espion étranger a été capturé !',
       condition:function(s){return s.turn>10&&Math.random()<0.08;},
       choices:[
-        {text:'ExÃƒÆ’Ã‚Â©cuter',effect:'Stab +5, Diplo -10',apply:function(s){s.stability+=5;}},
-        {text:'ÃƒÆ’Ã¢â‚¬Â°changer',effect:'Or +60, Science +20',apply:function(s){s.resources.gold+=60;s.resources.science+=20;}},
+        {text:'Exécuter',effect:'Stab +5, Diplo -10',apply:function(s){s.stability+=5;}},
+        {text:'Échanger',effect:'Or +60, Science +20',apply:function(s){s.resources.gold+=60;s.resources.science+=20;}},
         {text:'Recruter',effect:'Science +40, Stab -5',apply:function(s){s.resources.science+=40;s.stability-=5;}}
     ]},
-    { id:'merveille', title:'Merveille DÃƒÆ’Ã‚Â©couverte', icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', desc:'Des ruines anciennes aux portes de votre citÃƒÆ’Ã‚Â© !',
+    { id:'merveille', title:'Merveille Découverte', icon:'🏛️', desc:'Des ruines anciennes aux portes de votre cité !',
       condition:function(s){return Math.random()<0.04;},
       choices:[
         {text:'Fouiller',effect:'Culture +80, Prestige +8',apply:function(s){s.resources.culture+=80;s.prestige+=8;}},
         {text:'Piller',effect:'Or +200',apply:function(s){s.resources.gold+=200;}}
     ]},
-    { id:'heretiques', title:'HÃƒÆ’Ã‚Â©rÃƒÆ’Ã‚Â©sie', icon:'ÃƒÂ¢Ã¢â‚¬ÂºÃ‚Âª', desc:'Un mouvement religieux dissident ÃƒÆ’Ã‚Â©merge.',
+    { id:'heretiques', title:'Hérésie', icon:'⛪', desc:'Un mouvement religieux dissident émerge.',
       condition:function(s){return s.policies.religion>60&&Math.random()<0.1;},
       choices:[
-        {text:'TolÃƒÆ’Ã‚Â©rer',effect:'Bonheur +8, Stab -8',apply:function(s){s.happiness+=8;s.stability-=8;}},
-        {text:'PersÃƒÆ’Ã‚Â©cuter',effect:'Stab +10, Bonheur -12',apply:function(s){s.stability+=10;s.happiness-=12;}}
+        {text:'Tolérer',effect:'Bonheur +8, Stab -8',apply:function(s){s.happiness+=8;s.stability-=8;}},
+        {text:'Persécuter',effect:'Stab +10, Bonheur -12',apply:function(s){s.stability+=10;s.happiness-=12;}}
     ]},
-    { id:'genie_militaire', title:'GÃƒÆ’Ã‚Â©nie Militaire', icon:'ÃƒÂ¢Ã…Â¡Ã¢â‚¬ÂÃƒÂ¯Ã‚Â¸Ã‚Â', desc:'Un stratÃƒÆ’Ã‚Â¨ge brillant propose ses services.',
+    { id:'genie_militaire', title:'Génie Militaire', icon:'⚔️', desc:'Un stratège brillant propose ses services.',
       condition:function(s){return s.militaryPower>20&&Math.random()<0.07;},
       choices:[
         {text:'Engager',effect:'Or -80, Force +25',apply:function(s){s.resources.gold-=80;s.militaryPower+=25;}},
-        {text:'DÃƒÆ’Ã‚Â©cliner',effect:'Rien',apply:function(s){}}
+        {text:'Décliner',effect:'Rien',apply:function(s){}}
     ]}
 ];
 
 
 // ============================
-//  ÃƒÆ’Ã¢â‚¬Â°TAT DU JEU
+//  ÉTAT DU JEU
 // ============================
 function _cp1252Byte(code) {
     if (code <= 0xFF) return code;
@@ -384,7 +384,7 @@ function _decodeLatin1Utf8(str) {
 }
 
 function _mojibakeScore(str) {
-    var m = str.match(/[ÃƒÆ’Ãƒâ€šÃƒÂ¢ÃƒÂ°Ãƒâ€¦]/g);
+    var m = str.match(/[ÃÂâðÅ]/g);
     var r = str.match(/\uFFFD/g);
     return (m ? m.length : 0) + (r ? r.length : 0);
 }
@@ -433,7 +433,7 @@ function safeLabel(text, fallback) {
     var value = decodeMojibakeText((text === undefined || text === null) ? '' : String(text)).trim();
     if (!value) return fallback || '';
     if (/[\uFFFD]/.test(value)) return fallback || '';
-    if (/[ÃƒÃ‚Ã¢Ã°]/.test(value) && fallback) return fallback;
+    if (/[ÃÂâð]/.test(value) && fallback) return fallback;
     if (fallback && (/(\?\?+)/.test(value) || /[A-Za-z]\?[A-Za-z]/.test(value))) return fallback;
     return value;
 }
@@ -441,7 +441,7 @@ function safeLabel(text, fallback) {
 function safeIcon(icon, fallback) {
     var value = decodeMojibakeText((icon === undefined || icon === null) ? '' : String(icon)).trim();
     if (!value) return fallback || '&#9679;';
-    if (/[\uFFFD]/.test(value) || /[ÃƒÃ‚Ã¢Ã°]/.test(value) || /\?/.test(value)) return fallback || '&#9679;';
+    if (/[\uFFFD]/.test(value) || /[ÃÂâð]/.test(value) || /\?/.test(value)) return fallback || '●';
     if (/^[A-Za-z0-9 _.,:;!?()[\]{}<>\-+='"`~\\|/]+$/.test(value)) return fallback || '&#9679;';
     return value;
 }
@@ -522,7 +522,7 @@ function createDefaultState(nName, rName, gov, diff) {
 
 
 // ============================
-//  CARTE 2D ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â GÃƒÆ’Ã‚Â©nÃƒÆ’Ã‚Â©ration et Rendu
+//  CARTE 2D — Génération et Rendu
 // ============================
 var WorldMap = {
     COLS: 40,
@@ -548,29 +548,29 @@ var WorldMap = {
     _textSanitized: false,
 
     TERRAIN: {
-        ocean:   { color:'#1a3a4a', name:'OcÃƒÆ’Ã‚Â©an',    food:0, prod:0, gold:1, movable:false },
-        coast:   { color:'#5a9aad', name:'CÃƒÆ’Ã‚Â´te',     food:2, prod:0, gold:2, movable:true },
+        ocean:   { color:'#1a3a4a', name:'Océan',    food:0, prod:0, gold:1, movable:false },
+        coast:   { color:'#5a9aad', name:'Côte',     food:2, prod:0, gold:2, movable:true },
         plain:   { color:'#4a7c59', name:'Plaine',   food:3, prod:1, gold:1, movable:true },
-        forest:  { color:'#2d5a27', name:'ForÃƒÆ’Ã‚Âªt',    food:1, prod:3, gold:1, movable:true },
+        forest:  { color:'#2d5a27', name:'Forêt',    food:1, prod:3, gold:1, movable:true },
         mountain:{ color:'#8a8580', name:'Montagne', food:0, prod:4, gold:2, movable:true },
-        desert:  { color:'#d4a843', name:'DÃƒÆ’Ã‚Â©sert',   food:0, prod:1, gold:3, movable:true },
+        desert:  { color:'#d4a843', name:'Désert',   food:0, prod:1, gold:3, movable:true },
         tundra:  { color:'#7a6a8a', name:'Toundra',  food:1, prod:1, gold:0, movable:true },
         swamp:   { color:'#3a6a3a', name:'Marais',   food:2, prod:1, gold:0, movable:true }
     },
 
     RESOURCES: [
-        { id:'ble',   icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â¾', name:'BlÃƒÆ’Ã‚Â©',       bonus:{food:2}, terrain:['plain'] },
-        { id:'fer',   icon:'ÃƒÂ¢Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¯Ã‚Â¸Ã‚Â', name:'Fer',       bonus:{prod:2}, terrain:['mountain','forest'] },
-        { id:'or_r',  icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â°', name:'Or',        bonus:{gold:3}, terrain:['mountain','desert'] },
-        { id:'bois',  icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ‚Âµ', name:'Bois',      bonus:{prod:2}, terrain:['forest'] },
-        { id:'pierre',icon:'ÃƒÂ°Ã…Â¸Ã‚ÂªÃ‚Â¨', name:'Pierre',    bonus:{prod:2}, terrain:['mountain','plain'] },
-        { id:'poisson',icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ…Â¸',name:'Poisson',   bonus:{food:3}, terrain:['coast'] },
-        { id:'chevaux',icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ‚Â´',name:'Chevaux',   bonus:{militaryPower:3}, terrain:['plain'] },
-        { id:'encens', icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¢Ã‚Â¯ÃƒÂ¯Ã‚Â¸Ã‚Â', name:'Encens',    bonus:{culture:2,gold:1}, terrain:['desert'] },
-        { id:'epices', icon:'ÃƒÂ°Ã…Â¸Ã…â€™Ã‚Â¶ÃƒÂ¯Ã‚Â¸Ã‚Â', name:'ÃƒÆ’Ã¢â‚¬Â°pices',    bonus:{gold:2,food:1}, terrain:['forest','swamp'] },
-        { id:'marbre', icon:'ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬ÂºÃƒÂ¯Ã‚Â¸Ã‚Â', name:'Marbre',    bonus:{culture:2,prod:1}, terrain:['mountain','plain'] },
-        { id:'sel',    icon:'ÃƒÂ°Ã…Â¸Ã‚Â§Ã¢â‚¬Å¡', name:'Sel',       bonus:{gold:2,food:1}, terrain:['coast','desert'] },
-        { id:'petrole',icon:'ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂºÃ‚Â¢ÃƒÂ¯Ã‚Â¸Ã‚Â', name:'PÃƒÆ’Ã‚Â©trole',   bonus:{prod:4,gold:3}, terrain:['desert','plain','coast'], minEra:3 }
+        { id:'ble',   icon:'🌾', name:'Blé',       bonus:{food:2}, terrain:['plain'] },
+        { id:'fer',   icon:'⛏️', name:'Fer',       bonus:{prod:2}, terrain:['mountain','forest'] },
+        { id:'or_r',  icon:'💰', name:'Or',        bonus:{gold:3}, terrain:['mountain','desert'] },
+        { id:'bois',  icon:'🪵', name:'Bois',      bonus:{prod:2}, terrain:['forest'] },
+        { id:'pierre',icon:'🪨', name:'Pierre',    bonus:{prod:2}, terrain:['mountain','plain'] },
+        { id:'poisson',icon:'🐟',name:'Poisson',   bonus:{food:3}, terrain:['coast'] },
+        { id:'chevaux',icon:'🐴',name:'Chevaux',   bonus:{militaryPower:3}, terrain:['plain'] },
+        { id:'encens', icon:'🕯️', name:'Encens',    bonus:{culture:2,gold:1}, terrain:['desert'] },
+        { id:'epices', icon:'🌶️', name:'Épices',    bonus:{gold:2,food:1}, terrain:['forest','swamp'] },
+        { id:'marbre', icon:'🏛️', name:'Marbre',    bonus:{culture:2,prod:1}, terrain:['mountain','plain'] },
+        { id:'sel',    icon:'🧂', name:'Sel',       bonus:{gold:2,food:1}, terrain:['coast','desert'] },
+        { id:'petrole',icon:'🛢️', name:'Pétrole',   bonus:{prod:4,gold:3}, terrain:['desert','plain','coast'], minEra:3 }
     ],
 
     generate: function() {
@@ -1260,7 +1260,7 @@ var WorldMap = {
 
 
 // ============================
-//  GAME ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ContrÃƒÆ’Ã‚Â´le Principal
+//  GAME — Contrôle Principal
 // ============================
 var Game = {
     _rtBaseStepMs: 1800,
@@ -2610,7 +2610,7 @@ var Game = {
 
 
 // ============================
-//  UI ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Interface
+//  UI — Interface
 // ============================
 var UI = {
     currentFilter: 'all',
