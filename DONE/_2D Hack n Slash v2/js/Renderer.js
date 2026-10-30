@@ -106,6 +106,27 @@ class Renderer {
         ctx.translate(player.pos.x, player.pos.y);
         ctx.rotate(angle);
 
+        // Layered attack trail, matching the active weapon style.
+        // Visual only: the weapon system still owns timing and hit detection.
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.strokeStyle = weapon.color || '#cbdcff';
+        ctx.shadowColor = weapon.color || '#cbdcff';
+        ctx.shadowBlur = 14;
+        ctx.lineCap = 'round';
+        ctx.globalAlpha = 0.24;
+        if (style === 'slash' || style === 'chop') {
+            ctx.lineWidth = style === 'chop' ? 20 : 12;
+            ctx.beginPath();ctx.arc(0,0,style === 'chop' ? 55 : 45,-.85,.65);ctx.stroke();
+        } else if (style === 'thrust' || style === 'stab' || style === 'ranged') {
+            ctx.lineWidth = style === 'thrust' ? 12 : 7;
+            ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(style === 'thrust' ? 90 : style === 'ranged' ? 50 : 30,0);ctx.stroke();
+        } else if (style === 'smash' || style === 'magic') {
+            ctx.lineWidth = 15;
+            ctx.beginPath();ctx.arc(0,0,style === 'smash' ? 40 + combo*2 : 30,0,Math.PI*2);ctx.stroke();
+        }
+        ctx.restore();
+
         switch (style) {
             case 'slash':
                 ctx.lineWidth = 6;
