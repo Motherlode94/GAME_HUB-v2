@@ -938,6 +938,12 @@ function handleScore() {
         spawnConfetti(60);
     }
 
+    // Classic encourages bank shots and rim rebounds without penalizing swishes.
+    if (selectedMode === "classic" && ball.rimHits > 0) {
+        const reboundBonus = Math.min(3, ball.rimHits);
+        totalPts += reboundBonus;
+        spawnFloatText(ball.x, hoopConfig.y - 80, "REBOND +" + reboundBonus, "#f7d36a", 20);
+    }
     score      += totalPts;
     basketsMade++;
     if (pts === 3) threesMade++;
