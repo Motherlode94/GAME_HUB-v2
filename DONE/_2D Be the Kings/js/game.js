@@ -527,6 +527,7 @@ function createDefaultState(nName, rName, gov, diff) {
         buildings:{}, techs:[], currentResearch:null, army:{},
         policies:{taxes:30,conscription:20,education_p:30,liberte:50,religion:40,sante:25,infrastructure_p:30,securite_p:35},
         activeDecrees:[], tempBonuses:[],
+        parliament:{support:60, opposition:40, lastElectionTurn:1, electionInterval:12, lastResult:null},
         eventControl:{nextAllowedTurn:1,lastEventTurn:0},
         diplomacy:{},
         cultureState:{
@@ -1622,6 +1623,7 @@ var Game = {
         state.stability += Math.round((securityBudget - 35) / 20);
         if (healthBudget >= 60 && state.resources.food >= state.population * 0.1)
             state.population += Math.max(1, Math.floor(state.population * 0.002));
+        this._politicalTurn();
         // Stability drift
         if (state.happiness < 30) state.stability -= 2;
         if (state.happiness > 70) state.stability += 1;
@@ -1976,10 +1978,39 @@ var Game = {
         };
     },
 
+    _parliament: function() {
+        if (!state.parliament) state.parliament = {support:60,opposition:40,lastElectionTurn:state.turn||1,electionInterval:12,lastResult:null};
+        return state.parliament;
+    },
+
+    _politicalTurn: function() {
+        var p = this._parliament();
+        var taxes = state.policies.taxes == null ? 30 : state.policies.taxes;
+        var freedom = state.policies.liberte == null ? 50 : state.policies.liberte;
+        var supportTarget = Math.max(8, Math.min(92, Math.round(
+            35 + state.happiness * .35 + state.stability * .18 + freedom * .08 - taxes * .22
+        )));
+        p.support = Math.max(5, Math.min(95, Math.round(p.support * .8 + supportTarget * .2)));
+        p.opposition = 100 - p.support;
+        // Parliamentary elections only in representative government types.
+        if (['republique','democratie'].indexOf(state.government) >= 0 &&
+            state.turn - p.lastElectionTurn >= p.electionInterval) {
+            p.lastElectionTurn = state.turn;
+            p.lastResult = p.support;
+            UI.toast('Elections parlementaires : coalition ' + p.support + '% des sieges.', 'info');
+        }
+        if (p.support < 30) state.stability = Math.max(0, state.stability - 2);
+    },
+
     activateDecree: function(did) {
         var d = DECREES.find(function(x){return x.id===did;});
         if (!d) return;
         if (state.activeDecrees.find(function(a){return a.id===did;})) { UI.toast('Deja actif !','info'); return; }
+        var parliament = this._parliament();
+        if (['republique','democratie'].indexOf(state.government) >= 0 &&
+            parliament.support < 35 && ['mobilisation','censure','austerite'].indexOf(did) >= 0) {
+            UI.toast('Decret bloque par l opposition parlementaire.', 'warning'); return;
+        }
         if (d.cost.gold && state.resources.gold < d.cost.gold) { UI.toast('Pas assez d\'or !','warning'); return; }
         if (d.cost.prod && state.resources.prod < d.cost.prod) { UI.toast('Pas assez de prod !','warning'); return; }
         if (d.cost.gold) state.resources.gold -= d.cost.gold;
@@ -3132,7 +3163,10 @@ var UI = {
             couverture_sante: 'Couverture Sanitaire', plan_infrastructures: 'Plan d’Infrastructures', dialogue_social: 'Dialogue Social'
         };
 
+        var political = Game._parliament();
         var sHtml = '<h4 style="font-family:var(--font-display);color:var(--accent);margin-bottom:10px">Politiques</h4>';
+        sHtml += '<div class="policy-item"><strong>Parlement : '+political.support+'% coalition / '+political.opposition+'% opposition</strong>' +
+            '<span> · '+(['republique','democratie'].indexOf(state.government)>=0?'Prochaines élections dans '+Math.max(0,political.electionInterval-(state.turn-political.lastElectionTurn))+' tours':'Conseil consultatif (pas d élections)')+'</span></div>';
         POLICIES.forEach(function(p){
             var v = state.policies[p.id] == null ? p.default : state.policies[p.id];
             var pName = safeLabel(p.name, policyNames[p.id] || humanizeId(p.id));
