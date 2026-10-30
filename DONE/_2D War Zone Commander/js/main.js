@@ -171,7 +171,7 @@ window.onload = function() {
                     RTS.WorkerSystem.update(game, delta);
                     if (RTS.AllySystem) RTS.AllySystem.update(game, delta);
                     RTS.SquadAISystem.update(game, delta);
-                    RTS.SquadSystem.update(game.squads, delta);
+                    RTS.SquadSystem.update(game.squads, delta, game.buildings);
                     RTS.SquadCombatSystem.update(game, delta);
                     RTS.ProjectileSystem.update(game, delta);
                     RTS.ParticleSystem.update(game.particles, delta);
