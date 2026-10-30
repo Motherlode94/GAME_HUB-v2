@@ -31,6 +31,7 @@ class Player {
         // Jump buffer
         this.jumpBuffer    = 0;
         this.jumpBufferMax = 10;
+        this.jumpHeld = false;
 
         // Invincibility blink after respawn
         this.invincible = 0;
@@ -68,9 +69,11 @@ class Player {
             if (Math.abs(this.velocityX) < 0.2) this.velocityX = 0;
         }
 
-        if (keys['Space'] || keys['ArrowUp'] || keys['KeyW']) {
-            this.jumpBuffer = this.jumpBufferMax;
-        }
+        // Only buffer the initial press, not every frame the key is held.
+        // This prevents unwanted automatic jumps on each landing.
+        var jumpPressed = !!(keys['Space'] || keys['ArrowUp'] || keys['KeyW']);
+        if (jumpPressed && !this.jumpHeld) this.jumpBuffer = this.jumpBufferMax;
+        this.jumpHeld = jumpPressed;
     }
 
     // ── Update ────────────────────────────────
