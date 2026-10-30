@@ -141,7 +141,9 @@ function updateTowers(dt) {
             tower.angle = angleToTarget(tower.x, tower.y, tower.target.x, tower.target.y);
             if (tower.cooldown <= 0) {
                 fireTower(tower, tower.target);
-                tower.cooldown = tower.fireRate;
+                const jammed = enemies.some((e) => e.type === 'JAMMER' && e.life > 0 &&
+                    Math.hypot(e.x - tower.x, e.y - tower.y) <= ENEMY_TYPES.JAMMER.aura);
+                tower.cooldown = tower.fireRate * (jammed ? ENEMY_TYPES.JAMMER.disruption : 1);
                 tower.recoil = 120;
             }
         }
