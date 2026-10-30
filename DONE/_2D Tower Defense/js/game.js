@@ -24,7 +24,7 @@ function activateTacticalAbility(name) {
     if ((gameState.abilityCooldowns[name] || 0) > 0) return false;
     const tile = gameState.hoveredTile;
     const validAim = tile && tile.x >= 0 && tile.y >= 0;
-    const target = validAim ? { x: gridToWorld(tile.x), y: gridToWorld(tile.y) } : null;
+    const target = validAim ? { x: gridToWorld(tile.x) + TILE_SIZE / 2, y: gridToWorld(tile.y) + TILE_SIZE / 2 } : null;
     if (name !== 'repair' && !target) return false;
     if (name === 'repair') {
         const selected = gameState.selectedTowers.filter((t) => towers.includes(t));
