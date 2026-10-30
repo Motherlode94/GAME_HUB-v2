@@ -335,6 +335,18 @@ class Player {
             ctx.globalAlpha = 0.45;
         }
 
+        // Ground shadow, narrower while airborne; a gameplay-free depth cue.
+        ctx.save();
+        const feetY = this.y + this.height;
+        const airHeight = Math.max(0, FLOOR_Y - feetY);
+        const shadowScale = Math.max(.40, 1 - airHeight / 240);
+        ctx.globalAlpha = Math.max(.10, .33 - airHeight / 550);
+        ctx.fillStyle = '#080812';
+        ctx.beginPath();
+        ctx.ellipse(cx, FLOOR_Y + 3, this.width * .56 * shadowScale, 5 * shadowScale, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
         // Traînées de dash
         if (this.isDashing) {
             ctx.globalAlpha = 0.2;
@@ -686,6 +698,29 @@ function drawBackground() {
     }
 
     updateAndDrawClouds();
+
+    // Layered distant skyline: deterministic silhouette, no asset downloads.
+    ctx.save();
+    const ridge = [
+        [0,.76],[.07,.69],[.14,.73],[.22,.61],[.30,.70],
+        [.39,.64],[.48,.71],[.56,.59],[.65,.68],[.74,.63],
+        [.83,.73],[.92,.65],[1,.71]
+    ];
+    ctx.fillStyle = '#211b3e';
+    ctx.beginPath();ctx.moveTo(0,FLOOR_Y);
+    ridge.forEach(([x,y]) => ctx.lineTo(x * GAME_WIDTH, y * FLOOR_Y));
+    ctx.lineTo(GAME_WIDTH,FLOOR_Y);ctx.closePath();ctx.fill();
+    ctx.fillStyle = 'rgba(15,13,34,.68)';
+    for (let i=0;i<18;i++) {
+        const bw=22+(i*17)%44;
+        const bx=i*GAME_WIDTH/17 - 5;
+        const bh=18+(i*29)%55;
+        ctx.fillRect(bx,FLOOR_Y-bh,bw,bh);
+        ctx.fillStyle='rgba(174,124,213,.13)';
+        for(let k=0;k<3;k++) ctx.fillRect(bx+5+k*10,FLOOR_Y-bh+9,3,5);
+        ctx.fillStyle='rgba(15,13,34,.68)';
+    }
+    ctx.restore();
 
     // Sol
     const groundGrad = ctx.createLinearGradient(0, FLOOR_Y, 0, GAME_HEIGHT);
