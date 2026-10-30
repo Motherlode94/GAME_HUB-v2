@@ -48,7 +48,15 @@ RTS.WaveSystem = {
         { type: "mobile_aa", cost: 4, minWave: 5 },
         { type: "attack_drone", cost: 3, minWave: 5 },
         { type: "rocket_artillery", cost: 4, minWave: 6 },
-        { type: "interceptor_drone", cost: 3, minWave: 7 }
+        { type: "interceptor_drone", cost: 3, minWave: 7 },
+        { type: "grenadier_team", cost: 2, minWave: 2 },
+        { type: "combat_engineers", cost: 2, minWave: 3 },
+        { type: "armored_car", cost: 2, minWave: 3 },
+        { type: "tank_destroyer", cost: 5, minWave: 5 },
+        { type: "heavy_aa", cost: 4, minWave: 6 },
+        { type: "ew_drone", cost: 2, minWave: 5 },
+        { type: "light_attack_heli", cost: 3, minWave: 5 },
+        { type: "gunship", cost: 5, minWave: 7 }
     ],
 
     reset: function() {
@@ -154,10 +162,10 @@ RTS.WaveSystem = {
         // Support medics participate only when damage dealers are already present.
         var doctrine = ["infantry", "mechanized", "air", "artillery"][(this._waveInLevel - 1) % 4];
         var doctrineTypes = {
-            infantry: ["riflemen","assault_team","recon_team","heavy_mg","at_team","sniper_team"],
-            mechanized: ["matv","mechanized_scout","bradley","wheeled_ifv","m1a2","riflemen"],
-            air: ["apache","blackhawk","attack_drone","interceptor_drone","manpads","mobile_aa","riflemen"],
-            artillery: ["paladin","rocket_artillery","mlrs","at_team","heavy_mg","riflemen"]
+            infantry: ["riflemen","assault_team","recon_team","heavy_mg","grenadier_team","combat_engineers","at_team","sniper_team"],
+            mechanized: ["matv","mechanized_scout","bradley","wheeled_ifv","armored_car","tank_destroyer","m1a2","riflemen"],
+            air: ["apache","blackhawk","attack_drone","interceptor_drone","light_attack_heli","gunship","manpads","mobile_aa","riflemen"],
+            artillery: ["paladin","rocket_artillery","tank_destroyer","mlrs","at_team","heavy_mg","riflemen"]
         };
         var avail = this.CATALOG.filter(function(e) {
             return e.minWave <= w && e.type !== "combat_medic";
