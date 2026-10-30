@@ -325,3 +325,13 @@ button:hover::after { transform: translateX(100%); }
   .panel { padding: 32px 20px; }
   .panel h1 { font-size: 28px; }
 }
+
+/* Visual polish: restrained gothic atmosphere */
+.panel{box-shadow:0 24px 70px rgba(0,0,0,.72),0 0 0 1px rgba(179,85,104,.24);backdrop-filter:blur(7px)}
+.bat-icon{filter:drop-shadow(0 0 12px rgba(236,88,132,.55))}
+#hud{filter:drop-shadow(0 6px 17px rgba(0,0,0,.45))}
+.track{box-shadow:inset 0 2px 5px rgba(0,0,0,.5)}
+.fill{transition:width .24s ease;box-shadow:inset 0 1px rgba(255,255,255,.16)}
+#actionHint,#eventBox{text-shadow:0 2px 6px rgba(0,0,0,.8)}
+button:focus-visible,a:focus-visible{outline:2px solid #efa7b7;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.fill{transition:none!important}}
