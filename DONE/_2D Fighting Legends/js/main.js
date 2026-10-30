@@ -117,6 +117,9 @@ class Player {
         this.attackTimer    = 0;
         this.attackCooldown = 0;
         this.hitThisSwing   = false;
+        this.guarding = false;
+        this.guardMeter = 100;
+        this.guardBroken = 0;
 
         this.health    = 100;
         this.hurtFlash = 0;
@@ -176,7 +179,7 @@ class Player {
 
     // Lancer une attaque (normale ou chargée)
     attack(charged) {
-        if (this.attackCooldown > 0 || this.isAttacking) return;
+        if (this.attackCooldown > 0 || this.isAttacking || this.guarding) return;
         this.isAttacking    = true;
         this.attackTimer    = charged ? 22 : 16;
         this.attackCooldown = charged ? 45 : 30;
@@ -197,6 +200,19 @@ class Player {
 
     // Recevoir un coup
     takeDamage(dmg, attacker = null) {
+        const incomingFromFront = attacker && (attacker.x - this.x) * this.facing >= -15;
+        if (this.guarding && this.guardBroken <= 0 && incomingFromFront) {
+            const cost = Math.ceil(dmg * 2.1);
+            const prevented = this.guardMeter >= cost ? .80 : .35;
+            this.guardMeter = Math.max(0, this.guardMeter - cost);
+            dmg = Math.max(1, Math.ceil(dmg * (1 - prevented)));
+            spawnParticles(this.x + this.width/2 + this.facing*22, this.y + 30, '#61dfff', 15);
+            if (this.guardMeter <= 0) {
+                this.guardBroken = 105;
+                this.guarding = false;
+                spawnParticles(this.x + this.width/2, this.y + 20, '#ffbe5e', 20);
+            }
+        }
         this.health    = Math.max(0, this.health - dmg);
         this.hurtFlash = 12;
         this.knockX    = -this.facing * 9;
@@ -211,6 +227,9 @@ class Player {
 
     // Mise à jour
     update() {
+        if (this.guardBroken > 0) this.guardBroken--;
+        if (!this.guarding && this.guardBroken === 0) this.guardMeter = Math.min(100, this.guardMeter + 0.32);
+        if (this.guarding) this.velocityX *= .45;
         if (this.attackCooldown > 0) this.attackCooldown--;
         if (this.attackTimer    > 0) {
             this.attackTimer--;
@@ -506,6 +525,9 @@ class Player {
         this.attackTimer    = 0;
         this.attackCooldown = 0;
         this.hitThisSwing   = false;
+        this.guarding = false;
+        this.guardMeter = 100;
+        this.guardBroken = 0;
         this.hurtFlash      = 0;
         this.knockX         = 0;
         this.walkCycle      = 0;
@@ -526,7 +548,7 @@ const player1 = new Player(
     100,
     '#ff5555',
     '#ff2200',
-    { left: 'q', right: 'd', jump: 'z', attack: 's', dash: 'a' },
+    { left: 'q', right: 'd', jump: 'z', attack: 's', dash: 'a', guard: 'e' },
     'P1'
 );
 
@@ -534,7 +556,7 @@ const player2 = new Player(
     GAME_WIDTH - 146,
     '#5588ff',
     '#2255ff',
-    { left: 'arrowleft', right: 'arrowright', jump: 'arrowup', attack: 'arrowdown', dash: '/' },
+    { left: 'arrowleft', right: 'arrowright', jump: 'arrowup', attack: 'arrowdown', dash: '/', guard: 'shift' },
     'P2'
 );
 
@@ -650,6 +672,7 @@ function drawBackground() {
 
 // TRAITEMENT INPUTS
 function handleInputs(p) {
+    p.guarding = !!keys[p.keys.guard] && p.guardBroken === 0 && p.guardMeter > 0 && !p.isAttacking;
     if (keys[p.keys.left])  { p.velocityX = -p.speed; p.facing = -1; }
     if (keys[p.keys.right]) { p.velocityX =  p.speed; p.facing =  1; }
 
@@ -670,22 +693,22 @@ function handleInputs(p) {
     }
 
     // Dash
-    if (keysDown[p.keys.dash]) {
+    if (!p.guarding && keysDown[p.keys.dash]) {
         p.dash();
         safeSoundDash();
         keysDown[p.keys.dash] = false;
     }
 
     // Coup chargé
-    if (keys[p.keys.attack] && !p.isAttacking) {
+    if (!p.guarding && keys[p.keys.attack] && !p.isAttacking) {
         p.chargeTimer++;
         p.isCharging = false;
         if (p.chargeTimer % 8 === 0) safeSoundChargeTick(Math.min(p.chargeTimer / 40, 1));
         if (p.chargeTimer === 40)    safeSoundChargeReady();
-    } else if (!keys[p.keys.attack] && p.chargeTimer > 0 && !p.isAttacking) {
+    } else if (!keys[p.keys.attack] && p.chargeTimer > 0 && !p.isAttacking && !p.guarding) {
         p.attack(p.chargeTimer >= 40);
         p.chargeTimer = 0;
-    } else if (p.isAttacking) {
+    } else if (p.isAttacking || p.guarding) {
         p.chargeTimer = 0;
     }
 }
@@ -771,6 +794,20 @@ function gameLoop() {
 
         player1.draw();
         player2.draw();
+        // Directional shield and guard stamina indicators
+        [player1, player2].forEach(p => {
+            const barX = p.x - 2, barY = p.y - 14;
+            ctx.fillStyle = '#10202c'; ctx.fillRect(barX, barY, p.width + 4, 5);
+            ctx.fillStyle = p.guardBroken > 0 ? '#ff6040' : '#5bd8ff';
+            ctx.fillRect(barX, barY, (p.width + 4) * p.guardMeter / 100, 5);
+            if (p.guarding) {
+                ctx.save();
+                ctx.strokeStyle = '#8ae9ff'; ctx.lineWidth = 4; ctx.shadowColor = '#37d6ff'; ctx.shadowBlur = 16;
+                ctx.beginPath(); ctx.arc(p.x + p.width/2 + p.facing*17, p.y + 41, 29, -.9, .9);
+                ctx.stroke();ctx.restore();
+            }
+        });
+
 
         drawHitFlash();
 
