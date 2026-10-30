@@ -603,3 +603,12 @@ body::after {
    Les éléments HTML #hud-panel / #hud-nav sont masqués pour éviter
    le double rendu et les conflits d'affichage. ── */
 #hud-panel, #hud-title, .hud-btn, #hud-nav, .nav-btn { display: none !important; }
+
+/* Military sci-fi interface contrast and focus */
+.menu-title{text-shadow:0 0 24px rgba(97,197,245,.4),0 4px 24px rgba(0,0,0,.65)}
+.map-card{box-shadow:0 14px 32px rgba(0,0,0,.3);transition:transform .18s ease,box-shadow .18s ease}
+.map-card:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(0,0,0,.45),0 0 0 1px rgba(119,210,255,.35)}
+.menu-btn{transition:transform .16s ease,filter .16s ease}
+.menu-btn:hover:not(:disabled){filter:brightness(1.15)}
+button:focus-visible{outline:2px solid #95eaff;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.map-card,.menu-btn{transition:none!important}.map-card:hover{transform:none!important}}
