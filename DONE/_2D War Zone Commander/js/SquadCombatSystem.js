@@ -177,6 +177,8 @@ RTS.SquadCombatSystem = {
         var proj = {
             type:         type,
             team:         squad.team,
+            originX:      shooter.x,
+            originY:      shooter.y,
             x:            shooter.x,
             y:            shooter.y,
             targetMember: target,
