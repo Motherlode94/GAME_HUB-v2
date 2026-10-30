@@ -37,6 +37,11 @@ const WEAPONS_DATA = {
     smg:     { label: 'SMG',     icon: '▸', color: '#a5f27b', fireRate: 4, ammoMax: 160, ammoGrant: 100, bulletSpeed: 16, spread: 0.11, pellets: 1, damage: 1 },
     dmr:     { label: 'DMR',     icon: '⌖', color: '#dbb6ff', fireRate: 28, ammoMax: 36, ammoGrant: 24, bulletSpeed: 24, spread: 0.01, pellets: 1, damage: 4 },
     lmg:     { label: 'LMG',     icon: '▰', color: '#ffca78', fireRate: 9, ammoMax: 220, ammoGrant: 120, bulletSpeed: 15, spread: 0.13, pellets: 1, damage: 2 },
+    carbine: { label: 'CARBINE', icon: '▸', color: '#a3d5ff', fireRate: 6, ammoMax: 120, ammoGrant: 80, bulletSpeed: 18, spread: 0.055, pellets: 1, damage: 2 },
+    revolver:{ label: 'REVOLVER',icon: '◎', color: '#ffec9a', fireRate: 24, ammoMax: 36, ammoGrant: 24, bulletSpeed: 20, spread: 0.012, pellets: 1, damage: 4 },
+    marksman:{label: 'SNIPER',  icon: '⌖', color: '#e7b6ff', fireRate: 42, ammoMax: 20, ammoGrant: 12, bulletSpeed: 27, spread: 0, pellets: 1, damage: 6 },
+    auto_shotgun:{ label:'AUTO SG',icon:'✦',color:'#ffa478',fireRate: 13,ammoMax: 32,ammoGrant: 20,bulletSpeed: 13,spread: 0.36,pellets: 6,damage: 1 },
+    burst_rifle:{label:'BURST',icon:'≡',color:'#9cffbe',fireRate: 17,ammoMax: 100,ammoGrant: 60,bulletSpeed: 17,spread: 0.08,pellets: 3,damage: 1 },
 };
 
 // ── Resize ─────────────────────────────────────────
@@ -204,6 +209,11 @@ const POWERUP_TYPES = [
     { id: 'wpn_smg',        color: '#a5f27b', label: 'SMG', icon: 'SM' },
     { id: 'wpn_dmr',        color: '#dbb6ff', label: 'DMR', icon: 'DM' },
     { id: 'wpn_lmg',        color: '#ffca78', label: 'LMG', icon: 'LM' },
+    { id: 'wpn_carbine', color:'#a3d5ff',label:'CARBINE',icon:'CB' },
+    { id: 'wpn_revolver', color:'#ffec9a',label:'REVOLVER',icon:'RV' },
+    { id: 'wpn_marksman', color:'#e7b6ff',label:'SNIPER',icon:'SN' },
+    { id: 'wpn_auto_shotgun', color:'#ffa478',label:'AUTO SG',icon:'AS' },
+    { id: 'wpn_burst_rifle', color:'#9cffbe',label:'BURST',icon:'BR' },
 ];
 
 class PowerUp {
@@ -266,9 +276,14 @@ function spawnPowerUp(x, y, forceAmmo) {
     else if (r < 0.80)   { typeId = 'wpn_shotgun'; }
     else if (r < 0.88)   { typeId = 'wpn_rocket'; }
     else if (r < 0.93)   { typeId = 'wpn_laser'; }
-    else if (r < 0.955)  { typeId = 'wpn_smg'; }
-    else if (r < 0.975)  { typeId = 'wpn_dmr'; }
-    else if (r < 0.995)  { typeId = 'wpn_lmg'; }
+    else if (r < 0.945)  { typeId = 'wpn_smg'; }
+    else if (r < 0.96)   { typeId = 'wpn_dmr'; }
+    else if (r < 0.972)  { typeId = 'wpn_lmg'; }
+    else if (r < 0.978)  { typeId = 'wpn_carbine'; }
+    else if (r < 0.984)  { typeId = 'wpn_revolver'; }
+    else if (r < 0.990)  { typeId = 'wpn_marksman'; }
+    else if (r < 0.994)  { typeId = 'wpn_auto_shotgun'; }
+    else if (r < 0.997)  { typeId = 'wpn_burst_rifle'; }
     else                  { typeId = 'nuke'; }
     powerups.push(new PowerUp(x, y, typeId));
 }
