@@ -10,9 +10,11 @@ RTS.SquadAISystem = {
             red._decisionTimer = (red._decisionTimer || 0) - delta;
             if (red._decisionTimer > 0) return;
             red._decisionTimer = 0.65 + (red.id % 5) * 0.13;
-            var range = red.def.attackRange || 80, min = red.def.minRange || 0;
+            var reconOnly = red.def.combatMode === "none";
+            var range = reconOnly ? 260 : (red.def.attackRange || 80), min = red.def.minRange || 0;
             var best = null, score = Infinity, distance = 0;
             enemies.forEach(function(t) {
+                if (red.def.antiAirOnly && (!t.def || t.def.category !== "air")) return;
                 var d = Math.hypot(t.x - red.x, t.y - red.y);
                 var threat = t.def && t.def.category === "vehicle" ? 0.95 : 1;
                 var hp = t.getTotalHp && t.getMaxHp ? t.getTotalHp() / Math.max(1, t.getMaxHp()) : 1;
@@ -30,6 +32,8 @@ RTS.SquadAISystem = {
             } else if (min > 0 && distance < min * 1.15) {
                 tx = red.x + nx * (min - distance + 65);
                 ty = red.y + ny * (min - distance + 65);
+            } else if (reconOnly && distance < 230) {
+                tx = red.x + nx * 220; ty = red.y + ny * 220;
             } else if (distance > range * 0.86) {
                 // Alternating group flanks instead of piling up at the same point.
                 var side = red.id % 2 ? 1 : -1;
