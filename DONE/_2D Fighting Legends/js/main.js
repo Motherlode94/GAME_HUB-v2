@@ -583,7 +583,8 @@ const player2 = new Player(
 
 function setupPlayersFromUI() {
     const p1Name = p1NameInput.value.trim();
-    const p2Name = p2NameInput.value.trim();
+    const solo = !!document.getElementById('solo-ai')?.checked;
+    const p2Name = solo ? (p2NameInput.value.trim() || 'IA') : p2NameInput.value.trim();
 
     updateCharacterPreview('P1');
     updateCharacterPreview('P2');
@@ -595,6 +596,7 @@ function setupPlayersFromUI() {
 
     player1.playerName = p1Name;
     player2.playerName = p2Name;
+    window.fightingSoloAI = solo;
     player1.applyCharacter(presetById(p1CharacterSelect.value));
     player2.applyCharacter(presetById(p2CharacterSelect.value));
     setupErrorEl.textContent = '';
@@ -737,6 +739,27 @@ function handleInputs(p) {
 }
 
 
+// Solo mode is part of the original game; no second build is required.
+function handleSoloAI(bot, target) {
+    const difficulty = document.getElementById('ai-difficulty')?.value || 'normal';
+    const reaction = difficulty === 'hard' ? 0.88 : difficulty === 'easy' ? 0.38 : 0.65;
+    const dx = target.x - bot.x;
+    const distance = Math.abs(dx);
+    bot.guarding = false;
+    if (target.isAttacking && distance < target.attackReach + 50 && bot.guardBroken === 0 && Math.random() < reaction * .12) {
+        bot.guarding = true;
+        bot.guardWindow = Math.max(bot.guardWindow, 5);
+    }
+    if (distance > bot.attackReach * .68 && !bot.guarding) bot.velocityX = Math.sign(dx) * bot.speed * (difficulty === 'hard' ? 0.92 : 0.68);
+    else if (distance < 34 && !bot.guarding) bot.velocityX = -Math.sign(dx) * bot.speed * .38;
+    if (distance < bot.attackReach + 18 && bot.attackCooldown <= 0 && !bot.guarding && Math.random() < reaction * .085) {
+        bot.attack(difficulty === 'hard' && Math.random() < .25);
+    }
+    if (difficulty !== 'easy' && distance > 140 && bot.onGround && Math.random() < .006) {
+        bot.velocityY = bot.jumpForce;bot.onGround = false;
+    }
+}
+
 // BOUCLE DE JEU
 function gameLoop() {
     ctx.resetTransform();
@@ -777,7 +800,8 @@ function gameLoop() {
         if (newSec !== prevSec && newSec <= 10 && newSec > 0) safeSoundTimerBeep();
 
         handleInputs(player1);
-        handleInputs(player2);
+        if (window.fightingSoloAI) handleSoloAI(player2, player1);
+        else handleInputs(player2);
 
         // Facing automatique
         if (player1.x < player2.x) { player1.facing =  1; player2.facing = -1; }
