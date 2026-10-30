@@ -1,25 +1,38 @@
-﻿// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-//  2D BASKET SIM â€” script.js  (v2 â€” Enhanced)
-//  â€¢ Physics: realistic spin, multi-bounce, backboard angles
-//  â€¢ Modes: Classic | Precision (10 shots) | Survival (lives + moving hoop)
-//  â€¢ Visuals: flame trail, animated net, flash on score, screen shake++
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+﻿// ══════════════════════════════════════════════════════════════
+//  2D BASKET SIM — script.js  (v3)
+//  • Physics: spin, rim/backboard bounces, ball drops through the net
+//  • Modes: Classic (30 s + time bonus + buzzer beater)
+//           Precision (10 shots, distance rises)
+//           Survival (3 lives, moving hoop, wind)
+//  • Points from the real shot distance, matching the court zones
+// ══════════════════════════════════════════════════════════════
 
 const canvas = document.getElementById("gameCanvas");
 const ctx    = canvas.getContext("2d");
-canvas.width  = 820;
-canvas.height = 520;
 
-const W = canvas.width;
-const H = canvas.height;
+const W = 820;
+const H = 520;
 
-// â”€â”€ Audio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Crisp rendering on high-DPI screens (game logic stays in W×H units)
+function setupCanvasResolution() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    courtCache = null;
+}
+window.addEventListener("resize", setupCanvasResolution);
+
+// ── Audio ──────────────────────────────────────────────────────
 let audioCtx = null;
+let muted = false;
 function getAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
     return audioCtx;
 }
 function playTone(freq, dur = 0.1, type = "sine", vol = 0.35, delay = 0) {
+    if (muted) return;
     try {
         const ac   = getAudio();
         const osc  = ac.createOscillator();
@@ -35,7 +48,6 @@ function playTone(freq, dur = 0.1, type = "sine", vol = 0.35, delay = 0) {
 }
 function soundScore(pts, swish) {
     if (swish) {
-        // Clean whoosh for swish
         playTone(900,.06,"sine",.3,0); playTone(1200,.08,"sine",.35,.06);
         playTone(1600,.12,"sine",.4,.13);
     }
@@ -48,13 +60,29 @@ function soundScore(pts, swish) {
         playTone(523,.12,"sine",.4,0); playTone(660,.15,"sine",.4,.1);
     }
 }
-function soundMiss()    { playTone(200,.22,"sawtooth",.25); playTone(160,.2,"sawtooth",.2,.1); }
-function soundBounce()  { playTone(280 + Math.random()*60,.07,"sine",.18); }
+function soundMiss()     { playTone(200,.22,"sawtooth",.25); playTone(160,.2,"sawtooth",.2,.1); }
+function soundBounce()   { playTone(280 + Math.random()*60,.07,"sine",.18); }
 function soundBackboard(){ playTone(180,.12,"square",.2); }
-function soundCombo(n)  { playTone(440 + n*55,.09,"sine",.28); }
-function soundLifeLost(){ playTone(150,.3,"sawtooth",.35); playTone(100,.4,"sawtooth",.3,.25); }
+function soundCombo(n)   { playTone(440 + n*55,.09,"sine",.28); }
+function soundLifeLost() { playTone(150,.3,"sawtooth",.35); playTone(100,.4,"sawtooth",.3,.25); }
+function soundBuzzer()   { playTone(110,.7,"square",.25); playTone(116,.7,"square",.2); }
+function soundTick()     { playTone(1000,.04,"square",.12); }
 
-// â”€â”€ Particles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Scheduled callbacks (cleared on restart/menu) ──────────────
+let pendingTimers = [];
+function schedule(fn, ms) {
+    const id = setTimeout(() => {
+        pendingTimers = pendingTimers.filter(t => t !== id);
+        fn();
+    }, ms);
+    pendingTimers.push(id);
+}
+function clearScheduled() {
+    pendingTimers.forEach(clearTimeout);
+    pendingTimers = [];
+}
+
+// ── Particles ──────────────────────────────────────────────────
 const particles = [];
 
 function spawnParticles(x, y, color, count = 10, speed = 4) {
@@ -103,6 +131,21 @@ function spawnStars(x, y, count = 8) {
     }
 }
 
+function spawnConfetti(count = 40) {
+    const colors = ["#FF8C00", "#00e5ff", "#ffd60a", "#ff4d6d", "#7CFC00"];
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * W, y: -10 - Math.random() * 60,
+            vx: (Math.random()-.5) * 2, vy: 1 + Math.random() * 2,
+            life: 1, decay: .006 + Math.random() * .006,
+            size: 4 + Math.random() * 4,
+            color: colors[i % colors.length],
+            type: "confetti",
+            angle: Math.random() * Math.PI, spin: (Math.random()-.5) * .3
+        });
+    }
+}
+
 function spawnRipple(x, y) {
     particles.push({ x, y, vx:0, vy:0, life:1, decay:.035, size:1, color:"#FF8C00", type:"ripple", r:5 });
 }
@@ -120,12 +163,12 @@ function spawnSwishTrail(x, y) {
 
 // Ball flame trail
 const ballTrail = [];
-function updateBallTrail() {
+function updateBallTrail(dt) {
     if (ball.isMoving && combo >= 3) {
         ballTrail.push({ x: ball.x, y: ball.y, life: 1 });
     }
     for (let i = ballTrail.length-1; i >= 0; i--) {
-        ballTrail[i].life -= .08;
+        ballTrail[i].life -= .08 * dt;
         if (ballTrail[i].life <= 0) ballTrail.splice(i,1);
     }
 }
@@ -134,11 +177,12 @@ function updateParticles(dt) {
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * dt; p.y += p.vy * dt;
-        if (p.type !== "flame") p.vy += 0.15 * dt;
-        if (p.type === "star") p.angle += p.spin * dt;
+        if (p.type === "confetti") { p.vx += Math.sin(p.angle) * .05 * dt; }
+        else if (p.type !== "flame") p.vy += 0.15 * dt;
+        if (p.type === "star" || p.type === "confetti") p.angle += p.spin * dt;
         if (p.type === "ripple") p.r += 3 * dt;
         p.life -= p.decay * dt;
-        if (p.life <= 0) particles.splice(i, 1);
+        if (p.life <= 0 || p.y > H + 40) particles.splice(i, 1);
     }
 }
 
@@ -150,6 +194,12 @@ function drawParticles() {
 
         if (p.type === "star") {
             drawStar(ctx, p.x, p.y, 5, p.size * p.life, p.size * p.life * .4, p.angle);
+        } else if (p.type === "confetti") {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+            ctx.restore();
         } else if (p.type === "ripple") {
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
@@ -171,7 +221,6 @@ function drawParticles() {
         }
     });
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = "";
 }
 
 function drawStar(ctx, cx, cy, spikes, outerR, innerR, rotation) {
@@ -186,10 +235,10 @@ function drawStar(ctx, cx, cy, spikes, outerR, innerR, rotation) {
     ctx.fill();
 }
 
-// â”€â”€ Floating score texts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Floating score texts ───────────────────────────────────────
 const floatTexts = [];
 function spawnFloatText(x, y, text, color = "#FF8C00", size = 22) {
-    floatTexts.push({ x, y, text, color, life: 1, vy: -1.8, size });
+    floatTexts.push({ x: Math.max(90, Math.min(W - 90, x)), y, text, color, life: 1, vy: -1.8, size });
 }
 function updateFloatTexts(dt) {
     for (let i = floatTexts.length - 1; i >= 0; i--) {
@@ -210,10 +259,11 @@ function drawFloatTexts() {
         ctx.fillText(f.text, f.x, f.y);
     });
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = "";
 }
 
-// â”€â”€ Highscores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Highscores ─────────────────────────────────────────────────
+const MODE_LABELS = { classic: "CLASSIQUE", precision: "PRÉCISION", survival: "SURVIE" };
+
 function getScores(mode = "classic") {
     try { return JSON.parse(localStorage.getItem(`basket_scores_${mode}`)) || []; }
     catch { return []; }
@@ -223,24 +273,33 @@ function saveScore(s, mode = "classic") {
     scores.push(s);
     scores.sort((a, b) => b - a);
     scores.length = Math.min(scores.length, 5);
-    localStorage.setItem(`basket_scores_${mode}`, JSON.stringify(scores));
+    try { localStorage.setItem(`basket_scores_${mode}`, JSON.stringify(scores)); } catch {}
 }
 function renderTitleScores() {
     const el = document.getElementById("titleHsList");
     if (!el) return;
     const mode = selectedMode || "classic";
     const scores = getScores(mode);
-    if (!scores.length) { el.innerHTML = '<p style="color:#555;font-size:.9em">Aucun score encore</p>'; return; }
-    el.innerHTML = scores.map((s, i) =>
+    const head = `<p class="hs-mode">${MODE_LABELS[mode]}</p>`;
+    if (!scores.length) { el.innerHTML = head + '<p class="hs-empty">Aucun score encore</p>'; return; }
+    el.innerHTML = head + scores.map((s, i) =>
         `<div class="hs-row"><span>#${i+1}</span><span>${s} pts</span></div>`
     ).join("");
 }
 
-// â”€â”€ Game constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Game constants ──────────────────────────────────────────────
 const GRAVITY   = 0.38;
 const GAME_TIME = 30;
+const FLOOR_Y   = H * 0.72;
+const MAX_POWER = 18;
+const POWER_K   = 0.065;
+const SHOT_TIMEOUT = 420;     // frames (~7 s) before a stuck shot counts as a miss
 
-// â”€â”€ Hoop config (can move in survival) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Distance zones, measured from the point under the hoop (hoop.x, H)
+const ZONE_2PT = 280;
+const ZONE_3PT = 430;
+
+// ── Hoop config (can move in survival) ─────────────────────────
 const BASE_HOOP = { x: 650, y: 220 };
 let hoopConfig = {};
 function resetHoop(x, y) {
@@ -252,33 +311,56 @@ function resetHoop(x, y) {
         rimLeft:  0,
         rimRight: 0,
         backboard: { x: 0, y: 0, w: 12, h: 90 },
-        // Survival: movement
-        vx: 0,
-        vy: 0,
-        // Net animation
-        netPhase: 0
+        movePhase: 0,
+        netPhase: 0,
+        netStretch: 0     // 0..1, net pulled down when the ball goes through
     };
+    syncHoopGeometry();
+}
+function syncHoopGeometry() {
     hoopConfig.rimLeft  = hoopConfig.x - hoopConfig.innerW / 2;
     hoopConfig.rimRight = hoopConfig.x + hoopConfig.innerW / 2;
     hoopConfig.backboard.x = hoopConfig.x + hoopConfig.innerW/2 + 30;
     hoopConfig.backboard.y = hoopConfig.y - 40;
 }
 
-// â”€â”€ Ball spawn â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const SPAWN_SPOTS = [
-    { x: 100, y: 420 },
-    { x: 180, y: 440 },
-    { x: 250, y: 420 },
-    { x: 80,  y: 380 },
-    { x: 320, y: 430 },
-];
+// ── Shot spots ──────────────────────────────────────────────────
+function distFromHoop(x, y) {
+    return Math.hypot(x - hoopConfig.x, y - H);
+}
+function zonePoints(x, y) {
+    const d = distFromHoop(x, y);
+    return d > ZONE_3PT ? 3 : d > ZONE_2PT ? 2 : 1;
+}
+function randomSpot() {
+    // Precision: distance rises shot after shot. Other modes: random zone.
+    let zone;
+    if (selectedMode === "precision") {
+        const done = 10 - precisionShotsLeft;
+        zone = done < 3 ? 1 : done < 7 ? 2 : 3;
+    } else {
+        const r = Math.random();
+        zone = r < .3 ? 1 : r < .7 ? 2 : 3;
+    }
+    const y = 395 + Math.random() * 50;
+    const dy = H - y;
+    const ranges = { 1: [150, ZONE_2PT - 25], 2: [ZONE_2PT + 25, ZONE_3PT - 25], 3: [ZONE_3PT + 25, 620] };
+    const [dMin, dMax] = ranges[zone];
+    const maxX = BASE_HOOP.x - (selectedMode === "survival" ? 180 : 120);
+    for (let i = 0; i < 20; i++) {
+        const d = dMin + Math.random() * (dMax - dMin);
+        const x = BASE_HOOP.x - Math.sqrt(Math.max(0, d*d - dy*dy));
+        if (x > 60 && x < maxX) return { x, y };
+    }
+    return { x: 60 + Math.random() * (maxX - 60), y };
+}
 
-// â”€â”€ Game state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Game state ──────────────────────────────────────────────────
 let ball, score, highscore, combo, maxCombo;
-let shotsTaken, basketsMade, swishCount, timeLeft, timerInterval;
-let gameRunning, gameStarted, lastTime;
+let shotsTaken, basketsMade, swishCount, threesMade, timeLeft;
+let gameRunning, gameStarted, paused, lastTime;
 let mouseX, mouseY, aiming;
-let currentSpot, streakHistory;
+let streakHistory;
 let shakeTimer  = 0;
 let shakeAmount = 0;
 let flashTimer  = 0;
@@ -286,8 +368,13 @@ let flashColor  = "rgba(255,140,0,0)";
 let selectedMode = "classic";
 let lives = 3;
 let precisionShotsLeft = 10;
+let wind = 0;
+let crowdHype = 0;
+let timeUp = false;
+let lastTickSecond = 0;
+let courtCache = null;
 
-// â”€â”€ Mode selection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Mode selection ──────────────────────────────────────────────
 function selectMode(mode) {
     selectedMode = mode;
     document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("active"));
@@ -295,40 +382,55 @@ function selectMode(mode) {
     renderTitleScores();
 }
 
-// â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Reset ───────────────────────────────────────────────────────
 function resetBall() {
-    const spot = SPAWN_SPOTS[currentSpot % SPAWN_SPOTS.length];
+    const spot = randomSpot();
     ball = {
         x: spot.x, y: spot.y,
+        startX: spot.x, startY: spot.y,
         vx: 0, vy: 0,
         radius: 16,
         isMoving: false,
-        spin: 0,          // angular velocity (rad/frame)
-        angle: 0,         // visual rotation
-        bounceCount: 0,
-        rimHits: 0,       // count rim hits this shot (swish = 0)
+        spin: 0,
+        angle: 0,
+        rimHits: 0,       // rim/backboard contacts this shot (swish = 0)
         passedAboveHoop: false,
         scored: false,
-        dead: false
+        resolved: false,  // score or miss already handled
+        flightTime: 0
     };
+    if (selectedMode === "survival") rollWind();
+}
+
+function rollWind() {
+    // Wind kicks in after 6 baskets in survival
+    if (basketsMade < 6) { wind = 0; return; }
+    const max = Math.min(0.012 + (basketsMade - 6) * 0.002, 0.03);
+    wind = (Math.random() * 2 - 1) * max;
 }
 
 function resetGame() {
+    clearScheduled();
     score         = 0;
     combo         = 1;
     maxCombo      = 1;
     shotsTaken    = 0;
     basketsMade   = 0;
     swishCount    = 0;
+    threesMade    = 0;
     timeLeft      = GAME_TIME;
+    lastTickSecond = GAME_TIME;
+    timeUp        = false;
     gameRunning   = true;
-    currentSpot   = 0;
+    paused        = false;
     streakHistory = [];
     shakeTimer    = 0;
     shakeAmount   = 0;
     flashTimer    = 0;
     lives         = 3;
     precisionShotsLeft = 10;
+    wind          = 0;
+    crowdHype     = 0;
     particles.length   = 0;
     floatTexts.length  = 0;
     ballTrail.length   = 0;
@@ -337,55 +439,29 @@ function resetGame() {
     mouseX        = 0; mouseY = 0;
 
     resetHoop();
-
-    // Survival: hoop starts moving after wave 2
-    if (selectedMode === "survival") {
-        hoopConfig.vx = 0; hoopConfig.vy = 0;
-    }
-
     resetBall();
     updateHUD();
     setMsg(getModeStartMsg());
     updateStreakDisplay();
+    document.getElementById("hTimer").classList.remove("timer-low");
 
-    // HUD tweaks per mode
     const timerCell = document.getElementById("hudTimerCell");
     const livesCell = document.getElementById("hudLivesCell");
-    const shotCell  = document.getElementById("hudShotCell");
-    if (selectedMode === "precision") {
-        timerCell.classList.add("hidden");
-        livesCell.classList.add("hidden");
-        shotCell.classList.remove("hidden");
-        clearInterval(timerInterval);
-    } else if (selectedMode === "survival") {
-        timerCell.classList.add("hidden");
-        livesCell.classList.remove("hidden");
-        shotCell.classList.remove("hidden");
-        clearInterval(timerInterval);
-    } else {
-        timerCell.classList.remove("hidden");
-        livesCell.classList.add("hidden");
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            if (!gameRunning) return;
-            timeLeft--;
-            updateHUD();
-            if (timeLeft <= 5) document.getElementById("hTimer").classList.add("timer-low");
-            if (timeLeft <= 0) endGame();
-        }, 1000);
-    }
+    timerCell.classList.toggle("hidden", selectedMode !== "classic");
+    livesCell.classList.toggle("hidden", selectedMode !== "survival");
 
     const tag = document.getElementById("modeTag");
-    if (tag) tag.textContent = { classic:"â± CLASSIQUE", precision:"ðŸŽ¯ PRÃ‰CISION", survival:"ðŸ’€ SURVIE" }[selectedMode] || "";
+    if (tag) tag.textContent = { classic:"⏱ CLASSIQUE", precision:"🎯 PRÉCISION", survival:"💀 SURVIE" }[selectedMode] || "";
+    updatePauseButton();
 }
 
 function getModeStartMsg() {
-    if (selectedMode === "precision") return `ðŸŽ¯ ${precisionShotsLeft} tirs â€” vise parfait !`;
-    if (selectedMode === "survival")  return "ðŸ’€ 3 ratÃ©s et c'est fini !";
-    return "Clique pour tirer !";
+    if (selectedMode === "precision") return `🎯 ${precisionShotsLeft} tirs — de plus en plus loin !`;
+    if (selectedMode === "survival")  return "💀 3 ratés et c'est fini !";
+    return "Clique pour tirer ! Swish = +2 s, 3 pts = +1 s";
 }
 
-// â”€â”€ UI helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── UI helpers ──────────────────────────────────────────────────
 function setMsg(text) {
     const el = document.getElementById("msgLine");
     if (el) el.textContent = text;
@@ -403,10 +479,10 @@ function updateHUD() {
     document.getElementById("hShots").textContent = selectedMode === "precision"
         ? `${precisionShotsLeft} rest.`
         : shotsTaken;
-    document.getElementById("hTimer").textContent = timeLeft;
+    document.getElementById("hTimer").textContent = Math.max(0, Math.ceil(timeLeft));
     const livEl = document.getElementById("hLives");
     if (livEl) {
-        livEl.textContent = "â¤ï¸".repeat(lives) + "ðŸ–¤".repeat(Math.max(0, 3-lives));
+        livEl.textContent = "❤️".repeat(lives) + "🖤".repeat(Math.max(0, 3-lives));
         livEl.className = "hud-val lives-val" + (lives <= 1 ? " lives-danger" : "");
     }
 }
@@ -418,18 +494,19 @@ function updateStreakDisplay() {
         `<div class="streak-dot ${v === 'swish' ? 'swish' : v ? 'hit' : 'miss'}"></div>`
     ).join("");
 }
+function updatePauseButton() {
+    const btn = document.getElementById("pauseBtn");
+    if (btn) btn.textContent = paused ? "REPRENDRE" : "PAUSE";
+}
 
-// â”€â”€ Mouse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Input pointer (desktop + mobile)
+// ── Input ───────────────────────────────────────────────────────
 let activePointerId = null;
 
 function getCanvasCoords(clientX, clientY) {
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
     return {
-        x: (clientX - rect.left) * scaleX,
-        y: (clientY - rect.top) * scaleY
+        x: (clientX - rect.left) * (W / rect.width),
+        y: (clientY - rect.top)  * (H / rect.height)
     };
 }
 
@@ -439,24 +516,35 @@ function updateAimFromClientPoint(clientX, clientY) {
     mouseY = p.y;
 }
 
+function canShoot() {
+    return gameRunning && !paused && !timeUp && !ball.isMoving && !ball.resolved;
+}
+
+function launchVelocity(tx, ty) {
+    const dx  = tx - ball.x;
+    const dy  = ty - ball.y;
+    const mag = Math.hypot(dx, dy);
+    if (mag < 4) return null;
+    const power = Math.min(mag * POWER_K, MAX_POWER);
+    return { vx: (dx / mag) * power, vy: (dy / mag) * power, mag };
+}
+
 function shootTowardClientPoint(clientX, clientY) {
-    if (!gameRunning || ball.isMoving) return;
+    if (!canShoot()) return;
 
     const p = getCanvasCoords(clientX, clientY);
-    const dx  = p.x - ball.x;
-    const dy  = p.y - ball.y;
-    const mag = Math.hypot(dx, dy);
-    if (mag < 4) return;
+    const v = launchVelocity(p.x, p.y);
+    if (!v) return;
 
-    const power = Math.min(mag * 0.065, 18);
-    ball.vx = (dx / mag) * power;
-    ball.vy = (dy / mag) * power;
-
-    // Spin based on horizontal component (more realistic)
+    ball.vx = v.vx;
+    ball.vy = v.vy;
     ball.spin = ball.vx * 0.14 + (Math.random()-.5) * 0.05;
-
+    ball.startX = ball.x;
+    ball.startY = ball.y;
+    ball.shotPts = zonePoints(ball.x, ball.y);
     ball.isMoving = true;
     ball.rimHits  = 0;
+    ball.flightTime = 0;
     aiming        = false;
     shotsTaken++;
 
@@ -470,7 +558,8 @@ function shootTowardClientPoint(clientX, clientY) {
 
 if (window.PointerEvent) {
     canvas.addEventListener("pointerdown", e => {
-        if (!gameRunning || ball.isMoving) return;
+        if (paused) { togglePause(); e.preventDefault(); return; }
+        if (!canShoot()) return;
         activePointerId = e.pointerId;
         updateAimFromClientPoint(e.clientX, e.clientY);
         aiming = true;
@@ -481,12 +570,12 @@ if (window.PointerEvent) {
     canvas.addEventListener("pointermove", e => {
         if (e.pointerType === "mouse" || activePointerId === e.pointerId) {
             updateAimFromClientPoint(e.clientX, e.clientY);
-            if (!ball.isMoving && gameRunning) aiming = true;
+            if (canShoot()) aiming = true;
         }
     });
 
     canvas.addEventListener("pointerup", e => {
-        if (activePointerId !== null && e.pointerId !== activePointerId) return;
+        if (activePointerId === null || e.pointerId !== activePointerId) return;
         shootTowardClientPoint(e.clientX, e.clientY);
         activePointerId = null;
         aiming = false;
@@ -502,72 +591,95 @@ if (window.PointerEvent) {
         if (e.pointerType === "mouse") aiming = false;
     });
 } else {
-    // Fallback for old browsers
     canvas.addEventListener("mousemove", e => {
         updateAimFromClientPoint(e.clientX, e.clientY);
-        if (!ball.isMoving && gameRunning) aiming = true;
+        if (canShoot()) aiming = true;
     });
     canvas.addEventListener("mouseleave", () => { aiming = false; });
     canvas.addEventListener("click", e => {
+        if (paused) { togglePause(); return; }
         shootTowardClientPoint(e.clientX, e.clientY);
     });
 }
 
-function updateHoopMovement(dt) {
-    if (selectedMode !== "survival") return;
-    if (basketsMade < 3) return; // starts moving after 3 baskets
+document.addEventListener("keydown", e => {
+    if (!gameStarted) return;
+    const k = e.key.toLowerCase();
+    if (k === "p" || k === "escape") { togglePause(); e.preventDefault(); }
+    else if (k === "r") restartGame();
+    else if (k === "m") toggleMute();
+});
 
-    const speed = 0.5 + basketsMade * 0.06;
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && gameStarted && gameRunning && !paused) togglePause();
+});
 
-    // Random direction changes
-    if (Math.random() < .01) hoopConfig.vx = (Math.random()-.5) * speed * 2;
-    if (Math.random() < .006) hoopConfig.vy = (Math.random()-.5) * speed;
-
-    hoopConfig.x += hoopConfig.vx * dt;
-    hoopConfig.y += hoopConfig.vy * dt;
-
-    // Bounds
-    const minX = 450, maxX = 720, minY = 160, maxY = 300;
-    if (hoopConfig.x < minX) { hoopConfig.x = minX; hoopConfig.vx = Math.abs(hoopConfig.vx); }
-    if (hoopConfig.x > maxX) { hoopConfig.x = maxX; hoopConfig.vx = -Math.abs(hoopConfig.vx); }
-    if (hoopConfig.y < minY) { hoopConfig.y = minY; hoopConfig.vy = Math.abs(hoopConfig.vy); }
-    if (hoopConfig.y > maxY) { hoopConfig.y = maxY; hoopConfig.vy = -Math.abs(hoopConfig.vy); }
-
-    hoopConfig.rimLeft  = hoopConfig.x - hoopConfig.innerW / 2;
-    hoopConfig.rimRight = hoopConfig.x + hoopConfig.innerW / 2;
-    hoopConfig.backboard.x = hoopConfig.x + hoopConfig.innerW/2 + 30;
-    hoopConfig.backboard.y = hoopConfig.y - 40;
+function togglePause() {
+    if (!gameStarted || !gameRunning) return;
+    paused = !paused;
+    aiming = false;
+    activePointerId = null;
+    lastTime = 0;
+    updatePauseButton();
 }
 
-// â”€â”€ Game loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function toggleMute() {
+    muted = !muted;
+    const btn = document.getElementById("muteBtn");
+    if (btn) btn.textContent = muted ? "🔇" : "🔊";
+}
+
+// ── Survival hoop movement ─────────────────────────────────────
+function updateHoopMovement(dt) {
+    if (selectedMode !== "survival" || basketsMade < 3) return;
+
+    // Smooth figure-eight path; speed and amplitude grow with baskets
+    const level = Math.min(basketsMade - 3, 20);
+    hoopConfig.movePhase += dt * (0.012 + level * 0.0012);
+    const ampX = Math.min(30 + level * 5, 70);
+    const ampY = Math.min(15 + level * 3, 60);
+    hoopConfig.x = BASE_HOOP.x + Math.sin(hoopConfig.movePhase) * ampX;
+    hoopConfig.y = 225 + Math.sin(hoopConfig.movePhase * 2) * ampY;
+    syncHoopGeometry();
+}
+
+// ── Game loop ───────────────────────────────────────────────────
 let animId = null;
 function gameLoop(timestamp) {
     if (!gameStarted) return;
     if (!lastTime) lastTime = timestamp;
     const dt = Math.min((timestamp - lastTime) / 16.666, 3);
     lastTime = timestamp;
-    update(dt);
+    if (!paused) update(dt);
     draw();
     animId = requestAnimationFrame(gameLoop);
 }
 
 function update(dt) {
+    crowdHype = Math.max(0, crowdHype - 0.012 * dt);
+    hoopConfig.netPhase += dt * 0.1;
+    hoopConfig.netStretch = Math.max(0, hoopConfig.netStretch - 0.05 * dt);
+    updateParticles(dt);
+    updateFloatTexts(dt);
+    if (shakeTimer > 0) shakeTimer -= dt;
+    if (flashTimer > 0) flashTimer -= dt;
+
     if (!gameRunning) return;
 
+    updateClock(dt);
     updateHoopMovement(dt);
-    hoopConfig.netPhase += dt * 0.1;
 
     if (ball.isMoving) {
-        // â”€â”€ Physics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        ball.flightTime += dt;
+
         ball.vy += GRAVITY * dt;
+        ball.vx += wind * dt;
         ball.x  += ball.vx * dt;
         ball.y  += ball.vy * dt;
 
-        // Angular velocity follows ball velocity
         ball.spin += (ball.vx * 0.005 - ball.spin) * 0.08 * dt;
         ball.angle += ball.spin * dt;
 
-        // Air drag (very slight)
         ball.vx *= Math.pow(0.998, dt);
         ball.vy *= Math.pow(0.9998, dt);
 
@@ -585,64 +697,104 @@ function update(dt) {
             soundBounce();
         }
 
-        // Floor â€” reset
-        if (ball.y - ball.radius > H) {
-            handleMiss(); return;
+        // Ball left the screen (or got stuck): the shot is over
+        if (ball.y - ball.radius > H || ball.flightTime > SHOT_TIMEOUT) {
+            ball.isMoving = false;
+            if (ball.scored) finishScoredShot();
+            else handleMiss();
+            return;
         }
-
-        // â”€â”€ Backboard collision â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        const bb = hoopConfig.backboard;
-        if (
-            ball.x + ball.radius > bb.x &&
-            ball.x - ball.radius < bb.x + bb.w &&
-            ball.y + ball.radius > bb.y &&
-            ball.y - ball.radius < bb.y + bb.h &&
-            ball.vx > 0
-        ) {
-            // Realistic: angle of incidence = angle of reflection + friction
-            const nx = -1; // normal faces left
-            const dot = ball.vx * nx;
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.55;
-            ball.vx = -Math.abs(ball.vx);
-            ball.x  = bb.x - ball.radius - 0.5;
-            // Impart spin from contact
-            ball.spin = ball.vy * 0.1;
-            ball.vy  *= 0.8;
-            ball.rimHits++;
-            spawnParticles(ball.x, ball.y, "#aaa", 6, 3);
-            soundBackboard();
-        }
-
-        // â”€â”€ Rim collisions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        checkRimCollision(hoopConfig.rimLeft,  hoopConfig.y);
-        checkRimCollision(hoopConfig.rimRight, hoopConfig.y);
-        resolveRightRimBackboardTrap();
-
-        // â”€â”€ Scoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        const cx = ball.x, cy = ball.y;
-        const margin = 6;
 
         if (!ball.scored) {
-            if (cy + ball.radius < hoopConfig.y) ball.passedAboveHoop = true;
+            collideBackboard();
+            checkRimCollision(hoopConfig.rimLeft,  hoopConfig.y);
+            checkRimCollision(hoopConfig.rimRight, hoopConfig.y);
+            resolveRightRimBackboardTrap();
 
+            if (ball.y + ball.radius < hoopConfig.y) ball.passedAboveHoop = true;
+
+            const margin = 6;
             if (
                 ball.passedAboveHoop &&
-                cy > hoopConfig.y && cy < hoopConfig.y + 35 &&
-                cx > hoopConfig.rimLeft  + margin &&
-                cx < hoopConfig.rimRight - margin &&
+                ball.y > hoopConfig.y && ball.y < hoopConfig.y + 35 &&
+                ball.x > hoopConfig.rimLeft  + margin &&
+                ball.x < hoopConfig.rimRight - margin &&
                 ball.vy > 0
             ) {
                 handleScore();
             }
+        } else {
+            // Through the net: slow down and centre on the hoop
+            const inNet = ball.y < hoopConfig.y + 60;
+            if (inNet) {
+                ball.vx += (hoopConfig.x - ball.x) * 0.08 * dt;
+                ball.vx *= Math.pow(0.8, dt);
+                ball.vy  = Math.min(ball.vy, 4.5);
+            }
         }
 
-        updateBallTrail();
+        updateBallTrail(dt);
+    } else {
+        updateBallTrail(dt);
     }
+}
 
-    updateParticles(dt);
-    updateFloatTexts(dt);
-    if (shakeTimer  > 0) shakeTimer  -= dt;
-    if (flashTimer  > 0) flashTimer  -= dt;
+function updateClock(dt) {
+    if (selectedMode !== "classic" || timeUp) return;
+    timeLeft -= dt / 60;
+    const sec = Math.ceil(timeLeft);
+    if (sec !== lastTickSecond) {
+        lastTickSecond = sec;
+        updateHUD();
+        if (sec <= 5 && sec > 0) {
+            document.getElementById("hTimer").classList.add("timer-low");
+            soundTick();
+        }
+    }
+    if (timeLeft <= 0) {
+        timeLeft = 0;
+        timeUp = true;
+        aiming = false;
+        soundBuzzer();
+        updateHUD();
+        if (ball.isMoving && !ball.scored) {
+            setMsg("⏰ BUZZER ! Le ballon est encore en l'air...");
+            spawnFloatText(W/2, 110, "BUZZER !", "#ffd60a", 30);
+        } else if (!ball.isMoving) {
+            schedule(endGame, 500);
+        }
+    }
+}
+
+function collideBackboard() {
+    const bb = hoopConfig.backboard;
+    if (
+        ball.x + ball.radius > bb.x &&
+        ball.x - ball.radius < bb.x + bb.w &&
+        ball.y + ball.radius > bb.y &&
+        ball.y - ball.radius < bb.y + bb.h
+    ) {
+        if (ball.vx > 0 && ball.x < bb.x + bb.w / 2) {
+            // Front face
+            ball.vx = -Math.abs(ball.vx) * 0.55;
+            ball.x  = bb.x - ball.radius - 0.5;
+            ball.spin = ball.vy * 0.1;
+            ball.vy  *= 0.8;
+        } else if (ball.y < bb.y + 10 && ball.vy > 0) {
+            // Top edge
+            ball.vy = -Math.abs(ball.vy) * 0.5;
+            ball.y  = bb.y - ball.radius - 0.5;
+        } else if (ball.y > bb.y + bb.h - 10 && ball.vy < 0) {
+            // Bottom edge
+            ball.vy = Math.abs(ball.vy) * 0.5;
+            ball.y  = bb.y + bb.h + ball.radius + 0.5;
+        } else {
+            return;
+        }
+        ball.rimHits++;
+        spawnParticles(ball.x, ball.y, "#aaa", 6, 3);
+        soundBackboard();
+    }
 }
 
 function checkRimCollision(rimX, rimY) {
@@ -654,16 +806,14 @@ function checkRimCollision(rimX, rimY) {
         const nx = dx / dist;
         const ny = dy / dist;
 
-        // Push out
         ball.x = rimX + nx * minD;
         ball.y = rimY + ny * minD;
 
-        // Reflect & lose energy
         const dot = ball.vx * nx + ball.vy * ny;
-        ball.vx = (ball.vx - 2 * dot * nx) * 0.52;
-        ball.vy = (ball.vy - 2 * dot * ny) * 0.52;
+        if (dot >= 0) return; // already moving away
+        ball.vx = (ball.vx - 2 * dot * nx) * 0.55;
+        ball.vy = (ball.vy - 2 * dot * ny) * 0.55;
 
-        // Contact spin: tangential friction
         const tx = -ny, ty = nx;
         const relT = ball.vx * tx + ball.vy * ty;
         ball.spin = ball.spin * 0.6 + relT * 0.04;
@@ -696,53 +846,68 @@ function resolveRightRimBackboardTrap() {
 }
 
 function handleScore() {
-    ball.scored   = true;
-    ball.isMoving = false;
+    ball.scored = true;
+    ball.resolved = true;
 
     const isSwish = ball.rimHits === 0;
-
-    // Points by distance
-    const distFromHoop = Math.hypot(ball.x - hoopConfig.x, SPAWN_SPOTS[0].y - H);
-    const spotX = SPAWN_SPOTS[currentSpot % SPAWN_SPOTS.length].x;
-    const approxDist = Math.hypot(spotX - hoopConfig.x, 200);
-
-    let pts = 1;
-    if (approxDist > 430) pts = 3;
-    else if (approxDist > 280) pts = 2;
+    const pts = ball.shotPts || zonePoints(ball.startX, ball.startY);
+    const buzzer = timeUp && selectedMode === "classic";
 
     let totalPts = pts * combo;
-    let label    = pts === 3 ? "ðŸ”¥ 3 PTS !" : pts === 2 ? "2 PTS" : "1 PT";
+    let label    = pts === 3 ? "🔥 3 PTS !" : pts === 2 ? "2 PTS" : "1 PT";
 
     if (isSwish) {
         totalPts = Math.round(totalPts * 1.5);
-        label = "ðŸŒŸ SWISH ! " + label;
+        label = "🌟 SWISH ! " + label;
         swishCount++;
         spawnSwishTrail(ball.x, hoopConfig.y);
         spawnFloatText(ball.x, hoopConfig.y - 55, "SWISH !", "#00e5ff", 26);
     }
+    if (buzzer) {
+        totalPts *= 2;
+        spawnFloatText(W/2, 150, "🚨 BUZZER BEATER x2 !", "#ffd60a", 34);
+        spawnConfetti(60);
+    }
 
     score      += totalPts;
     basketsMade++;
+    if (pts === 3) threesMade++;
     combo       = Math.min(combo + 1, 10);
     maxCombo    = Math.max(maxCombo, combo);
+    hoopConfig.netStretch = 1;
+    crowdHype   = Math.min(1, crowdHype + (pts === 3 ? .9 : .6) + (isSwish ? .3 : 0));
+
+    // Classic: time bonus
+    if (selectedMode === "classic" && !timeUp) {
+        const bonus = (isSwish ? 2 : 0) + (pts === 3 ? 1 : 0);
+        if (bonus > 0) {
+            timeLeft += bonus;
+            spawnFloatText(W/2, 70, `+${bonus} s`, "#7CFC00", 24);
+            bump("hTimer");
+            if (timeLeft > 5) document.getElementById("hTimer").classList.remove("timer-low");
+        }
+    }
 
     soundScore(pts, isSwish);
     soundCombo(combo);
 
-    // Particles
     spawnParticles(ball.x, hoopConfig.y, "#FF8C00", 20, 7);
     spawnParticles(ball.x, hoopConfig.y, "#fff",     8, 4);
     spawnStars(ball.x, hoopConfig.y, 6);
     spawnRipple(ball.x, hoopConfig.y);
     if (combo >= 3) spawnFlames(ball.x, hoopConfig.y - 10, 12);
+    if (combo === 5 || combo === 10) spawnConfetti(30);
 
-    spawnFloatText(ball.x, hoopConfig.y - 30, `${label}  x${combo}`, "#FF8C00");
+    spawnFloatText(ball.x, hoopConfig.y - 30, `${label}  +${totalPts}`, "#FF8C00");
     if (combo > 2) spawnFloatText(ball.x, hoopConfig.y - 65, `COMBO x${combo} !`, "#ff4400", 26);
+    if (combo === 5) spawnFloatText(W/2, 120, "🔥 ON FIRE !", "#ff4400", 32);
 
     streakHistory.push(isSwish ? "swish" : true);
-    setMsg(isSwish ? `ðŸŒŸ SWISH ! +${totalPts} pts` : combo > 3 ? `ðŸ”¥ COMBO x${combo} ! +${totalPts} pts` : `PANIER ! +${totalPts} pts`);
+    setMsg(buzzer ? `🚨 BUZZER BEATER ! +${totalPts} pts`
+        : isSwish ? `🌟 SWISH ! +${totalPts} pts`
+        : combo > 3 ? `🔥 COMBO x${combo} ! +${totalPts} pts`
+        : `PANIER ! +${totalPts} pts`);
 
-    // Screen flash
     flashTimer = 18;
     flashColor = isSwish ? "rgba(0,229,255,0.15)" : "rgba(255,140,0,0.18)";
     shakeTimer  = combo >= 3 ? 10 : 6;
@@ -752,32 +917,29 @@ function handleScore() {
     updateHUD();
     updateStreakDisplay();
 
-    currentSpot++;
+    // Ball keeps falling through the net; next ball once it is out
+    schedule(() => { if (ball.scored && ball.isMoving) { ball.isMoving = false; finishScoredShot(); } }, 900);
+}
 
-    // Precision mode end check
-    if (selectedMode === "precision" && precisionShotsLeft <= 0) {
-        setTimeout(() => endGame(), 600);
-        return;
-    }
-    // Survival mode: speed up
-    if (selectedMode === "survival" && basketsMade >= 3) {
-        const speed = 0.5 + basketsMade * 0.06;
-        if (hoopConfig.vx === 0) {
-            hoopConfig.vx = (Math.random()-.5) * speed * 2;
-            hoopConfig.vy = (Math.random()-.5) * speed;
-        }
-    }
+function finishScoredShot() {
+    if (isGameDone()) { schedule(endGame, 400); return; }
+    schedule(() => { resetBall(); aiming = false; }, 150);
+}
 
-    setTimeout(() => { resetBall(); aiming = false; }, 500);
+function isGameDone() {
+    if (selectedMode === "precision") return precisionShotsLeft <= 0;
+    if (selectedMode === "classic")   return timeUp;
+    return lives <= 0;
 }
 
 function handleMiss() {
     ball.isMoving = false;
+    ball.resolved = true;
     combo = 1;
     soundMiss();
 
-    spawnParticles(ball.x, ball.y, "#e63946", 10, 4);
-    spawnFloatText(ball.x, ball.y - 20, "RATÃ‰", "#e63946", 24);
+    spawnParticles(Math.min(W - 20, Math.max(20, ball.x)), Math.min(H - 10, ball.y), "#e63946", 10, 4);
+    spawnFloatText(ball.x, Math.min(H - 30, ball.y - 20), "RATÉ", "#e63946", 24);
     streakHistory.push(false);
     shakeTimer  = 5;
     shakeAmount = 2;
@@ -785,47 +947,43 @@ function handleMiss() {
     if (selectedMode === "survival") {
         lives = Math.max(0, lives - 1);
         soundLifeLost();
-        spawnFloatText(W/2, 80, lives > 0 ? `â¤ï¸ ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}` : "ðŸ’€ GAME OVER !", "#e63946", 20);
-        if (lives <= 0) {
-            updateHUD();
-            setTimeout(() => endGame(), 800);
-            return;
-        }
+        spawnFloatText(W/2, 80, lives > 0 ? `❤️ ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}` : "💀 GAME OVER !", "#e63946", 20);
     }
 
-    const msgMap = { survival: `ðŸ’€ RatÃ© ! ${lives} vie${lives!==1?'s':''} restante${lives!==1?'s':''}`, precision: "RatÃ© !", classic: "RatÃ© ! RÃ©essaie..." };
-    setMsg(msgMap[selectedMode] || "RatÃ© !");
+    const msgMap = {
+        survival: `💀 Raté ! ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}`,
+        precision: `Raté ! ${precisionShotsLeft} tir${precisionShotsLeft>1?'s':''} restant${precisionShotsLeft>1?'s':''}`,
+        classic: timeUp ? "⏰ Temps écoulé !" : "Raté ! Réessaie..."
+    };
+    setMsg(msgMap[selectedMode] || "Raté !");
     updateHUD();
     updateStreakDisplay();
-    currentSpot++;
 
-    if (selectedMode === "precision" && precisionShotsLeft <= 0) {
-        setTimeout(() => endGame(), 600);
-        return;
-    }
-
-    setTimeout(() => { resetBall(); aiming = false; }, 400);
+    if (isGameDone()) { schedule(endGame, 700); return; }
+    schedule(() => { resetBall(); aiming = false; }, 400);
 }
 
-// â”€â”€ Draw â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Draw ─────────────────────────────────────────────────────────
 function draw() {
     ctx.save();
 
-    // Screen shake
-    if (shakeTimer > 0) {
+    if (shakeTimer > 0 && !paused) {
         const s = (shakeTimer / 10) * shakeAmount;
         ctx.translate((Math.random()-.5)*s*2, (Math.random()-.5)*s*2);
     }
 
     drawCourt();
+    drawCrowd();
+    drawSpotMarker();
     drawAimLine();
-    drawHoop();
+    drawHoopBack();
     drawBallTrail();
     drawBall();
+    drawHoopFront();
     drawParticles();
     drawFloatTexts();
+    drawWindIndicator();
 
-    // Full-screen flash overlay
     if (flashTimer > 0) {
         ctx.fillStyle = flashColor;
         ctx.globalAlpha = flashTimer / 18;
@@ -833,21 +991,35 @@ function draw() {
         ctx.globalAlpha = 1;
     }
 
-    // Precision countdown overlay
-    if (selectedMode === "precision" && precisionShotsLeft <= 3 && !ball.isMoving) {
-        ctx.fillStyle = "rgba(255,140,0,.12)";
+    if (selectedMode === "precision" && precisionShotsLeft <= 3 && precisionShotsLeft > 0 && !ball.isMoving) {
+        ctx.fillStyle = "rgba(255,140,0,.08)";
         ctx.fillRect(0, 0, W, H);
     }
 
     ctx.restore();
+
+    if (paused) drawPauseOverlay();
+}
+
+function drawPauseOverlay() {
+    ctx.fillStyle = "rgba(0,0,0,.6)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#FF8C00";
+    ctx.font = "bold 54px 'Oswald', Arial";
+    ctx.fillText("PAUSE", W/2, H/2 - 10);
+    ctx.fillStyle = "#ccc";
+    ctx.font = "600 18px 'Rajdhani', Arial";
+    ctx.fillText("Clique ou appuie sur P pour reprendre", W/2, H/2 + 26);
 }
 
 function drawBallTrail() {
     if (ballTrail.length < 2) return;
+    const col = combo >= 5 ? "#ff4400" : "#FF8C00";
     for (let i = 0; i < ballTrail.length; i++) {
         const t   = ballTrail[i];
         const r   = ball.radius * t.life * .7;
-        const col = combo >= 5 ? "#ff4400" : "#FF8C00";
+        if (r <= 0) continue;
         ctx.globalAlpha = t.life * .5;
         const grad = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, r);
         grad.addColorStop(0, col);
@@ -858,233 +1030,279 @@ function drawBallTrail() {
     ctx.globalAlpha = 1;
 }
 
-function drawCourt() {
-    // Dark background
-    ctx.fillStyle = "#0e0600";
-    ctx.fillRect(0, 0, W, H);
+// Static court background is rendered once to an offscreen canvas
+function buildCourtCache() {
+    const c = document.createElement("canvas");
+    const dpr = canvas.width / W;
+    c.width = canvas.width; c.height = canvas.height;
+    const g = c.getContext("2d");
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    const floorY = H * 0.72;
-
-    // Wall
-    const wallGrad = ctx.createLinearGradient(0, 0, 0, floorY);
-    wallGrad.addColorStop(0, "#100500");
+    const wallGrad = g.createLinearGradient(0, 0, 0, FLOOR_Y);
+    wallGrad.addColorStop(0, "#0b0400");
     wallGrad.addColorStop(1, "#1c0900");
-    ctx.fillStyle = wallGrad;
-    ctx.fillRect(0, 0, W, floorY);
+    g.fillStyle = wallGrad;
+    g.fillRect(0, 0, W, FLOOR_Y);
 
-    // Subtle wall panels
-    ctx.strokeStyle = "rgba(255,140,0,.04)";
-    ctx.lineWidth   = 1;
+    // Arena spotlights
+    [[160, .05], [410, .07], [660, .06]].forEach(([x, a]) => {
+        const lg = g.createRadialGradient(x, -20, 0, x, -20, 260);
+        lg.addColorStop(0, `rgba(255,200,120,${a * 2})`);
+        lg.addColorStop(1, "transparent");
+        g.fillStyle = lg;
+        g.fillRect(0, 0, W, FLOOR_Y);
+    });
+
+    g.strokeStyle = "rgba(255,140,0,.04)";
+    g.lineWidth   = 1;
     for (let x = 0; x < W; x += 80) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, floorY); ctx.stroke();
+        g.beginPath(); g.moveTo(x, 0); g.lineTo(x, FLOOR_Y); g.stroke();
     }
 
     // Floor
-    const floorGrad = ctx.createLinearGradient(0, floorY, 0, H);
-    floorGrad.addColorStop(0, "#6e3010");
+    const floorGrad = g.createLinearGradient(0, FLOOR_Y, 0, H);
+    floorGrad.addColorStop(0, "#7a3812");
     floorGrad.addColorStop(1, "#4a1e05");
-    ctx.fillStyle = floorGrad;
-    ctx.fillRect(0, floorY, W, H - floorY);
+    g.fillStyle = floorGrad;
+    g.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
 
-    // Wood planks
-    ctx.strokeStyle = "rgba(0,0,0,.25)";
-    ctx.lineWidth   = 1.5;
+    g.strokeStyle = "rgba(0,0,0,.25)";
+    g.lineWidth   = 1.5;
     for (let x = 0; x < W; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, floorY); ctx.lineTo(x, H); ctx.stroke();
+        g.beginPath(); g.moveTo(x, FLOOR_Y); g.lineTo(x, H); g.stroke();
     }
-    // Highlight planks
-    ctx.strokeStyle = "rgba(255,160,60,.06)";
-    ctx.lineWidth   = 1;
+    g.strokeStyle = "rgba(255,160,60,.06)";
+    g.lineWidth   = 1;
     for (let x = 20; x < W; x += 40) {
-        ctx.beginPath(); ctx.moveTo(x, floorY); ctx.lineTo(x, H); ctx.stroke();
+        g.beginPath(); g.moveTo(x, FLOOR_Y); g.lineTo(x, H); g.stroke();
     }
+    // Floor reflection of the lights
+    g.fillStyle = "rgba(255,220,160,.05)";
+    g.beginPath(); g.ellipse(W/2, FLOOR_Y + 40, 320, 30, 0, 0, Math.PI*2); g.fill();
 
-    // Floor line
-    ctx.strokeStyle = "rgba(255,255,255,.45)";
-    ctx.lineWidth   = 3;
-    ctx.beginPath(); ctx.moveTo(0, floorY); ctx.lineTo(W, floorY); ctx.stroke();
+    g.strokeStyle = "rgba(255,255,255,.45)";
+    g.lineWidth   = 3;
+    g.beginPath(); g.moveTo(0, FLOOR_Y); g.lineTo(W, FLOOR_Y); g.stroke();
 
-    // Zone arcs
-    const hx = hoopConfig.x;
-    ctx.strokeStyle = "rgba(255,140,0,.18)";
-    ctx.lineWidth   = 2;
-    ctx.setLineDash([8, 6]);
-    ctx.beginPath(); ctx.arc(hx, H, 430, Math.PI, 0); ctx.stroke();
-    ctx.beginPath(); ctx.arc(hx, H, 280, Math.PI, 0); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Zone labels
-    ctx.fillStyle = "rgba(255,140,0,.3)";
-    ctx.font      = "bold 12px 'Oswald', Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("3 PTS", 180, floorY - 8);
-    ctx.fillText("2 PTS", 380, floorY - 8);
-    ctx.fillText("1 PT",  530, floorY - 8);
-
-    // Court lighting glow
-    ctx.fillStyle = "rgba(255,140,0,.04)";
-    ctx.beginPath(); ctx.ellipse(W/2, H*.3, 300, 200, 0, 0, Math.PI*2); ctx.fill();
-
-    // Crowd silhouette
-    drawCrowd(floorY);
+    courtCache = c;
 }
 
-function drawCrowd(floorY) {
-    const crowdY = floorY - 8;
-    // Glow behind crowd
-    ctx.fillStyle = "rgba(255,60,0,.06)";
-    ctx.fillRect(0, crowdY - 50, W, 50);
+function drawCourt() {
+    if (!courtCache) buildCourtCache();
+    ctx.drawImage(courtCache, 0, 0, W, H);
 
-    ctx.fillStyle = "rgba(0,0,0,.7)";
+    // Zone arcs follow the hoop (it moves in survival)
+    const hx = hoopConfig.x;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, FLOOR_Y, W, H - FLOOR_Y); ctx.clip();
+    ctx.fillStyle = "rgba(255,140,0,.05)";
+    ctx.beginPath(); ctx.arc(hx, H, ZONE_2PT, Math.PI, 0); ctx.fill();
+    ctx.strokeStyle = "rgba(255,140,0,.35)";
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath(); ctx.arc(hx, H, ZONE_3PT, Math.PI, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(hx, H, ZONE_2PT, Math.PI, 0); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    ctx.fillStyle = "rgba(255,140,0,.45)";
+    ctx.font      = "bold 12px 'Oswald', Arial";
+    ctx.textAlign = "center";
+    const labelY = H - 10;
+    ctx.fillText("3 PTS", Math.max(30, hx - ZONE_3PT - 50), labelY);
+    ctx.fillText("2 PTS", hx - (ZONE_2PT + ZONE_3PT) / 2, labelY);
+    ctx.fillText("1 PT",  hx - ZONE_2PT / 2, labelY);
+}
+
+function drawCrowd() {
+    const crowdY = FLOOR_Y - 8;
+    const t = performance.now() * 0.012;
+    ctx.fillStyle = `rgba(255,60,0,${.06 + crowdHype * .12})`;
+    ctx.fillRect(0, crowdY - 55, W, 55);
+
+    ctx.fillStyle = "rgba(0,0,0,.72)";
     for (let x = 10; x < W; x += 26) {
-        const h = 16 + Math.sin(x * 0.28) * 5 + Math.sin(x * 0.07) * 4;
+        const jump = crowdHype > 0.05 ? Math.max(0, Math.sin(t + x * 0.9)) * 9 * crowdHype : 0;
+        const h = 16 + Math.sin(x * 0.28) * 5 + Math.sin(x * 0.07) * 4 + jump;
         ctx.beginPath();
         ctx.arc(x, crowdY - h, 8 + Math.sin(x * 0.5) * 2.5, 0, Math.PI*2);
         ctx.fill();
         ctx.fillRect(x - 6, crowdY - h, 12, h);
+        // Raised arms when the crowd is hyped
+        if (crowdHype > 0.4 && (x / 26) % 3 < 1) {
+            ctx.fillRect(x - 9, crowdY - h - 14, 3, 12);
+            ctx.fillRect(x + 6, crowdY - h - 14, 3, 12);
+        }
     }
 }
 
+function drawSpotMarker() {
+    if (ball.isMoving || ball.resolved || !gameRunning) return;
+    const pts = zonePoints(ball.x, ball.y);
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    ctx.beginPath(); ctx.ellipse(ball.x, ball.y + ball.radius + 2, 22, 6, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = pts === 3 ? "#ffd60a" : pts === 2 ? "#FF8C00" : "#ccc";
+    ctx.font = "bold 13px 'Oswald', Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(`${pts} PT${pts > 1 ? "S" : ""}`, ball.x, ball.y - ball.radius - 10);
+}
+
+function drawWindIndicator() {
+    if (!wind) return;
+    const x = W/2, y = 34;
+    const strength = Math.abs(wind) / 0.03;
+    const dir = Math.sign(wind);
+    ctx.fillStyle = "rgba(0,0,0,.45)";
+    ctx.fillRect(x - 70, y - 18, 140, 30);
+    ctx.fillStyle = "#9fdcff";
+    ctx.font = "bold 12px 'Oswald', Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("VENT", x, y - 4);
+    const len = 20 + strength * 40;
+    ctx.strokeStyle = "#9fdcff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - dir * len/2, y + 4);
+    ctx.lineTo(x + dir * len/2, y + 4);
+    ctx.lineTo(x + dir * (len/2 - 6), y);
+    ctx.moveTo(x + dir * len/2, y + 4);
+    ctx.lineTo(x + dir * (len/2 - 6), y + 8);
+    ctx.stroke();
+}
+
 function drawAimLine() {
-    if (!aiming || ball.isMoving || !gameRunning) return;
-    const bx = ball.x, by = ball.y;
-    const dx = mouseX - bx, dy = mouseY - by;
-    const mag = Math.hypot(dx, dy);
-    if (mag < 5) return;
+    if (!aiming || !canShoot()) return;
+    const v = launchVelocity(mouseX, mouseY);
+    if (!v) return;
+    let { vx, vy } = v;
 
-    const power = Math.min(mag * 0.065, 18);
-    let vx = (dx / mag) * power;
-    let vy = (dy / mag) * power;
-
-    // Trajectory dots
-    let px = bx, py = by;
-    for (let i = 0; i < 32; i++) {
-        vx *= 0.998; vy += GRAVITY;
-        px += vx;    py += vy;
+    // Trajectory preview uses the same per-frame physics as the ball
+    let px = ball.x, py = ball.y;
+    for (let i = 0; i < 30; i++) {
+        vy += GRAVITY; vx += wind;
+        px += vx; py += vy;
+        vx *= 0.998; vy *= 0.9998;
         if (py > H || px < 0 || px > W) break;
-        const alpha = 0.55 - i * 0.015;
+        if (i % 2) continue;
+        const alpha = 0.6 - i * 0.018;
         const size  = 3.5 - i * 0.08;
         ctx.globalAlpha = Math.max(0, alpha);
-        ctx.fillStyle   = i % 4 < 2 ? "#FF8C00" : "#ffa033";
+        ctx.fillStyle   = "#FF8C00";
         ctx.beginPath(); ctx.arc(px, py, Math.max(.5,size), 0, Math.PI*2); ctx.fill();
     }
     ctx.globalAlpha = 1;
 
-    // Power bar
-    const pct = Math.min(mag / 400, 1);
-    const len = Math.min(mag * 0.5, 70);
-    ctx.strokeStyle = `rgba(255,${Math.round(140-pct*100)},0,0.4)`;
-    ctx.lineWidth   = 2.5;
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    ctx.moveTo(bx, by);
-    ctx.lineTo(bx + (dx/mag)*len, by + (dy/mag)*len);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // Power gauge next to the ball
+    const pct = Math.min(v.mag * POWER_K / MAX_POWER, 1);
+    const gx = ball.x - 34, gy = ball.y - 30, gh = 60;
+    ctx.fillStyle = "rgba(0,0,0,.5)";
+    ctx.fillRect(gx, gy, 8, gh);
+    ctx.fillStyle = pct > .9 ? "#e63946" : pct > .6 ? "#FF8C00" : "#ffd60a";
+    ctx.fillRect(gx, gy + gh * (1 - pct), 8, gh * pct);
+    ctx.strokeStyle = "rgba(255,255,255,.4)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(gx, gy, 8, gh);
 }
 
-function drawHoop() {
-    const hx  = hoopConfig.x;
+// Back part of the hoop: pole, backboard, arm, net (drawn behind the ball)
+function drawHoopBack() {
     const hy  = hoopConfig.y;
     const bb  = hoopConfig.backboard;
-    const rl  = hoopConfig.rimLeft;
-    const rr  = hoopConfig.rimRight;
 
-    // Support pole
     ctx.strokeStyle = "#666";
     ctx.lineWidth   = 6;
     ctx.beginPath();
     ctx.moveTo(bb.x + bb.w/2, bb.y + bb.h);
-    ctx.lineTo(bb.x + bb.w/2, H * 0.72);
+    ctx.lineTo(bb.x + bb.w/2, FLOOR_Y);
     ctx.stroke();
 
-    // Backboard
     ctx.fillStyle = "rgba(180,220,255,.12)";
     ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
     ctx.strokeStyle = "#9ab";
     ctx.lineWidth   = 3;
     ctx.strokeRect(bb.x, bb.y, bb.w, bb.h);
 
-    // Backboard target square
     ctx.strokeStyle = "rgba(255,255,255,.35)";
     ctx.lineWidth   = 2;
     ctx.strokeRect(bb.x - 2, hy - 16, bb.w + 2, 42);
 
-    // Support arm
     ctx.strokeStyle = "#888";
     ctx.lineWidth   = 4;
     ctx.beginPath();
     ctx.moveTo(bb.x + bb.w/2, hy);
-    ctx.lineTo(bb.x - 5, hy);
+    ctx.lineTo(hoopConfig.rimRight, hy);
     ctx.stroke();
+}
 
-    // Animated net
+// Front part: net and rim, drawn over the ball so it goes "through"
+function drawHoopFront() {
+    const hx  = hoopConfig.x;
+    const hy  = hoopConfig.y;
+    const rl  = hoopConfig.rimLeft;
+    const rr  = hoopConfig.rimRight;
+
     drawAnimatedNet(rl, rr, hy);
 
-    // Rim glow (when ball is near)
     const distToHoop = Math.hypot(ball.x - hx, ball.y - hy);
     if (distToHoop < 120 && ball.isMoving) {
         ctx.shadowColor = "#FF8C00";
         ctx.shadowBlur  = 12;
     }
 
-    // Left rim
+    ctx.strokeStyle = "#e05c00";
+    ctx.lineWidth   = 4;
+    ctx.beginPath(); ctx.moveTo(rl, hy); ctx.lineTo(rr, hy); ctx.stroke();
+
     ctx.fillStyle   = "#e05c00";
     ctx.strokeStyle = "#c04400";
     ctx.lineWidth   = 2;
     ctx.beginPath(); ctx.arc(rl, hy, hoopConfig.rimRadius, 0, Math.PI*2);
     ctx.fill(); ctx.stroke();
-
-    // Right rim
     ctx.beginPath(); ctx.arc(rr, hy, hoopConfig.rimRadius, 0, Math.PI*2);
     ctx.fill(); ctx.stroke();
-
-    // Rim connector
-    ctx.strokeStyle = "#e05c00";
-    ctx.lineWidth   = 4;
-    ctx.beginPath(); ctx.moveTo(rl, hy); ctx.lineTo(rr, hy); ctx.stroke();
 
     ctx.shadowBlur  = 0;
     ctx.shadowColor = "transparent";
 
-    // Survival: blinking indicator
-    if (selectedMode === "survival" && basketsMade >= 3) {
-        const blink = Math.sin(Date.now() * 0.008) > 0;
+    if (selectedMode === "survival" && basketsMade >= 3 && gameRunning) {
+        const blink = Math.sin(performance.now() * 0.008) > 0;
         if (blink) {
             ctx.strokeStyle = "rgba(255,60,0,.5)";
             ctx.lineWidth   = 2;
             ctx.setLineDash([5,4]);
-            ctx.beginPath(); ctx.arc(hx, hy, 50, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(hx, hy + 10, 50, 0, Math.PI*2); ctx.stroke();
             ctx.setLineDash([]);
         }
     }
 }
 
 function drawAnimatedNet(rl, rr, hy) {
-    const netDepth = 55;
+    const stretch  = hoopConfig.netStretch;
+    const netDepth = 55 + stretch * 18;
+    const narrow   = 1 - stretch * .35;
     const segments = 8;
     const phase    = hoopConfig.netPhase;
+    const swayAmp  = 3 + stretch * 4;
 
-    ctx.strokeStyle = "rgba(255,255,255,.35)";
+    ctx.strokeStyle = "rgba(255,255,255,.4)";
     ctx.lineWidth   = 1.5;
 
     for (let i = 0; i <= segments; i++) {
         const t   = i / segments;
         const nx  = rl + (rr - rl) * t;
         const cx  = hoopConfig.x;
-        const sway = Math.sin(phase + t * Math.PI * 2) * 3;
+        const sway = Math.sin(phase + t * Math.PI * 2) * swayAmp;
         const midX = nx + (cx - nx) * 0.5 + sway;
         const midY = hy + netDepth * 0.5;
         ctx.beginPath();
         ctx.moveTo(nx, hy);
-        ctx.quadraticCurveTo(midX, midY, cx + (t - .5) * 20 + sway*.5, hy + netDepth);
+        ctx.quadraticCurveTo(midX, midY, cx + (t - .5) * 20 * narrow + sway*.5, hy + netDepth);
         ctx.stroke();
     }
-    // Horizontal net rows
     for (let row = 1; row <= 3; row++) {
         const rowY   = hy + netDepth * (row / 4);
         const interp = row / 4;
-        const hw     = (rr - rl) * (1 - interp * .7) / 2;
+        const hw     = (rr - rl) * (1 - interp * .7) * narrow / 2;
         ctx.beginPath();
         ctx.moveTo(hoopConfig.x - hw, rowY);
         ctx.lineTo(hoopConfig.x + hw, rowY);
@@ -1095,27 +1313,31 @@ function drawAnimatedNet(rl, rr, hy) {
 function drawBall() {
     if (ball.y - ball.radius > H + 20) return;
 
-    ctx.save();
-    ctx.translate(ball.x, ball.y);
-    ctx.rotate(ball.angle);
-
     // Floor shadow
-    if (ball.isMoving) {
-        const dist    = H * 0.72 - ball.y;
-        const scale   = Math.max(.1, 1 - dist / (H * 0.5));
-        ctx.fillStyle = `rgba(0,0,0,${scale * 0.28})`;
+    if (ball.y < FLOOR_Y + 40) {
+        const dist  = Math.max(0, FLOOR_Y - ball.y);
+        const scale = Math.max(.15, 1 - dist / (H * 0.5));
+        ctx.fillStyle = `rgba(0,0,0,${scale * 0.3})`;
         ctx.beginPath();
-        ctx.ellipse(0, H * 0.72 - ball.y + ball.radius, ball.radius * 1.3 * scale, ball.radius * .4 * scale, 0, 0, Math.PI*2);
+        ctx.ellipse(ball.x, Math.max(FLOOR_Y + 6, ball.y + ball.radius), ball.radius * 1.3 * scale, ball.radius * .4 * scale, 0, 0, Math.PI*2);
         ctx.fill();
     }
 
-    // Shadow on ball
-    ctx.fillStyle = "rgba(0,0,0,.25)";
-    ctx.beginPath();
-    ctx.ellipse(3, 5, ball.radius * .85, ball.radius * .5, 0, 0, Math.PI*2);
-    ctx.fill();
+    ctx.save();
+    ctx.translate(ball.x, ball.y);
 
-    // Ball gradient
+    // Combo fire glow
+    if (combo >= 4 && ball.isMoving) {
+        const r = ball.radius + 10;
+        const fg = ctx.createRadialGradient(0,0,ball.radius*.8, 0,0,r);
+        fg.addColorStop(0, "rgba(255,100,0,.6)");
+        fg.addColorStop(1, "transparent");
+        ctx.fillStyle = fg;
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2); ctx.fill();
+    }
+
+    ctx.rotate(ball.angle);
+
     const grad = ctx.createRadialGradient(-5, -6, 2, 0, 0, ball.radius);
     grad.addColorStop(0,   "#ffaa44");
     grad.addColorStop(0.5, "#e06000");
@@ -1123,7 +1345,6 @@ function drawBall() {
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.arc(0, 0, ball.radius, 0, Math.PI*2); ctx.fill();
 
-    // Lines
     ctx.strokeStyle = "rgba(0,0,0,.5)";
     ctx.lineWidth   = 2;
     ctx.beginPath(); ctx.moveTo(-ball.radius, 0); ctx.lineTo(ball.radius, 0); ctx.stroke();
@@ -1131,37 +1352,32 @@ function drawBall() {
     ctx.beginPath(); ctx.arc(0, 0, ball.radius * .68, Math.PI*.15, Math.PI*.85); ctx.stroke();
     ctx.beginPath(); ctx.arc(0, 0, ball.radius * .68, Math.PI*1.15, Math.PI*1.85); ctx.stroke();
 
-    // Highlight
-    ctx.fillStyle = "rgba(255,255,255,.3)";
-    ctx.beginPath();
-    ctx.ellipse(-5, -6, ball.radius * .38, ball.radius * .22, -0.5, 0, Math.PI*2);
-    ctx.fill();
-
-    // Combo fire effect around ball
-    if (combo >= 4 && ball.isMoving) {
-        const r = ball.radius + 4;
-        const fg = ctx.createRadialGradient(0,0,ball.radius*.8, 0,0,r+6);
-        fg.addColorStop(0, "rgba(255,100,0,.6)");
-        fg.addColorStop(1, "transparent");
-        ctx.fillStyle = fg;
-        ctx.beginPath(); ctx.arc(0, 0, r+6, 0, Math.PI*2); ctx.fill();
-    }
-
     ctx.restore();
+
+    // Fixed highlight (doesn't rotate with the ball)
+    ctx.fillStyle = "rgba(255,255,255,.28)";
+    ctx.beginPath();
+    ctx.ellipse(ball.x - 5, ball.y - 6, ball.radius * .38, ball.radius * .22, -0.5, 0, Math.PI*2);
+    ctx.fill();
 }
 
-// â”€â”€ Game flow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Game flow ─────────────────────────────────────────────────────
 function endGame() {
+    if (!gameRunning) return;
     gameRunning = false;
-    clearInterval(timerInterval);
-    cancelAnimationFrame(animId);
+    paused = false;
+    clearScheduled();
 
     const hs    = getScores(selectedMode)[0] || 0;
     const isNew = score > hs;
-    if (score > 0) saveScore(score, selectedMode);
+    if (score > 0) {
+        saveScore(score, selectedMode);
+        if (typeof window.submitGameScore === "function") window.submitGameScore(16, score);
+    }
+    if (isNew && score > 0) spawnConfetti(70);
 
     const accuracy = shotsTaken > 0 ? Math.round((basketsMade / shotsTaken) * 100) : 0;
-    const titleMap = { classic: "BUZZER BEATER !", precision: "FIN DE SÃ‰RIE !", survival: "GAME OVER !" };
+    const titleMap = { classic: "BUZZER BEATER !", precision: "FIN DE SÉRIE !", survival: "GAME OVER !" };
 
     document.getElementById("goTitle").textContent     = titleMap[selectedMode] || "GAME OVER !";
     document.getElementById("goScore").textContent     = score;
@@ -1170,7 +1386,9 @@ function endGame() {
     document.getElementById("goAccuracy").textContent  = accuracy + "%";
     document.getElementById("goCombo").textContent     = "x" + maxCombo;
     document.getElementById("goSwish").textContent     = swishCount;
+    document.getElementById("goThrees").textContent    = threesMade;
     document.getElementById("goHs").textContent        = Math.max(hs, score);
+    document.getElementById("goMode").textContent      = MODE_LABELS[selectedMode];
     document.getElementById("goNewRecord").classList.toggle("hidden", !isNew);
 
     document.getElementById("gameOverScreen").classList.remove("hidden");
@@ -1182,26 +1400,22 @@ function startGame() {
     document.getElementById("gameScreen").classList.remove("hidden");
     lastTime = 0;
     resetGame();
+    cancelAnimationFrame(animId);
     animId = requestAnimationFrame(gameLoop);
 }
 
 function restartGame() {
     document.getElementById("gameOverScreen").classList.add("hidden");
     if (!gameStarted) { startGame(); return; }
-    cancelAnimationFrame(animId);
-    clearInterval(timerInterval);
     lastTime = 0;
-    particles.length  = 0;
-    floatTexts.length = 0;
-    ballTrail.length  = 0;
     resetGame();
-    animId = requestAnimationFrame(gameLoop);
 }
 
 function goMenu() {
     gameStarted = false;
     gameRunning = false;
-    clearInterval(timerInterval);
+    paused = false;
+    clearScheduled();
     cancelAnimationFrame(animId);
     document.getElementById("gameScreen").classList.add("hidden");
     document.getElementById("gameOverScreen").classList.add("hidden");
@@ -1212,6 +1426,7 @@ function goMenu() {
 function showHowTo() { document.getElementById("howToScreen").classList.remove("hidden"); }
 function hideHowTo() { document.getElementById("howToScreen").classList.add("hidden"); }
 
-// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Init ─────────────────────────────────────────────────────────
+setupCanvasResolution();
 resetHoop();
 renderTitleScores();

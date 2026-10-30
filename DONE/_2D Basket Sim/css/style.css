@@ -247,6 +247,8 @@ body {
 
 /* GAME SCREEN */
 #gameScreen {
+    /* Game grows with the window while keeping the whole court visible */
+    --gw: min(1240px, 100vw, calc((100vh - 150px) * 820 / 520));
     display: flex; flex-direction: column; align-items: center; gap: 0;
 }
 
@@ -262,7 +264,7 @@ body {
 }
 
 #hud {
-    width: 820px; max-width: 100%;
+    width: var(--gw); max-width: 100%;
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px 14px;
     background: rgba(0,0,0,.7);
@@ -282,7 +284,7 @@ body {
 @keyframes blink { from { opacity: 1 } to { opacity: .4 } }
 
 #msgLine {
-    width: 820px; max-width: 100%;
+    width: var(--gw); max-width: 100%;
     padding: 5px 14px;
     background: rgba(0,0,0,.45);
     border-left: 1px solid rgba(255,140,0,.2);
@@ -296,7 +298,7 @@ body {
     border-left: 3px solid rgba(255,140,0,.28);
     border-right: 3px solid rgba(255,140,0,.28);
     cursor: crosshair;
-    width: 820px;
+    width: var(--gw);
     max-width: 100vw;
     height: auto;
     aspect-ratio: 820 / 520;
@@ -304,7 +306,7 @@ body {
 }
 
 #bottomBar {
-    width: 820px; max-width: 100%;
+    width: var(--gw); max-width: 100%;
     padding: 8px 14px;
     background: rgba(0,0,0,.7);
     border: 1px solid rgba(255,140,0,.25);
@@ -352,3 +354,10 @@ body {
     .go-btns { flex-direction: column; }
     .go-btns .btn-primary, .go-btns .btn-secondary { width: 100%; }
 }
+
+/* v3 additions */
+.hs-mode { font-family: 'Oswald', sans-serif; font-size: .75em; letter-spacing: 2px; color: #777; margin-bottom: 4px; }
+.hs-empty { color: #555; font-size: .9em; }
+.go-mode { font-family: 'Oswald', sans-serif; letter-spacing: 3px; color: #888; font-size: .85em; margin: -8px 0 6px; }
+.stat-wide { grid-column: 1 / -1; text-align: center; }
+#muteBtn { padding: 8px 12px; }
