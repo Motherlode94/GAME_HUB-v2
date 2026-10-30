@@ -158,6 +158,7 @@ function fireTower(tower, target) {
         damage: tower.damage,
         splash: tower.splash,
         slow: tower.slow,
+        pierce: !!template.pierce,
         color: tower.type === 'FROST' ? '#bff3ff' : (tower.type === 'MORTAR' ? '#333' : (tower.type === 'ANTITANK' ? '#ff9b40' : '#ffff66')),
         size: tower.type === 'MORTAR' || tower.type === 'ANTITANK' ? 6 : (tower.type === 'RAPID' || tower.type === 'RIFLEMAN' ? 3 : PROJECTILE_SIZE),
         arc: tower.type === 'MORTAR',
