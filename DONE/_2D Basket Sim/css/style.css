@@ -361,3 +361,10 @@ body {
 .go-mode { font-family: 'Oswald', sans-serif; letter-spacing: 3px; color: #888; font-size: .85em; margin: -8px 0 6px; }
 .stat-wide { grid-column: 1 / -1; text-align: center; }
 #muteBtn { padding: 8px 12px; }
+
+/* Defender controls — desktop and touch */
+#defenseControls { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; padding:10px 12px; background:#111e30; border:1px solid #4f718d; border-radius:10px; margin:8px auto; width:fit-content; max-width:95%; color:#e6f1ff; }
+#defenseControls.hidden { display:none !important; }
+.defense-hand { background:#26364d; border:2px solid #61738c; color:#fff; padding:12px 18px; border-radius:8px; min-height:48px; font-weight:700; cursor:pointer; }
+.defense-hand.active { background:#376aa0; border-color:#75c7ff; box-shadow:0 0 0 2px rgba(117,199,255,.22); }
+@media(max-width:600px) { #defenseControls { width:95%; } .defense-hand { flex:1; padding:12px 8px; } #defenseControls strong { width:100%; text-align:center; } }
