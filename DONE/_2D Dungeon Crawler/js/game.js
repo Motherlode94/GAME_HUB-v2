@@ -403,6 +403,23 @@ function drawEnemy(e) {
 
   if (e.isBoss) ctx.restore();
 
+  // Species-specific orbiting highlights. No particles or game state allocated.
+  if (e.symbol === 'm' || e.isBoss) {
+    const time = animTick * (e.isBoss ? .055 : .075) + e.wobble;
+    ctx.save();
+    ctx.strokeStyle = e.isBoss ? 'rgba(255,74,89,.55)' : 'rgba(176,117,255,.48)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.ellipse(px, py + 3, e.isBoss ? 17 : 12, 5, -.16, time, time + Math.PI * 1.15);
+    ctx.stroke();
+    for (let i = 0; i < 3; i++) {
+      const phase = time + i * Math.PI * 2 / 3;
+      ctx.fillStyle = e.isBoss ? 'rgba(255,126,91,.75)' : 'rgba(183,137,255,.7)';
+      ctx.fillRect(px + Math.cos(phase) * 12, py - 7 + Math.sin(phase * 1.2) * 8, 2, 2);
+    }
+    ctx.restore();
+  }
+
   // Rage indicator
   if (e.rageActive) {
     ctx.fillStyle = `rgba(255,50,0,${0.5+0.3*Math.sin(animTick*0.2)})`;
@@ -565,6 +582,14 @@ function drawPlayer() {
   ctx.beginPath(); ctx.moveTo(px + 10, py - 4 + bob); ctx.lineTo(px + 18, py - 14 + bob); ctx.stroke();
   ctx.strokeStyle = '#c9a84c'; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.moveTo(px + 6, py - 1 + bob); ctx.lineTo(px + 14, py - 4 + bob); ctx.stroke();
+
+  // A small, animated glint improves sword readability at 36px tiles.
+  const gleam = .35 + .35 * Math.sin(animTick * .13);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(235,246,255,' + gleam + ')';
+  ctx.lineWidth = 1;
+  ctx.beginPath();ctx.moveTo(px+13,py-12+bob);ctx.lineTo(px+17,py-15+bob);ctx.stroke();
+  ctx.restore();
 
   // Poison effect
   if (player.poisonTurns > 0) {
