@@ -9,6 +9,9 @@ const ENEMY_TYPES = {
     SWARM:   { name: 'Essaim',  color: '#f1c40f', speed: 75, hp: 28,   armor: 0, reward: 2,   score: 4,   size: 12, lives: 1,  shape: 'circle' },
     ARMORED: { name: 'Blindé',  color: '#95a5a6', speed: 45, hp: 170,  armor: 8, reward: 12,  score: 30,  size: 22, lives: 1,  shape: 'hex' },
     TANK:    { name: 'Tank',    color: '#8d5524', speed: 35, hp: 360,  armor: 3, reward: 15,  score: 40,  size: 26, lives: 2,  shape: 'square' },
+    MEDIC:   { name:'Médecin', color:'#40c9a2', speed:46, hp:115, armor:1, reward:15, score:28, size:20, lives:1, shape:'circle', aura:135, healing:17 },
+    SHIELD:  { name:'Protecteur', color:'#5479bd', speed:38, hp:215, armor:5, reward:19, score:42, size:25, lives:2, shape:'hex', aura:115, protection:0.65 },
+    JAMMER:  { name:'Brouilleur', color:'#b46de0', speed:52, hp:135, armor:2, reward:19, score:40, size:22, lives:1, shape:'diamond', aura:155, disruption:1.75 },
     BOSS:    { name: 'Boss',    color: '#ff6600', speed: 30, hp: 2400, armor: 5, reward: 120, score: 400, size: 34, lives: 10, shape: 'star' }
 };
 
@@ -25,6 +28,9 @@ function buildWaveGroups(wave) {
     if (wave >= 3) add('FAST', Math.floor((wave - 1) * 0.9), 450);
     if (wave >= 4 && wave % 2 === 0) add('SWARM', 8 + wave, 170);
     if (wave >= 6) add('ARMORED', Math.floor((wave - 4) * 0.6), 1100);
+    if (wave >= 4) add('MEDIC', Math.min(4, Math.floor(wave / 4)), 1600);
+    if (wave >= 6) add('SHIELD', Math.min(4, Math.floor(wave / 5)), 1800);
+    if (wave >= 7) add('JAMMER', Math.min(3, Math.floor(wave / 6)), 2000);
     if (wave >= 8) add('TANK', Math.floor((wave - 6) * 0.5), 1400);
     if (wave % 10 === 0) add('BOSS', Math.floor(wave / 10), 2500);
     else if (wave % 5 === 0) add('TANK', 2 + Math.floor(wave / 10), 1600);
@@ -91,7 +97,10 @@ function spawnEnemy(typeKey, wave) {
 
 function damageEnemy(enemy, amount, tower, pierceArmor = false) {
     if (!enemy || enemy.life <= 0) return 0;
-    const effective = pierceArmor ? amount : Math.max(amount * 0.25, amount - enemy.armor);
+    const protectedBy = enemies.some((unit) => unit !== enemy && unit.type === 'SHIELD' &&
+        unit.life > 0 && Math.hypot(unit.x - enemy.x, unit.y - enemy.y) <= ENEMY_TYPES.SHIELD.aura);
+    const armorDamage = pierceArmor ? amount : Math.max(amount * 0.25, amount - enemy.armor);
+    const effective = protectedBy ? armorDamage * ENEMY_TYPES.SHIELD.protection : armorDamage;
     enemy.life -= effective;
     enemy.hitFlash = 80;
     if (tower) {
@@ -109,6 +118,16 @@ function applySlow(enemy, factor, duration) {
 }
 
 function updateEnemies(dt) {
+    // Support auras are evaluated before movement. Dead support units grant no bonuses.
+    enemies.forEach((medic) => {
+        if (medic.type !== 'MEDIC' || medic.life <= 0) return;
+        const definition = ENEMY_TYPES.MEDIC;
+        enemies.forEach((ally) => {
+            if (ally.life <= 0 || ally === medic || ally.life >= ally.maxLife) return;
+            if (Math.hypot(medic.x - ally.x, medic.y - ally.y) > definition.aura) return;
+            ally.life = Math.min(ally.maxLife, ally.life + definition.healing * dt / 1000);
+        });
+    });
     enemies.forEach((enemy) => {
         if (enemy.slowTimer > 0) {
             enemy.slowTimer -= dt;
