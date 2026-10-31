@@ -506,3 +506,16 @@ body { background:var(--bg); font-family:'Syne',sans-serif; color:var(--text); h
 .btn-cta:hover:not(:disabled),.btn-tab:hover:not(:disabled),.btn-nextweek:hover:not(:disabled){filter:brightness(1.14)}
 button:focus-visible,[tabindex]:focus-visible{outline:2px solid #f1a9ff;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.title-card,.dash-card,.btn-cta,.btn-tab,.btn-nextweek{transition:none!important;transform:none!important}}
+
+
+/* Visual polish: recording-label dashboard */
+.title-card,.dash-card,.tstat {backdrop-filter:blur(12px);box-shadow:0 9px 24px rgba(0,0,0,.18)}
+.title-card,.btn-tab,.btn-nextweek,.btn-cta {transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+.title-card:hover,.btn-tab:hover,.btn-nextweek:hover,.btn-cta:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.btn-tab:focus-visible,.btn-nextweek:focus-visible,.btn-cta:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+#distribution-panel {border-top:1px solid var(--border);padding-top:14px;color:var(--text);line-height:1.7}
+#distribution-panel button {background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:8px 12px;margin:4px;cursor:pointer}
+#distribution-panel button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+#distribution-panel button:disabled{opacity:.46;cursor:default}
+.finance-val,.tstat{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
