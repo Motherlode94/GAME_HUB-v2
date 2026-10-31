@@ -166,15 +166,8 @@ function doHunt(victim, stealth = false) {
       n.alertTimer = Math.max(n.alertTimer, 5);
   });
   victim.dead = true;
-  state.nightProgress++;
   state.reputation += stealth ? 1 : 2;
-  if (state.nightProgress >= 3) {
-    state.nightProgress = 0;
-    state.nightGoal++;
-    state.money += 25;
-    state.power += 2;
-    UI.showEvent("Contrat nocturne accompli : +25$ et +2 pouvoir.");
-  }
+  progressNightMission(stealth ? "stealth" : "hunt");
   player.cooldown = HUNT_COOLDOWN;
   setTimeout(() => spawnNPC("victim"), 7000);
   passTurn();
@@ -216,6 +209,36 @@ function activateShadowVeil() {
   UI.showEvent("Voile d'ombre activé : −24 suspicion. Recharge : 18 secondes.");
 }
 
+// Each completed contract unlocks the next objective and changes player priorities.
+const NIGHT_MISSIONS = [
+  {id:"hunt",label:"Nourrir la lignée",target:3,reward:25,power:2},
+  {id:"stealth",label:"La chasse silencieuse",target:2,reward:35,power:3},
+  {id:"hide",label:"Effacer les traces",target:2,reward:20,power:4},
+  {id:"ritual",label:"Le pacte du cimetière",target:1,reward:45,power:3}
+];
+function currentNightMission() {
+  return NIGHT_MISSIONS[state.nightGoal % NIGHT_MISSIONS.length];
+}
+function progressNightMission(action) {
+  if (!state?.alive) return;
+  const mission = currentNightMission();
+  if (action !== mission.id && !(mission.id === "hunt" && action === "stealth")) return;
+  state.nightProgress++;
+  if (state.nightProgress < mission.target) {
+    UI.showEvent("Contrat — " + mission.label + " : " + state.nightProgress + "/" + mission.target);
+    return;
+  }
+  state.nightProgress = 0;
+  state.nightGoal++;
+  state.money += mission.reward;
+  state.power += mission.power;
+  if (mission.id === "stealth") state.heat = clamp(state.heat - 12);
+  state.reputation += mission.id === "stealth" ? 3 : 1;
+  const next = currentNightMission();
+  UI.showEvent("Contrat accompli : " + mission.label + " ! +" + mission.reward + "$, +" + mission.power +
+    " pouvoir. Prochain : " + next.label + " (" + next.target + ").");
+}
+
 function doHide() {
   const sewer = currentTile() === TILE.SEWER;
   const drop  = sewer ? 30 : 22;
@@ -224,6 +247,7 @@ function doHide() {
   addFloat(`🌑 −${drop} Suspicion`, player.x, player.y - 30, "#4a90d9");
   spawnSpark(player.x, player.y, sewer ? "#0d3010" : "#0d2040", 22);
   player.cooldown = 0.8;
+  progressNightMission("hide");
   passTurn();
   UI.showEvent(sewer
     ? "🚰 Vous plongez dans les égouts... −30 suspicion."
@@ -258,6 +282,7 @@ function doCemetery() {
   addFloat("☠️ +3 Pouvoir", player.x, player.y - 30, "#7a9a8a");
   spawnSpark(player.x, player.y, "#1a3020", 20);
   player.cooldown = 1.2;
+  progressNightMission("ritual");
   passTurn();
   UI.showEvent("☠️ Vous puisez l'énergie des morts... +3 Pouvoir.");
 }
@@ -762,7 +787,7 @@ function startGame() {
   initState(); initPlayer(); initNPCs();
   particles=[]; floats=[]; camera={x:0,y:0}; keys={}; waterAnim=0;
   resize(); fogCanvas=buildFogCanvas();
-  UI.updateStats(state); UI.showEvent("Contrat nocturne : nourrissez-vous de 3 proies. Récompense : 25$ et 2 pouvoir. F : sens du sang après 2 contrats."); lastTime=performance.now();
+  UI.updateStats(state); UI.showEvent("Contrat : " + currentNightMission().label + " (" + currentNightMission().target + "). F : sens du sang après 2 contrats."); lastTime=performance.now();
   cancelAnimationFrame(animID); animID=requestAnimationFrame(loop);
 }
 
