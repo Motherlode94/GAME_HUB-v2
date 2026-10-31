@@ -886,25 +886,43 @@ function enemyTurn() {
         return;
     }
 
-    // IA améliorée : prioriser les ultimes si disponibles
-    let skill;
-    const ultimateSkills = usableSkills.filter(s => s.isUltimate);
-    if (ultimateSkills.length > 0 && Math.random() > 0.3) {
-        skill = ultimateSkills[0];
+    // Tactical AI: choose actions according to survival, energy and type matchups.
+    const allies = aliveEnemies;
+    const opponents = gameState.playerTeam.filter(c => c.isAlive);
+    if (!opponents.length) { endBattle(false); return; }
+
+    const healSkill = usableSkills.filter(s => s.heal).sort((a,b) => b.heal-a.heal)[0];
+    const injured = allies.slice().sort((a,b) => (a.currentHP/a.maxHP)-(b.currentHP/b.maxHP))[0];
+    const shieldSkill = usableSkills.filter(s => s.shield).sort((a,b) => b.shield-a.shield)[0];
+    const exposed = allies.slice().sort((a,b) => a.shield-b.shield)[0];
+
+    let skill, target;
+    if (healSkill && injured.currentHP/injured.maxHP < 0.45) {
+        skill = healSkill;
+        target = injured;
+    } else if (shieldSkill && exposed.shield === 0 && exposed.currentHP/exposed.maxHP < 0.65) {
+        skill = shieldSkill;
+        target = exposed;
     } else {
-        skill = usableSkills[Math.floor(Math.random() * usableSkills.length)];
+        const attacks = usableSkills.filter(s => !s.heal && !s.shield);
+        if (!attacks.length) {
+            skill = usableSkills[0];
+            target = skill.heal ? injured : exposed;
+        } else {
+            let bestScore = -Infinity;
+            attacks.forEach(candidate => opponents.forEach(foe => {
+                const affinity = TYPE_EFFECTIVENESS[enemy.type]?.[foe.type] || 1;
+                const estimate = Math.max(1, (candidate.damage||0) * affinity - foe.defense*0.3);
+                const score = estimate
+                    + (estimate >= foe.currentHP ? 70 : 0)
+                    + (foe.currentHP/foe.maxHP < 0.35 ? 12 : 0)
+                    + (candidate.isUltimate ? 8 : 0)
+                    - candidate.cost * 1.5;
+                if (score > bestScore) { bestScore=score; skill=candidate; target=foe; }
+            }));
+        }
     }
-
-    const alivePlayer = gameState.playerTeam.filter(c => c.isAlive);
-    
-    if (alivePlayer.length === 0) {
-        endBattle(false);
-        return;
-    }
-
-    const target = skill.heal || skill.shield ? 
-        aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)] :
-        alivePlayer[Math.floor(Math.random() * alivePlayer.length)];
+    if (!skill || !target) { nextTurn(); return; }
 
     setTimeout(() => {
         executeSkill(enemy, target, skill);
