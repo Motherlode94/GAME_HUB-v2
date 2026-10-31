@@ -32,6 +32,8 @@ class Player {
         this.jumpBuffer    = 0;
         this.jumpBufferMax = 10;
         this.jumpHeld = false;
+        this.airJumpsLeft = 1;
+        this.sprinting = false;
 
         // Invincibility blink after respawn
         this.invincible = 0;
@@ -49,6 +51,9 @@ class Player {
     // ── Input ─────────────────────────────────
     handleInput(keys) {
         var moving = false;
+        // Hold Shift to sprint, at the cost of reduced fine control.
+        this.sprinting = !!(keys['ShiftLeft'] || keys['ShiftRight']);
+        var maxSpeed = this.sprinting ? this.speed * 1.45 : this.speed;
 
         if (keys['ArrowRight'] || keys['KeyD']) {
             this.velocityX += this.accel;
@@ -61,8 +66,8 @@ class Player {
             moving = true;
         }
 
-        if (this.velocityX >  this.speed) this.velocityX =  this.speed;
-        if (this.velocityX < -this.speed) this.velocityX = -this.speed;
+        if (this.velocityX >  maxSpeed) this.velocityX =  maxSpeed;
+        if (this.velocityX < -maxSpeed) this.velocityX = -maxSpeed;
 
         if (!moving) {
             this.velocityX *= this.friction;
@@ -102,6 +107,7 @@ class Player {
 
         // Coyote time
         if (this.isGrounded) {
+            this.airJumpsLeft = 1;
             this.coyoteCounter = this.coyoteTime;
         } else {
             this.coyoteCounter = Math.max(0, this.coyoteCounter - 1);
@@ -115,6 +121,11 @@ class Player {
                 this.isGrounded    = false;
                 this.coyoteCounter = 0;
                 this.jumpBuffer    = 0;
+            } else if (!this.isGrounded && this.airJumpsLeft > 0) {
+                // A second press mid-air grants one shorter corrective jump.
+                this.velocityY = this.jumpForce * 0.85;
+                this.airJumpsLeft--;
+                this.jumpBuffer = 0;
             }
         }
 
