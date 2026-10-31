@@ -2152,3 +2152,12 @@ body {
         padding: 7px 9px;
     }
 }
+
+
+/* Visual polish: royal strategy */
+.gov-card,.panel-dark,.title-content {backdrop-filter:blur(10px)}
+.gov-card,.btn-title,.btn-diff {transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.gov-card:hover,.btn-title:hover,.btn-diff:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,.22)}
+.gov-card:focus-visible,.btn-title:focus-visible,.btn-diff:focus-visible,.btn-back:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.gov-card.selected {box-shadow:0 0 0 1px var(--accent),0 12px 26px var(--accent-glow)}
+@media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
