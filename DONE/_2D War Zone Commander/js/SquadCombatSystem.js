@@ -83,6 +83,7 @@ RTS.SquadCombatSystem = {
                 case "machinegun": self._machinegun(game, squad, target); break;
                 case "artillery":  self._artillery(game, squad, target);  break;
                 case "rocket":     self._rocket(game, squad, target);     break;
+                case "missile":    self._emitProjectile(game, squad, target, "rocket"); break;
             }
 
             // Fire cost is paid on trigger. A burst consumes additional rounds as queued.
