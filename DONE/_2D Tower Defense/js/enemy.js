@@ -12,6 +12,9 @@ const ENEMY_TYPES = {
     MEDIC:   { name:'Médecin', color:'#40c9a2', speed:46, hp:115, armor:1, reward:15, score:28, size:20, lives:1, shape:'circle', aura:135, healing:17 },
     SHIELD:  { name:'Protecteur', color:'#5479bd', speed:38, hp:215, armor:5, reward:19, score:42, size:25, lives:2, shape:'hex', aura:115, protection:0.65 },
     JAMMER:  { name:'Brouilleur', color:'#b46de0', speed:52, hp:135, armor:2, reward:19, score:40, size:22, lives:1, shape:'diamond', aura:155, disruption:1.75 },
+    IFV: {name:'Véhicule de combat d’infanterie',color:'#73856b',speed:52,hp:290,armor:7,reward:24,score:58,size:26,lives:2,shape:'hex'},
+    DRONE: {name:'Drone de reconnaissance',color:'#77d4e8',speed:112,hp:78,armor:0,reward:18,score:42,size:16,lives:1,shape:'diamond',isAir:true},
+    HELICOPTER: {name:'Hélicoptère de combat',color:'#588e92',speed:78,hp:310,armor:5,reward:42,score:110,size:29,lives:3,shape:'diamond',isAir:true},
     BOSS:    { name: 'Boss',    color: '#ff6600', speed: 30, hp: 2400, armor: 5, reward: 120, score: 400, size: 34, lives: 10, shape: 'star' }
 };
 
@@ -31,6 +34,9 @@ function buildWaveGroups(wave) {
     if (wave >= 4) add('MEDIC', Math.min(4, Math.floor(wave / 4)), 1600);
     if (wave >= 6) add('SHIELD', Math.min(4, Math.floor(wave / 5)), 1800);
     if (wave >= 7) add('JAMMER', Math.min(3, Math.floor(wave / 6)), 2000);
+    if (wave >= 6) add('IFV', Math.min(6, Math.floor(wave / 3)), 1450);
+    if (wave >= 7) add('DRONE', Math.min(8, 1 + Math.floor(wave / 3)), 730);
+    if (wave >= 11) add('HELICOPTER', Math.min(4, Math.floor(wave / 5)), 1800);
     if (wave >= 8) add('TANK', Math.floor((wave - 6) * 0.5), 1400);
     if (wave % 10 === 0) add('BOSS', Math.floor(wave / 10), 2500);
     else if (wave % 5 === 0) add('TANK', 2 + Math.floor(wave / 10), 1600);
