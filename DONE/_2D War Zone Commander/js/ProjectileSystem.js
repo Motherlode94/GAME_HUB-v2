@@ -37,8 +37,11 @@ RTS.ProjectileSystem = {
             var dist = Math.sqrt(dx * dx + dy * dy);
             var hitR = (p.type === "shell" || p.type === "artillery") ? 16 : 10;
 
-            if (dist < hitR || p.age > 5) {
+            if (dist < hitR) {
                 self._onImpact(game, p, tx, ty);
+                toRemove.push(idx);
+            } else if (p.age > 5) {
+                // A timed-out projectile misses; never award guaranteed damage.
                 toRemove.push(idx);
             }
         });
