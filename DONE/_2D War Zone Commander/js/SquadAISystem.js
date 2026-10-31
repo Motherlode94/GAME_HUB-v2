@@ -2,9 +2,9 @@ window.RTS = window.RTS || {};
 /* Enemy squad tactical movement: staggered decisions, target weighting, flanks, retreat. */
 RTS.SquadAISystem = {
     update: function(game, delta) {
-        if (game.setupPhase || !RTS.WaveSystem._prepDone) return;
+        if (game.setupPhase || (game.mode !== "conquest" && !RTS.WaveSystem._prepDone)) return;
         var enemies = game.squads.filter(function(s) { return (s.team === "blue" || s.team === "ally") && !s.isDead(); });
-        if (!enemies.length) return;
+        if (!enemies.length && !game.conquest) return;
         game.squads.forEach(function(red) {
             if (red.team !== "red" || red.isDead() || !red.def) return;
             red._decisionTimer = (red._decisionTimer || 0) - delta;
@@ -21,6 +21,20 @@ RTS.SquadAISystem = {
                 var value = d * threat * (0.85 + hp * 0.15);
                 if (value < score) { score = value; best = t; distance = d; }
             });
+            if (game.mode === "conquest" && game.conquest) {
+                var zones=game.conquest.zones.filter(function(z){return z.owner!=="red";});
+                var support=/supply_truck|ammo_carrier/.test(red.typeName);
+                if (support) {
+                    var needy=game.squads.filter(function(t){return t.team==="red" && t!==red && !t.isDead() && t.ammoCapacity && t.ammo<t.ammoCapacity*.5;})[0];
+                    if(needy){red.target={x:needy.x+45,y:needy.y+35};return;}
+                }
+                if ((!best || distance>(red.def.attackRange||200)*1.5) && zones.length && red.def.category!=="air") {
+                    zones.sort(function(a,b){return Math.hypot(a.x-red.x,a.y-red.y)-Math.hypot(b.x-red.x,b.y-red.y);});
+                    var z=zones[red.id%Math.min(2,zones.length)];
+                    red.target={x:z.x+(red.id%3-1)*28,y:z.y+(red.id%5-2)*25};
+                    return;
+                }
+            }
             if (!best) return;
             var hpRatio = red.getTotalHp() / Math.max(1, red.getMaxHp());
             var dx = red.x - best.x, dy = red.y - best.y;
