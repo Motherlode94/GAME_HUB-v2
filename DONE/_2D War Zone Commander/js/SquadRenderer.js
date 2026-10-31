@@ -22,6 +22,16 @@ RTS.SquadRenderer = {
             });
             RTS.SquadRenderer._drawSquadHpBar(ctx, squad);
             RTS.SquadRenderer._drawBadge(ctx, squad);
+            if (squad.passengers && squad.passengers.length) {
+                ctx.save();
+                ctx.font = "bold 12px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#d9f99d";
+                ctx.shadowColor = "#052e16";
+                ctx.shadowBlur = 4;
+                ctx.fillText("▣ " + squad.passengers.length + "/" + (RTS.TransportSystem ? RTS.TransportSystem.capacity(squad) : 3), squad.x, squad.y - 34);
+                ctx.restore();
+            }
         });
     },
 
