@@ -44,6 +44,10 @@ RTS.Camera.prototype.update = function(delta) {
 };
 
 RTS.Camera.prototype._clamp = function() {
+    // Never expose empty canvas outside the world on wide screens.
+    var fit = Math.max(this.canvas.width / RTS.WORLD_W, this.canvas.height / RTS.WORLD_H);
+    this.minZoom = Math.min(this.maxZoom, Math.max(0.35, fit));
+    this.zoom = Math.max(this.minZoom, this.zoom);
     var maxX = RTS.WORLD_W - this.canvas.width  / this.zoom;
     var maxY = RTS.WORLD_H - this.canvas.height / this.zoom;
     this.x = Math.max(0, Math.min(this.x, Math.max(0, maxX)));
