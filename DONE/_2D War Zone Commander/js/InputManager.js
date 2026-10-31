@@ -153,6 +153,14 @@ RTS.InputManager = function(game) {
             game.selectedSquads = [];
             game.selectedBuildings = [];
         }
+        // Air commands: P patrol, V reconnaissance, O return to initial air position.
+        if ((k === "p" || k === "v" || k === "o") && !e.ctrlKey && !e.altKey &&
+            !/input|textarea|select/i.test((e.target && e.target.tagName) || "") &&
+            RTS.AirMissionSystem && !RTS.BuildingSystem.isPlacing()) {
+            var targetPoint = game.camera.screenToWorld(RTS.InputState.mouseX, RTS.InputState.mouseY);
+            var mission = k === "p" ? "patrol" : k === "v" ? "recon" : "return";
+            if (RTS.AirMissionSystem.issue(game, mission, targetPoint)) e.preventDefault();
+        }
         // F cycles selected squads between close grid, defensive line and assault wedge.
         if (k === "f" && !e.ctrlKey && !e.altKey &&
             !/input|textarea|select/i.test((e.target && e.target.tagName) || "")) {
