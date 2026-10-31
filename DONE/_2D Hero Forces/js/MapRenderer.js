@@ -107,14 +107,14 @@ RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGri
 RTS.Game.Map.MapRenderer.prototype._renderTerrain = function(ctx, canvas) {
     if (this.imageLoaded) {
         // Légère désaturation militaire via globalAlpha + filtre (si supporté)
-        ctx.drawImage(this.image, 0, 0);
+        ctx.drawImage(this.image, 0, 0, this.worldWidth||this.image.width, this.worldHeight||this.image.height);
 
         // Teinte verdâtre militaire subtile sur le terrain
         ctx.fillStyle = 'rgba(20, 35, 10, 0.12)';
-        ctx.fillRect(0, 0, this.image.width, this.image.height);
+        ctx.fillRect(0, 0, this.worldWidth||this.image.width, this.worldHeight||this.image.height);
     } else {
         // Terrain procédural si l'image est absente
-        this._renderProceduralTerrain(ctx, 3840, 2880);
+        this._renderProceduralTerrain(ctx, this.worldWidth||3840, this.worldHeight||2880);
     }
 };
 
