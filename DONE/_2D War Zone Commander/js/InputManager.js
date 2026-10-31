@@ -168,6 +168,47 @@ RTS.InputManager = function(game) {
                 e.preventDefault();
             }
         }
+        // H: hold ground. Stop current orders while continuing defensive fire.
+        if (k === "h" && !e.ctrlKey && !e.altKey &&
+            !/input|textarea|select/i.test((e.target && e.target.tagName) || "")) {
+            var holding = game.selectedSquads.filter(function(s) {
+                return s.team === "blue" && !s.isDead();
+            });
+            if (holding.length) {
+                holding.forEach(function(s) {
+                    s.target = null;
+                    s._nav = null;
+                    s.holdingPosition = true;
+                });
+                e.preventDefault();
+            }
+        }
+        // R: ordered withdrawal from the nearest enemy, preserving squad spacing.
+        if (k === "r" && !e.ctrlKey && !e.altKey &&
+            !/input|textarea|select/i.test((e.target && e.target.tagName) || "")) {
+            var retreating = game.selectedSquads.filter(function(s) {
+                return s.team === "blue" && !s.isDead();
+            });
+            if (retreating.length) {
+                retreating.forEach(function(s, i) {
+                    var hostile = null, nearest = Infinity;
+                    game.squads.forEach(function(enemy) {
+                        if (enemy.team !== "red" || enemy.isDead()) return;
+                        var d = Math.hypot(enemy.x-s.x, enemy.y-s.y);
+                        if (d < nearest) {nearest=d;hostile=enemy;}
+                    });
+                    if (!hostile) return;
+                    var dx=s.x-hostile.x, dy=s.y-hostile.y, d=Math.max(1,Math.hypot(dx,dy));
+                    s.target = {
+                        x: Math.max(25,Math.min(RTS.WORLD_W-25,s.x+dx/d*180+(i%3-1)*20)),
+                        y: Math.max(25,Math.min(RTS.WORLD_H-25,s.y+dy/d*180))
+                    };
+                    s._nav = null;
+                    s.holdingPosition = false;
+                });
+                e.preventDefault();
+            }
+        }
         // T toggles priority on selected friendly combat squads.
         if (k === "t" && !e.ctrlKey && !e.altKey &&
             !/input|textarea|select/i.test((e.target && e.target.tagName) || "")) {
