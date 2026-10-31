@@ -14,7 +14,7 @@ RTS.FogOfWar = {
         game.squads.forEach(function(s) {
             if ((s.team !== "blue" && s.team !== "ally") || s.isDead()) return;
             var radius = s.typeName === "ew_drone" ? 700 : s.typeName === "recon_drone" ? 650 : s.typeName === "recon_team" || s.typeName === "mechanized_scout" ? 360 : s.def && s.def.category === "air" ? 400 : 250;
-            reveal(s.x, s.y, radius);
+            reveal(s.x, s.y, RTS.TacticalRules ? RTS.TacticalRules.sight(s) : radius);
         });
         game.buildings.forEach(function(b) {
             if (b.team === "blue" && b.hp > 0) reveal(b.x, b.y, b.type === "tower" ? 340 : 185);
@@ -27,6 +27,7 @@ RTS.FogOfWar = {
             for (var cy = top; cy <= bottom; cy++) for (var cx = left; cx <= right; cx++) {
                 var px = (cx + .5) * cell - x, py = (cy + .5) * cell - y;
                 if (px * px + py * py > radius * radius) continue;
+                if (RTS.TacticalRules && RTS.TacticalRules.blocked(game,x,y,(cx+.5)*cell,(cy+.5)*cell)) continue;
                 var i = cy * cols + cx; fog.visible[i] = 1; fog.seen[i] = 1;
             }
         }
