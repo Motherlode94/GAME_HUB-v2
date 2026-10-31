@@ -1510,3 +1510,12 @@ body {
 .difficulty-btn:hover:not(:disabled){filter:brightness(1.16);transform:translateY(-2px)}
 .btn:focus-visible,.difficulty-btn:focus-visible{outline:2px solid #e4c2ff;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.difficulty-btn{transition:none!important}.difficulty-btn:hover{transform:none!important}}
+
+
+/* Visual polish: elemental battle interface */
+.creature-card,.score-item,.start-container {backdrop-filter:blur(12px);transition:box-shadow .2s ease,transform .2s ease}
+.creature-card:hover {transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.32)}
+.btn,.difficulty-btn {transition:transform .16s ease,box-shadow .16s ease,filter .16s ease}
+.btn:hover:not(:disabled),.difficulty-btn:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-2px)}
+.btn:focus-visible,.difficulty-btn:focus-visible,.creature-card:focus-visible{outline:2px solid #a5b4fc;outline-offset:3px}
+@media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
