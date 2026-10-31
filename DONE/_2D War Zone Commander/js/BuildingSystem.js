@@ -114,6 +114,23 @@ RTS.BuildingSystem = {
     // ── Mise à jour principale ────────────────────────────────────────────────
 
     update: function(game, delta) {
+        // Territory interactions: uncontested nearby infantry captures neutral or hostile field sites.
+        game.buildings.forEach(function(b){
+            if(!b.tacticalSite||b.hp<=0)return;
+            var near=game.squads.filter(function(u){return !u.isDead()&&u.def&&u.def.category==="infantry"&&Math.hypot(u.x-b.x,u.y-b.y)<105;});
+            var blue=near.some(function(u){return u.team==="blue"||u.team==="ally";});
+            var red=near.some(function(u){return u.team==="red";});
+            if(blue===red)return;
+            var attacker=blue?"blue":"red";
+            if(b.team===attacker){b.captureProgress=0;return;}
+            b.captureProgress=(b.captureProgress||0)+delta*(near.length>1?14:10);
+            if(b.captureProgress>=100){b.team=attacker;b.captureProgress=0;}
+        });
+        game.squads.forEach(function(u){
+            if(!u.garrisonedIn)return;
+            var b=u.garrisonedIn;
+            if(b.hp<=0||u.isDead()||Math.hypot(u.x-b.x,u.y-b.y)>115)u.garrisonedIn=null;
+        });
         RTS.BuildingSystem._updateProduction(game, delta);
         RTS.BuildingSystem._updatePassiveIncome(game, delta);
         RTS.BuildingSystem._updateHospital(game, delta);
