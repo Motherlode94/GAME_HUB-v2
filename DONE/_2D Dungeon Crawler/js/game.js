@@ -1028,6 +1028,16 @@ function enemyAttack() {
     combat.guarding = false;
     addLog('🛡 Parade : ' + blocked + ' dégâts absorbés !');
     spawnFloatingText(player.x, player.y, '🛡 -' + blocked, '#68cfff');
+    // Timed defensive stance can retaliate, but cannot replace a finishing attack.
+    if (!spellCast && Math.random() < 0.35) {
+      const riposte = Math.min(Math.max(0, e.hp - 1), Math.max(1, Math.floor(player.atk * 0.55)));
+      if (riposte > 0) {
+        e.hp -= riposte;
+        addLog('⚔️ Riposte après parade ! ' + riposte + ' dégâts.');
+        spawnFloatingText(e.x, e.y, 'RIPOSTE -' + riposte, '#ffd36e');
+        spawnParticles(e.x, e.y, '#ffd36e', 7, 'spark');
+      }
+    }
   }
 
   // Goblin poison
@@ -1075,7 +1085,15 @@ function fleeHandler() {
 
 // ==================== CONTROLS ====================
 window.addEventListener('keydown', e => {
-  if (combat) return;
+  // Combat keyboard shortcuts, ignored while an action is resolving.
+  if (combat) {
+    if (e.repeat || combat.turn !== 'player') return;
+    const key = e.key.toLowerCase();
+    if (key === 'a' || key === ' ') { e.preventDefault(); attackHandler(); }
+    else if (key === 'g') { e.preventDefault(); guardHandler(); }
+    else if (key === 'f') { e.preventDefault(); fleeHandler(); }
+    return;
+  }
   switch (e.key.toLowerCase()) {
     case 'arrowup':    case 'z': move(0, -1);  e.preventDefault(); break;
     case 'arrowdown':  case 's': move(0,  1);  e.preventDefault(); break;
