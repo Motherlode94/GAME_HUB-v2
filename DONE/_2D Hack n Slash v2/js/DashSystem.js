@@ -10,11 +10,14 @@ class DashSystem {
 
         this.cooldown = 0;
         this.maxCooldown = 60;
+        this._dashHeld = false;
     }
 
     tryDash(dir) {
-        if (this.cooldown > 0) return;
-        if (dir.length() === 0) return;
+        if (this.cooldown > 0 || this.dashing) return;
+        // Allow a dash without a directional key, using the character's facing.
+        if (dir.length() === 0) dir = this.player.lastDir;
+        if (!dir || dir.length() === 0) return;
 
         this.dashing = true;
         this.dashTimer = this.dashDuration;
@@ -29,9 +32,12 @@ class DashSystem {
 
     update(keys, dir) {
         // Déclenchement
-        if ((keys['ShiftLeft'] || keys['KeyL']) && !this.dashing) {
+        const dashPressed = !!(keys['ShiftLeft'] || keys['ShiftRight'] || keys['KeyL']);
+        // A dash requires a new key press; holding Shift no longer chains invulnerable dashes.
+        if (dashPressed && !this._dashHeld && !this.dashing) {
             this.tryDash(dir);
         }
+        this._dashHeld = dashPressed;
 
         // Dash en cours
         if (this.dashing) {
