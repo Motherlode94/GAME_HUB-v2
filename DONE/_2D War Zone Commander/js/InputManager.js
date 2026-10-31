@@ -146,6 +146,15 @@ RTS.InputManager = function(game) {
 
     window.addEventListener("keydown", function(e) {
         var k = e.key.toLowerCase();
+        // G: garrison nearest owned tactical building. X: leave cover.
+        if((k==="g"||k==="x")&&!e.ctrlKey&&!e.altKey&&!/input|textarea|select/i.test((e.target&&e.target.tagName)||"")){
+            game.selectedSquads.filter(function(u){return (u.team==="blue"||u.team==="ally")&&u.def&&u.def.category==="infantry"&&!u.isDead();}).forEach(function(u){
+                if(k==="x"){u.garrisonedIn=null;return;}
+                var b=game.buildings.filter(function(b){return b.hp>0&&b.team==="blue"&&b.type!=="wall"&&Math.hypot(u.x-b.x,u.y-b.y)<110;}).sort(function(a,b){return Math.hypot(a.x-u.x,a.y-u.y)-Math.hypot(b.x-u.x,b.y-u.y);})[0];
+                if(b){u.garrisonedIn=b;u.target=null;u.holdingPosition=true;}
+            });
+            e.preventDefault();return;
+        }
         if (e.key === "Escape") {
             if (RTS.BuildingSystem.isPlacing()) { RTS.BuildingSystem.cancelPlacing(); return; }
             game.squads.forEach(function(s) { s.selected = false; });
