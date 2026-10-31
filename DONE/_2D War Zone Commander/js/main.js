@@ -171,6 +171,7 @@ window.onload = function() {
                     if (RTS.AllySystem) RTS.AllySystem.update(game, delta);
                     RTS.SquadAISystem.update(game, delta);
                     RTS.FogOfWar.update(game);
+                    if (RTS.AirMissionSystem) RTS.AirMissionSystem.update(game);
                     RTS.SquadSystem.update(game.squads, delta, game.buildings);
                     RTS.SquadCombatSystem.update(game, delta);
                     RTS.ProjectileSystem.update(game, delta);
