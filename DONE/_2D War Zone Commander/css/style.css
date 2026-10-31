@@ -346,3 +346,9 @@ button:focus-visible{outline:2px solid #b2ecff;outline-offset:2px}
 #requisitionPanel select,#requisitionPanel button{max-width:100%}
 @media(min-width:900px){#requisitionPanel{left:12px!important;right:auto!important;top:auto!important;bottom:12px!important;transform:none!important;width:276px!important;max-height:48vh!important}}
 @media(max-width:700px){#requisitionPanel{left:8px!important;bottom:8px!important;top:auto!important;transform:none!important;width:min(245px,75vw)!important;max-height:43vh!important}#missionPanel{max-height:20vh!important}}
+
+/* Broken Array: clear battlefield and avoid colliding sidebars */
+#missionPanel{top:84px!important;left:12px!important;width:176px!important;max-height:30vh!important;overflow-y:auto!important;background:rgba(5,13,22,.83)!important}
+#requisitionPanel{left:12px!important;top:auto!important;bottom:12px!important;transform:none!important;width:min(288px,calc(100vw - 24px))!important;max-height:40vh!important;overflow-y:auto!important;background:rgba(7,18,28,.93)!important}
+#controls:not(.open){display:none!important}
+@media(max-width:700px){#missionPanel{max-height:22vh!important}#requisitionPanel{max-height:36vh!important;width:min(245px,72vw)!important}}
