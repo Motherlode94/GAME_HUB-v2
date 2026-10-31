@@ -975,6 +975,34 @@ RTS.Game.Squad.prototype._drawInfantry = function(ctx,col) {
     this._drawLabel(ctx,col,this.x,this.y);
 };
 
+RTS.Game.Squad.prototype._spriteId = function(kind) {
+    var red=this.team==='axis',t=this.type;
+    if(kind==='infantry'){
+        var base=t==='medic'?'soldat_medic':t==='pioneer'?'soldat_ingenieur':t==='mg'||t==='support'?'soldat_minigun':t==='officer'?'soldat_radio':'soldat_fusil';
+        return base+(red?'_rouge':'');
+    }
+    var map={
+        jeep:'buggy_bleu',recon_car:'buggy_bleu',halftrack:'blinde_bleu',anti_inf_car:'antiaerien_vert',
+        sherman:'blinde_vert',panzer:'char_lourd_vert',heavy_tank:'char_lourd_vert',
+        tank_destroyer:'char_lourd_vert',artillery_truck:'artillerie_bleue',m10_wolverine:'blinde_vert',
+        stug:'char_lourd_vert',tiger:'char_lourd_vert',jagdpanther:'char_lourd_vert',
+        heli_transport:'helico_bleu',heli_attack:'helico_vert',airstrike:'avion_bleu',
+        p47_thunderbolt:'chasseur_bleu',fw190:'chasseur_bleu',me262:'chasseur_bleu'
+    };
+    var id=map[t]||(kind==='aerial'?'avion_bleu':'blinde_vert');
+    if(red){
+        var variants={buggy_bleu:'buggy_rouge',blinde_bleu:'blinde_rouge',blinde_vert:'blinde_rouge',
+            char_lourd_vert:'char_lourd_rouge',artillerie_bleue:'artillerie_rouge',
+            antiaerien_vert:'antiaerien_rouge',helico_bleu:'helico_rouge',helico_vert:'helico_rouge',
+            avion_bleu:'avion_rouge',chasseur_bleu:'chasseur_rouge'};
+        id=variants[id]||id;
+    }
+    return id;
+};
+RTS.Game.Squad.prototype._drawSharedSprite = function(ctx,kind,x,y,size,angle) {
+    var library=window.WarLikeRTSAssets;
+    return !!(library&&library.draw(ctx,this._spriteId(kind),x,y,size,size,angle||0));
+};
 RTS.Game.Squad.prototype._drawSoldier = function(ctx,sol,col) {
     var mov=!this.inCombat&&this.path.length>0&&this.pathIndex<this.path.length;
     var wb=mov?Math.sin(this._time*6+sol.wobblePhase)*1.8:0;
@@ -988,6 +1016,8 @@ RTS.Game.Squad.prototype._drawSoldier = function(ctx,sol,col) {
         ctx.moveTo(sx+4,sy-4);ctx.lineTo(sx-4,sy+4); ctx.stroke(); ctx.restore(); return;
     }
 
+    // Shared asset sprites, fallback to legacy shapes while loading/unavailable.
+    if(this._drawSharedSprite(ctx,'infantry',sx,sy,20,this._angle+Math.PI/2))return;
     // Couleur selon rôle
     var soldierColor = col.base;
     if (this.role==='assault')    soldierColor='#ff6600';
@@ -1019,6 +1049,7 @@ RTS.Game.Squad.prototype._drawSoldier = function(ctx,sol,col) {
 
 RTS.Game.Squad.prototype._drawVehicle = function(ctx,col) {
     var x=this.x, y=this.y;
+    if(this._drawSharedSprite(ctx,'vehicle',x,y,Math.max(34,this.radius*2.4),this._angle+Math.PI/2))return;
     ctx.save();
     ctx.translate(x,y); ctx.rotate(this._angle+Math.PI/2);
     var t=this.type;
