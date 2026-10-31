@@ -142,7 +142,8 @@ RTS.Squad.prototype.takeDamage = function(damage, fromX, fromY, particles) {
             this.rotorDamage = Math.min(0.75, (this.rotorDamage || 0) + 0.09);
         }
     }
-    if(this.garrisonedIn && this.def.category==="infantry")damage*=0.5;\n    best.hp -= damage;
+    if(this.garrisonedIn && this.def.category==="infantry")damage*=0.5;
+    best.hp -= damage;
     best.flashTimer = 0.08;
 
     if (best.hp <= 0) {
