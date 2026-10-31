@@ -122,16 +122,16 @@ RTS.BuildingSystem = {
             var red=near.some(function(u){return u.team==="red";});
             if(blue===red)return;
             var attacker=blue?"blue":"red";
-            if(b.team===attacker){b.captureProgress=0;return;}
+            if(b.team===attacker){b.captureProgress=0;b._capturingTeam=null;return;}
+            if(b._capturingTeam!==attacker){b.captureProgress=0;b._capturingTeam=attacker;}
             b.captureProgress=(b.captureProgress||0)+delta*(near.length>1?14:10);
-            if(b.captureProgress>=100){b.team=attacker;b.captureProgress=0;}
+            if(b.captureProgress>=100){b.team=attacker;b.captureProgress=0;b._capturingTeam=null;}
         });
         game.squads.forEach(function(u){
             if(!u.garrisonedIn)return;
             var b=u.garrisonedIn;
             if(b.hp<=0||u.isDead()||Math.hypot(u.x-b.x,u.y-b.y)>115)u.garrisonedIn=null;
         });
-        RTS.BuildingSystem._updateProduction(game, delta);
         RTS.BuildingSystem._updatePassiveIncome(game, delta);
         RTS.BuildingSystem._updateHospital(game, delta);
         RTS.BuildingSystem._updateFlash(game, delta);
