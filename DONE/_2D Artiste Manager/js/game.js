@@ -380,6 +380,7 @@ function createDefaultState() {
     projects: [],
     doneProjects: [],
     royaltyCatalog: [],
+    distributionPlan: 'independent',
     market: [],
     events: [],
     weekRevenue: 0,
@@ -1492,7 +1493,8 @@ function normalizeState(rawState) {
         done:      !!p.done,
       })) : [];
   next.doneProjects = Array.isArray(input.doneProjects) ? input.doneProjects.slice(-100) : [];
-  next.royaltyCatalog = Array.isArray(input.royaltyCatalog) ? input.royaltyCatalog.filter(x=>x&&typeof x==='object').slice(-100).map(x=>({name:String(x.name||'Projet'), format:MUSIC_RELEASE_FORMATS[x.format]?x.format:'single',tracks:Math.max(1,Math.floor(Number(x.tracks)||1)),weekly:Math.max(0,Math.floor(Number(x.weekly)||0)), weeksLeft:Math.max(0,Math.floor(Number(x.weeksLeft)||0)),totalWeeks:Math.max(1,Math.floor(Number(x.totalWeeks)||12))})) : [];
+  next.distributionPlan = ['independent','digital','major'].includes(input.distributionPlan) ? input.distributionPlan : 'independent';
+  next.royaltyCatalog = Array.isArray(input.royaltyCatalog) ? input.royaltyCatalog.filter(x=>x&&typeof x==='object').slice(-100).map(x=>({name:String(x.name||'Projet'), format:MUSIC_RELEASE_FORMATS[x.format]?x.format:'single',tracks:Math.max(1,Math.floor(Number(x.tracks)||1)),weekly:Math.max(0,Math.floor(Number(x.weekly)||0)), weeksLeft:Math.max(0,Math.floor(Number(x.weeksLeft)||0)),totalWeeks:Math.max(1,Math.floor(Number(x.totalWeeks)||12)),streams:Math.max(0,Math.floor(Number(x.streams)||0)),physicalSales:Math.max(0,Math.floor(Number(x.physicalSales)||0)),certification:String(x.certification||''),plan:['independent','digital','major'].includes(x.plan)?x.plan:'independent'})) : [];
   next.market       = Array.isArray(input.market) ? input.market.map(normalizeArtist) : [];
   next.events       = Array.isArray(input.events)
     ? input.events.filter(e=>e&&typeof e==='object').map(e=>({
@@ -2070,6 +2072,21 @@ function fireArtist(id) {
 
 // ── NEXT WEEK ─────────────────────────────────────────────────
 
+const DISTRIBUTION_PLANS = {
+  independent:{name:'Indépendant',cost:0,streamMultiplier:1,share:1,physicalMultiplier:0.5},
+  digital:{name:'Distribution numérique',cost:4000,streamMultiplier:1.5,share:0.85,physicalMultiplier:0.75},
+  major:{name:'Accord Major',cost:18000,streamMultiplier:2.4,share:0.65,physicalMultiplier:1.6}
+};
+function chooseDistribution(plan) {
+  if(!G || !DISTRIBUTION_PLANS[plan])return;
+  const selected=DISTRIBUTION_PLANS[plan];
+  if(G.distributionPlan===plan)return;
+  if(G.money<selected.cost){toast('❌ Trésorerie insuffisante pour la distribution.','#ef4444');return;}
+  G.money-=selected.cost;G.weekExpenses+=selected.cost;
+  G.distributionPlan=plan;
+  addNews('📦 Nouveau contrat de distribution : '+selected.name+'.');
+  renderAll();
+}
 const MUSIC_RELEASE_FORMATS = {
   single:{name:'Single',tracks:1,weeks:10,royaltyRate:0.025},
   ep:{name:'EP',tracks:5,weeks:18,royaltyRate:0.045},
@@ -2082,7 +2099,8 @@ function createMusicRelease(project) {
   G.royaltyCatalog=G.royaltyCatalog||[];
   G.royaltyCatalog.push({
     name:project.name,format:project.typeId,tracks:format.tracks,
-    weekly,weeksLeft:format.weeks,totalWeeks:format.weeks
+    weekly,weeksLeft:format.weeks,totalWeeks:format.weeks,
+    streams:0,physicalSales:0,certification:'',plan:G.distributionPlan||'independent'
   });
   G.royaltyCatalog=G.royaltyCatalog.slice(-100);
   addNews('🎶 Sortie '+format.name+' : '+format.tracks+' titre(s), '+format.weeks+' semaines de distribution.');
@@ -2218,7 +2236,16 @@ function nextWeek() {
   let royaltyRevenue = 0;
   G.royaltyCatalog.forEach(entry=>{
     const amount = Math.max(0,Math.floor(entry.weekly * (entry.weeksLeft / Math.max(1,entry.totalWeeks||12))));
-    royaltyRevenue += amount;
+    const distribution=DISTRIBUTION_PLANS[entry.plan]||DISTRIBUTION_PLANS.independent;
+    const weeklyStreams=Math.round(amount*35*distribution.streamMultiplier);
+    const physicalUnits=entry.format==='album'||entry.format==='ep' ? Math.round(amount*0.045*distribution.physicalMultiplier) : 0;
+    entry.streams=(entry.streams||0)+weeklyStreams;
+    entry.physicalSales=(entry.physicalSales||0)+physicalUnits;
+    const payout=Math.floor((amount+physicalUnits*5)*distribution.share);
+    royaltyRevenue+=payout;
+    const equivalent=entry.streams+entry.physicalSales*100;
+    const newCertification=equivalent>=1000000?'Platine':equivalent>=300000?'Or':equivalent>=100000?'Argent':'';
+    if(newCertification!==entry.certification){entry.certification=newCertification;if(newCertification)addNews('🏆 '+entry.name+' : certification '+newCertification+' !');}
     entry.weeksLeft--;
   });
   G.royaltyCatalog = G.royaltyCatalog.filter(entry=>entry.weeksLeft>0);
@@ -2564,6 +2591,18 @@ const artistsEl = document.getElementById('stat-artists');
 if(artistsEl) artistsEl.textContent = `${G.artists.length}/${tier.maxArtists}`;
 }
 
+function renderDistributionPanel() {
+  const container=document.getElementById('distribution-panel');
+  if(!container)return;
+  const plan=G.distributionPlan||'independent';
+  container.innerHTML='<h3>📦 Distribution musicale</h3>'+
+    Object.entries(DISTRIBUTION_PLANS).map(([id,p])=>
+      '<button type="button" onclick="chooseDistribution(\\''+id+'\\')" '+(id===plan?'disabled':'')+'>'+
+      p.name+' — '+p.cost.toLocaleString('fr-FR')+'€'+(id===plan?' ✓':'')+'</button>').join(' ')+
+    '<div style="margin-top:8px">'+(G.royaltyCatalog||[]).map(e=>
+      '<div>🎵 '+String(e.name).replace(/[<>&]/g,'')+' · '+(e.streams||0).toLocaleString('fr-FR')+
+      ' écoutes · '+(e.physicalSales||0)+' ventes · '+(e.certification||'Sans certification')+'</div>').join('')+'</div>';
+}
 // ── RENDER : DASHBOARD ────────────────────────────────────────
 
 function renderDashboard() {
@@ -2577,6 +2616,7 @@ function renderDashboard() {
     <div class="finance-item"><div class="finance-label">Trésorerie</div><div class="finance-val" style="color:var(--gold)">${G.money.toLocaleString()}€</div></div>
     <div class="finance-item"><div class="finance-label">Charges /sem.</div><div class="finance-val" style="color:var(--red)">${weeklyFees.toLocaleString()}€</div></div>
     <div class="finance-item"><div class="finance-label">Revenus totaux</div><div class="finance-val" style="color:var(--green)">${G.totalRevenue.toLocaleString()}€</div></div>
+    <div class="finance-item"><div class="finance-label">Distribution</div><div class="finance-val">${(DISTRIBUTION_PLANS[G.distributionPlan]||DISTRIBUTION_PLANS.independent).name}</div></div>
     <div class="finance-item"><div class="finance-label">Singles / EP / Albums</div><div class="finance-val">${['single','ep','album'].map(id=>(G.royaltyCatalog||[]).filter(x=>x.format===id).length).join(' / ')}</div></div>
     <div class="finance-item"><div class="finance-label">Projets actifs</div><div class="finance-val">${G.projects.length}/${tier.maxProjects}</div></div>
     <div class="finance-item"><div class="finance-label">Satisfaction moy.</div><div class="finance-val" style="color:${getHappinessColor(avgHappy)}">${avgHappy}/100</div></div>
@@ -2585,6 +2625,7 @@ function renderDashboard() {
     <div class="finance-item"><div class="finance-label">Label</div><div class="finance-val" style="color:${tier.color}">${tier.icon} ${tier.name}</div></div>
   `;
 
+  renderDistributionPanel();
   const sorted = [...G.artists].sort((a,b) => b.fame - a.fame).slice(0, 5);
   const topList = document.getElementById('top-artists-list');
 if(topList) topList.innerHTML = sorted.length > 0
