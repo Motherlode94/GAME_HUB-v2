@@ -40,6 +40,13 @@ window.onload = function() {
         // Ressources généreuses : le joueur construit tout from scratch
         game.resources = { gold: 1400, fuel: 400, ammo: 300 };
         game.resourceNodes = RTS.ResourceNode.generateMap();
+        // Neutral tactical sites available in conquest, without spending player resources.
+        if (mode === "conquest") {
+            [[RTS.WORLD_W*.38,RTS.WORLD_H*.37,"tower"],[RTS.WORLD_W*.61,RTS.WORLD_H*.59,"hospital"],[RTS.WORLD_W*.47,RTS.WORLD_H*.72,"arsenal"]].forEach(function(site){
+                var b=new RTS.Building(site[0],site[1],"neutral",site[2]);
+                b.captureProgress=0;b.tacticalSite=true;game.buildings.push(b);
+            });
+        }
 
         // Pas de bâtiments de départ — le joueur choisit tout
         // Pas de squads non plus — ils apparaîtront près du QG posé
