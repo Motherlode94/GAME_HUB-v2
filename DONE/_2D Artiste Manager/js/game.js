@@ -379,6 +379,7 @@ function createDefaultState() {
     artists: [],
     projects: [],
     doneProjects: [],
+    royaltyCatalog: [],
     market: [],
     events: [],
     weekRevenue: 0,
@@ -1491,6 +1492,7 @@ function normalizeState(rawState) {
         done:      !!p.done,
       })) : [];
   next.doneProjects = Array.isArray(input.doneProjects) ? input.doneProjects.slice(-100) : [];
+  next.royaltyCatalog = Array.isArray(input.royaltyCatalog) ? input.royaltyCatalog.filter(x=>x&&typeof x==='object').slice(-100).map(x=>({name:String(x.name||'Projet'), weekly:Math.max(0,Math.floor(Number(x.weekly)||0)), weeksLeft:Math.max(0,Math.floor(Number(x.weeksLeft)||0))})) : [];
   next.market       = Array.isArray(input.market) ? input.market.map(normalizeArtist) : [];
   next.events       = Array.isArray(input.events)
     ? input.events.filter(e=>e&&typeof e==='object').map(e=>({
@@ -2168,6 +2170,12 @@ function nextWeek() {
         // Succès
         p.done = true;
         G.money += p.reward; G.weekRevenue += p.reward;
+        // Successful music productions earn temporary streaming/catalog royalties.
+        if(p.typeId !== 'collab' && p.artists.some(id=>G.artists.some(a=>a.id===id && a.type==='musician'))){
+          G.royaltyCatalog = G.royaltyCatalog || [];
+          G.royaltyCatalog.push({name:p.name,weekly:Math.max(25,Math.floor(p.reward * 0.035)),weeksLeft:12});
+          G.royaltyCatalog = G.royaltyCatalog.slice(-100);
+        }
         G.reputation = Math.min(100, G.reputation + p.repGain);
         p.artists.forEach(id=>{
           const a=G.artists.find(x=>x.id===id);
@@ -2189,6 +2197,17 @@ function nextWeek() {
   const newDone = G.projects.filter(p=>p.done);
   G.doneProjects.push(...newDone);
   G.projects = G.projects.filter(p=>!p.done);
+
+  // Recurring catalog royalties decay as releases age; credited before the weekly balance.
+  G.royaltyCatalog = (G.royaltyCatalog || []).filter(entry=>entry.weeksLeft>0);
+  let royaltyRevenue = 0;
+  G.royaltyCatalog.forEach(entry=>{
+    const amount = Math.max(0,Math.floor(entry.weekly * (entry.weeksLeft / 12)));
+    royaltyRevenue += amount;
+    entry.weeksLeft--;
+  });
+  G.royaltyCatalog = G.royaltyCatalog.filter(entry=>entry.weeksLeft>0);
+  if(royaltyRevenue){G.money+=royaltyRevenue;G.weekRevenue+=royaltyRevenue;addNews('🎧 Catalogue : +'+royaltyRevenue.toLocaleString()+'€ de royalties cette semaine.');}
 
   // 6. Rival AI
   processRivals();
@@ -2543,6 +2562,7 @@ function renderDashboard() {
     <div class="finance-item"><div class="finance-label">Trésorerie</div><div class="finance-val" style="color:var(--gold)">${G.money.toLocaleString()}€</div></div>
     <div class="finance-item"><div class="finance-label">Charges /sem.</div><div class="finance-val" style="color:var(--red)">${weeklyFees.toLocaleString()}€</div></div>
     <div class="finance-item"><div class="finance-label">Revenus totaux</div><div class="finance-val" style="color:var(--green)">${G.totalRevenue.toLocaleString()}€</div></div>
+    <div class="finance-item"><div class="finance-label">Sorties en royalties</div><div class="finance-val">${(G.royaltyCatalog||[]).length}</div></div>
     <div class="finance-item"><div class="finance-label">Projets actifs</div><div class="finance-val">${G.projects.length}/${tier.maxProjects}</div></div>
     <div class="finance-item"><div class="finance-label">Satisfaction moy.</div><div class="finance-val" style="color:${getHappinessColor(avgHappy)}">${avgHappy}/100</div></div>
     <div class="finance-item"><div class="finance-label">Moral moyen</div><div class="finance-val" style="color:var(--blue)">${avgMood}/100</div></div>
