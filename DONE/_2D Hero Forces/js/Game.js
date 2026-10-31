@@ -599,12 +599,17 @@ canvas.addEventListener("mousedown", (e) => {
     //  INIT
     // -----------------------------------------------------------------------
     function start(mapWidth, mapHeight, mapId) {
+        // Larger operational space: capture zones, navigation, camera and minimap share the same scale.
+        var worldScale=1.65;
+        mapWidth=Math.round(mapWidth*worldScale);
+        mapHeight=Math.round(mapHeight*worldScale);
+        if(mapRenderer){mapRenderer.worldWidth=mapWidth;mapRenderer.worldHeight=mapHeight;}
         camera  = new RTS.Engine.Camera(canvas.width, canvas.height, mapWidth, mapHeight);
 
         // Zoom initial : voir toute la carte entière au démarrage.
         var zoomFitW = canvas.width  / mapWidth;
         var zoomFitH = canvas.height / mapHeight;
-        camera.zoom  = Math.min(zoomFitW, zoomFitH);
+        camera.zoom  = Math.min(1.0, Math.max(camera.minZoom, Math.min(zoomFitW, zoomFitH)*1.65));
 
         navGrid = new RTS.Game.Map.NavGrid(mapWidth, mapHeight, 48, mapId || 1);
 
