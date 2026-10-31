@@ -530,3 +530,13 @@ a:focus-visible {
     scrollbar-width: thin;
     scrollbar-color: #4169e1 rgba(0, 0, 0, 0.3);
 }
+
+/* Visual polish: tactical arcade */
+.game-stats,.stat-box,.instructions,.enemy-info {backdrop-filter:blur(10px);box-shadow:0 10px 25px rgba(0,0,0,.15)}
+.stat-box {transition:transform .16s ease,box-shadow .16s ease}
+.stat-box:hover {transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.23)}
+button {transition:transform .15s ease,filter .15s ease}
+button:hover:not(:disabled) {filter:brightness(1.12)}
+button:active:not(:disabled){transform:scale(.97)}
+button:focus-visible{outline:3px solid #a5f3fc;outline-offset:3px}
+@media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
