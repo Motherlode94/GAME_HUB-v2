@@ -25,7 +25,11 @@ RTS.CombatTactics={
   if(target.def.category==="vehicle"&&(p.type==="shell"||p.type==="rocket")&&Math.random()<.12){
    target.engineDamage=Math.min(1,(target.engineDamage||0)+.24);
   }
-  var accuracy=Math.max(.38,1-((p.shooterSuppression||0)/100)*.55);
+  var range=p.totalDist||0;
+  var suppressionPenalty=((p.shooterSuppression||0)/100)*.48;
+  var rangePenalty=Math.max(0,(range-160)/800)*.25;
+  var smokePenalty=this.obscured(game,p.originX,p.originY,p.tx,p.ty)?.42:0;
+  var accuracy=Math.max(.16,Math.min(.96,.92-suppressionPenalty-rangePenalty-smokePenalty));
   return Math.random()<accuracy?1:0;
  },
  render:function(game,ctx){
