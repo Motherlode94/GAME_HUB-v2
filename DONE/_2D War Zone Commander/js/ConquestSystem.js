@@ -44,8 +44,10 @@ RTS.ConquestSystem = {
             var sub=document.getElementById("bannerSub");
             if(title) title.textContent=victory?"VICTOIRE — CONQUÊTE":"DÉFAITE — CONQUÊTE";
             if(sub) sub.textContent=victory?"Les secteurs stratégiques sont sécurisés.":"L'adversaire contrôle le champ de bataille.";
-            var banner=document.getElementById("levelBanner");
+            var banner=document.getElementById("banner");
             if(banner) banner.style.display="flex";
+            var next=document.getElementById("nextLevelBtn");
+            if(next) next.style.display="none";
         }
         // Enemy squads not currently engaging aim to capture the nearest non-red sector.
         if (c.aiClock<=0) {
