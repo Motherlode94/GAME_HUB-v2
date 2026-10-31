@@ -3,6 +3,58 @@ window.RTS = window.RTS || {};
 RTS.SquadAISystem = {
     update: function(game, delta) {
         if (game.setupPhase || (game.mode !== "conquest" && !RTS.WaveSystem._prepDone)) return;
+        if(game.mode==="conquest" && game.conquest) {
+            var red=game.squads.filter(s=>s.team==="red"&&!s.isDead()&&s.def);
+            var blue=game.squads.filter(s=>(s.team==="blue"||s.team==="ally")&&!s.isDead()&&s.def);
+            var zones=game.conquest.zones;
+            red.forEach(function(s) {
+                s._decisionTimer=(s._decisionTimer||0)-delta;
+                if(s._decisionTimer>0)return;
+                s._decisionTimer=1.5+(s.id%5)*.3;
+                var isSupply=RTS.LogisticsSystem.isSupply(s);
+                var isAir=s.def.category==="air";
+                var isRecon=/recon|scout|drone/.test(s.typeName);
+                var isAA=/aa|manpads|air_defense/.test(s.typeName);
+                var isArty=/artillery|paladin|mlrs|mortar/.test(s.typeName);
+                var hp=s.getTotalHp()/Math.max(1,s.getMaxHp());
+                var allySupply=red.filter(t=>t!==s&&RTS.LogisticsSystem.isSupply(t)).sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y))[0];
+                var lowAmmo=s.ammoCapacity>0&&s.ammo/s.ammoCapacity<.15;
+                var goal=null;
+                if((hp<.30||lowAmmo)&&!isSupply) {
+                    goal=allySupply?{x:allySupply.x+35,y:allySupply.y+30}:{x:RTS.WORLD_W*.89,y:RTS.WORLD_H*.5};
+                    s.aiRole="repli / ravitaillement";
+                } else if(isSupply) {
+                    var needy=red.filter(t=>t!==s&&!RTS.LogisticsSystem.isSupply(t)&&t.ammoCapacity>0&&t.ammo/t.ammoCapacity<.65)
+                      .sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y))[0];
+                    if(needy)goal={x:needy.x+45,y:needy.y+35};
+                    s.aiRole="logistique";
+                } else {
+                    var enemy=blue.filter(t=>!isAA||t.def.category==="air")
+                        .filter(t=>RTS.TacticalRules.detects(game,s,t))
+                        .sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y))[0];
+                    var available=zones.filter(z=>z.owner!=="red");
+                    if(!available.length)available=zones;
+                    var zone=available.slice().sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y))[s.id%Math.min(2,available.length)];
+                    if(enemy) {
+                        var dx=s.x-enemy.x,dy=s.y-enemy.y,dist=Math.max(1,Math.hypot(dx,dy)),nx=dx/dist,ny=dy/dist;
+                        var range=s.def.attackRange||180;
+                        var spacing=isRecon?Math.max(190,range*.85):isArty?Math.max(250,range*.78):isAA?Math.max(130,range*.7):range*.68;
+                        var side=s.id%2?1:-1;
+                        if(dist>spacing*1.18||dist<spacing*.7)
+                            goal={x:enemy.x+nx*spacing-ny*side*(isRecon?80:50),y:enemy.y+ny*spacing+nx*side*(isRecon?80:50)};
+                        s.aiRole=isRecon?"reconnaissance":isArty?"appui artillerie":isAA?"couverture AA":isAir?"appui aérien":"attaque interarmes";
+                    } else if(zone) {
+                        var offset=isRecon?220:isArty?260:isAA?120:0;
+                        goal={x:zone.x+offset+(s.id%3-1)*32,y:zone.y+(s.id%5-2)*35};
+                        s.aiRole=isRecon?"éclairage":isArty?"appui":isAA?"protection":isAir?"patrouille":"capture";
+                    }
+                }
+                if(goal&&Math.hypot(goal.x-s.x,goal.y-s.y)>40) {
+                    s.target={x:Math.max(25,Math.min(RTS.WORLD_W-25,goal.x)),y:Math.max(25,Math.min(RTS.WORLD_H-25,goal.y))};
+                }
+            });
+            return;
+        }
         var enemies = game.squads.filter(function(s) { return (s.team === "blue" || s.team === "ally") && !s.isDead(); });
         if (!enemies.length && !game.conquest) return;
         game.squads.forEach(function(red) {
