@@ -167,6 +167,7 @@ window.onload = function() {
                     game.camera.update(delta);
                     RTS.ResourceSystem.update(game, delta);
                     RTS.WorkerSystem.update(game, delta);
+                    if (RTS.TransportSystem) RTS.TransportSystem.update(game);
                     if (RTS.AllySystem) RTS.AllySystem.update(game, delta);
                     RTS.SquadAISystem.update(game, delta);
                     RTS.FogOfWar.update(game);
