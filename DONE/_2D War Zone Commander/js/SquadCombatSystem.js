@@ -22,7 +22,7 @@ RTS.SquadCombatSystem = {
         var self   = this;
 
         squads.forEach(function(squad) {
-            if (!squad.def) return;
+            if (!squad.def || squad.abandoned) return;
 
             // Tick burst queue
             if (squad.burstQueue && squad.burstQueue.length > 0) {
@@ -54,7 +54,7 @@ RTS.SquadCombatSystem = {
 
             squads.forEach(function(other) {
                 if (!self._isEnemy(squad.team, other.team)) return;
-                if (other.isDead()) return;
+                if (other.isDead() || other.abandoned) return;
                 if (squad.def.antiAirOnly && !(other.def && other.def.category === "air")) return;
                 if (RTS.TacticalRules && !RTS.TacticalRules.spotted(game,other,squad.team==="red"?"red":"blue")) return;
                 var dx = other.x - squad.x;
