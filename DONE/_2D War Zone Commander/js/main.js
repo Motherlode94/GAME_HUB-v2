@@ -164,7 +164,7 @@ window.onload = function() {
 
                 // ── Caméra : commence au centre-gauche du monde ───────────────────
         if (game.camera) {
-            game.camera.zoom = Math.max(game.camera.minZoom, Math.min(0.85, canvas.width / 1500, canvas.height / 1150));
+            game.camera.zoom = Math.max(canvas.width / RTS.WORLD_W, canvas.height / RTS.WORLD_H, Math.min(0.85, canvas.width / 1500, canvas.height / 1150));
             game.camera.x = RTS.WORLD_W / 2 - canvas.width / (2 * game.camera.zoom);
             game.camera.y = RTS.WORLD_H / 2 - canvas.height / (2 * game.camera.zoom);
             game.camera._clamp();
@@ -297,7 +297,7 @@ window.onload = function() {
     function _showRequisitionPanel() {
         var previous=document.getElementById("requisitionPanel");if(previous)previous.remove();
         var panel=document.createElement("div");panel.id="requisitionPanel";
-        panel.style.cssText="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100;width:min(460px,92vw);max-height:75vh;overflow:auto;padding:14px;border-radius:8px;border:1px solid #5797ba;background:rgba(7,18,28,.97);color:#eef6ff;font:12px Arial";
+        panel.style.cssText="position:fixed;left:12px;bottom:12px;top:auto;transform:none;z-index:100;width:min(276px,90vw);max-height:min(49vh,470px);overflow:auto;padding:10px;border-radius:8px;border:1px solid #5797ba;background:rgba(7,18,28,.95);color:#eef6ff;font:12px Arial;box-shadow:0 8px 30px #0008";
         var heading=document.createElement("strong");heading.textContent="GROUPE DE COMBAT · RENFORTS";panel.append(heading);
         var summary=document.createElement("p");summary.style.color="#9eddf4";panel.append(summary);
         var doctrine=document.createElement("select");doctrine.title="Spécialisation du groupe de combat";
