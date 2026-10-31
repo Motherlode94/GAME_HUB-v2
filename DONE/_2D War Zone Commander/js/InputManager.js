@@ -168,6 +168,13 @@ RTS.InputManager = function(game) {
                 e.preventDefault();
             }
         }
+        // Transport orders: select carrier and nearby infantry, then B; select carrier and D to unload.
+        if ((k === "b" || k === "d") && !e.ctrlKey && !e.altKey &&
+            !/input|textarea|select/i.test((e.target && e.target.tagName) || "") &&
+            RTS.TransportSystem) {
+            var changed = k === "b" ? RTS.TransportSystem.board(game) : RTS.TransportSystem.disembark(game);
+            if (changed > 0) e.preventDefault();
+        }
         // H: hold ground. Stop current orders while continuing defensive fire.
         if (k === "h" && !e.ctrlKey && !e.altKey &&
             !/input|textarea|select/i.test((e.target && e.target.tagName) || "")) {
