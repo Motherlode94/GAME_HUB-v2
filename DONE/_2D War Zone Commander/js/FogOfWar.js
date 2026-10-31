@@ -57,7 +57,7 @@ RTS.FogOfWar = {
         for (var y = 0; y < f.rows; y++) for (var x = 0; x < f.cols; x++) {
             var i = y * f.cols + x;
             if (f.visible[i]) continue;
-            ctx.fillStyle = f.seen[i] ? "rgba(3,9,15,.68)" : "rgba(1,5,10,.96)";
+            ctx.fillStyle = f.seen[i] ? "rgba(3,9,15,.16)" : "rgba(1,5,10,.34)";
             ctx.fillRect(x * cell, y * cell, cell + .5, cell + .5);
         }
     }
