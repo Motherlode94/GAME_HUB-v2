@@ -19,10 +19,12 @@ RTS.TransportSystem = {
         carriers.forEach(function(carrier) {
             carrier.passengers = carrier.passengers || [];
             infantry.slice().forEach(function(s) {
-                if (carrier.passengers.length >= RTS.TransportSystem.capacity(carrier)) return;
+                if (carrier.passengers.length + game.squads.filter(function(x){return x._boardingCarrier===carrier;}).length >= RTS.TransportSystem.capacity(carrier)) return;
                 if (!game.squads.includes(s) || s._boardingCarrier) return;
                 if (Math.hypot(s.x - carrier.x, s.y - carrier.y) > 110) {
                     s._boardingCarrier = carrier;
+                    s.attackMove=false;
+                    s._nav=null;
                     s.target = {x:carrier.x+28,y:carrier.y+28};
                     s.holdingPosition=false;
                     return;
@@ -76,6 +78,7 @@ RTS.TransportSystem = {
         game.squads.slice().forEach(function(s){
             var v=s._boardingCarrier;
             if(!v)return;
+            if(!s.target || Math.hypot(s.target.x-v.x,s.target.y-v.y)>160){s._boardingCarrier=null;return;}
             if(v.isDead()||!game.squads.includes(v)){s._boardingCarrier=null;return;}
             v.passengers=v.passengers||[];
             if(v.passengers.length>=RTS.TransportSystem.capacity(v)){s._boardingCarrier=null;return;}
