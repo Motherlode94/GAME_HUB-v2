@@ -65,21 +65,6 @@ RTS.ConquestSystem = {
             var next=document.getElementById("nextLevelBtn");
             if(next) next.style.display="none";
         }
-        // Enemy squads not currently engaging aim to capture the nearest non-red sector.
-        if (c.aiClock<=0) {
-            c.aiClock=5;
-            game.squads.forEach(function(s) {
-                if(s.team!=="red"||s.isDead()||!s.def||s.def.category==="air")return;
-                var options=c.zones.filter(z=>z.owner!=="red");
-                if(!options.length)return;
-                options.sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y));
-                var z=options[0];
-                if(Math.hypot(z.x-s.x,z.y-s.y)>155) {
-                    s.target={x:z.x+(s.id%3-1)*23,y:z.y+(s.id%4-1.5)*23};
-                    s._nav=null;
-                }
-            });
-        }
     },
     renderWorld: function(game,ctx) {
         var c=game.conquest;if(!c)return;
