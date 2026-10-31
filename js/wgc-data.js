@@ -169,6 +169,14 @@
             playUrl: "DONE/_2D Plateformer/index.html",
             description: "Teste tes compétences de plateformer à travers des niveaux remplis de pièges et d'obstacles.",
 
+        },
+        {
+            id: 18,
+            title: "Iron Meridian: Greyfall",
+            category: "strategy",
+            tags: ["tactique", "escouades", "science-fiction militaire", "fictif", "missions"],
+            playUrl: "DONE/_2D Iron Meridian/index.html",
+            description: "Dirige le commando Astra dans une opération fictive : sécurise trois secteurs, préserve tes unités et organise une extraction."
         }
     ];
 
