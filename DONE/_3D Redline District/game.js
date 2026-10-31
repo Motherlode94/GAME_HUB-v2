@@ -20,7 +20,7 @@ if(mode==='race')for(let i=0;i<5;i++){const m=carModel([0xe6dcbd,0x4fb8b8,0xe071
 function finish(){finished=true;raceOn=false;const time=elapsed.toFixed(2),bestT=Number.isFinite(best)?best.toFixed(2):time;const key='redline_first_ignition_'+mode;let record=0;try{record=Number(localStorage.getItem(key)||0);if(!record||elapsed<record){localStorage.setItem(key,String(elapsed));record=elapsed}}catch(e){record=record||elapsed}$('resultTitle').textContent='COURSE TERMINÉE';$('resultText').textContent='Temps : '+time+' s · Meilleur tour : '+bestT+' s · Record local : '+record.toFixed(2)+' s';$('result').hidden=false;$('hud').hidden=true}
 function begin(){chosen=specs[Number($('car').value)];mode=$('mode').value;car.children[0].material.color.setHex(chosen.color);spawnGrid();$('menu').hidden=true;$('result').hidden=true;$('hud').hidden=false;raceOn=true}
 $('start').onclick=begin;$('restart').onclick=()=>{raceOn=false;$('result').hidden=true;$('hud').hidden=true;$('menu').hidden=false};
-window.addEventListener('keydown',e=>{keys.add(e.code);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='Escape'&&raceOn){raceOn=false;$('menu').hidden=false;$('hud').hidden=true}if(e.code==='KeyR'&&raceOn){const last=(nextCP-1+checkpoints.length)%checkpoints.length;car.position.copy(checkpoints[last]);const theta=last/checkpoints.length*Math.PI*2;angle=Math.atan2(rx*Math.cos(theta),-rz*Math.sin(theta));car.rotation.y=angle;speed=0;sideVelocity=0;damage=Math.min(100,damage+2)}});window.addEventListener('keyup',e=>keys.delete(e.code));
+window.addEventListener('keydown',e=>{keys.add(e.code);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='Escape'&&raceOn){raceOn=false;$('menu').hidden=false;$('hud').hidden=true}if(e.code==='KeyR'&&raceOn&&!e.repeat){const last=(nextCP-1+checkpoints.length)%checkpoints.length;car.position.copy(checkpoints[last]);const theta=last/checkpoints.length*Math.PI*2;angle=Math.atan2(rx*Math.cos(theta),-rz*Math.sin(theta));car.rotation.y=angle;speed=0;sideVelocity=0;damage=Math.min(100,damage+2)}});window.addEventListener('keyup',e=>keys.delete(e.code));
 const dir=()=>Number(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));
 function update(dt){
  elapsed+=dt;
@@ -65,7 +65,7 @@ function update(dt){
   car.position.copy(oldPos);speed*=-.22;damage=Math.min(100,damage+3);
  }
  const cp=checkpoints[nextCP];
- if(car.position.distanceTo(cp)<10){
+ if(car.position.distanceTo(cp)<10&&Math.abs(speed)>1){
   if(nextCP===0){best=Math.min(best,elapsed-lapStart);lapStart=elapsed;lap++;nextCP=1;if(lap>3)finish()}
   else nextCP=(nextCP+1)%checkpoints.length;
  }
