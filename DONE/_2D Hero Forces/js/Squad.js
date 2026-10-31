@@ -560,6 +560,19 @@ RTS.Game.Squad.prototype.update = function(dt, allSquads) {
         return;
     }
 
+    // Autonomous squad leader: assess own casualties and vehicle escort threats.
+    if(allSquads && !this.isVehicle && !this.isAerial) {
+        this._leaderThink=(this._leaderThink||0)-dt;
+        if(this._leaderThink<=0){
+            this._leaderThink=1;
+            var living=this._aliveSoldiers();
+            var nearEnemy=allSquads.filter(function(e){return e.team!==this.team&&!e.dead&&this._dist(e)<175;},this);
+            var nearbyArmor=allSquads.filter(function(v){return v.team===this.team&&!v.dead&&v.isVehicle&&this._dist(v)<240;},this);
+            this.leaderState=living.length<=Math.max(1,Math.floor(this.maxSoldiers/2))&&nearEnemy.length?'préserver les survivants':nearEnemy.length?'tenir et couvrir':nearbyArmor.length?'protection du véhicule':'progression';
+            // The leader requests defensive fire rather than overriding a player's route.
+            if(nearbyArmor.length&&nearEnemy.length&&!this.target) this.target=this._findTarget(allSquads);
+        }
+    }
     // IA auto-abilities
     this._autoAbilities(dt, allSquads);
 
@@ -691,6 +704,10 @@ RTS.Game.Squad.prototype._updateCombat = function(dt, all) {
 RTS.Game.Squad.prototype._findTarget = function(all) {
     if (this.retreating) return null;
     var self=this, best=null, bestD=Infinity;
+    // Squad leader protects the closest allied vehicle from nearby hostile squads.
+    var escort=(!this.isVehicle&&!this.isAerial)?all.filter(function(unit){
+        return !unit.dead && unit.team===self.team && unit.isVehicle && self._dist(unit)<250;
+    }).sort(function(a,b){return self._dist(a)-self._dist(b);})[0]:null;
     all.forEach(function(sq) {
         if (sq.team===self.team||sq.dead) return;
         if (sq.isAerial && self.type!=='mg' && self.type!=='sniper' && self.type!=='heli_attack') return;
@@ -698,6 +715,7 @@ RTS.Game.Squad.prototype._findTarget = function(all) {
         var d=self._dist(sq);
         if (d>self.attackRange) return;
         var score = d;
+        if (escort && Math.hypot(sq.x-escort.x,sq.y-escort.y)<190) score -= 75;
         if (self.role==='anti_tank'    && sq.isVehicle)  score -= 200;
         if (self.role==='tank_destroyer'&&sq.isVehicle)  score -= 300;
         if (self.role==='anti_inf'     && !sq.isVehicle) score -= 150;
