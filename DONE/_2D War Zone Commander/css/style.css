@@ -327,3 +327,12 @@
 #gameCanvas{filter:contrast(1.035) saturate(1.07)}
 button:focus-visible{outline:2px solid #b2ecff;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.build-btn{transition:none!important}.build-btn:hover{transform:none!important}}
+
+
+/* Visual polish: military tactical HUD */
+#hud .stat, #hud .res, #hud .build-section, #hud .menu-card {backdrop-filter:blur(12px);border-color:rgba(116,192,207,.28);box-shadow:0 10px 26px rgba(0,0,0,.28)}
+.build-btn,.prod-btn,.banner-btn,.menu-btn {transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;touch-action:manipulation}
+.build-btn:hover,.prod-btn:hover,.banner-btn:hover,.menu-btn:hover {transform:translateY(-2px);box-shadow:0 5px 20px rgba(56,189,248,.16)}
+.build-btn:focus-visible,.prod-btn:focus-visible,.banner-btn:focus-visible,.menu-btn:focus-visible {outline:2px solid #67e8f9;outline-offset:3px}
+.stat-value,.res-val {font-variant-numeric:tabular-nums;text-shadow:0 0 15px rgba(103,232,249,.2)}
+@media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
