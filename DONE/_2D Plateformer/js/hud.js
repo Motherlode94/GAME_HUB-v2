@@ -39,6 +39,16 @@ var HUD = (function () {
         ctx.textAlign = 'right';
         ctx.fillText(levelName, canvasW - 12, 18);
 
+        // Explain the movement skills on the challenge stage, without covering gameplay.
+        if (levelName.indexOf('MOMENTUM RUN') !== -1) {
+            ctx.fillStyle = 'rgba(8, 16, 28, 0.76)';
+            ctx.fillRect(9, 46, 362, 25);
+            ctx.textAlign = 'left';
+            ctx.font = 'bold 12px "Courier New", monospace';
+            ctx.fillStyle = '#d7f4ff';
+            ctx.fillText('SHIFT : SPRINT  |  SPACE x2 : DOUBLE SAUT', 17, 59);
+        }
+
         ctx.restore();
     }
 
