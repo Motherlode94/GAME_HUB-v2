@@ -16,6 +16,7 @@ RTS.MainMenu = {
     // Options sélectionnées par le joueur
     _selectedDiff: "normal",
     _selectedAlly: false,
+    _selectedMode: "conquest",
 
     show: function(canvas, onStart) {
         var ctx  = canvas.getContext("2d");
@@ -122,6 +123,22 @@ RTS.MainMenu = {
         });
         block.appendChild(diffRow);
 
+        // Mode selection: conquest is the new tactical default, survival preserved.
+        var modeRow=document.createElement("div");
+        modeRow.style.cssText="display:flex;gap:8px;align-items:center;";
+        var modeLabel=document.createElement("span");
+        modeLabel.textContent="Mode :";
+        modeLabel.style.cssText="color:#aaa;font-size:12px;width:90px;text-align:right;";
+        modeRow.appendChild(modeLabel);
+        [{key:"conquest",label:"CONQUÊTE"},{key:"survival",label:"SURVIE"}].forEach(function(opt){
+            var btn=document.createElement("button");
+            btn.textContent=opt.label;
+            btn.style.cssText=self._optBtnStyle("#54b9ed",self._selectedMode===opt.key);
+            btn.onclick=function(){self._selectedMode=opt.key;Array.from(modeRow.querySelectorAll("button")).forEach(function(b){b.style.cssText=self._optBtnStyle("#54b9ed",b===btn);});};
+            modeRow.appendChild(btn);
+        });
+        block.appendChild(modeRow);
+
         // ── Allié ────────────────────────────────────────────────────────────
         var allyRow = document.createElement("div");
         allyRow.style.cssText = "display:flex;gap:8px;align-items:center;";
@@ -177,7 +194,7 @@ RTS.MainMenu = {
         };
         playBtn.addEventListener("click", function() {
             self.hide();
-            onStart({ difficulty: self._selectedDiff, ally: self._selectedAlly });
+            onStart({ difficulty: self._selectedDiff, ally: self._selectedAlly, mode: self._selectedMode });
         });
         block.appendChild(playBtn);
 
