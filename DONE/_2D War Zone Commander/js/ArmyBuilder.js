@@ -21,6 +21,28 @@ RTS.ArmyBuilder={
   apache:{standard:{label:"Roquettes standard",extra:0,damage:1,range:1,ammo:1,speed:1},hellfire:{label:"Missiles Hellfire",extra:90,damage:1.4,range:1.17,ammo:.65,speed:.94},escort:{label:"Configuration escorte",extra:45,damage:.92,range:1.09,ammo:1.30,speed:1.08}}
  },
  storageKey:"warlike.armybuilder.v2",
+ libraryKey:"warlike.armybuilder.decks.v1",
+ listDecks:function(){
+  try{var decks=JSON.parse(localStorage.getItem(this.libraryKey)||"{}");return decks&&typeof decks==="object"&&!Array.isArray(decks)?Object.keys(decks):[];}catch(e){return [];}
+ },
+ saveNamed:function(game,name){
+  name=String(name||game.army.name||"Groupe Alpha").trim().slice(0,40);
+  if(!name||!game.army.deck.length)return false;
+  try{
+   var all=JSON.parse(localStorage.getItem(this.libraryKey)||"{}");
+   if(!all||typeof all!=="object"||Array.isArray(all))all={};
+   game.army.name=name;
+   all[name]={version:2,name:name,doctrine:game.army.doctrine,deck:game.army.deck.slice(),loadouts:Object.assign({},game.army.loadouts)};
+   localStorage.setItem(this.libraryKey,JSON.stringify(all));this.save(game);return true;
+  }catch(e){return false;}
+ },
+ loadNamed:function(game,name){
+  if(!game.setupPhase)return false;
+  try{
+   var all=JSON.parse(localStorage.getItem(this.libraryKey)||"{}");
+   return this.load(game,all[name])&&this.save(game);
+  }catch(e){return false;}
+ },
  init:function(game){
   var saved=null;
   try{saved=JSON.parse(localStorage.getItem(this.storageKey)||"null");}catch(e){}
