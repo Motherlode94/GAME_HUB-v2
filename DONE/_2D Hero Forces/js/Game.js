@@ -1290,9 +1290,13 @@ canvas.addEventListener("mousedown", (e) => {
                     }
                 }
 
+                // Reject unreachable orders without erasing the current mission.
+                if (!path || !path.length) return;
                 sq.retreating = false;
                 sq.inCombat = false;
                 sq.target = null;
+                sq._savedPath = [];
+                sq._savedPathIdx = 0;
                 sq.path = path;
                 sq.pathIndex = 0;
             });
@@ -1564,7 +1568,7 @@ canvas.addEventListener("mousedown", (e) => {
         console.log("Construction annulée par clic droit");
         return; 
     }
-        if (!camera) return;
+        if (!camera || gameOver) return;
         var p = _screenFromEvent(e);
         _issueMoveOrRallyAtScreen(p.x, p.y, !!e.shiftKey);
     });
