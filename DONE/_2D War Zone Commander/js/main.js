@@ -181,6 +181,7 @@ window.onload = function() {
                     RTS.FogOfWar.update(game);
                     if (RTS.AirMissionSystem) RTS.AirMissionSystem.update(game);
                     RTS.SquadSystem.update(game.squads, delta, game.buildings);
+                    RTS.LogisticsSystem.update(game, delta);
                     RTS.SquadCombatSystem.update(game, delta);
                     RTS.ProjectileSystem.update(game, delta);
                     RTS.ParticleSystem.update(game.particles, delta);
