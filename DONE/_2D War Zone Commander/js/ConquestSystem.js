@@ -10,13 +10,29 @@ RTS.ConquestSystem = {
                 {name:"BRAVO", x:RTS.WORLD_W*.52, y:RTS.WORLD_H*.54, owner:null, progress:0},
                 {name:"CHARLIE",x:RTS.WORLD_W*.72, y:RTS.WORLD_H*.72, owner:null, progress:0}
             ],
-            tickets: {blue:300,red:300}, elapsed:0, aiClock:0, done:false
+            tickets: {blue:300,red:300}, elapsed:0, aiClock:0, done:false, strikeTargets:null, strikeDone:false
         };
     },
     update: function(game, dt) {
         var c=game.conquest;
         if (!c || c.done || game.setupPhase || game.gameOver) return;
         c.elapsed+=dt; c.aiClock-=dt;
+        // Secondary objective: eliminate the enemy armored command asset.
+        // Capture remains the primary victory condition; destroying this asset awards tickets.
+        if (!c.strikeTargets) {
+            c.strikeTargets=game.squads.filter(function(s){
+                return s.team==="red" && /m1a2|heavy_mbt|tank_destroyer/.test(s.typeName);
+            }).slice(0,1);
+        }
+        if (!c.strikeDone && c.strikeTargets.length && c.strikeTargets.every(function(t){
+            return t.isDead() || game.squads.indexOf(t)<0;
+        })) {
+            c.strikeDone=true;
+            c.tickets.red=Math.max(0,c.tickets.red-65);
+            var notice=document.getElementById("waveNotif");
+            if(notice)notice.textContent="OBJECTIF SECONDAIRE : BLINDÉ DE COMMANDEMENT DÉTRUIT — -65 TICKETS";
+        }
+
         c.zones.forEach(function(z) {
             var blue=0, red=0;
             game.squads.forEach(function(s) {
@@ -83,6 +99,6 @@ RTS.ConquestSystem = {
         var c=game.conquest;if(!c)return;
         var el=document.getElementById("waveNotif");if(!el)return;
         el.style.opacity="1";
-        el.textContent="CONQUÊTE  |  ALLIÉS "+Math.ceil(c.tickets.blue)+"  —  ENNEMIS "+Math.ceil(c.tickets.red)+"  |  SECTEURS "+c.zones.filter(z=>z.owner==="blue").length+"/3";
+        el.textContent="CONQUÊTE  |  ALLIÉS "+Math.ceil(c.tickets.blue)+"  —  ENNEMIS "+Math.ceil(c.tickets.red)+"  |  SECTEURS "+c.zones.filter(z=>z.owner==="blue").length+"/3" + (c.strikeDone ? "  |  CIBLE DÉTRUITE" : "  |  CIBLE : CHAR ENNEMI");
     }
 };
