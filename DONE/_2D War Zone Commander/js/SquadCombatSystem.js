@@ -37,7 +37,7 @@ RTS.SquadCombatSystem = {
                 }
             }
 
-            if (squad.attackTimer > 0) return;
+            if (squad.attackTimer > 0 || (squad.suppression||0)>=90) return;
             if (squad.ammoCapacity > 0 && squad.ammo <= 0) return;
 
             var mode = squad.def.combatMode;
@@ -204,6 +204,7 @@ RTS.SquadCombatSystem = {
             tx:           target.x,
             ty:           target.y,
             speed:        def.projectileSpeed || 400,
+            shooterSuppression:squad.suppression||0,
             damage:       def.attackDamage * (squad.typeName === "tank_destroyer" && targetSquad.def && targetSquad.def.category === "vehicle" ? 1.35 : 1),
             aoeDamage:    def.aoeDamage  || 0,
             aoeRadius:    def.aoeRadius  || 0,
