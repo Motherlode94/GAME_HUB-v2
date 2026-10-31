@@ -76,7 +76,7 @@ RTS.SquadRenderer = {
             return;
         }
 
-        if (!RTS.SpriteAtlas.draw(ctx,type,m.x,m.y,Math.max(s,18)*(squad.def.category==="infantry"?1.4:2.2),Math.max(s,18)*(squad.def.category==="infantry"?1.4:2.2),squad.heading||0) && !RTS.SquadRenderer._drawModernSilhouette(ctx, m, s, squad)) {
+        if (!RTS.SpriteAtlas.draw(ctx,type,m.x,m.y,Math.max(s,18)*(squad.def.category==="infantry"?1.4:2.2),Math.max(s,18)*(squad.def.category==="infantry"?1.4:2.2),squad.heading||0,squad.team) && !RTS.SquadRenderer._drawModernSilhouette(ctx, m, s, squad)) {
         switch (type) {
             // ── Infanterie ──────────────────────────────────────────────────
             case "riflemen":    RTS.SquadRenderer._drawRiflemen(ctx, m, s, isBlue);   break;
