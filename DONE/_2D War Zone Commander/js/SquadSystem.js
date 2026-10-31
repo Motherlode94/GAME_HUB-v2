@@ -27,7 +27,7 @@ RTS.SquadSystem = {
                 });
             }
             if (!engaging) RTS.SquadSystem._move(squad, delta, buildings || []);
-            RTS.SquadSystem._updateFormation(squad);
+            RTS.SquadSystem._updateFormation(squad, delta);
             RTS.SquadSystem._tickTimers(squad, delta);
         });
     },
@@ -157,7 +157,10 @@ RTS.SquadSystem = {
     },
 
     // ── Mise à jour des positions membres selon formation ─────────────────────
-    _updateFormation: function(squad) {
+    _updateFormation: function(squad, delta) {
+        var follow = Math.min(1,Math.max(0,(delta==null?1:delta)*9));
+        function steer(m,tx,ty){if(!m._positioned){m.x=tx;m.y=ty;m._positioned=true;}else{m.x+=(tx-m.x)*follow;m.y+=(ty-m.y)*follow;}m.facing=Math.atan2(ty-m.y,tx-m.x);}
+
         var alive   = squad.aliveMembers();
         var count   = alive.length;
         var spread  = squad.def.formationSpread || 0;
@@ -167,8 +170,7 @@ RTS.SquadSystem = {
             alive.forEach(function(m) {
                 m.offsetX = 0;
                 m.offsetY = 0;
-                m.x = squad.x;
-                m.y = squad.y;
+                steer(m,squad.x,squad.y);
             });
             return;
         }
@@ -188,8 +190,7 @@ RTS.SquadSystem = {
                 }
                 m.offsetX = ox; m.offsetY = oy;
                 var a=squad.heading-Math.PI/2;
-                m.x = squad.x + ox*Math.cos(a)-oy*Math.sin(a);
-                m.y = squad.y + ox*Math.sin(a)+oy*Math.cos(a);
+                steer(m,squad.x + ox*Math.cos(a)-oy*Math.sin(a),squad.y + ox*Math.sin(a)+oy*Math.cos(a));
             });
             return;
         }
@@ -207,8 +208,7 @@ RTS.SquadSystem = {
                 m.offsetX = ox + col * spread;
                 m.offsetY = oy + row * spread;
                 var a=squad.heading-Math.PI/2;
-                m.x = squad.x + m.offsetX*Math.cos(a)-m.offsetY*Math.sin(a);
-                m.y = squad.y + m.offsetX*Math.sin(a)+m.offsetY*Math.cos(a);
+                steer(m,squad.x + m.offsetX*Math.cos(a)-m.offsetY*Math.sin(a),squad.y + m.offsetX*Math.sin(a)+m.offsetY*Math.cos(a));
             });
         }
     },
