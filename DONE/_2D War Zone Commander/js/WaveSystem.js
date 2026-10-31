@@ -19,9 +19,9 @@ RTS.WaveSystem = {
 
     // ── Config par difficulté ─────────────────────────────────────────────────
     DIFF: {
-        easy:   { prepTime: 90,  cooldown: 30, squadCount: 4,  hpScale: 0.70, label: "FACILE"    },
-        normal: { prepTime: 55,  cooldown: 14, squadCount: 8,  hpScale: 1.10, label: "NORMAL"    },
-        hard:   { prepTime: 30,  cooldown: 7,  squadCount: 14, hpScale: 1.80, label: "DIFFICILE" }
+        easy:   { prepTime: 90,  cooldown: 34, squadCount: 4,  hpScale: 0.78, label: "FACILE"    },
+        normal: { prepTime: 65,  cooldown: 21, squadCount: 7,  hpScale: 1.00, label: "NORMAL"    },
+        hard:   { prepTime: 40,  cooldown: 12, squadCount: 11, hpScale: 1.30, label: "DIFFICILE" }
     },
 
     difficulty: "normal",
@@ -167,9 +167,9 @@ RTS.WaveSystem = {
         var cfg  = this._cfg();
 
         // Nombre d'unités : rush +60%, boss +80%, normal +0%
-        var baseCount = cfg.squadCount + Math.floor((w - 1) * 0.6) + (lvl - 1) * 2;
-        var count = isRush ? Math.round(baseCount * 1.6)
-                  : isBoss ? Math.round(baseCount * 1.8)
+        var baseCount = cfg.squadCount + Math.floor((this._waveInLevel - 1) * 0.55) + (lvl - 1) * 2;
+        var count = isRush ? Math.round(baseCount * 1.35)
+                  : isBoss ? Math.round(baseCount * 1.5)
                   : baseCount;
 
         // Alternate infantry assaults, mechanized pushes, air raids and artillery.
@@ -190,8 +190,8 @@ RTS.WaveSystem = {
 
         // HP multiplicateur — escalade plus agressive
         var hpMult = Math.min(
-            cfg.hpScale * (1 + (w - 1) * 0.13 + (lvl - 1) * 0.22),
-            cfg.hpScale * 5.5
+            cfg.hpScale * (1 + (this._waveInLevel - 1) * 0.055 + (lvl - 1) * 0.18),
+            cfg.hpScale * 2.4
         );
 
         // ── Points de spawn ──
