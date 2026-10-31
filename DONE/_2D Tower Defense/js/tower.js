@@ -41,6 +41,12 @@ const TOWER_TYPES = {
         pierce: true,
         desc: 'Soldat lance-roquettes : tir puissant contre les blindés.'
     },
+    SAM: {
+        name:'Batterie sol-air',short:'AA',key:'8',
+        cost:175,range:235,damage:95,fireRate:1450,
+        color:'#62c6d5',projectileSpeed:570,splash:26,antiAirOnly:true,
+        desc:'Missiles sol-air : cible exclusivement les drones et hélicoptères.'
+    },
     MORTAR: {
         name: 'Mortier', short: 'M', key: '5',
         cost: 130, range: 165, damage: 45, fireRate: 1500,
@@ -100,7 +106,10 @@ function addTower(gridX, gridY, type = 'BASIC') {
 }
 
 function findTarget(tower) {
-    const candidates = getEnemiesInRange(tower.x, tower.y, tower.range);
+    const template = TOWER_TYPES[tower.type] || TOWER_TYPES.BASIC;
+    const candidates = getEnemiesInRange(tower.x, tower.y, tower.range).filter(e =>
+        template.antiAirOnly ? !!ENEMY_TYPES[e.type]?.isAir : !ENEMY_TYPES[e.type]?.isAir
+    );
     if (!candidates.length) return null;
 
     let best = candidates[0];
