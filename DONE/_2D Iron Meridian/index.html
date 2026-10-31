@@ -4,6 +4,7 @@
 <aside id="guide"><b>COMMANDES TACTIQUES</b><div>Clic gauche : sélectionner · Maj + clic : groupe</div><div>Clic droit : déplacement / attaquer</div><div>1–5 : sélectionner unité · Espace : pause</div><div>F : fumigène · G : tenir · C : récupérer</div><div>Mission : vaincre les défenseurs, récupérer un blindé et extraire vos unités.</div><a href="../../index.html">← Retour au Game Hub</a></aside>
 <section id="hud"><h2>COMMANDO « ASTRA »</h2><div id="selection">Sélectionnez une escouade pour consulter son équipement.</div><div id="actions"><button id="smoke">F — Fumigène</button><button id="hold">G — Tenir</button><button id="supply">Ravitaillement (2)</button><button id="recruit">Renfort Astra (1)</button><button id="recover">C — Récupérer véhicule</button><button id="restart">Recommencer</button></div><div id="log">Opération lancée. Armées et armements entièrement fictifs.</div></section>
 <div id="ending"><article><h1 id="endTitle"></h1><p id="endText"></p><button onclick="location.reload()">Rejouer l'opération</button></article></div>
+<script src="js/SpriteAtlas.js"></script>
 <script>
 (()=>{'use strict';
 const C=document.getElementById('field'),ctx=C.getContext('2d'),log=document.getElementById('log'),selection=document.getElementById('selection');
@@ -61,7 +62,9 @@ debris.forEach(d=>{ctx.fillStyle='#1b201b';ctx.fillRect(d.x-16,d.y-12,32,24)});
 smoke.forEach(s=>{ctx.fillStyle='#cbd0c1a2';for(let i=0;i<6;i++){let a=i*Math.PI/3;ctx.beginPath();ctx.arc(s.x+Math.cos(a)*28,s.y+Math.sin(a)*28,s.r*.53,0,Math.PI*2);ctx.fill();}});
 for(let u of units){if(u.hp<=0)continue;ctx.save();ctx.translate(u.x,u.y);ctx.rotate(u.heading);
 let d=stats[u.type],size=d.size;ctx.fillStyle='#0c151490';ctx.beginPath();ctx.ellipse(4,6,size*1.2,size*.8,0,0,Math.PI*2);ctx.fill();
+if(!RTS.SpriteAtlas.draw(ctx,{rifle:'rifleman',scout:'scout',support:'machinegunner',carrier:'apc',tank:'tank'}[u.type],0,0,size*2.7,size*2.7,0)){
 ctx.fillStyle=u.team==='blue'?'#7b9b8a':'#9a786f';if(u.type==='tank'||u.type==='carrier'){ctx.fillRect(-size,-size*.52,size*2,size*1.04);ctx.fillStyle='#303c38';ctx.fillRect(-size,-size*.63,size*2,size*.18);ctx.fillRect(-size,size*.45,size*2,size*.18);ctx.fillStyle='#c0c8b6';ctx.fillRect(-5,-6,10,12);ctx.fillStyle='#283c35';ctx.fillRect(0,-3,size*1.35,6);}else{for(let n=0;n<3;n++){ctx.beginPath();ctx.arc(-8+n*8,-6+(n%2)*12,size*.36,0,Math.PI*2);ctx.fill();ctx.fillStyle='#26362f';ctx.fillRect(n*7-7,-8,3,15);ctx.fillStyle=u.team==='blue'?'#7b9b8a':'#9a786f';}}
+}
 ctx.restore();if(selected.includes(u)){ctx.strokeStyle='#f9d78c';ctx.lineWidth=2;ctx.beginPath();ctx.arc(u.x,u.y,size*1.7,0,Math.PI*2);ctx.stroke();}
 ctx.fillStyle='#10221fe0';ctx.fillRect(u.x-29,u.y-size-19,58,7);ctx.fillStyle=u.team==='blue'?'#6fd5c7':'#e38e73';ctx.fillRect(u.x-28,u.y-size-18,56*u.hp/u.maxHp,5);ctx.textAlign='center';ctx.font='11px system-ui';ctx.fillStyle='#eef6e9';ctx.fillText(u.label,u.x,u.y-size-23);
 }
