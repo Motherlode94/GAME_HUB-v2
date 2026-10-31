@@ -16,7 +16,7 @@ RTS.SquadCombatSystem = {
     },
 
     update: function(game, delta) {
-        if (!RTS.WaveSystem._prepDone) return;
+        if (game.setupPhase || (game.mode !== "conquest" && !RTS.WaveSystem._prepDone)) return;
 
         var squads = game.squads;
         var self   = this;
@@ -51,7 +51,7 @@ RTS.SquadCombatSystem = {
                 if (!self._isEnemy(squad.team, other.team)) return;
                 if (other.isDead()) return;
                 if (squad.def.antiAirOnly && !(other.def && other.def.category === "air")) return;
-                if (squad.team !== "red" && !RTS.FogOfWar.isVisible(game, other.x, other.y)) return;
+                if (RTS.TacticalRules && !RTS.TacticalRules.spotted(game,other,squad.team==="red"?"red":"blue")) return;
                 var dx = other.x - squad.x;
                 var dy = other.y - squad.y;
                 var d  = Math.sqrt(dx * dx + dy * dy);
