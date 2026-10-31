@@ -328,3 +328,13 @@ kbd {
 #gameCanvas{filter:saturate(1.08) contrast(1.025)}
 button:focus-visible{outline:2px solid #a3e9ff;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.menu-btn{transition:none!important}.menu-btn:hover{transform:none!important}}
+
+
+/* Visual polish: crisp run-and-gun arcade */
+.menu-panel,.option-block,.scores-list {box-shadow:0 16px 45px rgba(0,0,0,.34)}
+.menu-btn,.back-btn {transition:transform .14s ease,filter .14s ease,text-shadow .14s ease}
+.menu-btn:hover,.back-btn:hover{transform:translateY(-2px);filter:brightness(1.14)}
+.menu-btn:active,.back-btn:active{transform:translateY(1px) scale(.985)}
+.menu-btn:focus-visible,.back-btn:focus-visible{outline:2px solid var(--yellow);outline-offset:4px}
+.score-num,.score-rank {font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
