@@ -45,6 +45,9 @@ RTS.Renderer.render = function(game) {
     // Projectiles
     RTS.ProjectileSystem.render(game.projectiles, ctx);
 
+    // Conquest zones (world-space)
+    if (game.mode === "conquest" && RTS.ConquestSystem) RTS.ConquestSystem.renderWorld(game, ctx);
+
     // Squads
     RTS.SquadRenderer.render(game.squads, ctx);
 
@@ -59,6 +62,7 @@ RTS.Renderer.render = function(game) {
     document.getElementById("redCount").textContent  = reds;
 
     RTS.Renderer._updateSelPanel(game);
+    if (game.mode === "conquest" && RTS.ConquestSystem) RTS.ConquestSystem.renderHUD(game);
 };
 
 RTS.Renderer._drawGrid = function(ctx, camera) {
