@@ -47,6 +47,7 @@ RTS.Game.Squad = function(x, y, team, type) {
     this._smokeParticles= [];
     this._explosions    = [];
 
+    this.abandoned = false; this.salvageTimer=0; this.salvageProgress=0; this.salvageTeam=null;
     this.dead = false;
     this.suppressed = false;
 
@@ -467,6 +468,21 @@ RTS.Game.Squad.prototype.reinforceOne = function() {
 // ---------------------------------------------------------------------------
 
 RTS.Game.Squad.prototype.update = function(dt, allSquads) {
+    if(this.abandoned && !this.dead){
+        this.salvageTimer=Math.max(0,this.salvageTimer-dt);
+        this.inCombat=false;this.target=null;this.path=[];this.pathIndex=0;
+        if(this.salvageTimer===0&&allSquads){
+            var nearby=allSquads.filter(function(u){return !u.dead&&!u.abandoned&&!u.isVehicle&&!u.isAerial&&Math.hypot(u.x-this.x,u.y-this.y)<90;},this);
+            var allied=nearby.some(function(u){return u.team==='allied';}),axis=nearby.some(function(u){return u.team==='axis';});
+            if(allied!==axis){
+                var claimant=allied?'allied':'axis';
+                if(this.salvageTeam!==claimant){this.salvageTeam=claimant;this.salvageProgress=0;}
+                this.salvageProgress+=dt*40;
+                if(this.salvageProgress>=100){this.team=claimant;this.abandoned=false;this.salvageProgress=0;this._fireTimer=0;this.speed=Math.max(12,this.speed*.55);}
+            }else{this.salvageProgress=0;this.salvageTeam=null;}
+        }
+        this._decayFX(dt);return;
+    }
     if (this.dead) {
         if (this._wreckActive) {
             this._time     += dt;
@@ -711,7 +727,7 @@ RTS.Game.Squad.prototype._findTarget = function(all) {
         return !unit.dead && unit.team===self.team && unit.isVehicle && self._dist(unit)<250;
     }).sort(function(a,b){return self._dist(a)-self._dist(b);})[0]:null;
     all.forEach(function(sq) {
-        if (sq.team===self.team||sq.dead) return;
+        if (sq.team===self.team||sq.dead||sq.abandoned) return;
         if (sq.isAerial && self.type!=='mg' && self.type!=='sniper' && self.type!=='heli_attack') return;
         // AT infantry prioritise les véhicules
         var d=self._dist(sq);
@@ -791,6 +807,9 @@ RTS.Game.Squad.prototype._shoot = function(tgt) {
             var retreatDmgMul = tgt.retreating ? 0.35 : 1.0;
             var doctrineMul = tgt.doctrineDamageTakenMul || 1.0;
             var finalDmg = self.damage * dmgModifier * focusBonus * coverDmgMul * retreatDmgMul * doctrineMul;
+            if(tgt.isVehicle&&!tgt.abandoned&&tgt._totalHP()>finalDmg&&self.role!=='infantry'&&self.role!=='sniper'&&Math.random()<0.22){
+                tgt.abandoned=true;tgt.salvageTimer=10;tgt.salvageProgress=0;tgt.salvageTeam=null;tgt.target=null;tgt.inCombat=false;tgt.path=[];
+            }
             ts.hp -= finalDmg;
             self._hitSparks.push({x:tx,y:ty,life:0.2});
 
