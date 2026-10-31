@@ -138,7 +138,7 @@ RTS.SquadSystem = {
         var mobility = vehicle ? Math.max(0.35, 1 - (squad.engineDamage || 0)) :
             aircraft ? Math.max(0.25, 1 - (squad.rotorDamage || 0)) : 1;
         var step = Math.max(0, squad.speed * mobility * delta);
-        if ((vehicle || aircraft) && dist > 0.001 && step > 0) {
+        if (dist > 0.001 && step > 0) {
             squad.heading = Math.atan2(dy, dx);
         }
         if (dist <= Math.max(3, step)) {
