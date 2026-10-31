@@ -15,7 +15,7 @@ function carModel(color){const group=new THREE.Group(),body=new THREE.Mesh(new T
 const specs=[{color:0xed5149,max:49,acc:23,grip:1.9},{color:0x3e87d0,max:59,acc:26,grip:1.65},{color:0xd0a13e,max:46,acc:24,grip:2.3}];
 let car=carModel(specs[0].color),chosen=specs[0],raceOn=false,mode='race',speed=0,angle=0,elapsed=0,lap=1,nextCP=1,best=Infinity,lapStart=0,finished=false,steerAngle=0,damage=0,sideVelocity=0;
 const keys=new Set(),clock=new THREE.Clock(),AI=[];
-function spawnGrid(){car.position.copy(points[0]);car.position.y=0;angle=Math.PI/2;car.rotation.y=angle;speed=0;damage=0;sideVelocity=0;steerAngle=0;elapsed=0;lap=1;nextCP=1;lapStart=0;best=Infinity;finished=false;AI.forEach(a=>{scene.remove(a.mesh)});AI.length=0;
+function spawnGrid(){car.position.copy(points[0]);car.position.y=0;angle=0;car.rotation.y=angle;speed=0;damage=0;sideVelocity=0;steerAngle=0;elapsed=0;lap=1;nextCP=1;lapStart=0;best=Infinity;finished=false;AI.forEach(a=>{scene.remove(a.mesh)});AI.length=0;
 if(mode==='race')for(let i=0;i<5;i++){const m=carModel([0xe6dcbd,0x4fb8b8,0xe07153,0x99bd49,0xb3a3d2][i]);AI.push({mesh:m,progress:((1-i*.018)%1+1)%1,rate:.067+i*.002,damage:0,lane:(i%2===0?1:-1)*2.25})}}
 function finish(){finished=true;raceOn=false;const time=elapsed.toFixed(2),bestT=Number.isFinite(best)?best.toFixed(2):time;const key='redline_first_ignition_'+mode;let record=0;try{record=Number(localStorage.getItem(key)||0);if(!record||elapsed<record){localStorage.setItem(key,String(elapsed));record=elapsed}}catch(e){record=record||elapsed}$('resultTitle').textContent='COURSE TERMINÉE';$('resultText').textContent='Temps : '+time+' s · Meilleur tour : '+bestT+' s · Record local : '+record.toFixed(2)+' s';$('result').hidden=false;$('hud').hidden=true}
 function begin(){chosen=specs[Number($('car').value)];mode=$('mode').value;car.children[0].material.color.setHex(chosen.color);spawnGrid();$('menu').hidden=true;$('result').hidden=true;$('hud').hidden=false;raceOn=true}
@@ -65,7 +65,7 @@ function update(dt){
   car.position.copy(oldPos);speed*=-.22;damage=Math.min(100,damage+3);
  }
  const cp=checkpoints[nextCP];
- if(car.position.distanceTo(cp)<13){
+ if(car.position.distanceTo(cp)<10){
   if(nextCP===0){best=Math.min(best,elapsed-lapStart);lapStart=elapsed;lap++;nextCP=1;if(lap>3)finish()}
   else nextCP=(nextCP+1)%checkpoints.length;
  }
