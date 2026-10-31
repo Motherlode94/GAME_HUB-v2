@@ -1492,7 +1492,7 @@ function normalizeState(rawState) {
         done:      !!p.done,
       })) : [];
   next.doneProjects = Array.isArray(input.doneProjects) ? input.doneProjects.slice(-100) : [];
-  next.royaltyCatalog = Array.isArray(input.royaltyCatalog) ? input.royaltyCatalog.filter(x=>x&&typeof x==='object').slice(-100).map(x=>({name:String(x.name||'Projet'), weekly:Math.max(0,Math.floor(Number(x.weekly)||0)), weeksLeft:Math.max(0,Math.floor(Number(x.weeksLeft)||0))})) : [];
+  next.royaltyCatalog = Array.isArray(input.royaltyCatalog) ? input.royaltyCatalog.filter(x=>x&&typeof x==='object').slice(-100).map(x=>({name:String(x.name||'Projet'), format:MUSIC_RELEASE_FORMATS[x.format]?x.format:'single',tracks:Math.max(1,Math.floor(Number(x.tracks)||1)),weekly:Math.max(0,Math.floor(Number(x.weekly)||0)), weeksLeft:Math.max(0,Math.floor(Number(x.weeksLeft)||0)),totalWeeks:Math.max(1,Math.floor(Number(x.totalWeeks)||12))})) : [];
   next.market       = Array.isArray(input.market) ? input.market.map(normalizeArtist) : [];
   next.events       = Array.isArray(input.events)
     ? input.events.filter(e=>e&&typeof e==='object').map(e=>({
@@ -2070,6 +2070,25 @@ function fireArtist(id) {
 
 // ── NEXT WEEK ─────────────────────────────────────────────────
 
+const MUSIC_RELEASE_FORMATS = {
+  single:{name:'Single',tracks:1,weeks:10,royaltyRate:0.025},
+  ep:{name:'EP',tracks:5,weeks:18,royaltyRate:0.045},
+  album:{name:'Album',tracks:12,weeks:28,royaltyRate:0.07}
+};
+function createMusicRelease(project) {
+  const format=MUSIC_RELEASE_FORMATS[project.typeId];
+  if(!format || !project.artists.some(id=>G.artists.some(a=>a.id===id && a.type==='musician')))return;
+  const weekly=Math.max(25,Math.floor(project.reward*format.royaltyRate));
+  G.royaltyCatalog=G.royaltyCatalog||[];
+  G.royaltyCatalog.push({
+    name:project.name,format:project.typeId,tracks:format.tracks,
+    weekly,weeksLeft:format.weeks,totalWeeks:format.weeks
+  });
+  G.royaltyCatalog=G.royaltyCatalog.slice(-100);
+  addNews('🎶 Sortie '+format.name+' : '+format.tracks+' titre(s), '+format.weeks+' semaines de distribution.');
+}
+
+// ── NEXT WEEK ─────────────────────────────────────────────────
 function nextWeek() {
   // 1. Payer les salaires hebdomadaires
   let salaries = 0;
@@ -2170,12 +2189,8 @@ function nextWeek() {
         // Succès
         p.done = true;
         G.money += p.reward; G.weekRevenue += p.reward;
-        // Successful music productions earn temporary streaming/catalog royalties.
-        if(p.typeId !== 'collab' && p.artists.some(id=>G.artists.some(a=>a.id===id && a.type==='musician'))){
-          G.royaltyCatalog = G.royaltyCatalog || [];
-          G.royaltyCatalog.push({name:p.name,weekly:Math.max(25,Math.floor(p.reward * 0.035)),weeksLeft:12});
-          G.royaltyCatalog = G.royaltyCatalog.slice(-100);
-        }
+        // Only recorded singles, EPs and albums enter the distributed catalog.
+        createMusicRelease(p);
         G.reputation = Math.min(100, G.reputation + p.repGain);
         p.artists.forEach(id=>{
           const a=G.artists.find(x=>x.id===id);
@@ -2202,7 +2217,7 @@ function nextWeek() {
   G.royaltyCatalog = (G.royaltyCatalog || []).filter(entry=>entry.weeksLeft>0);
   let royaltyRevenue = 0;
   G.royaltyCatalog.forEach(entry=>{
-    const amount = Math.max(0,Math.floor(entry.weekly * (entry.weeksLeft / 12)));
+    const amount = Math.max(0,Math.floor(entry.weekly * (entry.weeksLeft / Math.max(1,entry.totalWeeks||12))));
     royaltyRevenue += amount;
     entry.weeksLeft--;
   });
@@ -2562,7 +2577,7 @@ function renderDashboard() {
     <div class="finance-item"><div class="finance-label">Trésorerie</div><div class="finance-val" style="color:var(--gold)">${G.money.toLocaleString()}€</div></div>
     <div class="finance-item"><div class="finance-label">Charges /sem.</div><div class="finance-val" style="color:var(--red)">${weeklyFees.toLocaleString()}€</div></div>
     <div class="finance-item"><div class="finance-label">Revenus totaux</div><div class="finance-val" style="color:var(--green)">${G.totalRevenue.toLocaleString()}€</div></div>
-    <div class="finance-item"><div class="finance-label">Sorties en royalties</div><div class="finance-val">${(G.royaltyCatalog||[]).length}</div></div>
+    <div class="finance-item"><div class="finance-label">Singles / EP / Albums</div><div class="finance-val">${['single','ep','album'].map(id=>(G.royaltyCatalog||[]).filter(x=>x.format===id).length).join(' / ')}</div></div>
     <div class="finance-item"><div class="finance-label">Projets actifs</div><div class="finance-val">${G.projects.length}/${tier.maxProjects}</div></div>
     <div class="finance-item"><div class="finance-label">Satisfaction moy.</div><div class="finance-val" style="color:${getHappinessColor(avgHappy)}">${avgHappy}/100</div></div>
     <div class="finance-item"><div class="finance-label">Moral moyen</div><div class="finance-val" style="color:var(--blue)">${avgMood}/100</div></div>
