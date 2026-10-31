@@ -290,14 +290,21 @@ window.onload = function() {
         Object.keys(RTS.ArmyBuilder.doctrines).forEach(function(k){
             var option=document.createElement("option");option.value=k;option.textContent=RTS.ArmyBuilder.doctrines[k].label;doctrine.append(option);
         });
-        doctrine.onchange=function(){game.army.doctrine=doctrine.value;refresh();};panel.append(doctrine);
+        doctrine.value=game.army.doctrine;
+        doctrine.onchange=function(){RTS.ArmyBuilder.setDoctrine(game,doctrine.value);refresh();};panel.append(doctrine);
         var gear=document.createElement("select");gear.title="Équipement de l'unité sélectionnée";
         gear.style.cssText=doctrine.style.cssText;
-        Object.keys(RTS.ArmyBuilder.equipment).forEach(function(k){
-            var e=RTS.ArmyBuilder.equipment[k],o=document.createElement("option");o.value=k;o.textContent=e.label+" (+"+e.extra+" pts)";gear.append(o);
-        });
+        function showGear(type){
+            focused=type;gear.replaceChildren();
+            var options=RTS.ArmyBuilder.options(type);
+            Object.keys(options).forEach(function(k){
+                var e=options[k],o=document.createElement("option");
+                o.value=k;o.textContent=e.label+" (+"+e.extra+" pts)";gear.append(o);
+            });
+            gear.value=game.army.loadouts[type]||"standard";
+        }
         var focused="riflemen";
-        gear.onchange=function(){game.army.loadouts[focused]=gear.value;refresh();};
+        gear.onchange=function(){game.army.loadouts[focused]=gear.value;RTS.ArmyBuilder.save(game);refresh();};
         var explain=document.createElement("div");explain.style.cssText="font-size:11px;color:#c2d5e2;margin:4px 0 8px";panel.append(explain);panel.append(gear);
         var grid=document.createElement("div");grid.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:6px";panel.append(grid);
         RTS.DeploymentSystem.units.forEach(function(item) {
@@ -307,13 +314,16 @@ window.onload = function() {
             btn.style.cssText="padding:9px 6px;background:#25394c;color:#fff;border:1px solid #446c89;border-radius:5px;text-align:left;cursor:pointer";
             btn.onclick=function(){
                 if(game.setupPhase){
-                    focused=item[0];gear.value=game.army.loadouts[focused]||"standard";refresh();
+                    focused=item[0];RTS.ArmyBuilder.toggle(game,focused);showGear(focused);RTS.ArmyBuilder.save(game);refresh();
                 }else{RTS.DeploymentSystem.call(game,item[0]);refresh();}
             };grid.append(btn);
         });
         var start=document.createElement("button");start.type="button";start.textContent="▶ LANCER L'OPÉRATION";
         start.style.cssText="width:100%;padding:12px;margin-top:10px;background:#287456;border:1px solid #58b892;color:white;font-weight:bold;cursor:pointer";
         start.onclick=function(){
+            if(!game.army.deck.length)return;
+            RTS.ArmyBuilder.save(game);
+            doctrine.disabled=true;gear.disabled=true;
             if(!game.requisition.queue.length) RTS.DeploymentSystem.call(game,RTS.ArmyBuilder.doctrines[game.army.doctrine].types[0]);
             game.setupPhase=false;start.remove();refresh();
         };panel.append(start);
@@ -321,18 +331,23 @@ window.onload = function() {
         function refresh(){
             if(!panel.isConnected || !game.requisition)return;
             var d=game.requisition;
-            summary.textContent="Réserve "+Math.floor(d.points)+"/1500 pts · Revenu +"+d.income+"/min · File "+d.queue.length;
+            summary.textContent="Réserve "+Math.floor(d.points)+"/1500 pts · Revenu +"+d.income+"/min · File "+d.queue.length+" · Deck "+game.army.deck.length+"/"+game.army.slots;
             explain.textContent="Personnalisation : "+(RTS.SquadDefs[focused].label||focused)+". Avant le départ, cliquez une unité puis choisissez son équipement. Après le départ, cliquez pour appeler un renfort.";
             grid.querySelectorAll("button").forEach(function(b){
                 var type=b.dataset.type;
                 var allowed=RTS.ArmyBuilder.allowed(game,type);
                 var cost=RTS.ArmyBuilder.price(game,type);
                 b.textContent=(RTS.SquadDefs[type].label||type)+" · "+cost+" pts";
-                b.disabled=!allowed||(!game.setupPhase&&d.points<cost);
+                b.disabled=game.setupPhase?(!RTS.ArmyBuilder.doctrines[game.army.doctrine].types.includes(type)||(!allowed&&game.army.deck.length>=game.army.slots)):(!allowed||d.points<cost);
                 b.style.opacity=b.disabled?".3":"1";
-                b.style.borderColor=focused===type?"#e6c273":"#446c89";
+                b.style.borderColor=allowed?"#71c99c":focused===type?"#e6c273":"#446c89";
             });
         }
+        var save=document.createElement("button");save.textContent="ENREGISTRER LE DECK";
+        save.style.cssText="margin:9px 0;padding:9px;background:#264d60;color:#fff;border:1px solid #5c91a9;cursor:pointer;width:100%";
+        save.onclick=function(){RTS.ArmyBuilder.save(game);save.textContent="DECK ENREGISTRÉ ✓";};
+        panel.insertBefore(save,start);
+        showGear(focused);
         game.requisitionPanelRefresh=refresh;refresh();
     }
 
