@@ -569,6 +569,8 @@ RTS.Game.Squad.prototype.update = function(dt, allSquads) {
             var nearEnemy=allSquads.filter(function(e){return e.team!==this.team&&!e.dead&&this._dist(e)<175;},this);
             var nearbyArmor=allSquads.filter(function(v){return v.team===this.team&&!v.dead&&v.isVehicle&&this._dist(v)<240;},this);
             this.leaderState=living.length<=Math.max(1,Math.floor(this.maxSoldiers/2))&&nearEnemy.length?'préserver les survivants':nearEnemy.length?'tenir et couvrir':nearbyArmor.length?'protection du véhicule':'progression';
+            // A weakened fireteam withdraws only with an existing retreat route; never teleport or discard manual orders.
+            this.leaderNeedsRetreat=this.leaderState==='préserver les survivants';
             // The leader requests defensive fire rather than overriding a player's route.
             if(nearbyArmor.length&&nearEnemy.length&&!this.target) this.target=this._findTarget(allSquads);
         }
@@ -678,7 +680,7 @@ RTS.Game.Squad.prototype._updateCombat = function(dt, all) {
     if (this.retreating) return;
 
     if (this.target) {
-        if (this.target.dead || this._dist(this.target) > this.attackRange * 1.35)
+        if (this.target.dead || this._dist(this.target) > this.attackRange * 1.35 || !this.target._aliveSoldiers().length)
             this._exitCombat();
     }
     if (!this.target) {
