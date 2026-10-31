@@ -314,7 +314,9 @@ window.onload = function() {
             btn.style.cssText="padding:9px 6px;background:#25394c;color:#fff;border:1px solid #446c89;border-radius:5px;text-align:left;cursor:pointer";
             btn.onclick=function(){
                 if(game.setupPhase){
-                    focused=item[0];RTS.ArmyBuilder.toggle(game,focused);showGear(focused);RTS.ArmyBuilder.save(game);refresh();
+                    if(focused!==item[0]){focused=item[0];showGear(focused);}
+                    else RTS.ArmyBuilder.toggle(game,focused);
+                    RTS.ArmyBuilder.save(game);refresh();
                 }else{RTS.DeploymentSystem.call(game,item[0]);refresh();}
             };grid.append(btn);
         });
@@ -347,6 +349,25 @@ window.onload = function() {
         save.style.cssText="margin:9px 0;padding:9px;background:#264d60;color:#fff;border:1px solid #5c91a9;cursor:pointer;width:100%";
         save.onclick=function(){RTS.ArmyBuilder.save(game);save.textContent="DECK ENREGISTRÉ ✓";};
         panel.insertBefore(save,start);
+        var deckName=document.createElement("input");deckName.placeholder="Nom du deck";deckName.value=game.army.name;
+        deckName.style.cssText="width:95%;padding:8px;color:white;background:#1b3041;border:1px solid #52738a";
+        panel.insertBefore(deckName,save);
+        var presets=document.createElement("select");presets.style.cssText=doctrine.style.cssText;
+        function populatePresets(){
+            presets.replaceChildren();var empty=document.createElement("option");empty.value="";empty.textContent="Charger un deck enregistré…";presets.append(empty);
+            RTS.ArmyBuilder.listDecks().forEach(function(n){var option=document.createElement("option");option.value=n;option.textContent=n;presets.append(option);});
+        }
+        populatePresets();panel.insertBefore(presets,save);
+        presets.onchange=function(){
+            if(presets.value && RTS.ArmyBuilder.loadNamed(game,presets.value)){
+                doctrine.value=game.army.doctrine;deckName.value=game.army.name;showGear(focused);refresh();
+            }
+        };
+        save.onclick=function(){
+            if(RTS.ArmyBuilder.saveNamed(game,deckName.value)){
+                save.textContent="DECK ENREGISTRÉ ✓";populatePresets();
+            }else save.textContent="SAUVEGARDE IMPOSSIBLE";
+        };
         showGear(focused);
         game.requisitionPanelRefresh=refresh;refresh();
     }
