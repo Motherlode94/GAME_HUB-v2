@@ -1,33 +1,51 @@
 window.RTS=window.RTS||{};
 RTS.SpriteAtlas={
-  cache:{},
+  // RTS gameplay types -> available original PNG sprites.
   map:{
-    riflemen:"rifleman",assault_team:"rifleman",special_forces:"scout",paratroopers:"rifleman",
-    at_team:"antiarmor",manpads:"antiarmor",grenadier_team:"antiarmor",mortar_team:"machinegunner",
-    sniper_team:"scout",recon_team:"scout",heavy_mg:"machinegunner",engineer:"engineer",worker:"engineer",combat_medic:"medic",combat_engineers:"engineer",
-    matv:"buggy",mechanized_scout:"buggy",armored_car:"buggy",bradley:"ifv",wheeled_ifv:"ifv",
-    apc:"apc",m1a2:"tank",heavy_mbt:"tank",tank_destroyer:"tank",paladin:"artillery",
-    mlrs:"artillery",rocket_artillery:"artillery",selfpropelled_mortar:"artillery",
-    mobile_aa:"anti_air",heavy_aa:"anti_air",long_range_aa:"anti_air",air_defense_radar:"radar",
-    supply_truck:"supply_truck",ammo_carrier:"supply_truck",armored_engineer:"command_truck",
-    apache:"helicopter",light_attack_heli:"helicopter",gunship:"helicopter",blackhawk:"transport_helicopter",heavy_transport_heli:"transport_helicopter",
-    recon_drone:"drone",attack_drone:"drone",interceptor_drone:"drone",ew_drone:"drone",loitering_drone:"drone",
-    fighter_aircraft:"fighter",strike_aircraft:"fighter"
+    riflemen:"soldat_fusil",assault_team:"soldat_fusil",special_forces:"soldat_fusil",paratroopers:"soldat_fusil",
+    at_team:"soldat_fusil",manpads:"soldat_fusil",grenadier_team:"soldat_fusil",
+    mortar_team:"soldat_minigun",sniper_team:"soldat_fusil",recon_team:"soldat_radio",
+    heavy_mg:"soldat_minigun",engineer:"soldat_ingenieur",worker:"soldat_ingenieur",
+    combat_medic:"soldat_medic",combat_engineers:"soldat_ingenieur",
+    matv:"buggy_bleu",mechanized_scout:"buggy_bleu",armored_car:"blinde_bleu",
+    bradley:"blinde_bleu",wheeled_ifv:"blinde_bleu",apc:"blinde_bleu",
+    m1a2:"char_lourd_vert",heavy_mbt:"char_lourd_vert",tank_destroyer:"char_lourd_vert",
+    paladin:"artillerie_bleue",mlrs:"artillerie_bleue",rocket_artillery:"artillerie_bleue",
+    selfpropelled_mortar:"artillerie_bleue",mobile_aa:"antiaerien_vert",heavy_aa:"antiaerien_vert",
+    long_range_aa:"antiaerien_vert",air_defense_radar:"vehicule_radar_bleu",
+    supply_truck:"camion_bleu",ammo_carrier:"camion_bleu",armored_engineer:"blinde_bleu",
+    apache:"helico_bleu",light_attack_heli:"helico_bleu",gunship:"helico_bleu",
+    blackhawk:"helico_bleu",heavy_transport_heli:"helico_bleu",
+    recon_drone:"drone_bleu",attack_drone:"drone_bleu",interceptor_drone:"drone_bleu",
+    ew_drone:"drone_bleu",loitering_drone:"drone_bleu",
+    fighter_aircraft:"chasseur_bleu",strike_aircraft:"avion_bleu",
+    rifleman:"soldat_fusil",scout:"soldat_radio",machinegunner:"soldat_minigun",
+    antiarmor:"soldat_fusil",medic:"soldat_medic",buggy:"buggy_bleu",
+    ifv:"blinde_bleu",tank:"char_lourd_vert",artillery:"artillerie_bleue",
+    anti_air:"antiaerien_vert",radar:"vehicule_radar_bleu",apc_sprite:"blinde_bleu",
+    supply_truck_sprite:"camion_bleu",helicopter:"helico_bleu",
+    transport_helicopter:"helico_bleu",drone:"drone_bleu",fighter:"chasseur_bleu",
+    carrier:"blinde_bleu",support:"soldat_minigun",rifle:"soldat_fusil"
   },
-  draw:function(ctx,type,x,y,width,height,angle){
-    var key=this.map[type]||type, image=this.cache[key];
-    if(image===null)return false;
-    if(!image){
-      image=new Image();
-      this.cache[key]=image;
-      image.onload=function(){};
-      image.onerror=()=>{this.cache[key]=null;};
-      image.src="assets/rts/"+key+".png";
-      return false;
-    }
-    if(!image.complete||!image.naturalWidth)return false;
-    ctx.save();ctx.translate(x,y);ctx.rotate(angle||0);
-    ctx.drawImage(image,-width/2,-height/2,width,height);
-    ctx.restore();return true;
+  red:{
+    soldat_fusil:"soldat_fusil_rouge",soldat_ingenieur:"soldat_ingenieur_rouge",
+    soldat_medic:"soldat_medic_rouge",soldat_minigun:"soldat_minigun_rouge",
+    soldat_radio:"soldat_radio_rouge",buggy_bleu:"buggy_rouge",blinde_bleu:"blinde_rouge",
+    char_lourd_vert:"char_lourd_rouge",artillerie_bleue:"artillerie_rouge",
+    antiaerien_vert:"antiaerien_rouge",vehicule_radar_bleu:"vehicule_radar_rouge",
+    camion_bleu:"camion_rouge",helico_bleu:"helico_rouge",
+    drone_bleu:"drone_rouge",chasseur_bleu:"chasseur_rouge",avion_bleu:"avion_rouge"
+  },
+  resolve:function(type,team){
+    var id=this.map[type]||type;
+    if(team==="red"||team==="rouge"||team==="enemy") id=this.red[id]||id;
+    return id;
+  },
+  draw:function(ctx,type,x,y,width,height,angle,team){
+    var assets=window.WarLikeRTSAssets;
+    if(!assets)return false;
+    var id=this.resolve(type,team);
+    if(!assets.get(id))return false;
+    return assets.draw(ctx,id,x,y,width,height,angle||0);
   }
 };
