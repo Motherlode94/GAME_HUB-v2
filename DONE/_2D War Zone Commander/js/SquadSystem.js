@@ -73,7 +73,7 @@ RTS.SquadSystem = {
             goal = best;
         }
         var open = [start], seen = new Set(), g = new Map([[start, 0]]), parent = new Map();
-        var h = function(k) { return Math.abs(k % cols - goal % cols) + Math.abs(Math.floor(k / cols) - Math.floor(goal / cols)); };
+        var h = function(k) { return Math.hypot(k % cols - goal % cols, Math.floor(k / cols) - Math.floor(goal / cols)); };
         var limit = cols * rows;
         while (open.length && limit-- > 0) {
             var bi = 0;
@@ -90,12 +90,13 @@ RTS.SquadSystem = {
             }
             seen.add(cur);
             var x = cur % cols, y = Math.floor(cur / cols);
-            [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(step) {
+            [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(step) {
                 var nx = x + step[0], ny = y + step[1];
                 if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return;
                 var next = key(nx, ny);
                 if (blocked.has(next) || seen.has(next)) return;
-                var cost = g.get(cur) + 1;
+                if (step[0] && step[1] && (blocked.has(key(x+step[0],y)) || blocked.has(key(x,y+step[1])))) return;
+                var cost = g.get(cur) + (step[0]&&step[1]?1.41421356237:1);
                 if (!g.has(next) || cost < g.get(next)) {
                     g.set(next, cost); parent.set(next, cur);
                     if (open.indexOf(next) < 0) open.push(next);
@@ -137,9 +138,13 @@ RTS.SquadSystem = {
         var aircraft = squad.def && squad.def.category === "air";
         var mobility = vehicle ? Math.max(0.35, 1 - (squad.engineDamage || 0)) :
             aircraft ? Math.max(0.25, 1 - (squad.rotorDamage || 0)) : 1;
-        var step = Math.max(0, squad.speed * mobility * delta);
+        var suppressionFactor = squad.def.category === "infantry" ? Math.max(0.45, 1-(squad.suppression||0)*0.005) : 1;
+        var step = Math.max(0, squad.speed * mobility * suppressionFactor * delta);
         if (dist > 0.001 && step > 0) {
-            squad.heading = Math.atan2(dy, dx);
+            var wanted = Math.atan2(dy, dx);
+            var deltaAngle = Math.atan2(Math.sin(wanted-squad.heading),Math.cos(wanted-squad.heading));
+            var turnSpeed = vehicle ? 2.7 : 7.5;
+            squad.heading += Math.max(-turnSpeed*delta,Math.min(turnSpeed*delta,deltaAngle));
         }
         if (dist <= Math.max(3, step)) {
             squad.x = point.x; squad.y = point.y;
@@ -182,7 +187,9 @@ RTS.SquadSystem = {
                     oy = row * spread * .85;
                 }
                 m.offsetX = ox; m.offsetY = oy;
-                m.x = squad.x + ox; m.y = squad.y + oy;
+                var a=squad.heading-Math.PI/2;
+                m.x = squad.x + ox*Math.cos(a)-oy*Math.sin(a);
+                m.y = squad.y + ox*Math.sin(a)+oy*Math.cos(a);
             });
             return;
         }
@@ -199,8 +206,9 @@ RTS.SquadSystem = {
                 var row = Math.floor(i / cols);
                 m.offsetX = ox + col * spread;
                 m.offsetY = oy + row * spread;
-                m.x = squad.x + m.offsetX;
-                m.y = squad.y + m.offsetY;
+                var a=squad.heading-Math.PI/2;
+                m.x = squad.x + m.offsetX*Math.cos(a)-m.offsetY*Math.sin(a);
+                m.y = squad.y + m.offsetX*Math.sin(a)+m.offsetY*Math.cos(a);
             });
         }
     },
