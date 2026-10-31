@@ -43,6 +43,10 @@ RTS.SquadCombatSystem = {
             var mode = squad.def.combatMode;
             if (mode === "repair" || mode === "harvest" || mode === "none") return;
 
+            // A squad leader prioritizes threats attacking a nearby friendly vehicle.
+            var protectedVehicle = squad.def.category === "infantry" ?
+                squads.filter(function(v){return v.team===squad.team && v.def && v.def.category==="vehicle" && !v.isDead() && Math.hypot(v.x-squad.x,v.y-squad.y)<250;})
+                    .sort(function(x,y){return Math.hypot(x.x-squad.x,x.y-squad.y)-Math.hypot(y.x-squad.x,y.y-squad.y);})[0] : null;
             // Trouver la cible ennemie la plus proche
             var target  = null;
             var targetD = Infinity;
@@ -55,6 +59,8 @@ RTS.SquadCombatSystem = {
                 var dx = other.x - squad.x;
                 var dy = other.y - squad.y;
                 var d  = Math.sqrt(dx * dx + dy * dy);
+                // A threatening opponent close to the escorted vehicle gets priority.
+                if(protectedVehicle && Math.hypot(other.x-protectedVehicle.x,other.y-protectedVehicle.y)<190) d *= 0.62;
                 // Tactical order T: prioritize armored targets already in weapon range.
                 // If no armor is in range, keep normal nearest-enemy behavior.
                 var inRange = d <= squad.def.attackRange &&
@@ -179,7 +185,13 @@ RTS.SquadCombatSystem = {
     },
 
     _emitProjectileWithSpread: function(game, squad, targetSquad, type, spread) {
-        var shooter = squad.aliveMembers()[0];
+        var aliveShooters = squad.aliveMembers();
+        // Individual member selects the best firing position instead of always using member 0.
+        var shooter = aliveShooters.slice().sort(function(a,b){
+            var da=Math.hypot(a.x-targetSquad.x,a.y-targetSquad.y);
+            var db=Math.hypot(b.x-targetSquad.x,b.y-targetSquad.y);
+            return da-db;
+        })[0];
         if (!shooter) return;
 
         var target = null, bestD = Infinity;
