@@ -193,6 +193,8 @@ RTS.SquadSystem = {
         var spread = 60;
 
         squads.forEach(function(squad, i) {
+            squad.holdingPosition = false;
+            squad._nav = null;
             var col = i % cols;
             var row = Math.floor(i / cols);
             squad.target = {
