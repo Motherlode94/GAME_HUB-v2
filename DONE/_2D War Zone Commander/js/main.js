@@ -208,6 +208,8 @@ window.onload = function() {
                     RTS.ProjectileSystem.update(game, delta);
                     RTS.ParticleSystem.update(game.particles, delta);
                     RTS.ProductionSystem.update(game, delta);
+                    // Run building tactical/passive effects; production stays exclusive to ProductionSystem.
+                    RTS.BuildingSystem.update(game, delta);
 
                     // Vagues seulement hors phase de déploiement
                     if (!game.setupPhase) {
