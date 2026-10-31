@@ -48,6 +48,7 @@ RTS.Renderer.render = function(game) {
     // Conquest zones (world-space)
     if (game.mode === "conquest" && RTS.ConquestSystem) RTS.ConquestSystem.renderWorld(game, ctx);
 
+    RTS.CombatTactics.render(game, ctx);
     // Squads
     RTS.SquadRenderer.render(game.squads, ctx);
 
