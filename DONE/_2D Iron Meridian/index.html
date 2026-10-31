@@ -4,7 +4,8 @@
 <aside id="guide"><b>COMMANDES TACTIQUES</b><div>Clic gauche : sélectionner · Maj + clic : groupe</div><div>Clic droit : déplacement / attaquer</div><div>1–5 : sélectionner unité · Espace : pause</div><div>F : fumigène · G : tenir · C : récupérer</div><div>Mission : vaincre les défenseurs, récupérer un blindé et extraire vos unités.</div><a href="../../index.html">← Retour au Game Hub</a></aside>
 <section id="hud"><h2>COMMANDO « ASTRA »</h2><div id="selection">Sélectionnez une escouade pour consulter son équipement.</div><div id="actions"><button id="smoke">F — Fumigène</button><button id="hold">G — Tenir</button><button id="supply">Ravitaillement (2)</button><button id="recruit">Renfort Astra (1)</button><button id="recover">C — Récupérer véhicule</button><button id="restart">Recommencer</button></div><div id="log">Opération lancée. Armées et armements entièrement fictifs.</div></section>
 <div id="ending"><article><h1 id="endTitle"></h1><p id="endText"></p><button onclick="location.reload()">Rejouer l'opération</button></article></div>
-<script src="/_shared/rts/library.js"></script>\n<script src="js/SpriteAtlas.js"></script>
+<script src="/_shared/rts/library.js"></script>
+<script src="js/SpriteAtlas.js"></script>
 <script>
 (()=>{'use strict';
 const C=document.getElementById('field'),ctx=C.getContext('2d'),log=document.getElementById('log'),selection=document.getElementById('selection');
