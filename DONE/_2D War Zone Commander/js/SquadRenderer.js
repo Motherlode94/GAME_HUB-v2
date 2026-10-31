@@ -21,7 +21,7 @@ RTS.SquadRenderer = {
                 RTS.SquadRenderer._drawMember(ctx, m, squad);
             });
             RTS.SquadRenderer._drawSquadHpBar(ctx, squad);
-            RTS.SquadRenderer._drawBadge(ctx, squad);
+            if (squad.selected) RTS.SquadRenderer._drawBadge(ctx, squad);
             if (squad.selected) RTS.SquadRenderer._drawTacticalHud(ctx, squad);
             if (squad.passengers && squad.passengers.length) {
                 ctx.save();
@@ -158,9 +158,11 @@ RTS.SquadRenderer = {
         // Barre HP individuelle
         var pct = m.hp / m.maxHp;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillRect(m.x - s/2, m.y + s/2 + 2, s, 3);
-        ctx.fillStyle = pct > 0.5 ? "#2ecc71" : pct > 0.25 ? "#f39c12" : "#e74c3c";
-        ctx.fillRect(m.x - s/2, m.y + s/2 + 2, s * pct, 3);
+        if (squad.selected && pct < 0.99) {
+            ctx.fillRect(m.x - s/2, m.y + s/2 + 2, s, 3);
+            ctx.fillStyle = pct > 0.5 ? "#2ecc71" : pct > 0.25 ? "#f39c12" : "#e74c3c";
+            ctx.fillRect(m.x - s/2, m.y + s/2 + 2, s * pct, 3);
+        }
     },
 
     // ═══════════════════════════════════════════════════════════════════════════
