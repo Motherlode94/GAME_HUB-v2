@@ -11,7 +11,21 @@ RTS.SquadSystem = {
 
     update: function(squads, delta, buildings) {
         squads.forEach(function(squad) {
-            RTS.SquadSystem._move(squad, delta, buildings || []);
+            // Attack-move: pause movement while a hostile is inside weapon range.
+            // Resume toward the original destination as soon as no target is in range.
+            var engaging = false;
+            if (squad.attackMove && squad.target && squad.def &&
+                squad.def.attackRange > 0 && squad.ammo > 0 && !squad.isDead()) {
+                engaging = squads.some(function(other) {
+                    if (other.isDead()) return false;
+                    if (squad.team === other.team) return false;
+                    if (squad.team === "red" ? other.team !== "blue" && other.team !== "ally" : other.team !== "red") return false;
+                    if (squad.def.antiAirOnly && (!other.def || other.def.category !== "air")) return false;
+                    var dist = Math.hypot(other.x - squad.x, other.y - squad.y);
+                    return dist <= squad.def.attackRange && dist >= (squad.def.minRange || 0);
+                });
+            }
+            if (!engaging) RTS.SquadSystem._move(squad, delta, buildings || []);
             RTS.SquadSystem._updateFormation(squad);
             RTS.SquadSystem._tickTimers(squad, delta);
         });
@@ -194,6 +208,7 @@ RTS.SquadSystem = {
 
         squads.forEach(function(squad, i) {
             squad.holdingPosition = false;
+            squad.attackMove = false;
             squad._nav = null;
             var col = i % cols;
             var row = Math.floor(i / cols);
