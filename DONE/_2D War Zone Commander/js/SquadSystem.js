@@ -15,12 +15,13 @@ RTS.SquadSystem = {
             // Resume toward the original destination as soon as no target is in range.
             var engaging = false;
             if (squad.attackMove && squad.target && squad.def &&
-                squad.def.attackRange > 0 && squad.ammo > 0 && !squad.isDead()) {
+                squad.def.attackRange > 0 && squad.def.combatMode !== "none" && squad.def.combatMode !== "repair" && squad.def.combatMode !== "harvest" && squad.ammo > 0 && !squad.isDead()) {
                 engaging = squads.some(function(other) {
                     if (other.isDead()) return false;
                     if (squad.team === other.team) return false;
                     if (squad.team === "red" ? other.team !== "blue" && other.team !== "ally" : other.team !== "red") return false;
                     if (squad.def.antiAirOnly && (!other.def || other.def.category !== "air")) return false;
+
                     var dist = Math.hypot(other.x - squad.x, other.y - squad.y);
                     return dist <= squad.def.attackRange && dist >= (squad.def.minRange || 0);
                 });
