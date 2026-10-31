@@ -380,6 +380,7 @@ function createDefaultState() {
     projects: [],
     doneProjects: [],
     royaltyCatalog: [],
+    chartHistory: [],
     distributionPlan: 'independent',
     market: [],
     events: [],
@@ -1493,8 +1494,9 @@ function normalizeState(rawState) {
         done:      !!p.done,
       })) : [];
   next.doneProjects = Array.isArray(input.doneProjects) ? input.doneProjects.slice(-100) : [];
+  next.chartHistory = Array.isArray(input.chartHistory) ? input.chartHistory.slice(-24) : [];
   next.distributionPlan = ['independent','digital','major'].includes(input.distributionPlan) ? input.distributionPlan : 'independent';
-  next.royaltyCatalog = Array.isArray(input.royaltyCatalog) ? input.royaltyCatalog.filter(x=>x&&typeof x==='object').slice(-100).map(x=>({name:String(x.name||'Projet'), format:MUSIC_RELEASE_FORMATS[x.format]?x.format:'single',tracks:Math.max(1,Math.floor(Number(x.tracks)||1)),weekly:Math.max(0,Math.floor(Number(x.weekly)||0)), weeksLeft:Math.max(0,Math.floor(Number(x.weeksLeft)||0)),totalWeeks:Math.max(1,Math.floor(Number(x.totalWeeks)||12)),streams:Math.max(0,Math.floor(Number(x.streams)||0)),physicalSales:Math.max(0,Math.floor(Number(x.physicalSales)||0)),certification:String(x.certification||''),plan:['independent','digital','major'].includes(x.plan)?x.plan:'independent'})) : [];
+  next.royaltyCatalog = Array.isArray(input.royaltyCatalog) ? input.royaltyCatalog.filter(x=>x&&typeof x==='object').slice(-100).map(x=>({name:String(x.name||'Projet'), format:MUSIC_RELEASE_FORMATS[x.format]?x.format:'single',tracks:Math.max(1,Math.floor(Number(x.tracks)||1)),weekly:Math.max(0,Math.floor(Number(x.weekly)||0)), weeksLeft:Math.max(0,Math.floor(Number(x.weeksLeft)||0)),totalWeeks:Math.max(1,Math.floor(Number(x.totalWeeks)||12)),streams:Math.max(0,Math.floor(Number(x.streams)||0)),physicalSales:Math.max(0,Math.floor(Number(x.physicalSales)||0)),certification:String(x.certification||''),promotion:Math.max(0,Math.floor(Number(x.promotion)||0)),lastStreams:Math.max(0,Math.floor(Number(x.lastStreams)||0)),plan:['independent','digital','major'].includes(x.plan)?x.plan:'independent'})) : [];
   next.market       = Array.isArray(input.market) ? input.market.map(normalizeArtist) : [];
   next.events       = Array.isArray(input.events)
     ? input.events.filter(e=>e&&typeof e==='object').map(e=>({
@@ -2077,6 +2079,16 @@ const DISTRIBUTION_PLANS = {
   digital:{name:'Distribution numérique',cost:4000,streamMultiplier:1.5,share:0.85,physicalMultiplier:0.75},
   major:{name:'Accord Major',cost:18000,streamMultiplier:2.4,share:0.65,physicalMultiplier:1.6}
 };
+function promoteRelease(index) {
+  if(!G||!G.royaltyCatalog||!G.royaltyCatalog[index])return;
+  const release=G.royaltyCatalog[index];
+  const cost=1500;
+  if(release.weeksLeft<=0||G.money<cost){toast('❌ Promotion impossible : budget ou durée insuffisante.','#ef4444');return;}
+  G.money-=cost;G.weekExpenses+=cost;
+  release.promotion=Math.min(3,(release.promotion||0)+1);
+  addNews('📣 Campagne promotionnelle lancée pour '+release.name+' (-'+cost+'€).');
+  renderAll();
+}
 function chooseDistribution(plan) {
   if(!G || !DISTRIBUTION_PLANS[plan])return;
   const selected=DISTRIBUTION_PLANS[plan];
@@ -2100,7 +2112,7 @@ function createMusicRelease(project) {
   G.royaltyCatalog.push({
     name:project.name,format:project.typeId,tracks:format.tracks,
     weekly,weeksLeft:format.weeks,totalWeeks:format.weeks,
-    streams:0,physicalSales:0,certification:'',plan:G.distributionPlan||'independent'
+    streams:0,physicalSales:0,certification:'',promotion:0,lastStreams:0,plan:G.distributionPlan||'independent'
   });
   G.royaltyCatalog=G.royaltyCatalog.slice(-100);
   addNews('🎶 Sortie '+format.name+' : '+format.tracks+' titre(s), '+format.weeks+' semaines de distribution.');
@@ -2237,7 +2249,10 @@ function nextWeek() {
   G.royaltyCatalog.forEach(entry=>{
     const amount = Math.max(0,Math.floor(entry.weekly * (entry.weeksLeft / Math.max(1,entry.totalWeeks||12))));
     const distribution=DISTRIBUTION_PLANS[entry.plan]||DISTRIBUTION_PLANS.independent;
-    const weeklyStreams=Math.round(amount*35*distribution.streamMultiplier);
+    const promoMultiplier=1+(entry.promotion||0)*0.4;
+    const weeklyStreams=Math.round(amount*35*distribution.streamMultiplier*promoMultiplier);
+    entry.lastStreams=weeklyStreams;
+    entry.promotion=Math.max(0,(entry.promotion||0)-1);
     const physicalUnits=entry.format==='album'||entry.format==='ep' ? Math.round(amount*0.045*distribution.physicalMultiplier) : 0;
     entry.streams=(entry.streams||0)+weeklyStreams;
     entry.physicalSales=(entry.physicalSales||0)+physicalUnits;
@@ -2248,6 +2263,9 @@ function nextWeek() {
     if(newCertification!==entry.certification){entry.certification=newCertification;if(newCertification)addNews('🏆 '+entry.name+' : certification '+newCertification+' !');}
     entry.weeksLeft--;
   });
+  const chart=(G.royaltyCatalog||[]).slice().sort((a,b)=>(b.lastStreams||0)-(a.lastStreams||0)).slice(0,10).map(e=>({name:e.name,streams:e.lastStreams||0,format:e.format}));
+  (G.chartHistory||(G.chartHistory=[])).push({week:G.week,chart});
+  G.chartHistory=G.chartHistory.slice(-24);
   G.royaltyCatalog = G.royaltyCatalog.filter(entry=>entry.weeksLeft>0);
   if(royaltyRevenue){G.money+=royaltyRevenue;G.weekRevenue+=royaltyRevenue;addNews('🎧 Catalogue : +'+royaltyRevenue.toLocaleString()+'€ de royalties cette semaine.');}
 
@@ -2602,6 +2620,12 @@ function renderDistributionPanel() {
     '<div style="margin-top:8px">'+(G.royaltyCatalog||[]).map(e=>
       '<div>🎵 '+String(e.name).replace(/[<>&]/g,'')+' · '+(e.streams||0).toLocaleString('fr-FR')+
       ' écoutes · '+(e.physicalSales||0)+' ventes · '+(e.certification||'Sans certification')+'</div>').join('')+'</div>';
+  const latest=(G.chartHistory||[]).slice(-1)[0];
+  const table=container.appendChild(document.createElement('div'));
+  table.style.marginTop='12px';
+  const title=document.createElement('h3');title.textContent='🏆 Top sorties — semaine '+(latest?latest.week:G.week);table.appendChild(title);
+  (latest&&latest.chart||[]).forEach((entry,i)=>{const line=document.createElement('div');line.textContent=(i+1)+'. '+entry.name+' — '+entry.streams.toLocaleString('fr-FR')+' écoutes';table.appendChild(line);});
+  (G.royaltyCatalog||[]).forEach((release,i)=>{const button=document.createElement('button');button.type='button';button.textContent='📣 Promouvoir '+release.name+' (1 500 €)';button.disabled=G.money<1500||release.weeksLeft<=0;button.addEventListener('click',()=>promoteRelease(i));container.appendChild(button);});
   container.querySelectorAll('[data-distribution]').forEach(button=>{
     button.addEventListener('click',()=>chooseDistribution(button.dataset.distribution));
   });
