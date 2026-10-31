@@ -209,16 +209,10 @@ RTS.BuildingSystem = {
                 var dy = squad.y - b.y;
                 if (dx * dx + dy * dy > radius * radius) return;
 
-                // Applique le soin à chaque unité du squad
-                if (squad.units) {
-                    squad.units.forEach(function(u) {
-                        u.hp = Math.min(u.hp + healRate, u.maxHp);
-                    });
-                }
-                // Fallback si le squad a un HP propre
-                if (typeof squad.hp === "number") {
-                    squad.hp = Math.min(squad.hp + healRate, squad.maxHp || squad.hp);
-                }
+                // Squad uses members (not units): heal living infantry members.
+                (squad.members || []).forEach(function(member){
+                    if(!member.dead) member.hp=Math.min(member.maxHp,member.hp+healRate);
+                });
             });
         });
     },
