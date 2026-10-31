@@ -75,7 +75,23 @@ const infantry=u.type!=='tank'&&u.type!=='carrier';
 const bob=u.moving&&infantry?Math.sin(u.walkPhase)*1.15:0;
 if(u.moving&&!infantry){ctx.fillStyle='rgba(157,140,111,.27)';ctx.beginPath();ctx.ellipse(0,size*.95,size*.7,size*.24,0,0,Math.PI*2);ctx.fill();}
 if(u.type==='carrier'&&(u.passengers||[]).length){ctx.fillStyle='#c8efd6';ctx.font='bold 12px system-ui';ctx.fillText('▣ '+u.passengers.length+'/'+carrierCapacity,-size,-size-12);}
-if(!RTS.SpriteAtlas.draw(ctx,{rifle:'rifleman',scout:'scout',support:'machinegunner',carrier:'apc',tank:'tank'}[u.type],0,bob,size*2.7,size*2.7,0,u.team)){
+let visualDrawn=false;
+if(infantry){
+  // Three independently positioned soldiers represent one selectable fireteam.
+  const slots=[[-15,10],[0,-11],[15,10]];
+  u.visualMembers=u.visualMembers||slots.map(p=>({x:p[0],y:p[1]}));
+  slots.forEach((p,i)=>{
+    let m=u.visualMembers[i],alpha=u.moving?.14:.27;
+    m.x+=(p[0]-m.x)*alpha;m.y+=(p[1]-m.y)*alpha;
+    let stepBob=u.moving?Math.sin(u.walkPhase+i*2.1)*1.6:0;
+    const type={rifle:'rifleman',scout:'scout',support:'machinegunner'}[u.type];
+    if(RTS.SpriteAtlas.draw(ctx,type,m.x,m.y+stepBob,size*1.75,size*1.75,0,u.team))visualDrawn=true;
+    else{ctx.fillStyle=u.team==='blue'?'#8cbbb5':'#d29786';ctx.beginPath();ctx.arc(m.x,m.y,size*.37,0,Math.PI*2);ctx.fill();}
+  });
+}else{
+  visualDrawn=RTS.SpriteAtlas.draw(ctx,u.type==='tank'?'tank':'apc',0,bob,size*2.7,size*2.7,0,u.team);
+}
+if(!infantry&&!visualDrawn){
 ctx.fillStyle=u.team==='blue'?'#7b9b8a':'#9a786f';if(u.type==='tank'||u.type==='carrier'){ctx.fillRect(-size,-size*.52,size*2,size*1.04);ctx.fillStyle='#303c38';ctx.fillRect(-size,-size*.63,size*2,size*.18);ctx.fillRect(-size,size*.45,size*2,size*.18);ctx.fillStyle='#c0c8b6';ctx.fillRect(-5,-6,10,12);ctx.fillStyle='#283c35';ctx.fillRect(0,-3,size*1.35,6);}else{for(let n=0;n<3;n++){ctx.beginPath();ctx.arc(-8+n*8,-6+(n%2)*12,size*.36,0,Math.PI*2);ctx.fill();ctx.fillStyle='#26362f';ctx.fillRect(n*7-7,-8,3,15);ctx.fillStyle=u.team==='blue'?'#7b9b8a':'#9a786f';}}
 }
 ctx.restore();if(selected.includes(u)){ctx.strokeStyle='#f9d78c';ctx.lineWidth=2;ctx.beginPath();ctx.arc(u.x,u.y,size*1.7,0,Math.PI*2);ctx.stroke();}
