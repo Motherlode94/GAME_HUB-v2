@@ -10,7 +10,7 @@ RTS.ConquestSystem = {
                 {name:"BRAVO", x:RTS.WORLD_W*.52, y:RTS.WORLD_H*.54, owner:null, progress:0},
                 {name:"CHARLIE",x:RTS.WORLD_W*.72, y:RTS.WORLD_H*.72, owner:null, progress:0}
             ],
-            tickets: {blue:300,red:300}, elapsed:0, aiClock:0, done:false, strikeTargets:null, strikeDone:false
+            tickets: {blue:300,red:300}, elapsed:0, aiClock:0, done:false, strikeTargets:null, strikeDone:false, extraction:{x:RTS.WORLD_W*.22,y:RTS.WORLD_H*.78,radius:115,seconds:0,completed:false}
         };
     },
     update: function(game, dt) {
@@ -33,6 +33,17 @@ RTS.ConquestSystem = {
             if(notice)notice.textContent="OBJECTIF SECONDAIRE : BLINDÉ DE COMMANDEMENT DÉTRUIT — -65 TICKETS";
         }
 
+        // Optional extraction: escort a damaged or low-ammo allied ground squad to the LZ.
+        var ex=c.extraction;
+        if(!ex.completed){
+            var rescued=game.squads.some(function(s){
+                return s.team==="blue"&&!s.isDead()&&s.def.category!=="air" &&
+                  Math.hypot(s.x-ex.x,s.y-ex.y)<=ex.radius &&
+                  (s.getTotalHp()<s.getMaxHp()*.6 || (s.ammoCapacity>0&&s.ammo<s.ammoCapacity*.3));
+            });
+            ex.seconds=rescued?ex.seconds+dt:0;
+            if(ex.seconds>=7){ex.completed=true;c.tickets.red=Math.max(0,c.tickets.red-35);}
+        }
         c.zones.forEach(function(z) {
             var blue=0, red=0;
             game.squads.forEach(function(s) {
@@ -68,6 +79,12 @@ RTS.ConquestSystem = {
     },
     renderWorld: function(game,ctx) {
         var c=game.conquest;if(!c)return;
+        var ex=c.extraction;
+        ctx.save();ctx.strokeStyle=ex.completed?"#69dba9":"#f4d38e";ctx.lineWidth=3;
+        ctx.setLineDash([9,6]);ctx.beginPath();ctx.arc(ex.x,ex.y,ex.radius,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+        ctx.font="bold 13px sans-serif";ctx.fillStyle="#f2dfbd";ctx.textAlign="center";
+        ctx.fillText(ex.completed?"EXTRACTION TERMINÉE":"ZONE D'EXTRACTION",ex.x,ex.y);
+        ctx.restore();
         c.zones.forEach(function(z) {
             var color=z.owner==="blue"?"#54b9ed":z.owner==="red"?"#f07572":"#f2cb73";
             ctx.save();ctx.beginPath();ctx.arc(z.x,z.y,165,0,Math.PI*2);
@@ -84,6 +101,6 @@ RTS.ConquestSystem = {
         var c=game.conquest;if(!c)return;
         var el=document.getElementById("waveNotif");if(!el)return;
         el.style.opacity="1";
-        el.textContent="CONQUÊTE  |  ALLIÉS "+Math.ceil(c.tickets.blue)+"  —  ENNEMIS "+Math.ceil(c.tickets.red)+"  |  SECTEURS "+c.zones.filter(z=>z.owner==="blue").length+"/3" + (c.strikeDone ? "  |  CIBLE DÉTRUITE" : "  |  CIBLE : CHAR ENNEMI");
+        el.textContent="CONQUÊTE  |  ALLIÉS "+Math.ceil(c.tickets.blue)+"  —  ENNEMIS "+Math.ceil(c.tickets.red)+"  |  SECTEURS "+c.zones.filter(z=>z.owner==="blue").length+"/3" + (c.strikeDone ? "  |  CIBLE DÉTRUITE" : "  |  CIBLE : CHAR ENNEMI") + (c.extraction.completed?"  |  EXTRACTION ✓":"");
     }
 };
