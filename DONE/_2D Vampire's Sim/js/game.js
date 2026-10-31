@@ -51,7 +51,7 @@ const R_EVENTS = [
 // INIT
 // ══════════════════════════════════════════════════
 function initState() {
-  state = { hunger: 30, heat: 0, power: 10, money: 50, turn: 1, alive: true, veilCooldown: 0 };
+  state = { hunger: 30, heat: 0, power: 10, money: 50, turn: 1, alive: true, veilCooldown: 0, nightGoal: 0, nightProgress: 0, reputation: 0, rituals: 0, bloodMastery: 0 };
 }
 
 function initPlayer() {
@@ -102,6 +102,7 @@ window.addEventListener("keydown", e => {
   keys[e.key] = true;
   if ((e.key === "e" || e.key === "E") && !e.repeat) tryInteract(e.shiftKey);
   if ((e.key === "q" || e.key === "Q") && !e.repeat) activateShadowVeil();
+  if ((e.key === "f" || e.key === "F") && !e.repeat) activateBloodSense();
 });
 window.addEventListener("keyup", e => { keys[e.key] = false; });
 
@@ -165,10 +166,39 @@ function doHunt(victim, stealth = false) {
       n.alertTimer = Math.max(n.alertTimer, 5);
   });
   victim.dead = true;
+  state.nightProgress++;
+  state.reputation += stealth ? 1 : 2;
+  if (state.nightProgress >= 3) {
+    state.nightProgress = 0;
+    state.nightGoal++;
+    state.money += 25;
+    state.power += 2;
+    UI.showEvent("Contrat nocturne accompli : +25$ et +2 pouvoir.");
+  }
   player.cooldown = HUNT_COOLDOWN;
   setTimeout(() => spawnNPC("victim"), 7000);
   passTurn();
   UI.showEvent(stealth ? "🌑 Chasse discrète : moins de sang, moins de soupçons." : "🩸 Chasse brutale : les chasseurs proches sont alertés !");
+}
+
+// Sens du sang : débloqué après deux contrats nocturnes.
+function activateBloodSense() {
+  if (!state?.alive) return;
+  if (state.nightGoal < 2) {
+    UI.showEvent("Sens du sang : terminer 2 contrats nocturnes pour le débloquer.");
+    return;
+  }
+  if (player.bloodSenseCooldown > 0) return;
+  player.bloodSenseCooldown = 22;
+  const victims = npcs.filter(n => !n.dead && n.type === "victim");
+  const closest = victims.sort((a,b) => dist(player,a)-dist(player,b))[0];
+  if (!closest) { UI.showEvent("Aucune proie à proximité."); return; }
+  const dx = closest.x-player.x, dy = closest.y-player.y;
+  const angle = Math.atan2(dy,dx);
+  const directions = ["Est","Sud-Est","Sud","Sud-Ouest","Ouest","Nord-Ouest","Nord","Nord-Est"];
+  const dir = directions[Math.round(((angle+Math.PI*2)%(Math.PI*2))/(Math.PI/4))%8];
+  spawnSpark(player.x,player.y,"#e04072",22);
+  UI.showEvent("Sens du sang : proie repérée vers " + dir + " (" + Math.round(Math.hypot(dx,dy)/T) + " cases).");
 }
 
 // Pouvoir tactique : voile d'ombre. Éviter la police coûte des ressources.
@@ -716,7 +746,7 @@ function drawHint() {
 function loop(ts) {
   const dt=Math.min((ts-lastTime)/1000,0.05); lastTime=ts; waterAnim+=dt*1.4;
   ctx.fillStyle="#04060b"; ctx.fillRect(0,0,canvas.width,canvas.height);
-  if (state?.alive) state.veilCooldown = Math.max(0, state.veilCooldown - dt);
+  if (state?.alive) { state.veilCooldown = Math.max(0, state.veilCooldown - dt); if (player) player.bloodSenseCooldown = Math.max(0, (player.bloodSenseCooldown || 0) - dt); }
   updatePlayer(dt); updateNPCs(dt); updateParticles(dt); updateFloats(dt); updateCamera();
   drawMap(); npcs.forEach(drawNPC); drawPlayer(); drawParticles(); drawFloats(); drawVignette(); drawHint();
   animID=requestAnimationFrame(loop);
@@ -732,7 +762,7 @@ function startGame() {
   initState(); initPlayer(); initNPCs();
   particles=[]; floats=[]; camera={x:0,y:0}; keys={}; waterAnim=0;
   resize(); fogCanvas=buildFogCanvas();
-  UI.updateStats(state); lastTime=performance.now();
+  UI.updateStats(state); UI.showEvent("Contrat nocturne : nourrissez-vous de 3 proies. Récompense : 25$ et 2 pouvoir. F : sens du sang après 2 contrats."); lastTime=performance.now();
   cancelAnimationFrame(animID); animID=requestAnimationFrame(loop);
 }
 
