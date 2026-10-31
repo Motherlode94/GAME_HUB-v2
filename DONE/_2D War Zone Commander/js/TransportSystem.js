@@ -20,11 +20,12 @@ RTS.TransportSystem = {
             carrier.passengers = carrier.passengers || [];
             infantry.slice().forEach(function(s) {
                 if (carrier.passengers.length >= RTS.TransportSystem.capacity(carrier)) return;
-                if (Math.hypot(s.x - carrier.x, s.y - carrier.y) > 110) return;
+                if (Math.hypot(s.x - carrier.x, s.y - carrier.y) > 110 || !game.squads.includes(s)) return;
                 carrier.passengers.push(s);
-                game.squads = game.squads.filter(function(unit) { return unit !== s; });
+                game.squads.splice(game.squads.indexOf(s), 1);
                 game.selectedSquads = game.selectedSquads.filter(function(unit) { return unit !== s; });
                 s.selected = false;
+                s.attackMove = false;
                 s.target = null;
                 s._nav = null;
                 infantry.splice(infantry.indexOf(s), 1);
@@ -40,8 +41,21 @@ RTS.TransportSystem = {
             var occupants = carrier.passengers.splice(0);
             occupants.forEach(function(s,i) {
                 var angle = i * Math.PI * 2 / Math.max(1,occupants.length);
-                s.x = Math.max(24,Math.min(RTS.WORLD_W-24,carrier.x+Math.cos(angle)*65));
-                s.y = Math.max(24,Math.min(RTS.WORLD_H-24,carrier.y+Math.sin(angle)*65));
+                var chosen = null;
+                // Place infantry on free terrain rather than inside a structure.
+                for (var step = 0; step < 12; step++) {
+                    var dist = 65 + Math.floor(step / 6) * 32;
+                    var direction = angle + (step % 6) * Math.PI / 3;
+                    var x = Math.max(24,Math.min(RTS.WORLD_W-24,carrier.x+Math.cos(direction)*dist));
+                    var y = Math.max(24,Math.min(RTS.WORLD_H-24,carrier.y+Math.sin(direction)*dist));
+                    var blocked = game.buildings.some(function(b) {
+                        return b.hp > 0 && Math.abs(b.x-x) < (b.size||52)/2+15 &&
+                            Math.abs(b.y-y) < (b.size||52)/2+15;
+                    });
+                    if (!blocked) { chosen={x:x,y:y}; break; }
+                }
+                s.x = chosen ? chosen.x : carrier.x;
+                s.y = chosen ? chosen.y : carrier.y;
                 s.target = null;
                 s._nav = null;
                 s.selected = false;
