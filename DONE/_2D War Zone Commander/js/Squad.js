@@ -143,6 +143,7 @@ RTS.Squad.prototype.takeDamage = function(damage, fromX, fromY, particles) {
         }
     }
     if(this.garrisonedIn && this.def.category==="infantry")damage*=0.5;
+    if(this.def.category==='vehicle'&&!this.abandoned&&damage>this.def.memberHp*.16&&best.hp>damage&&Math.random()<.22){this.abandoned=true;this.salvageTimer=10;this.salvageTeam=null;this.salvageProgress=0;this.target=null;this._nav=null;this.engineDamage=1;}
     best.hp -= damage;
     best.flashTimer = 0.08;
 
@@ -158,6 +159,7 @@ RTS.Squad.prototype.takeDamage = function(damage, fromX, fromY, particles) {
 // AoE
 RTS.Squad.prototype.takeSplashDamage = function(damage, cx, cy, radius, particles) {
     var self = this;
+    if(this.def.category==='vehicle'&&!this.abandoned&&damage>this.def.memberHp*.18&&this.getTotalHp()>damage&&Math.random()<.35){this.abandoned=true;this.salvageTimer=10;this.salvageTeam=null;this.salvageProgress=0;this.target=null;this._nav=null;this.engineDamage=1;}
     this.members.forEach(function(m) {
         if (m.dead) return;
         var dx = m.x - cx;
