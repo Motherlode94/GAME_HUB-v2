@@ -1,5 +1,5 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
-import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const canvas=document.getElementById('game'),notice=document.getElementById('notice'),objective=document.getElementById('objective');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.shadowMap.enabled=true;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -58,9 +58,9 @@ function saveProgress(){
 function loadProgress(){
  try{
   const v=JSON.parse(localStorage.getItem('warlike_no_mans_dawn_v01')||'null');if(!v)return;
-  position.fromArray(v.position);if(v.pickup&&v.pickup.driving)pickup.driving=false;water=v.water;food=v.food;health=v.health;supplies=v.supplies;mission=v.mission;
+  if(Array.isArray(v.position)&&v.position.length===3)position.fromArray(v.position);pickup.driving=false;water=v.water;food=v.food;health=v.health;supplies=v.supplies;mission=v.mission;
   for(const k of v.inventory||[])playerInventory.add(k);
-  Object.assign(refuge,v.refuge||{});Object.assign(pickup,v.pickup||{});
+  Object.assign(refuge,v.refuge||{});Object.assign(pickup,v.pickup||{});pickup.driving=false;
   (v.loot||[]).forEach((used,i)=>{if(used&&loot[i]){loot[i].used=true;scene.remove(loot[i].mesh)}});
   updateObjective();
  }catch(e){console.warn('Sauvegarde ignorée',e)}
