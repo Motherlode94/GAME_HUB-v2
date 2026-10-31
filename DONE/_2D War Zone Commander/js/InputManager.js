@@ -412,14 +412,17 @@ RTS.InputManager.prototype._handleDragSelect = function(sx1, sy1, sx2, sy2) {
 
 RTS.InputManager.prototype._onRMB = function(e) {
     var p = this._screenFromClient(e.clientX, e.clientY);
-    this._onRMBAt(p.x, p.y);
+    this._onRMBAt(p.x, p.y, e.shiftKey);
 };
 
-RTS.InputManager.prototype._onRMBAt = function(sx, sy) {
+RTS.InputManager.prototype._onRMBAt = function(sx, sy, attackMove) {
     if (RTS.BuildingSystem.isPlacing()) {
         RTS.BuildingSystem.cancelPlacing();
         return;
     }
     var world = this.game.camera.screenToWorld(sx, sy);
     RTS.SquadSystem.orderMove(this.game.selectedSquads, world.x, world.y);
+    this.game.selectedSquads.forEach(function(s) {
+        if (s.team === 'blue') s.attackMove = !!attackMove;
+    });
 };
