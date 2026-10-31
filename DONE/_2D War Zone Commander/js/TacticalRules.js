@@ -16,6 +16,7 @@ RTS.TacticalRules={
   if(observer.isDead()||target.isDead())return false;
   var dist=Math.hypot(observer.x-target.x,observer.y-target.y);
   if(dist>this.sight(observer)*this.concealed(target))return false;
+  if(RTS.CombatTactics.obscured(game,observer.x,observer.y,target.x,target.y))return false;
   if(observer.def.category==="air"&&target.def.category==="air")return true;
   return !this.blocked(game,observer.x,observer.y,target.x,target.y);
  },
