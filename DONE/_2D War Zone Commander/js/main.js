@@ -23,6 +23,7 @@ window.onload = function() {
         options    = options || {};
         var difficulty = options.difficulty || "normal";
         var withAlly   = !!options.ally;
+        var mode = options.mode === "survival" ? "survival" : "conquest";
 
         if (loop) loop.stop();
         _removeSetupOverlay();
@@ -30,6 +31,8 @@ window.onload = function() {
         // ── Initialisation du jeu ─────────────────────────────────────────
         game = new RTS.Game(canvas);
         game.level     = 1;
+        game.mode = mode;
+        if (mode === "conquest" && RTS.ConquestSystem) RTS.ConquestSystem.init(game);
         game.setupPhase = true;   // ← bloque les vagues
 
         // Ressources généreuses : le joueur construit tout from scratch
@@ -169,7 +172,7 @@ window.onload = function() {
                     RTS.WorkerSystem.update(game, delta);
                     if (RTS.TransportSystem) RTS.TransportSystem.update(game);
                     if (RTS.AllySystem) RTS.AllySystem.update(game, delta);
-                    RTS.SquadAISystem.update(game, delta);
+                    if (game.mode === "survival") RTS.SquadAISystem.update(game, delta);
                     RTS.FogOfWar.update(game);
                     if (RTS.AirMissionSystem) RTS.AirMissionSystem.update(game);
                     RTS.SquadSystem.update(game.squads, delta, game.buildings);
@@ -180,7 +183,8 @@ window.onload = function() {
 
                     // Vagues seulement hors phase de déploiement
                     if (!game.setupPhase) {
-                        RTS.WaveSystem.update(game, delta);
+                        if (game.mode === "conquest" && RTS.ConquestSystem) RTS.ConquestSystem.update(game, delta);
+                        else RTS.WaveSystem.update(game, delta);
                         if (RTS.DefenseTower && !RTS.EventSystem.isTowerJammed())
                             RTS.DefenseTower.update(game, delta);
                         if (RTS.EventSystem)   RTS.EventSystem.update(game, delta);
