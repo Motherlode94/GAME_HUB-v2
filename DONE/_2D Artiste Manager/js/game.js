@@ -2597,11 +2597,14 @@ function renderDistributionPanel() {
   const plan=G.distributionPlan||'independent';
   container.innerHTML='<h3>📦 Distribution musicale</h3>'+
     Object.entries(DISTRIBUTION_PLANS).map(([id,p])=>
-      '<button type="button" onclick="chooseDistribution(\\''+id+'\\')" '+(id===plan?'disabled':'')+'>'+
+      '<button type="button" data-distribution="'+id+'" '+(id===plan?'disabled':'')+'>'+
       p.name+' — '+p.cost.toLocaleString('fr-FR')+'€'+(id===plan?' ✓':'')+'</button>').join(' ')+
     '<div style="margin-top:8px">'+(G.royaltyCatalog||[]).map(e=>
       '<div>🎵 '+String(e.name).replace(/[<>&]/g,'')+' · '+(e.streams||0).toLocaleString('fr-FR')+
       ' écoutes · '+(e.physicalSales||0)+' ventes · '+(e.certification||'Sans certification')+'</div>').join('')+'</div>';
+  container.querySelectorAll('[data-distribution]').forEach(button=>{
+    button.addEventListener('click',()=>chooseDistribution(button.dataset.distribution));
+  });
 }
 // ── RENDER : DASHBOARD ────────────────────────────────────────
 
