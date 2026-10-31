@@ -100,7 +100,7 @@ function spawnNPCAt(type, tx, ty) {
 // ══════════════════════════════════════════════════
 window.addEventListener("keydown", e => {
   keys[e.key] = true;
-  if (e.key === "e" || e.key === "E") tryInteract();
+  if ((e.key === "e" || e.key === "E") && !e.repeat) tryInteract(e.shiftKey);
   if ((e.key === "q" || e.key === "Q") && !e.repeat) activateShadowVeil();
 });
 window.addEventListener("keyup", e => { keys[e.key] = false; });
@@ -135,10 +135,10 @@ function nearbyVictim() {
 // ══════════════════════════════════════════════════
 // INTERACTIONS
 // ══════════════════════════════════════════════════
-function tryInteract() {
+function tryInteract(stealthHunt = false) {
   if (!state?.alive || player.cooldown > 0) return;
   const victim = nearbyVictim();
-  if (victim) { doHunt(victim); return; }
+  if (victim) { doHunt(victim, stealthHunt); return; }
   const zone = currentTile();
   if      (zone === TILE.ALLEY || zone === TILE.SEWER) doHide();
   else if (zone === TILE.GYM)      doTrain();
@@ -147,16 +147,28 @@ function tryInteract() {
   else if (zone === TILE.CHURCH)   doChurch();
 }
 
-function doHunt(victim) {
-  state.hunger = clamp(state.hunger - 28);
-  state.heat   = clamp(state.heat   + 10);
-  spawnBlood(victim.x, victim.y, 42);
-  addFloat("🩸 −28 Faim", victim.x, victim.y - 24, "#e74c3c");
+function doHunt(victim, stealth = false) {
+  // A discreet feeding is quieter but restores less blood and requires power.
+  if (stealth && state.power < 15) {
+    UI.showEvent("Chasse discrète : nécessite 15 points de pouvoir.");
+    return;
+  }
+  const blood = stealth ? 18 : 28;
+  const noise = stealth ? 3 : 15;
+  state.hunger = clamp(state.hunger - blood);
+  state.heat = clamp(state.heat + noise);
+  if (stealth) state.power -= 2;
+  spawnBlood(victim.x, victim.y, stealth ? 10 : 42);
+  addFloat("🩸 −" + blood + " Faim", victim.x, victim.y - 24, "#e74c3c");
+  if (!stealth) npcs.forEach(n => {
+    if (n.type === "hunter" && !n.dead && dist(n, victim) < T * 9)
+      n.alertTimer = Math.max(n.alertTimer, 5);
+  });
   victim.dead = true;
   player.cooldown = HUNT_COOLDOWN;
   setTimeout(() => spawnNPC("victim"), 7000);
   passTurn();
-  UI.showEvent("🩸 Vous avez chassé ! La soif est apaisée.");
+  UI.showEvent(stealth ? "🌑 Chasse discrète : moins de sang, moins de soupçons." : "🩸 Chasse brutale : les chasseurs proches sont alertés !");
 }
 
 // Pouvoir tactique : voile d'ombre. Éviter la police coûte des ressources.
@@ -331,10 +343,12 @@ function updateNPCs(dt) {
       }
       if (n.alertTimer > 0)
         n.dir = Math.atan2(player.y - n.y, player.x - n.x) + (Math.random() - 0.5) * 0.5;
+      else if (state.heat >= 65 && dist(n, player) < T * 8)
+        n.alertTimer = 2.5;
     } else {
       if (n.changeTimer <= 0) { n.changeTimer = 1.8 + Math.random() * 3.5; n.dir = Math.random() * Math.PI * 2; }
     }
-    const spd = n.speed * dt, R = 12;
+    const spd = n.speed * dt * (n.type === "hunter" && n.alertTimer > 0 ? 1.3 : 1), R = 12;
     const nx = n.x + Math.cos(n.dir) * spd, ny = n.y + Math.sin(n.dir) * spd;
     if (mapWalkable(nx - R, n.y) && mapWalkable(nx + R, n.y)) n.x = nx; else n.dir += Math.PI + (Math.random() - 0.5);
     if (mapWalkable(n.x, ny - R) && mapWalkable(n.x, ny + R)) n.y = ny; else n.dir += Math.PI + (Math.random() - 0.5);
