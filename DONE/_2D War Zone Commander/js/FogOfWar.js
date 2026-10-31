@@ -52,7 +52,7 @@ RTS.FogOfWar = {
         return 1;
     },
     render: function(game, ctx) {
-        if (!game.fog || game.setupPhase) return;
+        if (!game.fog || game.setupPhase || !game.squads.some(function(s){return (s.team==='blue'||s.team==='ally')&&!s.isDead();})) return;
         var f = game.fog, cell = this.cell;
         for (var y = 0; y < f.rows; y++) for (var x = 0; x < f.cols; x++) {
             var i = y * f.cols + x;
