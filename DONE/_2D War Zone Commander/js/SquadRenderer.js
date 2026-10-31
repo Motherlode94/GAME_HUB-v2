@@ -22,6 +22,7 @@ RTS.SquadRenderer = {
             });
             RTS.SquadRenderer._drawSquadHpBar(ctx, squad);
             RTS.SquadRenderer._drawBadge(ctx, squad);
+            if (squad.selected) RTS.SquadRenderer._drawTacticalHud(ctx, squad);
             if (squad.passengers && squad.passengers.length) {
                 ctx.save();
                 ctx.font = "bold 12px sans-serif";
@@ -869,6 +870,48 @@ RTS.SquadRenderer = {
             ctx.fillText(alive.length + "/" + squad.members.length, squad.x, barY - 2);
             ctx.textAlign = "left";
         }
+    },
+
+    // Compact role-specific information card, shown only for selected squads.
+    _drawTacticalHud: function(ctx, squad) {
+        if (!squad.def || !squad.members || !squad.members.length) return;
+        var category = squad.def.category || 'support';
+        var count = squad.aliveMembers().length;
+        if (!count) return;
+        var total = squad.getTotalHp(), max = Math.max(1, squad.getMaxHp());
+        var hp = Math.max(0, Math.min(1, total / max));
+        var ammo = squad.ammoCapacity > 0 ? 'AMMO ' + Math.ceil(squad.ammo) + '/' + squad.ammoCapacity : 'SUPPORT';
+        var status = 'READY';
+        if (squad.airMission) status = squad.airMission.mode === 'return' ? 'RTB' : squad.airMission.mode.toUpperCase();
+        else if (squad.passengers && squad.passengers.length) status = 'INF ' + squad.passengers.length + '/' + (RTS.TransportSystem ? RTS.TransportSystem.capacity(squad) : 0);
+        else if (squad.repairTarget) status = 'REPAIR';
+        else if (squad.holdingPosition) status = 'HOLD';
+        else if (squad.target) status = squad.attackMove ? 'ATTACK MOVE' : 'MOVING';
+        else if (squad.ammoCapacity > 0 && squad.ammo <= 0) status = 'NO AMMO';
+        if (category === 'infantry') ammo = 'MEN ' + count + '/' + squad.members.length + (squad.ammoCapacity > 0 ? '  ·  ' + Math.ceil(squad.ammo) + ' RD' : '');
+        else if (category === 'air' && squad.airMission) ammo = 'AIR  ·  ' + ammo;
+        var name = (squad.label || squad.typeName || 'UNIT').toUpperCase();
+        var accent = squad.team === 'red' ? '#e3756e' : squad.team === 'ally' ? '#78dcb2' : '#72b5ef';
+        var spread = squad.def.formationSpread || 0;
+        var cols = Math.max(1, Math.ceil(Math.sqrt(count)));
+        var y = squad.y - Math.max(14, cols * spread / 2 + (squad.def.memberSize || 10)) - 49;
+        var x = squad.x - 79;
+        ctx.save();
+        ctx.fillStyle = 'rgba(11,22,34,0.91)';
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();ctx.roundRect(x,y,158,38,7);ctx.fill();ctx.stroke();
+        ctx.textAlign = 'left';ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#e9f1fa';ctx.font = 'bold 10px sans-serif';
+        ctx.fillText(name.length > 22 ? name.slice(0,21)+'…' : name,x+8,y+10);
+        ctx.fillStyle = '#95acc0';ctx.font = '9px sans-serif';
+        ctx.fillText(ammo.length > 27 ? ammo.slice(0,26) : ammo,x+8,y+29);
+        ctx.textAlign = 'right';ctx.fillStyle = status === 'NO AMMO' ? '#ffab8f' : '#f2d38f';
+        ctx.fillText(status.length > 11 ? status.slice(0,11) : status,x+150,y+29);
+        ctx.fillStyle = '#394956';ctx.fillRect(x+8,y+18,142,4);
+        ctx.fillStyle = hp > .5 ? '#68c99b' : hp > .25 ? '#f4bd68' : '#f07171';
+        ctx.fillRect(x+8,y+18,142*hp,4);
+        ctx.restore();
     },
 
     _drawBadge: function(ctx, squad) {
