@@ -46,3 +46,25 @@
 @keyframes portraitIn{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
 @media(max-width:700px){.character{bottom:205px;left:59%;transform:translateX(-50%) scale(.62);transform-origin:center bottom;animation:none}.scene-caption{left:14px;top:54px}.dialogue{min-height:215px}.top{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.scene:before,.skyline,.character{animation:none}}
+
+/* Expressions et caméra narrative */
+.mood-label{position:absolute;top:91px;left:30px;z-index:3;font-size:11px;letter-spacing:.12em;color:#ead2dd;background:#120e24ad;padding:7px 11px;border:1px solid #ffffff30;border-radius:40px}
+.character{transition:filter .3s ease,opacity .25s ease}
+.character .eyes,.character .mouth,.character .cheeks{transition:all .24s ease}
+.character .cheeks{position:absolute;left:14px;top:99px;width:83px;height:17px;border-radius:50%;background:radial-gradient(ellipse at center,#db769344,transparent 70%);opacity:0}
+.character[data-mood="happy"] .mouth{border-bottom-width:5px;width:35px;left:38px;top:110px;height:14px}
+.character[data-mood="happy"] .eyes{height:8px;border-radius:55%;transform:translateY(-2px)}
+.character[data-mood="happy"] .cheeks{opacity:1}
+.character[data-mood="worried"] .mouth{width:18px;left:46px;border-bottom-width:2px;transform:rotate(-12deg)}
+.character[data-mood="worried"] .eyes{transform:rotate(-7deg)}
+.character[data-mood="sad"] .mouth{border-bottom:0;border-top:3px solid #713f54;border-radius:50%;top:120px}
+.character[data-mood="sad"] .eyes{transform:translateY(4px)}
+.character[data-mood="confident"] .mouth{width:34px;transform:rotate(-8deg)}
+.character[data-mood="confident"] .eyes{transform:translateY(-3px)}
+.scene[data-mood="worried"]:before{opacity:.17}
+.scene[data-mood="happy"]:before{opacity:.62}
+.scene[data-mood="sad"]{filter:saturate(.72)}
+.dialogue p{animation:lineReveal .26s ease-out}
+@keyframes lineReveal{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){.mood-label{top:78px;left:14px}}
+@media(prefers-reduced-motion:reduce){.dialogue p{animation:none}}
