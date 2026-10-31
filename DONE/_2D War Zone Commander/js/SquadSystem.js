@@ -52,6 +52,25 @@ RTS.SquadSystem = {
             }
             if (!engaging) RTS.SquadSystem._move(squad, delta, buildings || []);
             RTS.SquadSystem._updateFormation(squad, delta);
+            if(squad.def && squad.def.category==="infantry" && !squad.isDead()){
+                // Members hold spacing, but choose sheltered slots on contested ground.
+                var alive=squad.aliveMembers();
+                alive.forEach(function(m,i){
+                    if(!m._positioned)return;
+                    var cx=m.x,cy=m.y;
+                    var candidates=[{x:cx,y:cy},{x:cx-12,y:cy+10},{x:cx+12,y:cy-10}];
+                    var best=candidates[0],bestScore=Infinity;
+                    candidates.forEach(function(p){
+                        var blocked=(buildings||[]).some(function(b){return b.hp>0 && Math.abs(p.x-b.x)<(b.size||52)/2+5 && Math.abs(p.y-b.y)<(b.size||52)/2+5;});
+                        if(blocked)return;
+                        var cover=(buildings||[]).some(function(b){return b.hp>0 && Math.hypot(p.x-b.x,p.y-b.y)<(b.size||52)/2+55;});
+                        var score=Math.hypot(p.x-cx,p.y-cy)+(cover && (squad.suppression||0)>22?-22:0);
+                        if(score<bestScore){bestScore=score;best=p;}
+                    });
+                    m.x=best.x;m.y=best.y;
+                    m.tacticalState=(squad.suppression||0)>55?"à couvert":squad.leaderState==="protection blindé"?"escorte":"en formation";
+                });
+            }
             RTS.SquadSystem._tickTimers(squad, delta);
         });
     },
