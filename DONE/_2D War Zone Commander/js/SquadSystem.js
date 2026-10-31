@@ -11,6 +11,30 @@ RTS.SquadSystem = {
 
     update: function(squads, delta, buildings) {
         squads.forEach(function(squad) {
+            // Leader AI: tactical command intent belongs to player; leader evaluates local exposure.
+            if(squad.def && squad.def.category==="infantry" && !squad.isDead()){
+                var members=squad.aliveMembers(),leader=members.find(function(m){return m.role==="leader";})||members[0];
+                if(leader)leader.role="leader";
+                var enemies=squads.filter(function(e){return e!==squad&&!e.isDead()&&(squad.team==="red" ? e.team!=="red" : e.team==="red");});
+                var nearest=enemies.sort(function(a,b){return Math.hypot(a.x-squad.x,a.y-squad.y)-Math.hypot(b.x-squad.x,b.y-squad.y);})[0];
+                var threat=nearest?Math.hypot(nearest.x-squad.x,nearest.y-squad.y):Infinity;
+                var friends=squads.filter(function(v){return v!==squad&&v.team===squad.team&&v.def&&v.def.category==="vehicle"&&!v.isDead();});
+                var escort=friends.sort(function(a,b){return Math.hypot(a.x-squad.x,a.y-squad.y)-Math.hypot(b.x-squad.x,b.y-squad.y);})[0];
+                squad.leaderState=threat<140&&(squad.suppression||0)>55?"repli":threat<280?"couverture":escort&&Math.hypot(escort.x-squad.x,escort.y-squad.y)<240?"protection blindé":"progression";
+                // Under heavy fire, a leader recalls an exposed squad to the nearest safe position.
+                squad._leaderDelay=Math.max(0,(squad._leaderDelay||0)-delta);
+                if(squad.leaderState==="repli" && squad._leaderDelay===0 && nearest && !squad.garrisonedIn){
+                    var away=Math.atan2(squad.y-nearest.y,squad.x-nearest.x);
+                    squad.target={x:Math.max(25,Math.min(RTS.WORLD_W-25,squad.x+Math.cos(away)*110)),y:Math.max(25,Math.min(RTS.WORLD_H-25,squad.y+Math.sin(away)*110))};
+                    squad._nav=null;squad.holdingPosition=false;squad._leaderDelay=4;
+                }
+                // Infantry escorts maintain a protective screen instead of outrunning the vehicle.
+                if(escort && squad.leaderState==="protection blindé" && !squad.target && threat>340){
+                    var side=squad.id%2?1:-1,front=escort.heading||0;
+                    squad.target={x:escort.x+Math.cos(front)*55-Math.sin(front)*side*40,y:escort.y+Math.sin(front)*55+Math.cos(front)*side*40};
+                    squad._nav=null;
+                }
+            }
             // Attack-move: pause movement while a hostile is inside weapon range.
             // Resume toward the original destination as soon as no target is in range.
             var engaging = false;
