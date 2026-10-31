@@ -177,6 +177,62 @@
             tags: ["tactique", "escouades", "science-fiction militaire", "fictif", "missions"],
             playUrl: "DONE/_2D Iron Meridian/index.html",
             description: "Dirige le commando Astra dans une opération fictive : sécurise trois secteurs, préserve tes unités et organise une extraction."
+        },
+        {
+            id: 19,
+            title: "After Dark",
+            category: "rpg",
+            tags: ["visual novel","romance","dialogue","adulte"],
+            playUrl: "DONE/_2D After Dark/index.html",
+            description: "Visual novel 2D nocturne à choix et relations."
+        },
+        {
+            id: 20,
+            title: "Anime Harem",
+            category: "rpg",
+            tags: ["anime","simulation","relations"],
+            playUrl: "DONE/_2D Anime Harem/index.html",
+            description: "Simulation 2D de relations et de personnages."
+        },
+        {
+            id: 21,
+            title: "Hearts of Eden",
+            category: "rpg",
+            tags: ["simulation","romance","relations"],
+            playUrl: "DONE/_2D Hearts of Eden/index.html",
+            description: "Simulation sociale et relations entre adultes."
+        },
+        {
+            id: 22,
+            title: "The Silent Verdict",
+            category: "strategy",
+            tags: ["enquete","mystere","deduction"],
+            playUrl: "DONE/_2D The Silent Verdict/index.html",
+            description: "Résous trois enquêtes par les preuves et les témoignages."
+        },
+        {
+            id: 23,
+            title: "No Man's Dawn",
+            category: "action",
+            tags: ["survie","exploration","3d"],
+            playUrl: "DONE/_3D No Mans Dawn/index.html",
+            description: "Explore une région isolée et reconstruis un refuge."
+        },
+        {
+            id: 24,
+            title: "Redline District",
+            category: "sports",
+            tags: ["course","voiture","3d"],
+            playUrl: "DONE/_3D Redline District/index.html",
+            description: "Courses automobiles sur circuit avec adversaires."
+        },
+        {
+            id: 25,
+            title: "The Last Signal",
+            category: "rpg",
+            tags: ["horreur","enquete","3d"],
+            playUrl: "DONE/_3D The Last Signal/index.html",
+            description: "Une station radio abandonnée cache une transmission inquiétante."
         }
     ];
 
