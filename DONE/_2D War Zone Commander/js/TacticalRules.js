@@ -30,7 +30,7 @@ RTS.TacticalRules={
   var facing=Number.isFinite(target.heading)?target.heading:0;
   var dot=(vx*Math.cos(facing)+vy*Math.sin(facing))/(Math.hypot(vx,vy)||1);
   var zone=dot>.45?0:dot<-.45?2:1;
-  var ratio=pen/armor[zone];
+  var ratio=pen/(armor[zone]*(target.armorModifier||1));
   return projectile.damage*(ratio>=1?1:Math.max(.08,ratio*ratio*.65));
  }
 };
