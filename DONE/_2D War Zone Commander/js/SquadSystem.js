@@ -105,6 +105,22 @@ RTS.SquadSystem = {
     },
     _move: function(squad, delta, buildings) {
         if (!squad.target || !squad.speed) { squad._nav = null; return; }
+        // Aircraft fly directly to their orders; land units still use obstacle-aware A*.
+        if (squad.def && squad.def.category === "air") {
+            var ax = squad.target.x - squad.x, ay = squad.target.y - squad.y;
+            var airDist = Math.hypot(ax, ay);
+            var rotorFactor = Math.max(0.25, 1 - (squad.rotorDamage || 0));
+            var airStep = Math.max(0, squad.speed * rotorFactor * delta);
+            if (airDist <= Math.max(3, airStep)) {
+                squad.x = squad.target.x; squad.y = squad.target.y;
+                squad.target = null; squad._nav = null;
+            } else {
+                squad.heading = Math.atan2(ay, ax);
+                squad.x += ax / airDist * airStep;
+                squad.y += ay / airDist * airStep;
+            }
+            return;
+        }
         var dest = squad.target, nav = squad._nav;
         var stamp = buildings.filter(function(b) { return b.hp > 0; })
             .map(function(b) { return b.x + ":" + b.y + ":" + b.size; }).join("|");
