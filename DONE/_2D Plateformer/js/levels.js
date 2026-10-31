@@ -230,8 +230,44 @@ function _buildLevel3() {
     };
 }
 
+// ── WORLD 1-4 : Momentum Run ─────────────────
+// Optional upper routes reward double-jump mastery while low routes need fast sprint jumps.
+function _buildLevel4() {
+    var map = _emptyMap();
+    _fill(map, 19, 0, 79);
+    [[0,10],[16,26],[33,43],[50,60],[68,79]].forEach(function(pair) {
+        _fill(map, 18, pair[0], pair[1]);
+    });
+    [[12,16,15],[28,32,14],[45,49,13],[62,67,15],
+     [7,10,12],[20,23,10],[36,39,9],[54,57,10],[71,75,12]]
+        .forEach(function(p) { _fill(map,p[2],p[0],p[1]); });
+    var coins=[];
+    [[3,17],[8,17],[17,17],[23,17],[34,17],[40,17],[52,17],[58,17],[70,17],[76,17],
+     [8,11],[9,11],[13,14],[15,14],[21,9],[22,9],[29,13],[31,13],
+     [37,8],[38,8],[46,12],[48,12],[55,9],[56,9],[63,14],[65,14],[73,11],[74,11]]
+        .forEach(function(p) {coins.push(_coin(p[0],p[1]));});
+    return {
+        name:'WORLD 1-4  MOMENTUM RUN',
+        bg:'sky',
+        map:map,
+        playerStart:{x:2*TILE_SIZE,y:16*TILE_SIZE},
+        goalX:77*TILE_SIZE,
+        coins:coins,
+        enemies:[
+            _enemy(6,18,2,9,1.7),_enemy(20,18,17,25,1.9),
+            _enemy(38,18,34,42,2.1),_enemy(55,18,51,59,2.2),
+            _enemy(72,18,69,78,2.4)
+        ],
+        movingPlatforms:[
+            _mp(11,15,80,10,17,2.2),_mp(27,14,80,26,34,2.8),
+            _mp(44,13,80,43,51,3.0),_mp(61,15,80,60,69,3.2)
+        ]
+    };
+}
+
 var LEVELS = [
     _buildLevel1(),
     _buildLevel2(),
     _buildLevel3(),
+    _buildLevel4(),
 ];
