@@ -50,6 +50,7 @@ RTS.SquadCombatSystem = {
             // Trouver la cible ennemie la plus proche
             var target  = null;
             var targetD = Infinity;
+            var targetScore = Infinity;
 
             squads.forEach(function(other) {
                 if (!self._isEnemy(squad.team, other.team)) return;
@@ -59,8 +60,8 @@ RTS.SquadCombatSystem = {
                 var dx = other.x - squad.x;
                 var dy = other.y - squad.y;
                 var d  = Math.sqrt(dx * dx + dy * dy);
-                // A threatening opponent close to the escorted vehicle gets priority.
-                if(protectedVehicle && Math.hypot(other.x-protectedVehicle.x,other.y-protectedVehicle.y)<190) d *= 0.62;
+                var score=d;
+                if(protectedVehicle && Math.hypot(other.x-protectedVehicle.x,other.y-protectedVehicle.y)<190) score *= 0.62;
                 // Tactical order T: prioritize armored targets already in weapon range.
                 // If no armor is in range, keep normal nearest-enemy behavior.
                 var inRange = d <= squad.def.attackRange &&
@@ -71,8 +72,8 @@ RTS.SquadCombatSystem = {
                     (target.def.category === "vehicle" || target.def.category === "air") &&
                     targetD <= squad.def.attackRange;
                 if (!target || (priority && !currentArmored) ||
-                    (priority === !!currentArmored && d < targetD)) {
-                    targetD = d; target = other;
+                    (priority === !!currentArmored && score < targetScore)) {
+                    targetD = d; targetScore = score; target = other;
                 }
             });
 
