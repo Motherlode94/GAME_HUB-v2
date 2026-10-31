@@ -68,3 +68,26 @@
 @keyframes lineReveal{from{opacity:.3;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:700px){.mood-label{top:78px;left:14px}}
 @media(prefers-reduced-motion:reduce){.dialogue p{animation:none}}
+
+/* Cinematic staging v0.3 */
+.scene{--camera-x:0px;--camera-scale:1}
+.character{left:calc(57% + var(--camera-x));scale:var(--camera-scale);transform-origin:center bottom}
+.scene[data-framing="close"]{--camera-scale:1.18;--camera-x:-5%}
+.scene[data-framing="wide"]{--camera-scale:.86;--camera-x:9%}
+.scene[data-framing="medium"]{--camera-scale:1;--camera-x:0px}
+.scene .cinematic-bars{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(to bottom,#06070d 0 10px,transparent 10px calc(100% - 10px),#06070d calc(100% - 10px) 100%)}
+.scene[data-place="club"] .floor{background:linear-gradient(180deg,transparent,#130b23),repeating-linear-gradient(95deg,transparent 0 80px,#f05faf17 82px 84px,transparent 86px 140px)}
+.scene[data-place="gallery"] .floor{background:linear-gradient(180deg,#e1daf010,#080d1a),repeating-linear-gradient(90deg,transparent 0 85px,#d2dbff13 87px 89px,transparent 90px 150px)}
+.scene[data-place="cafe"] .floor{background:linear-gradient(180deg,#ae633021,#100c16),repeating-linear-gradient(100deg,transparent 0 100px,#f5c48c1d 102px 104px,transparent 105px 190px)}
+.scene[data-place="studio"] .floor{background:linear-gradient(180deg,#b05c2e20,#0a0c15),repeating-linear-gradient(105deg,transparent 0 115px,#ff9d6d20 117px 119px,transparent 120px 190px)}
+.rain{position:absolute;inset:-20%;z-index:2;pointer-events:none;opacity:.19;background:repeating-linear-gradient(105deg,transparent 0 20px,#d4d8ff55 21px,#ffffff0c 22px,transparent 23px 50px);animation:rainMove 1.6s linear infinite}
+.scene[data-place="cafe"] .rain,.scene[data-place="studio"] .rain,.scene[data-place="gallery"] .rain{opacity:.035}
+@keyframes rainMove{to{transform:translate(-36px,92px)}}
+.scene[data-framing="close"] .character{filter:drop-shadow(0 0 80px var(--glow))}
+.scene[data-mood="worried"] .character{filter:drop-shadow(0 0 25px #563651)}
+.dialogue{background:linear-gradient(125deg,#080b19f2,#181020ed);border:1px solid color-mix(in srgb,var(--accent) 52%,transparent)}
+.dialogue .speaker{font-size:14px;text-transform:uppercase;letter-spacing:.11em}
+.choices button{border-radius:6px;background:linear-gradient(125deg,#3d2846,#271b35);box-shadow:inset 0 1px #ffffff0a}
+.choices button:hover{box-shadow:0 0 15px #dd76b52e}
+@media(max-width:700px){.scene{--camera-scale:.65;--camera-x:0px}.scene[data-framing="close"]{--camera-scale:.75;--camera-x:-1%}.scene[data-framing="wide"]{--camera-scale:.55;--camera-x:5%}.character{transform:translateX(-50%);scale:var(--camera-scale)}}
+@media(prefers-reduced-motion:reduce){.rain{animation:none}}
