@@ -33,6 +33,7 @@ window.onload = function() {
         game.level     = 1;
         game.mode = mode;
         if (mode === "conquest" && RTS.ConquestSystem) RTS.ConquestSystem.init(game);
+        if (mode === "conquest" && RTS.DeploymentSystem) RTS.DeploymentSystem.init(game);
         game.setupPhase = true;   // ← bloque les vagues
 
         // Ressources généreuses : le joueur construit tout from scratch
@@ -155,10 +156,10 @@ window.onload = function() {
         }
 
         // ── Overlay de déploiement ────────────────────────────────────────
-        _showSetupOverlay();
+        if (game.mode === "conquest") _showRequisitionPanel(); else _showSetupOverlay();
 
         // ── Démarrer automatiquement la pose du QG ────────────────────────
-        setTimeout(function() {
+        if (game.mode === "survival") setTimeout(function() {
             RTS.BuildingSystem.startPlacing("hq");
         }, 400);
 
@@ -168,7 +169,10 @@ window.onload = function() {
                 if (game.gameOver) return;
                 try {
                     game.camera.update(delta);
-                    RTS.ResourceSystem.update(game, delta);
+                    if (game.mode === "conquest" && RTS.DeploymentSystem) {
+                        RTS.DeploymentSystem.update(game, delta);
+                        if (game.requisitionPanelRefresh) game.requisitionPanelRefresh();
+                    } else RTS.ResourceSystem.update(game, delta);
                     RTS.WorkerSystem.update(game, delta);
                     if (RTS.TransportSystem) RTS.TransportSystem.update(game);
                     if (RTS.AllySystem) RTS.AllySystem.update(game, delta);
@@ -273,6 +277,36 @@ window.onload = function() {
     }
 
     // ── Overlay de déploiement ────────────────────────────────────────────────
+    function _showRequisitionPanel() {
+        var previous=document.getElementById("requisitionPanel");if(previous)previous.remove();
+        var panel=document.createElement("div");panel.id="requisitionPanel";
+        panel.style.cssText="position:fixed;left:12px;bottom:12px;z-index:100;width:min(380px,93vw);max-height:65vh;overflow:auto;padding:14px;border-radius:8px;border:1px solid #5797ba;background:rgba(7,18,28,.97);color:#eef6ff;font:12px Arial";
+        var heading=document.createElement("strong");heading.textContent="GROUPE DE COMBAT · RENFORTS";panel.append(heading);
+        var summary=document.createElement("p");summary.style.color="#9eddf4";panel.append(summary);
+        var grid=document.createElement("div");grid.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:6px";panel.append(grid);
+        RTS.DeploymentSystem.units.forEach(function(item) {
+            var def=RTS.SquadDefs[item[0]];if(!def)return;
+            var btn=document.createElement("button");btn.type="button";btn.dataset.cost=item[1];
+            btn.textContent=(def.label||item[0])+" · "+item[1]+" pts";
+            btn.style.cssText="padding:9px 6px;background:#25394c;color:#fff;border:1px solid #446c89;border-radius:5px;text-align:left;cursor:pointer";
+            btn.onclick=function(){RTS.DeploymentSystem.call(game,item[0]);refresh();};grid.append(btn);
+        });
+        var start=document.createElement("button");start.type="button";start.textContent="▶ LANCER L'OPÉRATION";
+        start.style.cssText="width:100%;padding:12px;margin-top:10px;background:#287456;border:1px solid #58b892;color:white;font-weight:bold;cursor:pointer";
+        start.onclick=function(){
+            if(!game.requisition.queue.length) RTS.DeploymentSystem.call(game,"riflemen");
+            game.setupPhase=false;start.remove();refresh();
+        };panel.append(start);
+        document.body.append(panel);
+        function refresh(){
+            if(!panel.isConnected || !game.requisition)return;
+            var d=game.requisition;
+            summary.textContent="Réserve "+Math.floor(d.points)+"/1500 pts · Revenu +"+d.income+"/min · File "+d.queue.length;
+            grid.querySelectorAll("button").forEach(function(b){b.disabled=d.points<Number(b.dataset.cost);b.style.opacity=b.disabled?".45":"1";});
+        }
+        game.requisitionPanelRefresh=refresh;refresh();
+    }
+
     var _setupEl = null;
     var _hqPlaced = false;
 
