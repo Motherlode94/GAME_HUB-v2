@@ -177,7 +177,7 @@ window.onload = function() {
                     RTS.WorkerSystem.update(game, delta);
                     if (RTS.TransportSystem) RTS.TransportSystem.update(game);
                     if (RTS.AllySystem) RTS.AllySystem.update(game, delta);
-                    if (game.mode === "survival") RTS.SquadAISystem.update(game, delta);
+                    RTS.SquadAISystem.update(game, delta);
                     RTS.FogOfWar.update(game);
                     if (RTS.AirMissionSystem) RTS.AirMissionSystem.update(game);
                     RTS.SquadSystem.update(game.squads, delta, game.buildings);
