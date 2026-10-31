@@ -335,8 +335,8 @@ function zonePoints(x, y) {
 function randomSpot() {
     // Precision: distance rises shot after shot. Other modes: random zone.
     let zone;
-    if (selectedMode === "precision") {
-        const done = 10 - precisionShotsLeft;
+    if (selectedMode === "precision" || selectedMode === "marathon") {
+        const done = (selectedMode === "marathon" ? 25 : 10) - precisionShotsLeft;
         zone = done < 3 ? 1 : done < 7 ? 2 : 3;
     } else {
         const r = Math.random();
@@ -436,7 +436,7 @@ function resetGame() {
     shakeAmount   = 0;
     flashTimer    = 0;
     lives         = 3;
-    precisionShotsLeft = 10;
+    precisionShotsLeft = selectedMode === "marathon" ? 25 : 10;
     wind          = 0;
     crowdHype     = 0;
     particles.length   = 0;
@@ -464,7 +464,7 @@ function resetGame() {
     livesCell.classList.toggle("hidden", selectedMode !== "survival");
 
     const tag = document.getElementById("modeTag");
-    if (tag) tag.textContent = { classic:"🏀 CLASSIQUE", timer:"⏱ TIMER", precision:"🎯 PRÉCISION", survival:"💀 SURVIE", defense:"🛡️ DÉFENSE" }[selectedMode] || "";
+    if (tag) tag.textContent = { classic:"🏀 CLASSIQUE", timer:"⏱ TIMER", precision:"🎯 PRÉCISION", marathon:"🏀 MARATHON", survival:"💀 SURVIE", defense:"🛡️ DÉFENSE" }[selectedMode] || "";
     updatePauseButton();
 }
 
@@ -472,6 +472,7 @@ function getModeStartMsg() {
     if (selectedMode === "classic") return "🏀 Mode libre : marque des points, le panier bouge à 20 points !";
     if (selectedMode === "timer") return "⏱ 30 secondes : swish et tirs à 3 points ajoutent du temps !";
     if (selectedMode === "precision") return `🎯 ${precisionShotsLeft} tirs — de plus en plus loin !`;
+    if (selectedMode === "marathon") return "🏀 Marathon : 25 tirs, tente le meilleur score !";
     if (selectedMode === "survival")  return "💀 3 ratés et c'est fini !";
     if (selectedMode === "defense") return "🛡️ Défenseur : touches 1 / 2 pour changer les mains !";
     return "Clique pour tirer ! Swish = +2 s, 3 pts = +1 s";
@@ -492,7 +493,7 @@ function updateHUD() {
     document.getElementById("hScore").textContent = score;
     document.getElementById("hHs").textContent    = Math.max(highscore, score);
     document.getElementById("hCombo").textContent = `x${combo}`;
-    document.getElementById("hShots").textContent = selectedMode === "precision"
+    document.getElementById("hShots").textContent = (selectedMode === "precision" || selectedMode === "marathon")
         ? `${precisionShotsLeft} rest.`
         : shotsTaken;
     document.getElementById("hTimer").textContent = Math.max(0, Math.ceil(timeLeft));
@@ -564,7 +565,7 @@ function shootTowardClientPoint(clientX, clientY) {
     aiming        = false;
     shotsTaken++;
 
-    if (selectedMode === "precision") {
+    if (selectedMode === "precision" || selectedMode === "marathon") {
         precisionShotsLeft = Math.max(0, precisionShotsLeft - 1);
     }
 
@@ -1002,7 +1003,7 @@ function finishScoredShot() {
 }
 
 function isGameDone() {
-    if (selectedMode === "precision") return precisionShotsLeft <= 0;
+    if (selectedMode === "precision" || selectedMode === "marathon") return precisionShotsLeft <= 0;
     if (selectedMode === "timer" || selectedMode === "defense") return timeUp;
     if (selectedMode === "classic") return false;
     return lives <= 0;
@@ -1029,6 +1030,7 @@ function handleMiss() {
     const msgMap = {
         survival: `💀 Raté ! ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}`,
         precision: `Raté ! ${precisionShotsLeft} tir${precisionShotsLeft>1?'s':''} restant${precisionShotsLeft>1?'s':''}`,
+        marathon: `Marathon : ${precisionShotsLeft} tirs restants`,
         classic: "Continue ! Tu peux battre ton record.",
         timer: timeUp ? "⏰ Temps écoulé !" : "Raté ! Réessaie...",
         defense: timeUp ? "⏰ Temps écoulé !" : "Défenseur en place — retente ton tir !"
