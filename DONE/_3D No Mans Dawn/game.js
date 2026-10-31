@@ -58,7 +58,7 @@ function saveProgress(){
 function loadProgress(){
  try{
   const v=JSON.parse(localStorage.getItem('warlike_no_mans_dawn_v01')||'null');if(!v)return;
-  position.fromArray(v.position);water=v.water;food=v.food;health=v.health;supplies=v.supplies;mission=v.mission;
+  position.fromArray(v.position);if(v.pickup&&v.pickup.driving)pickup.driving=false;water=v.water;food=v.food;health=v.health;supplies=v.supplies;mission=v.mission;
   for(const k of v.inventory||[])playerInventory.add(k);
   Object.assign(refuge,v.refuge||{});Object.assign(pickup,v.pickup||{});
   (v.loot||[]).forEach((used,i)=>{if(used&&loot[i]){loot[i].used=true;scene.remove(loot[i].mesh)}});
@@ -95,7 +95,7 @@ if(pickup.mesh.position.distanceTo(position)<5){
    const parts=['Batterie du pick-up','Bidon de carburant','Outils'];
    if(parts.every(k=>playerInventory.has(k))){pickup.repaired=true;pickup.fuel=70;pickup.battery=true;for(const k of parts)playerInventory.delete(k);message('Pick-up réparé. Appuyez sur E pour conduire.');updateObjective()}
    else message('Pick-up : pièces manquantes — '+parts.filter(k=>!playerInventory.has(k)).join(', '));
- }else{pickup.driving=!pickup.driving;message(pickup.driving?'Au volant : ZQSD pour conduire, E pour descendre':'Véhicule stationné')}
+ }else{pickup.driving=!pickup.driving;if(!pickup.driving)position.copy(pickup.mesh.position).add(new THREE.Vector3(3,0,0));else position.copy(pickup.mesh.position);message(pickup.driving?'Au volant : ZQSD pour conduire, E pour descendre':'Véhicule stationné')}
  return;
 }
 if(position.distanceTo(refugePoint)<13){
@@ -107,7 +107,7 @@ message('Aucun objet à portée')}
 window.addEventListener('keydown',e=>{keys.add(e.code);if(e.code==='KeyE')interact();if(e.code==='KeyP')saveProgress();if(e.code==='Escape')document.exitPointerLock?.()});window.addEventListener('keyup',e=>keys.delete(e.code));
 canvas.addEventListener('click',()=>canvas.requestPointerLock());window.addEventListener('mousemove',e=>{if(document.pointerLockElement!==canvas)return;yaw-=e.movementX*.0026;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-.25,1.0)});
 window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
-function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDelta());if(player){const f=Number(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const r=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('KeyQ')||keys.has('ArrowLeft'));const dir=new THREE.Vector3(r,0,-f);const moving=dir.lengthSq()>0;if(moving){dir.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);const sprint=keys.has('ShiftLeft');const speed=pickup.driving?12:sprint?6.3:3.3;const p=position.clone().addScaledVector(dir,speed*dt);if((pickup.driving||!blocked(p.x,position.z)))position.x=p.x;if((pickup.driving||!blocked(position.x,p.z)))position.z=p.z;player.rotation.y=Math.atan2(dir.x,dir.z);setAction(sprint&&actions.Run?'Run':actions.Walk?'Walk':'Idle');water=Math.max(0,water-dt*(sprint?.25:.08));food=Math.max(0,food-dt*.035)}else setAction('Idle');player.visible=!pickup.driving;player.position.copy(position);if(pickup.driving){pickup.mesh.position.copy(position);pickup.mesh.rotation.y=player.rotation.y;}if(mixer)mixer.update(dt);updateActors(dt);
+function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDelta());if(player){const f=Number(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const r=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('KeyQ')||keys.has('ArrowLeft'));const dir=new THREE.Vector3(r,0,-f);const moving=dir.lengthSq()>0;if(moving){dir.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);const sprint=keys.has('ShiftLeft');const speed=pickup.driving?12:sprint?6.3:3.3;const p=position.clone().addScaledVector(dir,speed*dt);if((pickup.driving||!blocked(p.x,position.z)))position.x=p.x;if((pickup.driving||!blocked(position.x,p.z)))position.z=p.z;player.rotation.y=Math.atan2(dir.x,dir.z);setAction(sprint&&actions.Run?'Run':actions.Walk?'Walk':'Idle');water=Math.max(0,water-dt*(sprint?.25:.08));food=Math.max(0,food-dt*.035)}else setAction('Idle');player.visible=!pickup.driving;player.position.copy(position);if(pickup.driving){pickup.mesh.position.copy(position);pickup.mesh.rotation.y=player.rotation.y;}else if(pickup.repaired&&pickup.mesh.position.distanceTo(position)<2.8){/* park vehicle on exit */}if(mixer)mixer.update(dt);updateActors(dt);
 const aim=position.clone().add(new THREE.Vector3(0,1.7,0));const offset=new THREE.Vector3(Math.sin(yaw)*6*Math.cos(pitch),2.3+Math.sin(pitch)*6,Math.cos(yaw)*6*Math.cos(pitch));camera.position.lerp(aim.clone().add(offset),Math.min(1,dt*8));camera.lookAt(aim);
 if(mission===1&&supplies>=3&&!pickup.repaired){message('Récolte suffisante. Réparez le pick-up.');mission=2}
 document.getElementById('stats').textContent='SANTÉ '+health+'%  •  EAU '+Math.round(water)+'%  •  NOURRITURE '+Math.round(food)+'%  •  FOURNITURES '+supplies+'  •  [E] interaction  [P] sauvegarder';
