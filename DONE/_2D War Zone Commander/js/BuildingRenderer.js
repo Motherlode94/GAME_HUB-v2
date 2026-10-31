@@ -84,6 +84,12 @@ RTS.BuildingRenderer = {
             ? RTS.BuildingRenderer["_detail_" + b.type](ctx, b, hx, hy, w, h, isBlue, def)
             : RTS.BuildingRenderer._detailDefault(ctx, b, hx, hy, w, h, isBlue, def);
 
+        if(b.tacticalSite){
+            ctx.font="bold 9px sans-serif";ctx.textAlign="center";ctx.fillStyle=b.team==="blue"?"#79d9ff":b.team==="red"?"#ff6969":"#ffe6a5";
+            ctx.fillText((b.team==="neutral"?"CAPTURER ":"")+"POSTE "+b.type.toUpperCase(),b.x,b.y-h/2-10);
+            if(b.captureProgress>0){ctx.fillStyle="#10232b";ctx.fillRect(b.x-24,b.y+h/2+7,48,5);ctx.fillStyle="#f3c96b";ctx.fillRect(b.x-24,b.y+h/2+7,48*b.captureProgress/100,5);}
+            ctx.textAlign="left";
+        }
         // Sélection
         if (b.selected) {
             ctx.strokeStyle = "#ffd232"; ctx.lineWidth = 2;
