@@ -859,3 +859,15 @@ button:focus-visible{outline:2px solid #9be8ff;outline-offset:3px}
 
 /* Public transit coverage: subtly indicate served blocks. */
 .tile.transit-served:not(.disconnected-road) { box-shadow: inset 0 0 0 2px rgba(35, 195, 143, .5); }
+
+
+/* Visual polish: readable municipal control center */
+.hud-stat,.panel-section,.welcome-card {backdrop-filter:blur(16px);box-shadow:0 10px 28px rgba(0,0,0,.20)}
+.hud-val,.pg-val {font-variant-numeric:tabular-nums}
+.tool-btn,.spd-btn,.back-btn {transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.tool-btn:hover,.spd-btn:hover,.back-btn:hover {transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,189,248,.14)}
+.tool-btn:focus-visible,.spd-btn:focus-visible,.back-btn:focus-visible {outline:2px solid #67e8f9;outline-offset:2px}
+#troop-management .troop-rows button {background:#16233a;color:#eaf4ff;border:1px solid #49617d;border-radius:8px;padding:7px 10px;cursor:pointer}
+#troop-management .troop-rows button:hover:not(:disabled){border-color:#67e8f9;background:#203452}
+#troop-management .troop-rows button:disabled{opacity:.44;cursor:not-allowed}
+@media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
