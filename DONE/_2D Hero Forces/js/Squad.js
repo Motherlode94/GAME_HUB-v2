@@ -1375,6 +1375,7 @@ RTS.Game.Squad.prototype._drawVehicleDamageState = function(ctx) {
 
 RTS.Game.Squad.prototype._drawAerial = function(ctx,col) {
     var x=this.x, y=this.y-this.altitude, t=this.type;
+    if(this._drawSharedSprite(ctx,'aerial',x,y,Math.max(44,this.radius*2.5),this._angle+Math.PI/2))return;
 
     ctx.save(); ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
     ctx.beginPath(); ctx.moveTo(this.x,this.y); ctx.lineTo(x,y); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
