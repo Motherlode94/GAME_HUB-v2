@@ -76,6 +76,7 @@ RTS.SquadRenderer = {
             return;
         }
 
+        if (!RTS.SquadRenderer._drawModernSilhouette(ctx, m, s, squad)) {
         switch (type) {
             // ── Infanterie ──────────────────────────────────────────────────
             case "riflemen":    RTS.SquadRenderer._drawRiflemen(ctx, m, s, isBlue);   break;
@@ -133,6 +134,8 @@ RTS.SquadRenderer = {
             default:            RTS.SquadRenderer._drawRiflemen(ctx, m, s, isBlue);   break;
         }
 
+        }
+
         // Flash de bouche de canon
         if (m.muzzleFlash > 0) {
             var angle = m.fireAngle || 0;
@@ -168,6 +171,92 @@ RTS.SquadRenderer = {
      * Riflemen — M4A1 / AK-74M
      * Corps camouflé, casque MICH, fusil d'assaut latéral.
      */
+    // Shared illustrated top-down silhouettes. Shape and equipment encode combat role,
+    // rather than changing only the badge or recoloring identical rectangles.
+    _drawModernSilhouette: function(ctx, m, size, squad) {
+        var d=squad.def || {}, kind=d.category, type=squad.typeName || '';
+        if (kind !== 'infantry' && kind !== 'vehicle' && kind !== 'air' && kind !== 'support') return false;
+        var blue=squad.team !== 'red', accent=blue?'#66a9d8':'#d58a72';
+        var metal=blue?'#526452':'#66604a', dark=blue?'#2d3b34':'#40372f';
+        var light=blue?'#82917b':'#958a74';
+        var angle=Number.isFinite(squad.heading)?squad.heading:0;
+        var infantry=kind==='infantry'||(kind==='support'&&!/truck|carrier|engineer_vehicle/.test(type));
+        var airborne=kind==='air';
+        ctx.save();
+        ctx.translate(m.x,m.y);
+        if(infantry){
+            var u=Math.max(13,size);
+            // Person seen from above: helmet, shoulders, pack, boots and individual weapon.
+            ctx.rotate(angle);
+            ctx.fillStyle='rgba(0,0,0,.3)';
+            ctx.beginPath();ctx.ellipse(1,3,u*.46,u*.30,0,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=dark;ctx.fillRect(-u*.24,u*.12,u*.18,u*.28);ctx.fillRect(u*.06,u*.12,u*.18,u*.28);
+            ctx.fillStyle=metal;ctx.beginPath();ctx.ellipse(0,0,u*.39,u*.28,0,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=light;ctx.fillRect(-u*.32,-u*.12,u*.64,u*.22);
+            ctx.fillStyle=dark;ctx.fillRect(-u*.24,u*.18,u*.48,u*.14);
+            ctx.fillStyle='#b5a78b';ctx.beginPath();ctx.arc(0,-u*.31,u*.20,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle=metal;ctx.beginPath();ctx.arc(0,-u*.35,u*.22,Math.PI,0);ctx.lineTo(u*.22,-u*.31);ctx.fill();
+            var heavy=/at_|manpads|mortar|heavy_mg|grenadier/.test(type);
+            var scoped=/sniper|recon/.test(type);
+            ctx.fillStyle=heavy?'#262f2b':'#202b28';
+            ctx.fillRect(u*.16,-u*.55,heavy?u*.20:u*.12,heavy?u*.65:u*.56);
+            if(scoped){ctx.fillStyle='#93adb0';ctx.fillRect(u*.20,-u*.39,u*.08,u*.14);}
+            if(heavy){ctx.strokeStyle='#d5c59b';ctx.lineWidth=1.5;ctx.strokeRect(u*.12,-u*.56,u*.25,u*.40);}
+            if(/medic/.test(type)){ctx.fillStyle='#e8e8dc';ctx.fillRect(-u*.18,-u*.05,u*.36,u*.21);ctx.fillStyle='#a13b38';ctx.fillRect(-u*.04,-u*.05,u*.08,u*.21);}
+        }else{
+            var w=Math.max(29,size*(airborne?1.8:1.25)), h=Math.max(18,size*(airborne?1.05:.82));
+            if(/mbt|m1a2|tank_destroyer/.test(type)){w=Math.max(w,38);h=Math.max(h,25);}
+            if(airborne){w=Math.max(w,43);h=Math.max(h,26);}
+            ctx.fillStyle='rgba(2,9,11,.33)';
+            ctx.beginPath();ctx.ellipse(3,airborne?12:5,w*.57,h*.47,0,0,Math.PI*2);ctx.fill();
+            ctx.rotate(angle);
+            if(airborne){
+                var drone=/drone/.test(type), plane=/aircraft/.test(type);
+                if(plane){
+                    ctx.fillStyle=metal;
+                    ctx.beginPath();ctx.moveTo(0,-h*.86);ctx.lineTo(w*.15,-h*.20);ctx.lineTo(w*.54,h*.10);ctx.lineTo(w*.54,h*.28);ctx.lineTo(w*.13,h*.15);ctx.lineTo(w*.16,h*.57);ctx.lineTo(0,h*.42);ctx.lineTo(-w*.16,h*.57);ctx.lineTo(-w*.13,h*.15);ctx.lineTo(-w*.54,h*.28);ctx.lineTo(-w*.54,h*.1);ctx.lineTo(-w*.15,-h*.20);ctx.closePath();ctx.fill();
+                    ctx.fillStyle=dark;ctx.fillRect(-w*.08,-h*.43,w*.16,h*.40);
+                }else{
+                    ctx.fillStyle=dark;ctx.fillRect(-w*.06,h*.14,w*.12,h*.56);
+                    ctx.fillStyle=metal;ctx.beginPath();ctx.ellipse(0,0,w*(drone?.16:.25),h*.48,0,0,Math.PI*2);ctx.fill();
+                    ctx.fillStyle=light;ctx.fillRect(-w*.43,-h*.08,w*.86,h*.16);
+                    ctx.strokeStyle='#8c9c92';ctx.lineWidth=1.7;
+                    ctx.beginPath();ctx.moveTo(-w*.48,0);ctx.lineTo(w*.48,0);ctx.stroke();
+                    ctx.strokeStyle='rgba(190,214,205,.53)';ctx.lineWidth=2;
+                    ctx.beginPath();ctx.ellipse(0,0,w*.51,h*.12,0,0,Math.PI*2);ctx.stroke();
+                    ctx.fillStyle=dark;ctx.fillRect(-w*.1,-h*.24,w*.2,h*.19);
+                }
+            }else{
+                var wheels=/wheeled|matv|truck|carrier|armored_car|apc/.test(type);
+                ctx.fillStyle='#191f1a';
+                if(wheels){for(var i=-1;i<=1;i+=2){ctx.fillRect(i*w*.43-w*.055,-h*.46,w*.11,h*.23);ctx.fillRect(i*w*.43-w*.055,h*.24,w*.11,h*.23);}}
+                else{ctx.fillRect(-w*.52,-h*.44,w*.15,h*.88);ctx.fillRect(w*.37,-h*.44,w*.15,h*.88);}
+                ctx.fillStyle=metal;ctx.strokeStyle=light;ctx.lineWidth=1.4;
+                ctx.beginPath();ctx.moveTo(-w*.38,-h*.36);ctx.lineTo(w*.32,-h*.36);ctx.lineTo(w*.44,-h*.20);ctx.lineTo(w*.44,h*.27);ctx.lineTo(w*.27,h*.39);ctx.lineTo(-w*.38,h*.39);ctx.closePath();ctx.fill();ctx.stroke();
+                ctx.fillStyle=dark;ctx.fillRect(-w*.23,-h*.23,w*.42,h*.15);
+                var aa=/aa|sam|air_defense|manpads/.test(type), artillery=/artillery|mlrs|paladin|mortar/.test(type);
+                var transport=/apc|carrier|truck|transport/.test(type);
+                if(transport){
+                    ctx.fillStyle=light;ctx.fillRect(-w*.25,-h*.02,w*.50,h*.25);
+                    ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.strokeRect(-w*.24,-h*.02,w*.48,h*.23);
+                }else if(aa||artillery){
+                    ctx.fillStyle=dark;ctx.fillRect(-w*.2,-h*.18,w*.40,h*.37);
+                    ctx.fillStyle=light;
+                    if(aa){for(var t=-1;t<=1;t+=2){ctx.fillRect(t*w*.12-w*.075,-h*.48,w*.15,h*.33);}}
+                    else{for(var j=-1;j<=1;j+=2){ctx.fillRect(j*w*.13-w*.05,-h*.50,w*.10,h*.44);}}
+                }else{
+                    ctx.fillStyle=light;ctx.beginPath();ctx.ellipse(0,-h*.02,w*.26,h*.27,0,0,Math.PI*2);ctx.fill();
+                    ctx.fillStyle=dark;ctx.fillRect(-w*.065,-h*.65,w*.13,h*.52);
+                    ctx.fillStyle=light;ctx.fillRect(-w*.08,-h*.67,w*.16,h*.12);
+                }
+                ctx.fillStyle=accent;ctx.fillRect(-w*.34,h*.29,w*.25,2.5);
+                ctx.fillStyle='rgba(215,226,208,.26)';ctx.fillRect(-w*.32,-h*.31,w*.58,2);
+            }
+        }
+        ctx.restore();
+        return true;
+    },
+
     _drawRiflemen: function(ctx, m, s, isBlue) {
         var hx = m.x - s/2, hy = m.y - s/2;
 
