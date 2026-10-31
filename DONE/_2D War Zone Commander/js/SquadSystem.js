@@ -11,6 +11,22 @@ RTS.SquadSystem = {
 
     update: function(squads, delta, buildings) {
         squads.forEach(function(squad) {
+            if(squad.abandoned && !squad.isDead()){
+                squad.salvageTimer=Math.max(0,(squad.salvageTimer||0)-delta);
+                squad.target=null;squad._nav=null;squad.attackMove=false;
+                if(squad.salvageTimer===0){
+                    var infantry=squads.filter(function(u){return !u.isDead()&&!u.abandoned&&u.def&&u.def.category==='infantry'&&Math.hypot(u.x-squad.x,u.y-squad.y)<92;});
+                    var blue=infantry.some(function(u){return u.team==='blue'||u.team==='ally';}),red=infantry.some(function(u){return u.team==='red';});
+                    if(blue!==red){
+                        var claimant=blue?'blue':'red';
+                        if(squad.salvageTeam!==claimant){squad.salvageTeam=claimant;squad.salvageProgress=0;}
+                        squad.salvageProgress=(squad.salvageProgress||0)+delta*40;
+                        if(squad.salvageProgress>=100){squad.team=claimant;squad.abandoned=false;squad.salvageProgress=0;squad.engineDamage=Math.max(0.35,(squad.engineDamage||0)-0.4);}
+                    }else{ squad.salvageProgress=0;squad.salvageTeam=null; }
+                }
+                RTS.SquadSystem._updateFormation(squad,delta);RTS.SquadSystem._tickTimers(squad,delta);
+                return;
+            }
             // Leader AI: tactical command intent belongs to player; leader evaluates local exposure.
             if(squad.def && squad.def.category==="infantry" && !squad.isDead()){
                 var members=squad.aliveMembers(),leader=members.find(function(m){return m.role==="leader";})||members[0];
