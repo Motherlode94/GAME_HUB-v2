@@ -14,7 +14,10 @@ RTS.DeploymentSystem={
   d.points=Math.min(1500,d.points+d.income*dt/60);d.timer+=dt;
   if(d.timer>=2.3&&d.queue.length){
    d.timer=0;var order=d.queue.shift();var type=typeof order==="string"?order:order.type;var i=game.squads.length;
-   var s=new RTS.Squad(130+(i%4)*40,RTS.WORLD_H/2+(i%7-3)*36,"blue",type);
+   var airborne=RTS.SquadDefs[type]&&RTS.SquadDefs[type].category==="air";
+   var sx=airborne?RTS.WORLD_W*.22:130+(i%4)*40;
+   var sy=airborne?RTS.WORLD_H*.28+(i%5)*45:RTS.WORLD_H/2+(i%7-3)*36;
+   var s=new RTS.Squad(sx,sy,"blue",type);
    if(s.members.length){
     if(typeof order!=="string"){var chosen=order.loadout;var original=game.army.loadouts[type];game.army.loadouts[type]=chosen;RTS.ArmyBuilder.apply(game,s,type);game.army.loadouts[type]=original;}
     game.squads.push(s);
