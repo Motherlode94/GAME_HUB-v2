@@ -243,39 +243,41 @@ RTS.Game.Map.NavGrid.prototype._assignSectors = function() {
  * certaines tuiles impraticables (eau, forêt dense) et varier les coûts.
  */
 RTS.Game.Map.NavGrid.prototype._applyTerrainNoise = function() {
-    var cols = this.cols;
-    var rows = this.rows;
-
-    for (var y = 0; y < rows; y++) {
-        for (var x = 0; x < cols; x++) {
-            var tile = this.grid[y][x];
-
-            // Bruit pseudo-aléatoire déterministe (pas de Math.random pour reproductibilité)
-            var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
-            n = n - Math.floor(n); // 0..1
-
-            // Variation de terrain
-            if (n < 0.04) {
-                tile.terrainType  = 'water';
-                tile.walkable     = false;
-                tile.movementCost = 99;
-            } else if (n < 0.15) {
-                tile.terrainType  = 'forest';
-                tile.cover        = 1;
-                tile.movementCost = 1.8;
-            } else if (n < 0.20) {
-                tile.terrainType  = 'mud';
-                tile.movementCost = 2.2;
-            } else if (n < 0.24) {
-                tile.terrainType  = 'rubble';
-                tile.cover        = 2;
-                tile.movementCost = 1.5;
-            } else if (n < 0.30) {
-                tile.terrainType  = 'road';
-                tile.movementCost = 0.7;
-            }
+    // Coherent biomes and roads: visual terrain and pathfinding share these tiles.
+    // Preserve broad maneuver corridors; dense forests provide cover, not random impassable pixels.
+    var map=this.mapId||1, cols=this.cols, rows=this.rows;
+    function noise(x,y){var n=Math.sin(x*12.9898+y*78.233+map*37.719)*43758.5453;return n-Math.floor(n);}
+    function roadDistance(nx,ny){
+        var spine=0.88-0.73*nx+0.065*Math.sin(nx*6.28+map*.5);
+        var crossing=.18+.68*nx+.045*Math.sin(nx*8+map);
+        return Math.min(Math.abs(ny-spine),Math.abs(ny-crossing));
+    }
+    for(var y=0;y<rows;y++)for(var x=0;x<cols;x++){
+        var t=this.grid[y][x],nx=(x+.5)/cols,ny=(y+.5)/rows;
+        var region=Math.sin(nx*13+map)*.42+Math.cos(ny*11-map*.7)*.36+
+                   Math.sin((nx+ny)*17+map*2)*.22;
+        var detail=noise(Math.floor(x/3),Math.floor(y/3))-.5;
+        var biome=region+detail*.35;
+        t.walkable=true;t.cover=0;t.movementCost=1;t.terrainType='grass';
+        if(roadDistance(nx,ny)<.018){t.terrainType='road';t.movementCost=.72;continue;}
+        if(map===2 && ny>.40 && ny<.60 && Math.abs(nx-.5)>.11 && roadDistance(nx,ny)>.045){
+            t.terrainType='mud';t.movementCost=2.1;continue;
+        }
+        if(biome>.34){
+            t.terrainType='forest';t.cover=1;t.movementCost=1.65;
+        }else if(biome<-.45){
+            t.terrainType=map===1||map===5?'rubble':'mud';
+            t.cover=t.terrainType==='rubble'?2:0;t.movementCost=1.8;
         }
     }
+    // HQs and capture points remain approachable and traversable.
+    this.capturePoints.forEach(function(cp){
+        var cx=Math.floor(cp.x/this.cellSize),cy=Math.floor(cp.y/this.cellSize);
+        for(var dy=-3;dy<=3;dy++)for(var dx=-3;dx<=3;dx++){
+            var t=this.getTile(cx+dx,cy+dy);if(!t)continue;
+            t.walkable=true;t.movementCost=1;t.cover=0;t.terrainType='grass';
+        }
+    },this);
 };
 
 /**
