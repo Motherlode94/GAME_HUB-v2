@@ -32,14 +32,14 @@ function update(dt){if(paused||end)return;elapsed+=dt;
  smoke=smoke.filter(s=>(s.life-=dt)>0);shots=shots.filter(s=>(s.life-=dt)>0);debris=debris.filter(s=>(s.life-=dt)>0);
  for(let u of units){if(u.hp<=0)continue;u.cool-=dt;u.smoke=Math.max(0,u.smoke-dt);u.suppression=Math.max(0,u.suppression-dt*9);u.morale=clamp(u.morale+(u.suppression<20?dt*2:-dt*2),5,100);
  let enemies=units.filter(e=>e.hp>0&&e.team!==u.team&&spotted(u,e)).sort((a,b)=>dist(u,a)-dist(u,b));let t=enemies[0];
- if(u.team==='red'&&(!u.move||Math.random()<dt*.08)){let target=zones.filter(z=>z.owner!=='red').sort((a,b)=>dist(a,u)-dist(b,u))[0];if(target&&(!t||dist(u,t)>stats[u.type].range))command(u,{x:target.x+(u.id%3-1)*60,y:target.y+(u.id%4-2)*40});}
+ if(u.team==='red'&&!u.move){let target=zones.filter(z=>z.owner!=='red').sort((a,b)=>dist(a,u)-dist(b,u))[0];if(target&&(!t||dist(u,t)>stats[u.type].range))command(u,{x:target.x+(u.id%3-1)*60,y:target.y+(u.id%4-2)*40});}
  u.moving=false;
  if(u.move&&u.mode!=='hold'){let dx=u.move.x-u.x,dy=u.move.y-u.y,d=Math.hypot(dx,dy);if(d>9){let speed=stats[u.type].speed*(u.stamina/200+.5)*(u.engine/100)*(u.suppression>60?.55:1);let step=Math.min(d,speed*dt);let nx=u.x+dx/d*step,ny=u.y+dy/d*step;let trial={x:nx,y:ny};if(!buildings.some(b=>nx>b.x-16&&nx<b.x+b.w+16&&ny>b.y-16&&ny<b.y+b.h+16)){u.x=nx;u.y=ny;u.moving=true;} else {let sx=u.x+dx/d*step,sy=u.y,ax=u.x,ay=u.y+dy/d*step;let freeX=!buildings.some(b=>sx>b.x-16&&sx<b.x+b.w+16&&sy>b.y-16&&sy<b.y+b.h+16);let freeY=!buildings.some(b=>ax>b.x-16&&ax<b.x+b.w+16&&ay>b.y-16&&ay<b.y+b.h+16);if(freeX){u.x=sx;u.moving=true}else if(freeY){u.y=ay;u.moving=true}else{u.move=null}}if(u.moving){u.walkPhase+=dt*(u.type==='tank'||u.type==='carrier'?7:12);let targetAngle=Math.atan2(dy,dx)+Math.PI/2;let diff=Math.atan2(Math.sin(targetAngle-u.heading),Math.cos(targetAngle-u.heading));u.heading+=clamp(diff,-u.turnRate*dt,u.turnRate*dt);}u.stamina=Math.max(35,u.stamina-dt*1.2)}else u.move=null;}else u.stamina=Math.min(100,u.stamina+dt*5);
  if(t&&u.cool<=0&&u.ammo>0&&u.suppression<85&&dist(u,t)<=stats[u.type].range&&u.weapon>15){
- u.cool=1/stats[u.type].rate;u.ammo--;let chance=clamp(.83-u.suppression*.005-(100-u.morale)*.003,0.22,.92);
+ u.cool=1/stats[u.type].rate;u.ammo--;let shotDistance=dist(u,t);let smokePenalty=obscured(u,t)?.34:0;let chance=clamp(.88-u.suppression*.005-(100-u.morale)*.003-smokePenalty-Math.max(0,shotDistance/stats[u.type].range-.35)*.24,0.12,.94);
  let hit=Math.random()<chance;shots.push({x:u.x,y:u.y,tx:t.x,ty:t.y,team:u.team,life:.16,hit});
  if(hit){let armor=stats[t.type].armor,pen=u.type==='tank'?170:u.type==='carrier'?65:20;
- let rear=Math.cos(u.heading-t.heading)<-.4?.75:1;let damage=stats[u.type].damage*cover(t)*Math.min(1,Math.max(.16,pen/(armor*rear||1)));
+ let attackAngle=Math.atan2(u.y-t.y,u.x-t.x);let targetFront=t.heading-Math.PI/2;let facing=Math.cos(attackAngle-targetFront);let rear=facing<-.5?.72:facing>.5?1.2:1;let damage=stats[u.type].damage*cover(t)*Math.min(1,Math.max(.16,pen/(armor*rear||1)));
  t.hp=Math.max(0,t.hp-damage);t.suppression=clamp(t.suppression+(u.type==='tank'?32:8),0,100);t.morale=Math.max(5,t.morale-4);
  if(armor&&u.type==='tank'&&Math.random()<.12){t.engine=Math.max(35,t.engine-18);t.weapon=Math.max(35,t.weapon-12);}
  if(t.hp<=0){debris.push({x:t.x,y:t.y,life:40});u.veteran++;log.textContent=u.label+' a neutralisé '+t.label;}}
