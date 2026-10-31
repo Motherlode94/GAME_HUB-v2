@@ -51,7 +51,7 @@ const R_EVENTS = [
 // INIT
 // ══════════════════════════════════════════════════
 function initState() {
-  state = { hunger: 30, heat: 0, power: 10, money: 50, turn: 1, alive: true };
+  state = { hunger: 30, heat: 0, power: 10, money: 50, turn: 1, alive: true, veilCooldown: 0 };
 }
 
 function initPlayer() {
@@ -101,6 +101,7 @@ function spawnNPCAt(type, tx, ty) {
 window.addEventListener("keydown", e => {
   keys[e.key] = true;
   if (e.key === "e" || e.key === "E") tryInteract();
+  if ((e.key === "q" || e.key === "Q") && !e.repeat) activateShadowVeil();
 });
 window.addEventListener("keyup", e => { keys[e.key] = false; });
 
@@ -156,6 +157,21 @@ function doHunt(victim) {
   setTimeout(() => spawnNPC("victim"), 7000);
   passTurn();
   UI.showEvent("🩸 Vous avez chassé ! La soif est apaisée.");
+}
+
+// Pouvoir tactique : voile d'ombre. Éviter la police coûte des ressources.
+function activateShadowVeil() {
+  if (!state?.alive || state.veilCooldown > 0) return;
+  if (state.money < 15) { UI.showEvent("Voile d'ombre : il faut 15$ de composants."); return; }
+  if (state.heat < 8) { UI.showEvent("Aucune suspicion à dissiper pour le moment."); return; }
+  state.money -= 15;
+  state.heat = clamp(state.heat - 24);
+  state.veilCooldown = 18;
+  player.cooldown = Math.max(player.cooldown, 0.4);
+  spawnSpark(player.x, player.y, "#8661cf", 32);
+  addFloat("VOILE D'OMBRE −24", player.x, player.y - 35, "#bb9cff");
+  UI.updateStats(state);
+  UI.showEvent("Voile d'ombre activé : −24 suspicion. Recharge : 18 secondes.");
 }
 
 function doHide() {
@@ -686,6 +702,7 @@ function drawHint() {
 function loop(ts) {
   const dt=Math.min((ts-lastTime)/1000,0.05); lastTime=ts; waterAnim+=dt*1.4;
   ctx.fillStyle="#04060b"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  if (state?.alive) state.veilCooldown = Math.max(0, state.veilCooldown - dt);
   updatePlayer(dt); updateNPCs(dt); updateParticles(dt); updateFloats(dt); updateCamera();
   drawMap(); npcs.forEach(drawNPC); drawPlayer(); drawParticles(); drawFloats(); drawVignette(); drawHint();
   animID=requestAnimationFrame(loop);
