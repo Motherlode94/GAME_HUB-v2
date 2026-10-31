@@ -78,6 +78,7 @@ RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGri
     ctx.translate(-camera.x, -camera.y);
 
     this._renderTerrain(ctx, canvas);
+    if(navGrid)this._renderTerrainFeatures(ctx,camera,navGrid);
 
     if (navGrid) {
         if (this.showSectors) {
@@ -97,6 +98,33 @@ RTS.Game.Map.MapRenderer.prototype.render = function(ctx, canvas, camera, navGri
     if (navGrid) {
         this._renderMinimap(ctx, canvas, camera, navGrid, squads || []);
         this._renderHUD(ctx, canvas, camera, navGrid);
+    }
+};
+
+// Terrain details use the same navigation cells: roads and cover match gameplay.
+RTS.Game.Map.MapRenderer.prototype._renderTerrainFeatures = function(ctx,camera,navGrid){
+    var cs=navGrid.cellSize, bound=camera.getViewBounds();
+    var left=Math.max(0,Math.floor(bound.x/cs)-2),right=Math.min(navGrid.cols,Math.ceil((bound.x+bound.width)/cs)+2);
+    var top=Math.max(0,Math.floor(bound.y/cs)-2),bottom=Math.min(navGrid.rows,Math.ceil((bound.y+bound.height)/cs)+2);
+    for(var y=top;y<bottom;y++)for(var x=left;x<right;x++){
+        var t=navGrid.grid[y]&&navGrid.grid[y][x];if(!t)continue;
+        var px=x*cs,py=y*cs,seed=(x*31+y*17+navGrid.mapId*13)%19;
+        if(t.terrainType==='road'){
+            ctx.fillStyle='rgba(119,103,80,.38)';ctx.fillRect(px,py,cs+1,cs+1);
+            if(seed%5===0){ctx.strokeStyle='rgba(214,198,152,.22)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px+cs*.2,py+cs*.5);ctx.lineTo(px+cs*.8,py+cs*.5);ctx.stroke();}
+        }else if(t.terrainType==='forest'){
+            ctx.fillStyle='rgba(15,41,20,.20)';ctx.fillRect(px,py,cs+1,cs+1);
+            ctx.fillStyle=seed%2?'rgba(27,55,25,.62)':'rgba(38,67,32,.6)';
+            ctx.beginPath();ctx.arc(px+cs*.37,py+cs*.45,cs*.26,0,Math.PI*2);ctx.fill();
+            ctx.beginPath();ctx.arc(px+cs*.7,py+cs*.65,cs*.22,0,Math.PI*2);ctx.fill();
+        }else if(t.terrainType==='mud'){
+            ctx.fillStyle='rgba(88,68,46,.28)';ctx.fillRect(px,py,cs+1,cs+1);
+        }else if(t.terrainType==='rubble'){
+            ctx.fillStyle='rgba(95,89,76,.32)';ctx.fillRect(px,py,cs+1,cs+1);
+            ctx.fillStyle='rgba(69,66,60,.53)';
+            ctx.fillRect(px+cs*.22,py+cs*.3,cs*.3,cs*.16);
+            ctx.fillRect(px+cs*.56,py+cs*.57,cs*.22,cs*.13);
+        }
     }
 };
 
