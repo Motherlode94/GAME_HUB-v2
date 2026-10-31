@@ -6,7 +6,7 @@ window.RTS = window.RTS || {};
 RTS.TransportSystem = {
     capacity: function(carrier) {
         if (!carrier || !carrier.def) return 0;
-        if (carrier.typeName === "apc") return 2;
+        if (carrier.typeName === "apc" || carrier.typeName === "bradley" || carrier.typeName === "wheeled_ifv") return 2;
         if (carrier.typeName === "heavy_transport_heli") return 3;
         if (carrier.typeName === "blackhawk") return 2;
         return 0;
@@ -20,7 +20,13 @@ RTS.TransportSystem = {
             carrier.passengers = carrier.passengers || [];
             infantry.slice().forEach(function(s) {
                 if (carrier.passengers.length >= RTS.TransportSystem.capacity(carrier)) return;
-                if (Math.hypot(s.x - carrier.x, s.y - carrier.y) > 110 || !game.squads.includes(s)) return;
+                if (!game.squads.includes(s) || s._boardingCarrier) return;
+                if (Math.hypot(s.x - carrier.x, s.y - carrier.y) > 110) {
+                    s._boardingCarrier = carrier;
+                    s.target = {x:carrier.x+28,y:carrier.y+28};
+                    s.holdingPosition=false;
+                    return;
+                }
                 carrier.passengers.push(s);
                 game.squads.splice(game.squads.indexOf(s), 1);
                 game.selectedSquads = game.selectedSquads.filter(function(unit) { return unit !== s; });
@@ -67,6 +73,20 @@ RTS.TransportSystem = {
         return count;
     },
     update: function(game) {
+        game.squads.slice().forEach(function(s){
+            var v=s._boardingCarrier;
+            if(!v)return;
+            if(v.isDead()||!game.squads.includes(v)){s._boardingCarrier=null;return;}
+            v.passengers=v.passengers||[];
+            if(v.passengers.length>=RTS.TransportSystem.capacity(v)){s._boardingCarrier=null;return;}
+            if(Math.hypot(s.x-v.x,s.y-v.y)>82){
+                if(!s.target||Math.hypot(s.target.x-v.x,s.target.y-v.y)>65)s.target={x:v.x+28,y:v.y+28};
+                return;
+            }
+            v.passengers.push(s);s._boardingCarrier=null;s.target=null;s._nav=null;s.selected=false;
+            game.selectedSquads=game.selectedSquads.filter(function(x){return x!==s;});
+            game.squads.splice(game.squads.indexOf(s),1);
+        });
         game.squads.forEach(function(carrier) {
             if (carrier.passengers && carrier.passengers.length && carrier.isDead()) {
                 carrier.passengers.length = 0; // passengers lost with destroyed carrier
