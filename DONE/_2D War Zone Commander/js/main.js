@@ -152,8 +152,10 @@ window.onload = function() {
 
                 // ── Caméra : commence au centre-gauche du monde ───────────────────
         if (game.camera) {
-            game.camera.x = 400;
-            game.camera.y = RTS.WORLD_H / 2 - canvas.height / 2;
+            game.camera.zoom = Math.max(game.camera.minZoom, Math.min(0.85, canvas.width / 1500, canvas.height / 1150));
+            game.camera.x = RTS.WORLD_W / 2 - canvas.width / (2 * game.camera.zoom);
+            game.camera.y = RTS.WORLD_H / 2 - canvas.height / (2 * game.camera.zoom);
+            game.camera._clamp();
         }
 
         // ── Overlay de déploiement ────────────────────────────────────────
@@ -282,7 +284,7 @@ window.onload = function() {
     function _showRequisitionPanel() {
         var previous=document.getElementById("requisitionPanel");if(previous)previous.remove();
         var panel=document.createElement("div");panel.id="requisitionPanel";
-        panel.style.cssText="position:fixed;left:12px;bottom:12px;z-index:100;width:min(380px,93vw);max-height:65vh;overflow:auto;padding:14px;border-radius:8px;border:1px solid #5797ba;background:rgba(7,18,28,.97);color:#eef6ff;font:12px Arial";
+        panel.style.cssText="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100;width:min(460px,92vw);max-height:75vh;overflow:auto;padding:14px;border-radius:8px;border:1px solid #5797ba;background:rgba(7,18,28,.97);color:#eef6ff;font:12px Arial";
         var heading=document.createElement("strong");heading.textContent="GROUPE DE COMBAT · RENFORTS";panel.append(heading);
         var summary=document.createElement("p");summary.style.color="#9eddf4";panel.append(summary);
         var doctrine=document.createElement("select");doctrine.title="Spécialisation du groupe de combat";
@@ -327,7 +329,7 @@ window.onload = function() {
             RTS.ArmyBuilder.save(game);
             doctrine.disabled=true;gear.disabled=true;
             if(!game.requisition.queue.length) RTS.DeploymentSystem.call(game,RTS.ArmyBuilder.doctrines[game.army.doctrine].types[0]);
-            game.setupPhase=false;start.remove();refresh();
+            game.setupPhase=false;panel.style.left="12px";panel.style.top="auto";panel.style.bottom="12px";panel.style.transform="none";panel.style.width="min(340px,90vw)";panel.style.maxHeight="42vh";start.remove();refresh();
         };panel.append(start);
         document.body.append(panel);
         function refresh(){
