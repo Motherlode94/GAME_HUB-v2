@@ -66,10 +66,10 @@ window.onload = function() {
             else          RTS.AllySystem.disable();
         }
 
-        // Tactical abilities: S deploys smoke from selected ground squads.
+        // Tactical abilities: K deploys smoke from selected ground squads.
         if(window._rtsSmokeHandler)window.removeEventListener("keydown",window._rtsSmokeHandler);
         window._rtsSmokeHandler=function(e){
-            if(e.key.toLowerCase()!=="v" || game.gameOver || game.setupPhase)return;
+            if(e.key.toLowerCase()!=="k" || game.gameOver || game.setupPhase)return;
             if(e.target&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
             var n=0;(game.selectedSquads||[]).forEach(function(q){
                 if(q.team==="blue"&&RTS.CombatTactics.smoke(game,q))n++;
