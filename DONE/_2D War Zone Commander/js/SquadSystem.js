@@ -233,6 +233,7 @@ RTS.SquadSystem = {
 
         squads.forEach(function(squad, i) {
             squad.holdingPosition = false;
+            squad.garrisonedIn = null;
             squad.attackMove = false;
             if (RTS.AirMissionSystem && squad.def && squad.def.category === 'air') RTS.AirMissionSystem.cancel(squad);
             squad._nav = null;
