@@ -336,3 +336,13 @@ button:focus-visible{outline:2px solid #b2ecff;outline-offset:2px}
 .build-btn:focus-visible,.prod-btn:focus-visible,.banner-btn:focus-visible,.menu-btn:focus-visible {outline:2px solid #67e8f9;outline-offset:3px}
 .stat-value,.res-val {font-variant-numeric:tabular-nums;text-shadow:0 0 15px rgba(103,232,249,.2)}
 @media (prefers-reduced-motion: reduce) { .btn,.btn-tab,.btn-nextweek,.btn-cta,.btn-title,.btn-diff,.btn-glow,.build-btn,.prod-btn,.banner-btn,.menu-btn,.tool-btn,.spd-btn,.back-btn,.stat-box,.title-card,.creature-card,.gov-card {transition:none !important;animation:none !important} }
+
+/* Broken Array HUD: map first, controls secondary */
+#gameCanvas{width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;display:block}
+#controls{display:none}
+#controls.open{display:block}
+#missionPanel{max-height:28vh!important;opacity:.88;pointer-events:auto!important}
+#requisitionPanel{box-sizing:border-box}
+#requisitionPanel select,#requisitionPanel button{max-width:100%}
+@media(min-width:900px){#requisitionPanel{left:12px!important;right:auto!important;top:auto!important;bottom:12px!important;transform:none!important;width:276px!important;max-height:48vh!important}}
+@media(max-width:700px){#requisitionPanel{left:8px!important;bottom:8px!important;top:auto!important;transform:none!important;width:min(245px,75vw)!important;max-height:43vh!important}#missionPanel{max-height:20vh!important}}
