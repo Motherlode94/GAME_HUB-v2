@@ -2,6 +2,46 @@
 
 const WarlikeSprites=(()=>{const frames=new Map();function get(role,step){const key=role+':'+step;if(frames.has(key))return frames.get(key);const c=document.createElement('canvas');c.width=24;c.height=32;const p=c.getContext('2d');const b=(x,y,w,h,color)=>{p.fillStyle=color;p.fillRect(x,y,w,h)};let leg=step===1?3:step===3?-3:0;const peasant=role==='peasant',archer=role==='archer';b(6,20,5,9+Math.max(0,leg),'#43332c');b(14,20,5,9+Math.max(0,-leg),'#43332c');b(5,11,15,12,'#2b252b');b(7,12,11,10,peasant?'#997849':archer?'#3d6c43':'#7d8491');b(11,12,3,10,peasant?'#dcc093':'#b99457');b(3,13+leg,4,8,'#c2936d');b(18,13-leg,4,8,'#c2936d');b(8,4,9,9,peasant?'#b8865f':'#929ca7');b(7,3,11,4,peasant?'#8f6b3c':archer?'#34573a':'#b4bdc4');b(11,9,2,2,'#24212a');b(15,9,2,2,'#24212a');if(peasant){b(4,1,17,2,'#705030');b(2,1,2,18,'#b7b7ae');b(0,2,7,2,'#c7c7b6')}else if(archer){b(20,4,2,19,'#bd8a4c');b(21,4,3,2,'#efe1bb')}else{b(21,4,2,20,'#ccd4d6');b(19,2,5,5,'#e3e6e2');b(0,13,5,9,'#98643d');b(1,14,3,7,'#ddc188')}frames.set(key,c);return c}return{draw(ctx,u){const role=u.type==='peasant'?'peasant':u.type==='archer'?'archer':'soldier',step=u.state==='moving'?Math.floor((u.spriteClock||0)/130)%4:0;ctx.save();ctx.translate(u.x,u.y);const direction=u.spriteFacing||'right';if(direction==='left')ctx.scale(-1,1);ctx.imageSmoothingEnabled=false;ctx.drawImage(get(role,step),-15,-23,30,40);if(direction==='up'){ctx.fillStyle=role==='peasant'?'#6d5137':'#657384';ctx.fillRect(-6,-18,12,7);ctx.fillStyle=role==='peasant'?'#9b8256':'#a4b1ba';ctx.fillRect(-5,-18,10,3)}else if(direction==='down'){ctx.fillStyle='#d5ad76';ctx.fillRect(-3,-12,2,2);ctx.fillRect(2,-12,2,2)}ctx.restore()}}})();
 
+
+/* Navigation tactique : A* sur grille, obstacles de bâtiments et contournement local. */
+const TacticalNav=(()=>{
+ const cell=32;
+ function blocked(x,y,except=null){
+  return typeof buildings!=="undefined"&&buildings.some(b=>b!==except&&b.state!=="destroyed"&&x>b.x-12&&x<b.x+b.size+12&&y>b.y-12&&y<b.y+b.size+12);
+ }
+ function path(sx,sy,tx,ty){
+  if(typeof canvas==="undefined")return [{x:tx,y:ty}];
+  const w=Math.ceil(canvas.width/cell),h=Math.ceil(canvas.height/cell);
+  const grid=(x,y)=>y*w+x;
+  const clamp=(v,n)=>Math.max(0,Math.min(n-1,Math.floor(v/cell)));
+  const start={x:clamp(sx,w),y:clamp(sy,h)},goal={x:clamp(tx,w),y:clamp(ty,h)};
+  if(blocked(tx,ty))return [];
+  const startId=grid(start.x,start.y),endId=grid(goal.x,goal.y);
+  const open=[startId],openSet=new Set(open),came=new Map(),cost=new Map([[startId,0]]);
+  const heuristic=id=>Math.abs(id%w-goal.x)+Math.abs(Math.floor(id/w)-goal.y);
+  let scans=0;
+  while(open.length&&scans++<1600){
+   open.sort((a,b)=>(cost.get(b)+heuristic(b))-(cost.get(a)+heuristic(a)));
+   const id=open.pop();openSet.delete(id);
+   if(id===endId){const route=[{x:tx,y:ty}];let cur=id;
+    while(came.has(cur)){const x=cur%w,y=Math.floor(cur/w);route.unshift({x:(x+.5)*cell,y:(y+.5)*cell});cur=came.get(cur)}
+    return route;
+   }
+   const cx=id%w,cy=Math.floor(id/w);
+   for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+    const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=w||y>=h)continue;
+    const next=grid(x,y);if(blocked((x+.5)*cell,(y+.5)*cell)&&next!==startId)continue;
+    const nextCost=cost.get(id)+1;
+    if(nextCost>=(cost.get(next)??Infinity))continue;
+    cost.set(next,nextCost);came.set(next,id);
+    if(!openSet.has(next)){open.push(next);openSet.add(next)}
+   }
+  }
+  return [];
+ }
+ return {path,blocked};
+})();
+
 class Unit {
   constructor(x, y, faction, type = "warrior") {
     this.x = x;
@@ -21,6 +61,8 @@ class Unit {
     
     // Destination pour le mouvement
     this.spriteFacing='right';this.spriteClock=0;
+    this.navPath=[];
+    this.moveOrderActive=false;
     this.targetX = x;
     this.targetY = y;
     
@@ -201,6 +243,12 @@ class Unit {
   }
 
   updateCombatBehavior(deltaTime, allUnits) {
+    if(this.commandStance==="hold"){const nearby=this.findNearestEnemy(allUnits,this.attackRange+8,this.x,this.y);if(nearby){this.target=nearby;this.attackTarget(deltaTime)}else this.state="idle";return}
+    if(this.moveOrderActive&&!this.manualAttackOrder){
+      const nearby=this.commandStance==="aggressive"?this.findNearestEnemy(allUnits,this.attackRange+50,this.x,this.y):null;
+      if(nearby){this.target=nearby;this.attackTarget(deltaTime);return}
+      this.moveToTarget(deltaTime);return;
+    }
     if (this.manualAttackOrder) {
       if (this.isTargetAlive(this.target)) {
         this.attackTarget(deltaTime);
@@ -518,29 +566,29 @@ class Unit {
   }
 
   moveToTarget(deltaTime) {
-    const dx = this.targetX - this.x;
-    const dy = this.targetY - this.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance > 5) {
-      this.spriteClock+=deltaTime;
-      this.spriteFacing=Math.abs(dx)>Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'down':'up');
-      const moveSpeed = this.speed * (deltaTime / 16);
-      // Évitement local des bâtiments : contourner plutôt que traverser les murs.
-      const nextX=this.x+(dx/distance)*moveSpeed,nextY=this.y+(dy/distance)*moveSpeed;
-      let vx=dx/distance,vy=dy/distance;
-      const obstruction=typeof buildings!=="undefined"&&buildings.find(b=>b.state!=="destroyed"&&nextX>b.x-12&&nextX<b.x+b.size+12&&nextY>b.y-12&&nextY<b.y+b.size+12);
-      if(obstruction){
-        const cx=obstruction.x+obstruction.size/2,cy=obstruction.y+obstruction.size/2;
-        const sx=this.x-cx,sy=this.y-cy;
-        if(Math.abs(sx)>Math.abs(sy)){vx=0;vy=this.y<cy?-1:1}else{vx=this.x<cx?-1:1;vy=0}
-      }
-      this.x += vx * moveSpeed;
-      this.y += vy * moveSpeed;
-      this.state = "moving";
-    } else {
-      this.state = "idle";
+    let destination=this.navPath&&this.navPath.length?this.navPath[0]:{x:this.targetX,y:this.targetY};
+    let dx=destination.x-this.x,dy=destination.y-this.y,distance=Math.hypot(dx,dy);
+    if(distance<8&&this.navPath&&this.navPath.length){this.navPath.shift();destination=this.navPath[0]||{x:this.targetX,y:this.targetY};dx=destination.x-this.x;dy=destination.y-this.y;distance=Math.hypot(dx,dy)}
+    if(distance<=5){this.state="idle";this.moveOrderActive=false;return}
+    const step=Math.min(distance,this.speed*deltaTime/16),vx=dx/distance,vy=dy/distance;
+    let nx=this.x+vx*step,ny=this.y+vy*step;
+    if(TacticalNav.blocked(nx,ny)){
+      // Replanification limitée afin de ne pas refaire A* à chaque image.
+      this.navCooldown=(this.navCooldown||0)-deltaTime;
+      if(this.navCooldown<=0){this.navPath=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);this.navCooldown=650}
+      return;
     }
+    // Séparation douce : empêche les escouades de se superposer.
+    if(typeof units!=="undefined"){
+      let pushX=0,pushY=0;
+      for(const other of units){if(other===this||other.state==="dead")continue;
+        const rx=nx-other.x,ry=ny-other.y,d=Math.hypot(rx,ry);
+        if(d>0.01&&d<20){pushX+=rx/d*(20-d)*.16;pushY+=ry/d*(20-d)*.16}
+      }
+      if(!TacticalNav.blocked(nx+pushX,ny+pushY)){nx+=pushX;ny+=pushY}
+    }
+    this.x=nx;this.y=ny;this.state="moving";this.spriteClock+=deltaTime;
+    this.spriteFacing=Math.abs(vx)>Math.abs(vy)?(vx>0?"right":"left"):(vy>0?"down":"up");
   }
 
   attackTarget(deltaTime) {
@@ -649,6 +697,8 @@ class Unit {
   }
 
   moveTo(x, y) {
+    this.navPath=TacticalNav.path(this.x,this.y,x,y);
+    this.moveOrderActive=true;
     this.targetX = x;
     this.targetY = y;
     if (!this.canHarvest) {
