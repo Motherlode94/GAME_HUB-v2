@@ -935,19 +935,28 @@ function runFactionAI(faction, deltaTime) {
   if (owned.length <= 0) return;
 
   const factionBuildings = getFactionBuildings(faction);
-  if (factionBuildings.length < 5) {
-    const home = owned[Math.floor(Math.random() * owned.length)];
-    addBuilding(
-      home.x + 30 + Math.random() * Math.max(20, home.width - 90),
-      home.y + 30 + Math.random() * Math.max(20, home.height - 90),
-      faction,
-      Math.random() < 0.55 ? BUILDING_TYPES.BARRACKS : BUILDING_TYPES.SHRINE
-    );
+  // Économie d'abord, recrutement ensuite : gestion d'un plafond d'unités par IA.
+  const factionUnits=getFactionUnits(faction).filter(u=>u.state!=="dead");
+  const military=factionUnits.filter(u=>!u.canHarvest);
+  const capacity=10+factionBuildings.reduce((total,b)=>total+(b.type===BUILDING_TYPES.TOWN_HALL?10:b.type===BUILDING_TYPES.FARM?5:0),0);
+  if(factionBuildings.length<9){
+    const hasFarm=factionBuildings.some(b=>b.type===BUILDING_TYPES.FARM);
+    const hasEconomy=factionBuildings.some(b=>b.type===BUILDING_TYPES.LUMBER_MILL||b.type===BUILDING_TYPES.MINE);
+    const priority=factionUnits.length>=capacity-3?BUILDING_TYPES.FARM:!hasFarm?BUILDING_TYPES.FARM:!hasEconomy?BUILDING_TYPES.LUMBER_MILL:military.length<4?BUILDING_TYPES.BARRACKS:BUILDING_TYPES.SHRINE;
+    const home=owned[0], size=priority===BUILDING_TYPES.TOWN_HALL?80:54;
+    for(let attempt=0;attempt<16;attempt++){
+      const x=home.x+18+Math.random()*Math.max(1,home.width-size-36);
+      const y=home.y+18+Math.random()*Math.max(1,home.height-size-36);
+      if(!factionBuildings.some(b=>b.state!=="destroyed"&&x<b.x+b.size+15&&x+size+15>b.x&&y<b.y+b.size+15&&y+size+15>b.y)){
+        addBuilding(x,y,faction,priority);break;
+      }
+    }
   }
 
   factionBuildings.forEach((building) => {
-    if (!building.canProduce) return;
-    if (building.productionQueue.length >= 2) return;
+    if (!building.canProduce || building.constructionProgress<1) return;
+    const populationUsed=factionUnits.length+factionBuildings.reduce((n,b)=>n+b.productionQueue.length,0);
+    if(populationUsed>=capacity || building.productionQueue.length>=2)return;
     const types = building.produceTypes || [];
     if (types.length === 0) return;
     const next = types[Math.floor(Math.random() * types.length)];
@@ -960,7 +969,7 @@ function runFactionAI(faction, deltaTime) {
     attemptFaithCapture(faction, targetTerritory, true);
 
     const center = getTerritoryCenter(targetTerritory);
-    const assaultGroup = getFactionUnits(faction).filter((unit) => !unit.canHarvest).slice(0, 4);
+    const assaultGroup = getFactionUnits(faction).filter((unit) => !unit.canHarvest).slice(0, Math.min(8,Math.max(2,military.length)));
     assaultGroup.forEach((unit) => unit.moveTo(center.x + (Math.random() * 50 - 25), center.y + (Math.random() * 50 - 25)));
   }
 
