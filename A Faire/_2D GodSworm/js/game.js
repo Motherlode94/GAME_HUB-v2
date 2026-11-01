@@ -874,16 +874,19 @@ function pickPressureTarget(faction) {
 }
 
 function commandFactionPatrol(faction) {
-  const owned = getFactionTerritories(faction);
-  if (owned.length === 0) return;
-
-  const soldiers = getFactionUnits(faction).filter((unit) => !unit.canHarvest);
-  soldiers.forEach((unit, index) => {
-    const territory = owned[index % owned.length];
-    const px = territory.x + 30 + Math.random() * Math.max(20, territory.width - 60);
-    const py = territory.y + 30 + Math.random() * Math.max(20, territory.height - 60);
-    unit.moveTo(px, py);
-  });
+  const state=aiControllerStates[faction],owned=getFactionTerritories(faction);
+  if(!state||!owned.length)return;
+  const home=getTerritoryCenter(owned[0]);
+  const soldiers=getFactionUnits(faction).filter(u=>!u.canHarvest&&u.state!=="dead");
+  // No random orders: patrol is a defensive response to a genuine threat.
+  const intruders=units.filter(u=>u.state!=="dead"&&areHostileFactions(faction,u.faction)&&owned.some(t=>t.contains(u.x,u.y)));
+  if(intruders.length){
+    const threat=intruders.sort((a,b)=>Math.hypot(a.x-home.x,a.y-home.y)-Math.hypot(b.x-home.x,b.y-home.y))[0];
+    const defenders=soldiers.slice(0,Math.min(8,soldiers.length));
+    defenders.forEach((unit,i)=>{if(unit.manualAttackOrder&&unit.target===threat)return;unit.setManualAttackTarget(threat);unit.aiMission="defend"});
+    state.aiMission="defend";state.aiTarget=null;return;
+  }
+  if(state.aiMission==="defend"){state.aiMission="gather";state.aiTarget=null}
 }
 
 function runFactionDivineAI(faction) {
@@ -923,7 +926,7 @@ function runFactionAI(faction, deltaTime) {
   state.patrolTimer += deltaTime;
   state.pressureTimer += deltaTime;
 
-  if (state.patrolTimer >= 3200) {
+  if (state.patrolTimer >= 1800) {
     state.patrolTimer = 0;
     commandFactionPatrol(faction);
   }
@@ -934,6 +937,7 @@ function runFactionAI(faction, deltaTime) {
   const owned = getFactionTerritories(faction);
   if (owned.length <= 0) return;
 
+  state.decisionCount=(state.decisionCount||0)+1;
   const factionBuildings = getFactionBuildings(faction);
   // Économie d'abord, recrutement ensuite : gestion d'un plafond d'unités par IA.
   const factionUnits=getFactionUnits(faction).filter(u=>u.state!=="dead");
@@ -954,6 +958,7 @@ function runFactionAI(faction, deltaTime) {
   }
 
   factionBuildings.forEach((building) => {
+    if (military.length >= 14 || state.aiMission==="attack" && military.length>=10)return;
     if (!building.canProduce || building.constructionProgress<1) return;
     const populationUsed=factionUnits.length+factionBuildings.reduce((n,b)=>n+b.productionQueue.length,0);
     if(populationUsed>=capacity || building.productionQueue.length>=2)return;
@@ -963,14 +968,40 @@ function runFactionAI(faction, deltaTime) {
     building.produceUnit(next);
   });
 
-  const targetTerritory = pickPressureTarget(faction);
-  if (targetTerritory && state.pressureTimer >= 7000) {
-    state.pressureTimer = 0;
-    attemptFaithCapture(faction, targetTerritory, true);
-
-    const center = getTerritoryCenter(targetTerritory);
-    const assaultGroup = getFactionUnits(faction).filter((unit) => !unit.canHarvest).slice(0, Math.min(8,Math.max(2,military.length)));
-    assaultGroup.forEach((unit) => unit.moveTo(center.x + (Math.random() * 50 - 25), center.y + (Math.random() * 50 - 25)));
+  // Strategic decision loop: reserve, assemble, synchronized assault, recovery.
+  const targetTerritory=pickPressureTarget(faction);
+  const home=getTerritoryCenter(owned[0]);
+  const enemyNearHome=units.filter(u=>u.state!=="dead"&&areHostileFactions(faction,u.faction)&&Math.hypot(u.x-home.x,u.y-home.y)<240);
+  if(enemyNearHome.length){
+    state.aiMission="defend";state.aiTarget=null;
+    const target=enemyNearHome[0];military.slice(0,10).forEach(u=>{if(u.target!==target)u.setManualAttackTarget(target)});
+  }else if(state.aiMission==="attack"){
+    const target=state.aiTarget;
+    const survivors=military.filter(u=>u.aiMission==="attack"&&u.health>u.maxHealth*.25);
+    if(!target||target.faction===faction||survivors.length<4){
+      state.aiMission="recover";state.aiTarget=null;state.recoverUntil=gameTime+14;
+      survivors.forEach((u,i)=>{u.aiMission="recover";u.moveTo(home.x+(i%4)*28,home.y+Math.floor(i/4)*28)});
+    }
+  }else if(state.aiMission==="recover"){
+    if(gameTime>(state.recoverUntil||0))state.aiMission="gather";
+  }else if(targetTerritory){
+    state.aiMission="gather";
+    if(military.length>=7){
+      state.aiMission="attack";state.aiTarget=targetTerritory;
+      const center=getTerritoryCenter(targetTerritory);
+      const squad=military.slice(0,Math.min(11,military.length-2));
+      // Coordinated attack formation: shield line in front, archers behind.
+      squad.sort((a,b)=>(a.type===UNIT_TYPES.ARCHER?1:0)-(b.type===UNIT_TYPES.ARCHER?1:0));
+      squad.forEach((u,i)=>{
+        u.aiMission="attack";u.commandStance="aggressive";
+        const col=i%4,row=Math.floor(i/4);
+        u.moveTo(center.x+(col-1.5)*32,center.y+(row-1)*38);
+      });
+      attemptFaithCapture(faction,targetTerritory,true);
+    }else if(state.decisionCount%2===0){
+      const reserve=military.filter(u=>!u.manualAttackOrder);
+      reserve.forEach((u,i)=>{if(Math.hypot(u.x-home.x,u.y-home.y)>150)u.moveTo(home.x+(i%4)*25,home.y+Math.floor(i/4)*25)});
+    }
   }
 
   runFactionDivineAI(faction);
