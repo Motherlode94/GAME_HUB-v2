@@ -592,6 +592,11 @@ class Unit {
   }
 
   attackTarget(deltaTime) {
+    // Le chemin d'attaque est recalculé vers une cible mobile.
+    if(this.target&&this.state!=="attacking"){
+      this.navCooldown=(this.navCooldown||0)-deltaTime;
+      if(this.navCooldown<=0){this.navPath=TacticalNav.path(this.x,this.y,this.target.x,this.target.y);this.navCooldown=700}
+    }
     const targetX = this.target && typeof this.target.size === "number"
       ? this.target.x + this.target.size / 2
       : this.target.x;

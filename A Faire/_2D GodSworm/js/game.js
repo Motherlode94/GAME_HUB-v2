@@ -982,6 +982,12 @@ function updateEnemyAI(deltaTime) {
 }
 
 let militaryFormation="line";let militaryTech={weapons:0,armor:0,logistics:0};
+function setSquadStance(mode){
+ const selected=getSelectedPlayerUnits().filter(v=>!v.canHarvest);
+ if(!selected.length){pushGameLog("Sélectionnez des soldats.","warn");return}
+ selected.forEach(v=>{v.commandStance=mode;if(mode==="hold"){v.moveOrderActive=false;v.navPath=[];v.targetX=v.x;v.targetY=v.y;v.guardX=v.x;v.guardY=v.y;v.clearCombatTarget()}});
+ pushGameLog(selected.length+" unité(s) : "+mode,"ok");
+}
 function orderFormation(group,x,y){
  const squad=group.filter(a=>a&&a.state!=="dead");const count=squad.length;
  squad.forEach((unit,i)=>{
