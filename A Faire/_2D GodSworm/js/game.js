@@ -1090,29 +1090,17 @@ canvas.addEventListener("click", (e) => {
     }
   }
 
-  // Mode construction
+  // Placement : pas de superposition, construction uniquement sur territoire allié.
   if (buildMode) {
-    const cost = BUILDING_COSTS[buildMode];
-    if (cost) {
-      const resourceCost = {};
-      if (cost.gold) resourceCost[RESOURCES.GOLD] = cost.gold;
-      if (cost.wood) resourceCost[RESOURCES.WOOD] = cost.wood;
-      if (cost.food) resourceCost[RESOURCES.FOOD] = cost.food;
-      
-      if (hasResources(resourceCost)) {
-        if (consumeResources(resourceCost)) {
-          addBuilding(mouseX - 20, mouseY - 20, PLAYER_FACTION, buildMode);
-          createParticleExplosion(mouseX, mouseY, "#64b5f6", 15);
-          pushGameLog(`Construction: ${buildMode}.`, "ok");
-        } else {
-          pushGameLog("Ressources insuffisantes.", "warn");
-        }
-      } else {
-        pushGameLog("Construction impossible: cout trop eleve.", "warn");
-      }
-    }
-    buildMode = null;
-    return;
+    const test=validateBuildPlacement(mouseX,mouseY,buildMode);
+    if(!test.ok){pushGameLog(test.reason,"warn");return}
+    const cost=BUILDING_COSTS[buildMode];const rc={};
+    for(const item of ['gold','wood','food'])if(cost[item])rc[RESOURCES[item.toUpperCase()]]=cost[item];
+    if(!consumeResources(rc)){pushGameLog("Ressources insuffisantes.","warn");return}
+    addBuilding(test.x,test.y,PLAYER_FACTION,buildMode);
+    createParticleExplosion(mouseX,mouseY,"#86df95",12);
+    pushGameLog("Bâtiment construit. Sélectionnez-le pour recruter.","ok");
+    buildMode=null;return;
   }
 
   // Sélection de bâtiment
@@ -1440,6 +1428,27 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
+
+function validateBuildPlacement(mx,my,type){
+  const spec=BUILDING_COSTS[type];if(!spec)return {ok:false,reason:"Bâtiment inconnu"};
+  const size=type===BUILDING_TYPES.TOWN_HALL?80:type===BUILDING_TYPES.TEMPLE?60:54;
+  const x=mx-size/2,y=my-size/2;
+  if(x<8||y<8||x+size>canvas.width-8||y+size>canvas.height-8)return {ok:false,reason:"Trop près du bord de carte"};
+  const territory=getTerritoryAt(mx,my);
+  if(!territory||territory.faction!==PLAYER_FACTION)return {ok:false,reason:"Construisez dans un territoire que vous contrôlez"};
+  if(x<territory.x+10||y<territory.y+10||x+size>territory.x+territory.width-10||y+size>territory.y+territory.height-10)return {ok:false,reason:"Le bâtiment doit tenir dans votre territoire"};
+  if(buildings.some(b=>b.state!=="destroyed"&&x<b.x+b.size+12&&x+size+12>b.x&&y<b.y+b.size+12&&y+size+12>b.y))return {ok:false,reason:"Espace occupé : éloignez le bâtiment"};
+  const rc={};for(const item of ['gold','wood','food'])if(spec[item])rc[RESOURCES[item.toUpperCase()]]=spec[item];
+  if(!hasResources(rc))return {ok:false,reason:"Ressources insuffisantes"};
+  return {ok:true,x,y,size};
+}
+function recruitAtSelectedBuilding(type){
+  if(!selectedBuilding||selectedBuilding.faction!==PLAYER_FACTION||!selectedBuilding.canProduce||!selectedBuilding.produceTypes.includes(type)){pushGameLog("Sélectionnez le bon bâtiment de production.","warn");return false}
+  const cost=UNIT_COSTS[type];if(!cost)return false;
+  const rc={};for(const item of ['gold','wood','food'])if(cost[item])rc[RESOURCES[item.toUpperCase()]]=cost[item];
+  if(!hasResources(rc)||!consumeResources(rc)){pushGameLog("Ressources insuffisantes pour recruter.","warn");return false}
+  selectedBuilding.produceUnit(type);pushGameLog("Unité ajoutée à la file de recrutement.","ok");return true;
+}
 
 // Gestion du menu de construction
 document.querySelectorAll('.buildButton').forEach(button => {

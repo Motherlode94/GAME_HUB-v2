@@ -78,6 +78,11 @@
       <span>3. Clic droit sur une ressource pour récolter ou sur un ennemi pour attaquer.</span>
       <button id="toggleHelp" type="button" aria-expanded="true">Masquer l'aide</button>
     </section>
+    <section id="strategyDock" aria-label="Construction et recrutement">
+      <div class="strategyDockHeader"><strong>🏰 Construire &amp; recruter</strong><span>Choisissez un bâtiment, puis cliquez dans votre territoire.</span></div>
+      <div class="strategyDockActions"><button type="button" id="dockBuild">🏗️ Bâtiments</button><button type="button" id="dockCancel">✕ Annuler placement</button><div id="dockProduction">Sélectionnez une caserne ou un hôtel de ville pour recruter.</div></div>
+      <div id="dockFeedback" role="status">Aucune construction en cours.</div>
+    </section>
     <!-- Wrapper pour panels + canvas -->
     <div id="gameWrapper">
       <!-- Panels à gauche -->
@@ -227,6 +232,7 @@
   <script src="js/game.js"></script>
   <script src="js/war-room.js"></script>
   <script src="js/unit-identity.js"></script>
+  <script src="js/strategy-dock.js"></script>
   <script>
     (()=>{const btn=document.getElementById('toggleHelp'),panel=document.getElementById('quickHelp');btn.addEventListener('click',()=>{const collapsed=panel.classList.toggle('collapsed');btn.textContent=collapsed?'Afficher l’aide':'Masquer l’aide';btn.setAttribute('aria-expanded',String(!collapsed));});})();
   </script>
