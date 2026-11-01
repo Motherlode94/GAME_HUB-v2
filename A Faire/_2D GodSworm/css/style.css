@@ -466,3 +466,36 @@ canvas {
     margin-left: 0;
   }
 }
+
+/* GodSworm UI v3 — real in-game responsive command center */
+:root{--gs-panel:#151120;--gs-panel2:#201731;--gs-gold:#d9af65;--gs-purple:#a66bdf;--gs-line:#614577}
+body{display:block;background:radial-gradient(circle at 50% 4%,#332047 0%,#100b1b 58%,#090713 100%);overflow-x:hidden;color:#f4ecfa}
+#gameContainer{width:100%;max-width:1920px;min-width:0;min-height:100vh;margin:0 auto;padding:12px 16px 22px;gap:12px;align-items:stretch}
+#title{font:700 clamp(24px,2.2vw,36px) Georgia,serif;letter-spacing:1px;text-transform:none;text-align:left;color:#f3d79d;text-shadow:0 0 18px #a25aff66;animation:none;padding:4px 4px 0}
+#hud{justify-content:flex-start;gap:7px;margin:0;min-width:0}
+.hudPanel{padding:7px 12px;border:1px solid #665078;border-radius:7px;background:#1b1529;color:#e9ce94;font-size:12px;text-shadow:none;box-shadow:none}
+.hudPanel span{margin-left:4px;text-shadow:none}
+#topControls{width:100%;min-width:0;gap:7px;padding:10px 12px;border:1px solid #76558e;border-radius:10px;background:linear-gradient(180deg,#241731,#120f1c);box-shadow:0 5px 20px #0005}
+#topControls button{padding:9px 12px;background:linear-gradient(180deg,#3b2751,#24192f);border:1px solid #80619a;color:#f9f2ff;border-radius:7px;min-height:36px}
+#topControls button:hover{background:#523268;border-color:var(--gs-gold)}
+#topControls button.active,#topControls .speed-button.active{border-color:#d8b56c;background:#61358a;box-shadow:0 0 10px #a95aff44}
+.command-label{color:#dfc594;font-size:11px;font-weight:700;white-space:nowrap;padding:0 4px}
+.command-divider{height:27px;width:1px;flex:none;background:#76588c;margin:0 3px}
+#status-line{flex-basis:100%;color:#cbb9db;min-width:0;overflow-wrap:anywhere;padding:2px 4px;font-size:11px}
+#gameWrapper{width:100%;min-width:0;display:grid;grid-template-columns:minmax(205px,235px) minmax(0,1fr) minmax(210px,235px);align-items:start;gap:12px}
+#leftPanels,#rightPanels{width:auto;min-width:0;gap:12px}
+.panel{padding:12px 13px;border:1px solid #8e6d8f;border-radius:10px;background:linear-gradient(145deg,#24182f 0%,#110f1a 70%);box-shadow:0 4px 16px #0007;line-height:1.45}
+.panel h3{font-size:14px;line-height:1.45;color:#f0ce86;text-shadow:none;margin:0 0 10px;border-bottom:1px solid #5a406b;padding-bottom:8px}
+.panel p{margin:7px 0;color:#e4dbed}
+.panel span{color:#a6e5b3}
+.power.ready{background:#21372a;border-color:#81c28e;color:#d9f1df}
+#gameCanvas{display:block;width:100%;max-width:100%;height:auto;min-width:0;cursor:crosshair;border:3px solid #9272aa;border-radius:9px;box-shadow:0 0 0 2px #2b1c3e,0 8px 28px #0008;aspect-ratio:16/9}
+#controls,#eventLog{width:100%;min-width:0;margin-top:0;border:1px solid #594770;box-shadow:none;border-radius:9px;background:#17121f;color:#c6b8d0}
+#controls{line-height:2.25;padding:8px 12px;font-size:11px}
+#controls kbd{font-size:11px;padding:3px 6px}
+.status-summary{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:12px}.status-summary strong{color:#ddc28a;text-align:right}
+#warRoomToggle{top:auto!important;bottom:16px!important;right:16px!important;border:1px solid #b38b68!important;background:#21172e!important;box-shadow:0 3px 15px #0008}
+#warRoomPanel{top:auto!important;bottom:65px!important;right:16px!important}
+@media(max-width:1150px){#gameWrapper{grid-template-columns:minmax(170px,205px) minmax(0,1fr)}#rightPanels{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){#gameContainer{padding:10px;gap:10px}#gameWrapper{display:flex;flex-direction:column}#gameCanvas{order:0}#leftPanels{order:1;width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#rightPanels{order:2;width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#topControls{gap:5px}#topControls button{font-size:11px;padding:8px}#title{font-size:27px}#hud{gap:5px}.hudPanel{padding:6px 8px;font-size:10px}}
+@media(max-width:440px){#leftPanels,#rightPanels{grid-template-columns:1fr}.command-divider{display:none}#controls{font-size:10px}}

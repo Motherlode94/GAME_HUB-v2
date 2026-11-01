@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <h1 id="title">GODSWORM</h1>
+    <h1 id="title">⚜ GodSworm</h1>
     
     <!-- HUD Stats -->
     <div id="hud">
@@ -55,20 +55,20 @@
       <div class="hudPanel">SCORE: <span id="scoreValue">0</span></div>
     </div>
 
-    <div id="topControls">
-      <button id="pause-toggle" type="button">Pause</button>
+    <div id="topControls" aria-label="Barre de commandes">
+      <span class="command-label">Vitesse</span><button id="pause-toggle" type="button">Pause</button>
       <button class="speed-button active" type="button" data-speed="1">1x</button>
       <button class="speed-button" type="button" data-speed="2">2x</button>
       <button class="speed-button" type="button" data-speed="3">3x</button>
-      <button id="save-progress" type="button">Sauvegarder</button>
+      <span class="command-divider"></span><button id="save-progress" type="button">Sauvegarder</button>
       <button id="load-progress" type="button">Charger</button>
       <button id="reset-progress" type="button">Reset</button>
       <button id="open-main-menu" type="button">Main Menu</button>
-      <button id="power-smite" type="button">Smite (Z)</button>
+      <span class="command-divider"></span><span class="command-label">Pouvoirs divins</span><button id="power-smite" type="button">Smite (Z)</button>
       <button id="power-bless" type="button">Bless (X)</button>
       <button id="power-miracle" type="button">Miracle (C)</button>
       <button id="capture-faith" type="button">Capturer (F)</button>
-      <span id="status-line">Commandez vos troupes pour convertir les territoires.</span>
+      <span id="status-line" role="status">Commandez vos troupes pour convertir les territoires.</span>
     </div>
 
     <!-- Wrapper pour panels + canvas -->
@@ -77,7 +77,7 @@
       <div id="leftPanels">
         <!-- Divine Presence -->
         <div id="divinePresencePanel" class="panel">
-          <h3>⚡ Divine Presence</h3>
+          <h3>⚡ Présence divine</h3>
           <p>God: <span id="godName">Wyrd</span></p>
           <p>Faith: <span id="faith">100 / 300</span></p>
           <div class="faithBarContainer">
@@ -93,7 +93,7 @@
 
         <!-- Divine Powers -->
         <div id="divinePowersPanel" class="panel">
-          <h3>⚔️ Commands</h3>
+          <h3>⚔️ Commandes</h3>
           
           <div class="power ready">
             [B] Open Build Menu
@@ -118,10 +118,10 @@
       <canvas id="gameCanvas" width="1920" height="1080"></canvas>
 
       <!-- Panel à droite -->
-      <div id="rightPanels">
+      <div id="rightPanels"><div class="panel" id="gameStatusCard"><h3>⚑ État de la partie</h3><div class="status-summary"><span>Mode</span><strong id="statusMode">Partie</strong><span>Vague</span><strong id="statusWave">1</strong><span>État</span><strong id="statusGame">Actif</strong></div></div>
         <!-- Statistics -->
         <div id="statisticsPanel" class="panel">
-          <h3>📊 Statistics</h3>
+          <h3>📊 Statistiques</h3>
           <p>Power Level: <span id="powerLevel">0</span></p>
           <p>Smites Used: <span id="totalSmites">0</span></p>
           <p>Blessings: <span id="totalBlessings">0</span></p>
