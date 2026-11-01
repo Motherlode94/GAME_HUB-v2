@@ -55,7 +55,12 @@ RTS.Squad = function(x, y, team, typeName, memberCount) {
     // Membres
     var count = memberCount || def.defaultCount;
     for (var i = 0; i < count; i++) {
-        this.members.push(RTS.Squad._createMember(def, i));
+        var member = RTS.Squad._createMember(def, i);
+        if ((team === 'red' || team === 'enemy') && window.WarLikeArt) {
+            var factor = window.WarLikeArt.getEnemyFaction() === 'militia' ? 2.8 : 2.3;
+            member.hp = member.maxHp = Math.round(member.maxHp * factor);
+        }
+        this.members.push(member);
     }
 
     // Upgrade
