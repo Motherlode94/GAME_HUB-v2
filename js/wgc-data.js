@@ -46,7 +46,7 @@
             category: "strategy",
 
             tags: ["royaute", "strategie", "empire", "politique"],
-            playUrl: "DONE/_2D Be The Kings/index.html",
+            playUrl: "DONE/_2D Be the Kings/index.html",
             description: "Construis ton royaume, lève des armées et étends ton empire. Le trône t'attend — sauras-tu le garder ?",
 
         },
