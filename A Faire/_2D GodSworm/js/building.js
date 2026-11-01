@@ -183,7 +183,7 @@ class Building {
   }
 
   produceUnit(unitType) {
-    if (!this.canProduce) return false;
+    if (!this.canProduce || this.constructionProgress < 1) return false;
     if (!this.produceTypes.includes(unitType)) return false;
     if (this.productionQueue.length >= 5) return false;
 

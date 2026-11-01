@@ -1445,12 +1445,30 @@ function validateBuildPlacement(mx,my,type){
   if(!hasResources(rc))return {ok:false,reason:"Ressources insuffisantes"};
   return {ok:true,x,y,size};
 }
+function getPopulationUsage(){
+ const living=units.filter(u=>u.faction===PLAYER_FACTION&&u.state!=="dead").length;
+ const queued=buildings.filter(x=>x.faction===PLAYER_FACTION).reduce((n,x)=>n+x.productionQueue.length,0);
+ const capacity=10+buildings.filter(x=>x.faction===PLAYER_FACTION&&x.state!=="destroyed"&&x.constructionProgress>=1).reduce((n,x)=>n+(x.type===BUILDING_TYPES.TOWN_HALL?10:x.type===BUILDING_TYPES.FARM?5:0),0);
+ return {living,queued,capacity};
+}
+function cancelQueuedUnit(index){
+ const building=selectedBuilding;
+ if(!building||building.faction!==PLAYER_FACTION||index<0||index>=building.productionQueue.length)return false;
+ const type=building.productionQueue[index];
+ if(!building.cancelProduction(index))return false;
+ const cost=UNIT_COSTS[type]||{};
+ for(const name of ['gold','food','wood'])if(cost[name])addResource(RESOURCES[name.toUpperCase()],cost[name]);
+ pushGameLog("Recrutement annulé, ressources remboursées.","ok");return true;
+}
 function recruitAtSelectedBuilding(type){
   if(!selectedBuilding||selectedBuilding.faction!==PLAYER_FACTION||!selectedBuilding.canProduce||!selectedBuilding.produceTypes.includes(type)){pushGameLog("Sélectionnez le bon bâtiment de production.","warn");return false}
+  if(selectedBuilding.constructionProgress<1||selectedBuilding.productionQueue.length>=5){pushGameLog("Bâtiment inachevé ou file pleine.","warn");return false}
+  const pop=getPopulationUsage();if(pop.living+pop.queued>=pop.capacity){pushGameLog("Limite de population atteinte : construisez une ferme.","warn");return false}
   const cost=UNIT_COSTS[type];if(!cost)return false;
   const rc={};for(const item of ['gold','wood','food'])if(cost[item])rc[RESOURCES[item.toUpperCase()]]=cost[item];
   if(!hasResources(rc)||!consumeResources(rc)){pushGameLog("Ressources insuffisantes pour recruter.","warn");return false}
-  selectedBuilding.produceUnit(type);pushGameLog("Unité ajoutée à la file de recrutement.","ok");return true;
+  if(!selectedBuilding.produceUnit(type)){pushGameLog("Impossible d'ajouter l'unité.","warn");return false}
+  pushGameLog("Unité ajoutée à la file de recrutement.","ok");return true;
 }
 
 function orderBuilderToSite(){
