@@ -41,7 +41,7 @@ const TacticalNav=(()=>{
   if(free(x,y))return {x,y};
   for(let radius=16;radius<=192;radius+=16)for(let i=0;i<16;i++){
    const a=i*Math.PI/8,px=x+Math.cos(a)*radius,py=y+Math.sin(a)*radius;
-   if(px>15&&py>15&&px<canvas.width-15&&py<canvas.height-15&&!blocked(px,py))return {x:px,y:py};
+   if(px>15&&py>15&&px<canvas.width-15&&py<canvas.height-15&&free(px,py))return {x:px,y:py};
   }
   return null;
  }
@@ -749,9 +749,11 @@ class Unit {
     this.targetY = this.navGoal.y;
     if (!this.canHarvest) {
       this.clearCombatTarget();
-      this.guardX = x;
-      this.guardY = y;
-      this.pickPatrolPoint();
+      this.guardX = this.targetX;
+      this.guardY = this.targetY;
+      this.patrolX = this.targetX;
+      this.patrolY = this.targetY;
+      this.patrolPauseTimer = 1000;
     } else {
       this.target = null;
     }
