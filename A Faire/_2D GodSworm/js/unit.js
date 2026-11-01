@@ -15,7 +15,12 @@ const TacticalNav=(()=>{
   const grid=(x,y)=>y*w+x;
   const clamp=(v,n)=>Math.max(0,Math.min(n-1,Math.floor(v/cell)));
   const start={x:clamp(sx,w),y:clamp(sy,h)},goal={x:clamp(tx,w),y:clamp(ty,h)};
-  if(blocked(tx,ty))return [];
+  if(blocked(tx,ty)){
+    const near=[];
+    for(let radius=cell;radius<=cell*5;radius+=cell)for(let n=0;n<16;n++){const a=n*Math.PI/8;const px=tx+Math.cos(a)*radius,py=ty+Math.sin(a)*radius;if(px>8&&py>8&&px<canvas.width-8&&py<canvas.height-8&&!blocked(px,py))near.push({x:px,y:py,d:Math.hypot(px-sx,py-sy)})}
+    if(!near.length)return [];
+    near.sort((a,b)=>a.d-b.d);tx=near[0].x;ty=near[0].y;
+  }
   const startId=grid(start.x,start.y),endId=grid(goal.x,goal.y);
   const open=[startId],openSet=new Set(open),came=new Map(),cost=new Map([[startId,0]]);
   const heuristic=id=>Math.abs(id%w-goal.x)+Math.abs(Math.floor(id/w)-goal.y);
@@ -243,7 +248,7 @@ class Unit {
   }
 
   updateCombatBehavior(deltaTime, allUnits) {
-    if(this.commandStance==="hold"){const nearby=this.findNearestEnemy(allUnits,this.attackRange+8,this.x,this.y);if(nearby){this.target=nearby;this.attackTarget(deltaTime)}else this.state="idle";return}
+    if(this.commandStance==="hold"&&!this.moveOrderActive){const nearby=this.findNearestEnemy(allUnits,this.attackRange+8,this.x,this.y);if(nearby){this.target=nearby;this.attackTarget(deltaTime)}else this.state="idle";return}
     if(this.moveOrderActive&&!this.manualAttackOrder){
       const nearby=this.commandStance==="aggressive"?this.findNearestEnemy(allUnits,this.attackRange+50,this.x,this.y):null;
       if(nearby){this.target=nearby;this.attackTarget(deltaTime);return}
@@ -702,6 +707,9 @@ class Unit {
   }
 
   moveTo(x, y) {
+    // Un ordre explicite de déplacement prime sur "tenir position".
+    if(this.commandStance==="hold")this.commandStance="move";
+    if(this.canHarvest){this.harvestTarget=null;this.dropoffBuilding=null;this.buildTarget=null;}
     this.navPath=TacticalNav.path(this.x,this.y,x,y);
     this.moveOrderActive=true;
     this.targetX = x;
