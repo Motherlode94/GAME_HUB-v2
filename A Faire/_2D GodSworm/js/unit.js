@@ -669,6 +669,18 @@ class Unit {
     ctx.beginPath();ctx.ellipse(this.x,this.y+9,14,6,0,0,Math.PI*2);ctx.fillStyle=getFactionColor(this.faction);ctx.globalAlpha=.4;ctx.fill();ctx.globalAlpha=1;
     WarlikeSprites.draw(ctx,this);
 
+    // Identification instantanée : nom, activité et santé en permanence pour les unités choisies.
+    if(this.selected){
+      const names={peasant:"Paysan",warrior:"Épéiste",archer:"Archer",knight:"Chevalier",paladin:"Paladin",mage:"Mage",scout:"Éclaireur"};
+      const actions={idle:"Disponible",moving:"Déplacement",attacking:"Combat",harvesting:"Récolte",guarding:"Défense"};
+      ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 12px Arial";
+      const name=names[this.type]||this.type;const action=actions[this.state]||this.state;
+      ctx.fillStyle="rgba(12,12,22,.9)";ctx.fillRect(this.x-57,this.y-56,114,31);
+      ctx.fillStyle="#fff2c9";ctx.fillText(name,this.x,this.y-46);
+      ctx.font="10px Arial";ctx.fillStyle="#b9e9cd";ctx.fillText(action,this.x,this.y-32);
+      ctx.restore();
+    }
+
     // Indicateur de transport de ressources
     if (this.canHarvest && this.carrying > 0) {
       ctx.fillStyle = "#ffd700";
@@ -678,7 +690,7 @@ class Unit {
     }
 
     // Barre de vie
-    if (this.health < this.maxHealth) {
+    if (this.health < this.maxHealth || this.selected) {
       const barWidth = 30;
       const barHeight = 4;
       const barX = this.x - barWidth / 2;

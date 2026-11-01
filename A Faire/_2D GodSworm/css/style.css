@@ -508,3 +508,5 @@ body{display:block;background:radial-gradient(circle at 50% 4%,#332047 0%,#100b1
 #gameCanvas{cursor:crosshair;touch-action:manipulation}
 #leftPanels,#rightPanels{overflow-wrap:anywhere}
 @media(max-width:760px){#quickHelp{justify-content:flex-start;gap:7px}#quickHelp span{flex:1 1 100%}}
+
+#unitIdentityPanel{border-color:#c19a5e;background:linear-gradient(145deg,#31233d,#181521)}#unitIdentityContent{font-size:12px;line-height:1.7;color:#e9dff2}#unitIdentityContent strong{display:block;font-size:15px;color:#f6d38e}#unitIdentityContent p{margin-top:8px}
