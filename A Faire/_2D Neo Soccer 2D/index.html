@@ -27,7 +27,7 @@ function activeDir(p){let x=0,y=0;if(keys.has('KeyQ')||keys.has('ArrowLeft'))x--
 function possession(p){ball.holder=p;ball.vx=0;ball.vy=0;ball.x=p.x+p.dir.x*14;ball.y=p.y+p.dir.y*14;ball.last=p.team}
 function loose(p,vx,vy){ball.holder=null;ball.x=p.x+p.dir.x*17;ball.y=p.y+p.dir.y*17;ball.vx=vx;ball.vy=vy;ball.last=p.team;p.cool=.24}
 function targetOf(p,lead=false){const mates=formation(p.team).filter(m=>m!==p);let best=null,bestVal=-1e9;for(const m of mates){let dx=m.x-p.x,dy=m.y-p.y,dd=Math.hypot(dx,dy);if(dd<28||dd>480)continue;const front=dx*(p.team===0?1:-1);const val=(lead?front*.65:0)-dd*.21-Math.abs(dy)*.04+(m.index===4?4:0);if(val>bestVal){bestVal=val;best=m}}return best}
-function send(p,kind,charge=0){if(ball.holder!==p)return;const mov=activeDir(p),aim=(Math.abs(mov.x)+Math.abs(mov.y)>0)?mov:p.dir;let target=null,v=0;if(kind==='shot'){const gy=clamp(field.cy+(aim.y*135),field.cy-63,field.cy+63);target={x:p.team===0?field.r+10:field.l-10,y:gy};v=520+charge*330}else if(kind==='lob'){target=targetOf(p,true)||{x:p.x+aim.x*150,y:p.y+aim.y*150};v=335}else{target=targetOf(p,kind==='through')||{x:p.x+aim.x*130,y:p.y+aim.y*130};v=kind==='through'?445:370}
+function send(p,kind,charge=0){if(ball.holder!==p)return;const mov=p===selected?activeDir(p):p.dir,aim=(Math.abs(mov.x)+Math.abs(mov.y)>0)?mov:p.dir;let target=null,v=0;if(kind==='shot'){const gy=clamp(field.cy+(aim.y*135),field.cy-63,field.cy+63);target={x:p.team===0?field.r+10:field.l-10,y:gy};v=520+charge*330}else if(kind==='lob'){target=targetOf(p,true)||{x:p.x+aim.x*150,y:p.y+aim.y*150};v=335}else{target=targetOf(p,kind==='through')||{x:p.x+aim.x*130,y:p.y+aim.y*130};v=kind==='through'?445:370}
  const d=unit(target.x-p.x+(kind==='through'?aim.x*38:0),target.y-p.y+(kind==='through'?aim.y*38:0));loose(p,d.x*v,d.y*v);
  if(kind==='shot')announce('TIR !',.5);else announce(kind==='through'?'PASSE EN PROFONDEUR':kind==='lob'?'PASSE LOBÉE':'PASSE',.4)}
 function switchPlayer(){const avail=formation(0);const candidate=avail.filter(p=>p!==selected).sort((a,b)=>dist(a,ball)-dist(b,ball))[0];if(candidate)selected=candidate}
@@ -55,8 +55,8 @@ function step(dt){noticeTime=Math.max(0,noticeTime-dt);switchDelay=Math.max(0,sw
  let nearest=null,best=19;for(const p of players){if(p.cool>0)continue;const d=dist(p,ball);if(d<best){nearest=p;best=d}}
  if(nearest)possession(nearest)
  }
- if(ball.holder&&ball.holder.team!==0&&dist(selected,ball.holder)<24&&keys.has('KeyJ')&&selected.cool===0){const enemy=ball.holder;enemy.cool=.3;selected.cool=.4;possession(selected);announce('INTERCEPTION',.6)}
- if(ball.holder&&ball.holder.team===0&&keys.has('KeyK'))shotCharge=clamp(shotCharge+dt,0,1);else if(!keys.has('KeyK')&&prevShot){if(ball.holder===selected)send(selected,'shot',shotCharge);shotCharge=0}
+ if(ball.holder&&ball.holder.team===1&&dist(selected,ball.holder)<24&&keys.has('KeyJ')&&selected.cool===0){const enemy=ball.holder;enemy.cool=.3;selected.cool=.4;possession(selected);announce('INTERCEPTION',.6)}
+ if(ball.holder===selected&&keys.has('KeyK'))shotCharge=clamp(shotCharge+dt,0,1);else if(!keys.has('KeyK')&&prevShot){if(ball.holder===selected)send(selected,'shot',shotCharge);shotCharge=0}
  prevShot=keys.has('KeyK');updateUI()}
 function lines(){c.fillStyle='#1d7539';c.fillRect(field.l,field.t,field.r-field.l,field.b-field.t);for(let i=0;i<12;i++){c.fillStyle=i%2?'#277f41':'#227b3d';c.fillRect(field.l+i*(field.r-field.l)/12,field.t,(field.r-field.l)/12,field.b-field.t)}
  c.strokeStyle='#ecf8da';c.lineWidth=3;c.strokeRect(field.l,field.t,field.r-field.l,field.b-field.t);c.beginPath();c.moveTo(480,field.t);c.lineTo(480,field.b);c.stroke();c.beginPath();c.arc(480,field.cy,71,0,Math.PI*2);c.stroke();
@@ -82,6 +82,6 @@ document.addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','Arrow
 });
 document.addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='KeyK'&&started&&!paused&&!over&&ball.holder===selected){send(selected,'shot',shotCharge);shotCharge=0;prevShot=false}});
 window.addEventListener('blur',()=>{keys.clear();shotCharge=0;prevShot=false;if(started)paused=true});
-cvs.addEventListener('pointerdown',()=>cvs.focus());document.getElementById('restart').addEventListener('click',reset);document.getElementById('pause').addEventListener('click',()=>{if(!started){started=true;kickoffReset(0)}paused=!paused});reset();requestAnimationFrame(loop);
+cvs.addEventListener('pointerdown',()=>cvs.focus());document.getElementById('restart').addEventListener('click',()=>{keys.clear();reset()});document.getElementById('pause').addEventListener('click',()=>{if(!started){started=true;kickoffReset(0)}paused=!paused});reset();requestAnimationFrame(loop);
 })();
 </script></body></html>
