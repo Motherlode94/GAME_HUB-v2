@@ -234,7 +234,7 @@
             playUrl: "DONE/_3D The Last Signal/index.html",
             description: "Une station radio abandonnée cache une transmission inquiétante."
         },
-        {id:26,title:"Agence X",category:"strategy",tags:["espionnage","agents","gestion","missions"],playUrl:"DONE/_2D Agence X/index.html",description:"Dirige une agence secrète, recrute des agents et conduis des opérations à risques."}
+        {id:26,title:"Agence X",category:"strategy",tags:["studio","production","gestion","tycoon","18+"],playUrl:"DONE/_2D Agence X/index.html",description:"Dirige un studio de productions pour adultes fictifs : casting, tournages, distribution, contrats et finances."}
     ];
 
     function parseJson(value, fallback) {

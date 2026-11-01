@@ -1,2 +1,2 @@
-# Agence X
-Jeu de stratégie/gestion 2D autonome. Recrutement, missions, agents, alertes, entraînement et sauvegarde locale.
+# Agence X — Studio Tycoon
+Simulation 2D d'un studio de production pour adultes fictifs (21+), sans contenu sexuel explicite. Casting, contrats, tournages, distribution, réputation, finances, progression et sauvegarde locale.
