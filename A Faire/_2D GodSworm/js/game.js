@@ -1076,8 +1076,8 @@ canvas.addEventListener("mousemove", (e) => {
 // CLIC GAUCHE - Sélection
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
+  const mouseX = (e.clientX - rect.left - canvas.clientLeft) * canvas.width / Math.max(1,rect.width - canvas.clientLeft*2);
+  const mouseY = (e.clientY - rect.top - canvas.clientTop) * canvas.height / Math.max(1,rect.height - canvas.clientTop*2);
   const isShift = !!e.shiftKey;
   const isCtrlLike = !!(e.ctrlKey || e.metaKey);
 
@@ -1167,6 +1167,17 @@ canvas.addEventListener("click", (e) => {
     return;
   }
 
+  // Mode simple : cliquez sur le sol pour déplacer les unités déjà sélectionnées.
+  const selectedToMove = getSelectedPlayerUnits();
+  if (selectedToMove.length && !isShift && !isCtrlLike && !getResourceNodeAt(mouseX,mouseY)) {
+    const cols=Math.ceil(Math.sqrt(selectedToMove.length));
+    selectedToMove.forEach((unit,index)=>{
+      const ox=((index%cols)-(cols-1)/2)*26,oy=(Math.floor(index/cols)-Math.floor(selectedToMove.length/cols)/2)*26;
+      unit.moveTo(mouseX+ox,mouseY+oy);unit.target=null;unit.harvestTarget=null;
+    });
+    pushGameLog('Déplacement : '+selectedToMove.length+' unité(s).','ok');
+    return;
+  }
   // Sélection de territoire
   const clickedTerritory = getTerritoryAt(mouseX, mouseY);
   if (clickedTerritory) {
@@ -1187,8 +1198,8 @@ canvas.addEventListener("contextmenu", (e) => {
   e.preventDefault();
   
   const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
+  const mouseX = (e.clientX - rect.left - canvas.clientLeft) * canvas.width / Math.max(1,rect.width - canvas.clientLeft*2);
+  const mouseY = (e.clientY - rect.top - canvas.clientTop) * canvas.height / Math.max(1,rect.height - canvas.clientTop*2);
 
   if (isInMainMenu) return;
 

@@ -499,3 +499,12 @@ body{display:block;background:radial-gradient(circle at 50% 4%,#332047 0%,#100b1
 @media(max-width:1150px){#gameWrapper{grid-template-columns:minmax(170px,205px) minmax(0,1fr)}#rightPanels{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){#gameContainer{padding:10px;gap:10px}#gameWrapper{display:flex;flex-direction:column}#gameCanvas{order:0}#leftPanels{order:1;width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#rightPanels{order:2;width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#topControls{gap:5px}#topControls button{font-size:11px;padding:8px}#title{font-size:27px}#hud{gap:5px}.hudPanel{padding:6px 8px;font-size:10px}}
 @media(max-width:440px){#leftPanels,#rightPanels{grid-template-columns:1fr}.command-divider{display:none}#controls{font-size:10px}}
+
+/* Accessibilité et prise en main */
+#quickHelp{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;background:#1c2334;border:1px solid #698ba6;color:#edf6ff;border-radius:9px;padding:12px;font-size:12px;line-height:1.5}
+#quickHelp strong{color:#f0d18c}#quickHelp span{padding:5px 9px;background:#28344a;border-radius:5px}
+#quickHelp button{background:#304e74;color:white;border:1px solid #7694bc;border-radius:6px;padding:7px 10px;cursor:pointer}
+#quickHelp.collapsed span{display:none}
+#gameCanvas{cursor:crosshair;touch-action:manipulation}
+#leftPanels,#rightPanels{overflow-wrap:anywhere}
+@media(max-width:760px){#quickHelp{justify-content:flex-start;gap:7px}#quickHelp span{flex:1 1 100%}}

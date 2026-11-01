@@ -71,6 +71,13 @@
       <span id="status-line" role="status">Commandez vos troupes pour convertir les territoires.</span>
     </div>
 
+    <section id="quickHelp" aria-label="Aide de jeu">
+      <strong>🎯 Comment jouer ?</strong>
+      <span>1. Cliquez sur votre soldat ou paysan.</span>
+      <span>2. Cliquez sur le terrain pour le déplacer.</span>
+      <span>3. Clic droit sur une ressource pour récolter ou sur un ennemi pour attaquer.</span>
+      <button id="toggleHelp" type="button" aria-expanded="true">Masquer l'aide</button>
+    </section>
     <!-- Wrapper pour panels + canvas -->
     <div id="gameWrapper">
       <!-- Panels à gauche -->
@@ -218,6 +225,9 @@
   <script src="js/ui.js"></script>
   <script src="js/game.js"></script>
   <script src="js/war-room.js"></script>
+  <script>
+    (()=>{const btn=document.getElementById('toggleHelp'),panel=document.getElementById('quickHelp');btn.addEventListener('click',()=>{const collapsed=panel.classList.toggle('collapsed');btn.textContent=collapsed?'Afficher l’aide':'Masquer l’aide';btn.setAttribute('aria-expanded',String(!collapsed));});})();
+  </script>
 
 <script src='../../js/game-shell.js'></script>
 <script>
