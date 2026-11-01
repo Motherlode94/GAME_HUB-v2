@@ -24,7 +24,7 @@ function updateUI(){const n=Math.max(0,Math.ceil(seconds));document.getElementBy
 function announce(t,sec=1.1){notice=t;noticeTime=sec}
 function formation(t){return players.filter(p=>p.team===t&&!p.keeper)}
 function activeDir(p){let x=0,y=0;if(keys.has('KeyQ')||keys.has('ArrowLeft'))x--;if(keys.has('KeyD')||keys.has('ArrowRight'))x++;if(keys.has('KeyZ')||keys.has('ArrowUp'))y--;if(keys.has('KeyS')||keys.has('ArrowDown'))y++;return unit(x,y)}
-function possession(p){ball.holder=p;ball.vx=0;ball.vy=0;ball.x=p.x+p.dir.x*14;ball.y=p.y+p.dir.y*14;ball.last=p.team}
+function possession(p){ball.holder=p;ball.vx=0;ball.vy=0;ball.x=p.x+p.dir.x*14;ball.y=p.y+p.dir.y*14;ball.last=p.team;if(p.team===0&&!p.keeper)selected=p}
 function loose(p,vx,vy){ball.holder=null;ball.x=p.x+p.dir.x*17;ball.y=p.y+p.dir.y*17;ball.vx=vx;ball.vy=vy;ball.last=p.team;p.cool=.24}
 function targetOf(p,lead=false){const mates=formation(p.team).filter(m=>m!==p);let best=null,bestVal=-1e9;for(const m of mates){let dx=m.x-p.x,dy=m.y-p.y,dd=Math.hypot(dx,dy);if(dd<28||dd>480)continue;const front=dx*(p.team===0?1:-1);const val=(lead?front*.65:0)-dd*.21-Math.abs(dy)*.04+(m.index===4?4:0);if(val>bestVal){bestVal=val;best=m}}return best}
 function send(p,kind,charge=0){if(ball.holder!==p)return;const mov=p===selected?activeDir(p):p.dir,aim=(Math.abs(mov.x)+Math.abs(mov.y)>0)?mov:p.dir;let target=null,v=0;if(kind==='shot'){const gy=clamp(field.cy+(aim.y*135),field.cy-63,field.cy+63);target={x:p.team===0?field.r+10:field.l-10,y:gy};v=520+charge*330}else if(kind==='lob'){target=targetOf(p,true)||{x:p.x+aim.x*150,y:p.y+aim.y*150};v=335}else{target=targetOf(p,kind==='through')||{x:p.x+aim.x*130,y:p.y+aim.y*130};v=kind==='through'?445:370}
