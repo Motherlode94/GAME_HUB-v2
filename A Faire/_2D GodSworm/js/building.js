@@ -10,6 +10,9 @@ class Building {
     this.maxHealth = 200;
     this.selected = false;
     this.state = "active"; // active, damaged, destroyed
+    this.constructionProgress=1;
+    this.constructionDuration=9000;
+    this.rallyPoint=null;
     this.productionQueue = [];
     this.productionTimer = 0;
     this.resourceTickTimer = 0;
@@ -154,6 +157,12 @@ class Building {
       return;
     }
 
+    if(this.constructionProgress<1){
+      const workers=units.filter(u=>u.canHarvest&&u.faction===this.faction&&u.state!=="dead"&&u.buildTarget===this&&Math.hypot(u.x-this.x-this.size/2,u.y-this.y-this.size/2)<85);
+      if(workers.length)this.constructionProgress=Math.min(1,this.constructionProgress+deltaTime*(1+Math.min(3,workers.length-1)*.5)/this.constructionDuration);
+      if(this.constructionProgress>=1)workers.forEach(u=>u.buildTarget=null);
+      return;
+    }
     this.state = this.health < this.maxHealth * 0.3 ? "damaged" : "active";
 
     if (this.canProduce && this.productionQueue.length > 0) {
@@ -190,6 +199,7 @@ class Building {
     const spawnY = this.y + this.size / 2;
 
     const unit = addUnit(spawnX, spawnY, this.faction, unitType);
+    if(unit&&this.rallyPoint)unit.moveTo(this.rallyPoint.x,this.rallyPoint.y);
     createParticleExplosion(spawnX, spawnY, getFactionColor(this.faction), 10);
     return unit;
   }
@@ -224,6 +234,15 @@ class Building {
   }
 
   draw(ctx) {
+    if(this.constructionProgress<1){
+      ctx.save();ctx.fillStyle="#4a4037";ctx.fillRect(this.x,this.y,this.size,this.size);
+      ctx.strokeStyle="#d7ae72";ctx.lineWidth=3;ctx.strokeRect(this.x,this.y,this.size,this.size);
+      ctx.strokeStyle="#b19d7b";for(let i=1;i<4;i++){const x=this.x+this.size*i/4;ctx.beginPath();ctx.moveTo(x,this.y);ctx.lineTo(x,this.y+this.size);ctx.stroke()}
+      ctx.fillStyle="#182720";ctx.fillRect(this.x,this.y+this.size+4,this.size,7);
+      ctx.fillStyle="#88db9b";ctx.fillRect(this.x,this.y+this.size+4,this.size*this.constructionProgress,7);
+      ctx.fillStyle="white";ctx.font="bold 11px Arial";ctx.fillText("Chantier "+Math.floor(this.constructionProgress*100)+"%",this.x,this.y-6);
+      ctx.restore();return;
+    }
     if (this.state === "destroyed") {
       ctx.save();
       ctx.globalAlpha = 0.3;

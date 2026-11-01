@@ -1057,8 +1057,8 @@ function createParticleExplosion(x, y, color, count = 15) {
 
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
-  godCursor.x = e.clientX - rect.left;
-  godCursor.y = e.clientY - rect.top;
+  godCursor.x=(e.clientX-rect.left)*canvas.width/Math.max(1,rect.width);
+  godCursor.y=(e.clientY-rect.top)*canvas.height/Math.max(1,rect.height);
 
   buildPreviewX = godCursor.x;
   buildPreviewY = godCursor.y;
@@ -1082,7 +1082,7 @@ canvas.addEventListener("click", (e) => {
   const isCtrlLike = !!(e.ctrlKey || e.metaKey);
 
   if (isInMainMenu) return;
-
+  if(window.godswormRallyBuilding){window.godswormRallyBuilding.rallyPoint={x:mouseX,y:mouseY};window.godswormRallyBuilding=null;pushGameLog("Point de ralliement défini.","ok");return}
   if (divineCastMode) {
     const casted = castDivinePowerAt(mouseX, mouseY);
     if (casted) {
@@ -1097,7 +1097,10 @@ canvas.addEventListener("click", (e) => {
     const cost=BUILDING_COSTS[buildMode];const rc={};
     for(const item of ['gold','wood','food'])if(cost[item])rc[RESOURCES[item.toUpperCase()]]=cost[item];
     if(!consumeResources(rc)){pushGameLog("Ressources insuffisantes.","warn");return}
-    addBuilding(test.x,test.y,PLAYER_FACTION,buildMode);
+    const site=addBuilding(test.x,test.y,PLAYER_FACTION,buildMode);site.constructionProgress=0;
+    const worker=units.filter(u=>u.faction===PLAYER_FACTION&&u.canHarvest&&u.state!=="dead").sort((a,b)=>Math.hypot(a.x-mouseX,a.y-mouseY)-Math.hypot(b.x-mouseX,b.y-mouseY))[0];
+    if(worker){worker.buildTarget=site;worker.harvestTarget=null;worker.moveTo(site.x+site.size/2,site.y+site.size/2+20)}
+    else pushGameLog("Chantier posé : affectez un paysan pour le construire.","warn");
     createParticleExplosion(mouseX,mouseY,"#86df95",12);
     pushGameLog("Bâtiment construit. Sélectionnez-le pour recruter.","ok");
     buildMode=null;return;
@@ -1450,6 +1453,16 @@ function recruitAtSelectedBuilding(type){
   selectedBuilding.produceUnit(type);pushGameLog("Unité ajoutée à la file de recrutement.","ok");return true;
 }
 
+function orderBuilderToSite(){
+  const site=selectedBuilding;if(!site||site.constructionProgress>=1)return false;
+  const worker=units.filter(u=>u.faction===PLAYER_FACTION&&u.canHarvest&&u.state!=="dead").sort((a,b)=>Math.hypot(a.x-site.x,a.y-site.y)-Math.hypot(b.x-site.x,b.y-site.y))[0];
+  if(!worker){pushGameLog("Aucun paysan disponible.","warn");return false}
+  worker.buildTarget=site;worker.harvestTarget=null;worker.moveTo(site.x+site.size/2,site.y+site.size/2+20);return true;
+}
+function setSelectedRallyPoint(){
+ if(!selectedBuilding||!selectedBuilding.canProduce)return false;
+ window.godswormRallyBuilding=selectedBuilding;pushGameLog("Cliquez sur la carte pour définir le ralliement.");return true;
+}
 // Gestion du menu de construction
 document.querySelectorAll('.buildButton').forEach(button => {
   button.addEventListener('click', () => {
@@ -1703,7 +1716,9 @@ function serializeGameState() {
         type: building.type,
         health: building.health,
         productionQueue: Array.isArray(building.productionQueue) ? building.productionQueue.slice() : [],
-        productionTimer: Number(building.productionTimer) || 0
+        productionTimer: Number(building.productionTimer) || 0,
+        constructionProgress:building.constructionProgress,
+        rallyPoint:building.rallyPoint
       })),
     units: units
       .filter((unit) => unit.state !== "dead")
@@ -1793,6 +1808,8 @@ function applySerializedState(snapshot) {
       created.health = Number(savedBuilding.health) || created.health;
       created.productionQueue = Array.isArray(savedBuilding.productionQueue) ? savedBuilding.productionQueue.slice() : [];
       created.productionTimer = Number(savedBuilding.productionTimer) || 0;
+      created.constructionProgress = Number.isFinite(savedBuilding.constructionProgress)?savedBuilding.constructionProgress:1;
+      created.rallyPoint=savedBuilding.rallyPoint||null;
     });
   }
 
@@ -1904,6 +1921,7 @@ function draw() {
   drawMapDecorations(ctx); // Décorations de la carte
   drawResourceNodes(ctx);
   drawAllBuildings(ctx);
+  buildings.forEach(b=>{if(b.selected&&b.rallyPoint){ctx.save();ctx.strokeStyle="#efd07a";ctx.setLineDash([7,7]);ctx.beginPath();ctx.moveTo(b.x+b.size/2,b.y+b.size/2);ctx.lineTo(b.rallyPoint.x,b.rallyPoint.y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#efd07a";ctx.fillRect(b.rallyPoint.x-5,b.rallyPoint.y-5,10,10);ctx.restore()}});
   drawAllUnits(ctx);
   drawAllRituals(ctx); // Rituels actifs
   particles.forEach(p => p.draw(ctx));
