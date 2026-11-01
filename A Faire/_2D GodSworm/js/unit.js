@@ -5,42 +5,33 @@ const WarlikeSprites=(()=>{const frames=new Map();function get(role,step){const 
 
 /* Navigation tactique : A* sur grille, obstacles de bâtiments et contournement local. */
 const TacticalNav=(()=>{
- const cell=32;
- function blocked(x,y,except=null){
-  return typeof buildings!=="undefined"&&buildings.some(b=>b!==except&&b.state!=="destroyed"&&x>b.x-12&&x<b.x+b.size+12&&y>b.y-12&&y<b.y+b.size+12);
+ const CELL=24;
+ function blocked(x,y){
+  return typeof buildings!=="undefined"&&buildings.some(b=>b.state!=="destroyed"&&x>b.x-12&&x<b.x+b.size+12&&y>b.y-12&&y<b.y+b.size+12);
  }
  function path(sx,sy,tx,ty){
   if(typeof canvas==="undefined")return [{x:tx,y:ty}];
-  const w=Math.ceil(canvas.width/cell),h=Math.ceil(canvas.height/cell);
-  const grid=(x,y)=>y*w+x;
-  const clamp=(v,n)=>Math.max(0,Math.min(n-1,Math.floor(v/cell)));
-  const start={x:clamp(sx,w),y:clamp(sy,h)};
-  if(blocked(tx,ty)){
-    const near=[];
-    for(let radius=cell;radius<=cell*5;radius+=cell)for(let n=0;n<16;n++){const a=n*Math.PI/8;const px=tx+Math.cos(a)*radius,py=ty+Math.sin(a)*radius;if(px>8&&py>8&&px<canvas.width-8&&py<canvas.height-8&&!blocked(px,py))near.push({x:px,y:py,d:Math.hypot(px-sx,py-sy)})}
-    if(!near.length)return [];
-    near.sort((a,b)=>a.d-b.d);tx=near[0].x;ty=near[0].y;
-  }
-  const goal={x:clamp(tx,w),y:clamp(ty,h)};
-  const startId=grid(start.x,start.y),endId=grid(goal.x,goal.y);
-  const open=[startId],openSet=new Set(open),came=new Map(),cost=new Map([[startId,0]]);
-  const heuristic=id=>Math.abs(id%w-goal.x)+Math.abs(Math.floor(id/w)-goal.y);
-  let scans=0;
-  while(open.length&&scans++<1600){
-   open.sort((a,b)=>(cost.get(b)+heuristic(b))-(cost.get(a)+heuristic(a)));
-   const id=open.pop();openSet.delete(id);
-   if(id===endId){const route=[{x:tx,y:ty}];let cur=id;
-    while(came.has(cur)){const x=cur%w,y=Math.floor(cur/w);route.unshift({x:(x+.5)*cell,y:(y+.5)*cell});cur=came.get(cur)}
-    return route;
-   }
-   const cx=id%w,cy=Math.floor(id/w);
-   for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
-    const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=w||y>=h)continue;
-    const next=grid(x,y);if(blocked((x+.5)*cell,(y+.5)*cell)&&next!==startId)continue;
-    const nextCost=cost.get(id)+1;
-    if(nextCost>=(cost.get(next)??Infinity))continue;
-    cost.set(next,nextCost);came.set(next,id);
-    if(!openSet.has(next)){open.push(next);openSet.add(next)}
+  const w=Math.ceil(canvas.width/CELL),h=Math.ceil(canvas.height/CELL);
+  const cx=x=>Math.max(0,Math.min(w-1,Math.floor(x/CELL))),cy=y=>Math.max(0,Math.min(h-1,Math.floor(y/CELL)));
+  const key=(x,y)=>y*w+x,point=id=>({x:((id%w)+.5)*CELL,y:(Math.floor(id/w)+.5)*CELL});
+  const start=key(cx(sx),cy(sy));
+  let goal=key(cx(tx),cy(ty));
+  const free=id=>{const p=point(id);return !blocked(p.x,p.y)};
+  // Find a navigable target cell, including for construction/harvest orders.
+  if(!free(goal)){let best=-1,dist=Infinity;for(let y=Math.max(0,cy(ty)-8);y<=Math.min(h-1,cy(ty)+8);y++)for(let x=Math.max(0,cx(tx)-8);x<=Math.min(w-1,cx(tx)+8);x++){let id=key(x,y);if(!free(id))continue;const p=point(id),d=Math.hypot(p.x-tx,p.y-ty);if(d<dist){dist=d;best=id}}if(best<0)return [];goal=best}
+  const open=[start],opened=new Set([start]),came=new Map(),cost=new Map([[start,0]]);
+  const score=id=>cost.get(id)+Math.abs(id%w-goal%w)+Math.abs(Math.floor(id/w)-Math.floor(goal/w));
+  let visited=0;
+  while(open.length&&visited++<w*h){
+   let best=0;for(let i=1;i<open.length;i++)if(score(open[i])<score(open[best]))best=i;
+   const id=open.splice(best,1)[0];opened.delete(id);
+   if(id===goal){let list=[],cur=id;while(cur!==start&&came.has(cur)){list.push(point(cur));cur=came.get(cur)}list.reverse();return list.length?list:[point(goal)]}
+   const x=id%w,y=Math.floor(id/w);
+   for(const [vx,vy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+    const nx=x+vx,ny=y+vy;if(nx<0||ny<0||nx>=w||ny>=h)continue;
+    const next=key(nx,ny);if(next!==start&&!free(next))continue;
+    const value=cost.get(id)+1;if(value>=(cost.get(next)??Infinity))continue;
+    cost.set(next,value);came.set(next,id);if(!opened.has(next)){open.push(next);opened.add(next)}
    }
   }
   return [];
@@ -574,29 +565,40 @@ class Unit {
   }
 
   moveToTarget(deltaTime) {
-    let destination=this.navPath&&this.navPath.length?this.navPath[0]:{x:this.targetX,y:this.targetY};
-    let dx=destination.x-this.x,dy=destination.y-this.y,distance=Math.hypot(dx,dy);
-    if(distance<8&&this.navPath&&this.navPath.length){this.navPath.shift();destination=this.navPath[0]||{x:this.targetX,y:this.targetY};dx=destination.x-this.x;dy=destination.y-this.y;distance=Math.hypot(dx,dy)}
-    if(distance<=5){this.state="idle";this.moveOrderActive=false;return}
-    const step=Math.min(distance,this.speed*deltaTime/16),vx=dx/distance,vy=dy/distance;
+    if(!this.navPath)this.navPath=[];
+    const destination=this.navPath[0]||{x:this.targetX,y:this.targetY};
+    let dx=destination.x-this.x,dy=destination.y-this.y;
+    let distance=Math.hypot(dx,dy);
+    // Consume waypoints, including those initially inside the same occupied grid cell.
+    while(distance<9&&this.navPath.length){this.navPath.shift();const p=this.navPath[0]||this.navGoal||{x:this.targetX,y:this.targetY};dx=p.x-this.x;dy=p.y-this.y;distance=Math.hypot(dx,dy)}
+    if(distance<7){this.state="idle";this.moveOrderActive=false;return}
+    const step=Math.min(distance,this.speed*deltaTime/16);let vx=dx/distance,vy=dy/distance;
     let nx=this.x+vx*step,ny=this.y+vy*step;
     if(TacticalNav.blocked(nx,ny)){
-      // Replanification limitée afin de ne pas refaire A* à chaque image.
+      // A building can be created after a path was planned; replan from current position.
       this.navCooldown=(this.navCooldown||0)-deltaTime;
-      if(this.navCooldown<=0){this.navPath=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);this.navCooldown=650}
+      if(this.navCooldown<=0){const route=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);if(route.length){this.navPath=route;this.navGoal=route[route.length-1]}this.navCooldown=800}
+      this.stuckTimer=(this.stuckTimer||0)+deltaTime;
       return;
     }
-    // Séparation douce : empêche les escouades de se superposer.
+    // Separation is steering, not a hard collision against other moving units.
     if(typeof units!=="undefined"){
-      let pushX=0,pushY=0;
+      let px=0,py=0;
       for(const other of units){if(other===this||other.state==="dead")continue;
-        const rx=nx-other.x,ry=ny-other.y,d=Math.hypot(rx,ry);
-        if(d>0.01&&d<20){pushX+=rx/d*(20-d)*.16;pushY+=ry/d*(20-d)*.16}
+       const rx=nx-other.x,ry=ny-other.y,d=Math.hypot(rx,ry);
+       if(d>0.1&&d<19){px+=rx/d*(19-d)*.12;py+=ry/d*(19-d)*.12}
       }
-      if(!TacticalNav.blocked(nx+pushX,ny+pushY)){nx+=pushX;ny+=pushY}
+      if(!TacticalNav.blocked(nx+px,ny+py)){nx+=px;ny+=py}
     }
     this.x=nx;this.y=ny;this.state="moving";this.spriteClock+=deltaTime;
-    this.spriteFacing=Math.abs(vx)>Math.abs(vy)?(vx>0?"right":"left"):(vy>0?"down":"up");
+    this.spriteFacing=Math.abs(vx)>=Math.abs(vy)?(vx>=0?"right":"left"):(vy>=0?"down":"up");
+    // Avoid oscillating forever on a stale waypoint.
+    this.stuckTimer=(this.stuckTimer||0)+deltaTime;
+    if(this.stuckTimer>1200){
+      const moved=Math.hypot(this.x-(this.lastMoveX??this.x),this.y-(this.lastMoveY??this.y));
+      if(moved<7){const route=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);if(route.length){this.navPath=route;this.navGoal=route[route.length-1]}}
+      this.lastMoveX=this.x;this.lastMoveY=this.y;this.stuckTimer=0;
+    }
   }
 
   attackTarget(deltaTime) {
@@ -714,6 +716,8 @@ class Unit {
     if(this.commandStance==="hold")this.commandStance="move";
     if(this.canHarvest){this.harvestTarget=null;this.dropoffBuilding=null;this.buildTarget=null;}
     this.navPath=TacticalNav.path(this.x,this.y,x,y);
+    this.navGoal=this.navPath.length?this.navPath[this.navPath.length-1]:{x,y};
+    this.stuckTimer=0;this.lastMoveX=this.x;this.lastMoveY=this.y;
     this.moveOrderActive=true;
     this.targetX = x;
     this.targetY = y;
