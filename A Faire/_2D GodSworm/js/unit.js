@@ -100,6 +100,17 @@ class Unit {
 
     if (this.state === "dead") return;
 
+    // Les ordres de chantier priment sur la récolte automatique.
+    if(this.canHarvest&&this.buildTarget){
+      if(this.buildTarget.constructionProgress>=1||this.buildTarget.state==="destroyed"){this.buildTarget=null;this.state="idle";}
+      else{
+        const bx=this.buildTarget.x+this.buildTarget.size/2,by=this.buildTarget.y+this.buildTarget.size/2+20;
+        if(Math.hypot(this.x-bx,this.y-by)>35){this.targetX=bx;this.targetY=by;this.moveToTarget(deltaTime);}
+        else{this.state="building";}
+        return;
+      }
+    }
+
     // Paysan en mode récolte
     if (this.canHarvest) {
       if (this.harvestTarget && !this.isHarvestNodeUsable(this.harvestTarget, 0.01)) {
