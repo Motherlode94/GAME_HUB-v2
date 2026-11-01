@@ -44,40 +44,33 @@
   }
 
   draw(ctx) {
-    ctx.fillStyle = getFactionColor(this.faction, this.selected);
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-
-    if (this.hovered) {
-      ctx.fillStyle = "rgba(255,255,255,0.08)";
-      ctx.fillRect(this.x, this.y, this.width, this.height);
+    // Terrain lisible : couleurs de faction en surcouche, sans modifier les zones cliquables.
+    const factionColor=getFactionColor(this.faction,this.selected);
+    ctx.fillStyle="#3e533d";ctx.fillRect(this.x,this.y,this.width,this.height);
+    ctx.fillStyle=factionColor;ctx.globalAlpha=.69;ctx.fillRect(this.x,this.y,this.width,this.height);ctx.globalAlpha=1;
+    const seed=(Math.floor(this.x/32)*73856093+Math.floor(this.y/32)*19349663)>>>0;
+    ctx.save();ctx.beginPath();ctx.rect(this.x+2,this.y+2,Math.max(0,this.width-4),Math.max(0,this.height-4));ctx.clip();
+    // Motif de prairie discret ; reste stable d'une image à l'autre.
+    for(let n=0;n<100;n++){
+      const hash=(seed+n*1664525+1013904223)>>>0;
+      const px=this.x+8+(hash%Math.max(1,this.width-16));
+      const py=this.y+8+((Math.imul(hash^0x9e3779b9,1597334677)>>>0)%Math.max(1,this.height-16));
+      ctx.fillStyle=n%4===0?"rgba(237,222,161,.17)":"rgba(10,38,22,.14)";
+      ctx.fillRect(px,py,3+(n%3),2);
     }
-
-    ctx.strokeStyle = this.selected ? "#ffcc00" : getFactionBorderColor(this.faction);
-    ctx.lineWidth = this.selected ? 3 : 1;
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
-
-    if (this.width >= 220 && this.height >= 180) {
-      ctx.save();
-      ctx.globalAlpha = 0.25;
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 48px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(getFactionIcon(this.faction), this.x + this.width / 2, this.y + this.height / 2);
-      ctx.restore();
-    }
-
-    if (this.faction !== FACTIONS.NEUTRAL) {
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.fillRect(this.x + 6, this.y + 6, 96, 24);
-      ctx.fillStyle = "#fff";
-      ctx.font = "12px Arial";
-      ctx.fillText(`${Math.floor(this.population)} pop`, this.x + 10, this.y + 22);
-
-      ctx.fillStyle = "rgba(0,0,0,0.45)";
-      ctx.fillRect(this.x + 106, this.y + 6, 90, 24);
-      ctx.fillStyle = "#ffd66b";
-      ctx.fillText(`res ${Math.floor(this.resistance)}`, this.x + 110, this.y + 22);
+    ctx.restore();
+    // Frontières : deux traits contrastés et un effet de sélection.
+    ctx.strokeStyle="rgba(7,10,16,.72)";ctx.lineWidth=5;ctx.strokeRect(this.x+2.5,this.y+2.5,this.width-5,this.height-5);
+    ctx.strokeStyle=this.selected?"#ffe28e":this.hovered?"#eff0c9":getFactionBorderColor(this.faction);
+    ctx.lineWidth=this.selected?4:2;ctx.strokeRect(this.x+3,this.y+3,this.width-6,this.height-6);
+    if(this.hovered){ctx.fillStyle="rgba(255,255,255,.095)";ctx.fillRect(this.x+5,this.y+5,this.width-10,this.height-10)}
+    // Emblème de faction discret, visible sous les unités.
+    if(this.width>=220&&this.height>=180){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle="#fff";ctx.font="bold 64px Georgia";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(getFactionIcon(this.faction),this.x+this.width/2,this.y+this.height/2);ctx.restore()}
+    if(this.faction!==FACTIONS.NEUTRAL){
+      const barW=Math.min(196,this.width-20),bx=this.x+10,by=this.y+10;
+      ctx.fillStyle="rgba(9,14,22,.84)";ctx.fillRect(bx,by,barW,29);
+      ctx.fillStyle="#fff";ctx.font="bold 13px Arial";ctx.textAlign="left";ctx.fillText(Math.floor(this.population)+" habitants",bx+9,by+19);
+      ctx.fillStyle="#e9ca85";ctx.textAlign="right";ctx.fillText("Rés. "+Math.floor(this.resistance),bx+barW-8,by+19);ctx.textAlign="left";
     }
   }
 }
@@ -91,30 +84,30 @@ class MapDecoration {
   }
 
   draw(ctx) {
-    if (this.type === "forest") {
-      ctx.fillStyle = "rgba(21, 94, 38, 0.55)";
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.data.size || 26, 0, Math.PI * 2);
-      ctx.fill();
-      return;
+    const x=this.x,y=this.y,d=this.data;
+    ctx.save();
+    if(this.type==="forest"){
+      const size=d.size||26;
+      ctx.fillStyle="rgba(14,46,25,.34)";ctx.beginPath();ctx.ellipse(x,y+size*.35,size*1.05,size*.55,0,0,Math.PI*2);ctx.fill();
+      for(let i=0;i<5;i++){
+        const angle=i*2.4,rx=x+Math.cos(angle)*size*.36,ry=y+Math.sin(angle)*size*.3;
+        ctx.fillStyle="#6a4e33";ctx.fillRect(rx-3,ry,6,size*.47);
+        ctx.fillStyle=i%2?"#295f3c":"#397948";
+        ctx.beginPath();ctx.moveTo(rx,ry-size*.8);ctx.lineTo(rx-size*.35,ry+size*.1);ctx.lineTo(rx+size*.35,ry+size*.1);ctx.closePath();ctx.fill();
+        ctx.strokeStyle="rgba(9,28,17,.65)";ctx.lineWidth=1.5;ctx.stroke();
+      }
+    }else if(this.type==="lake"){
+      const w=d.w||45,h=d.h||26;
+      ctx.fillStyle="#2b637b";ctx.beginPath();ctx.ellipse(x,y,w+4,h+4,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#317f9b";ctx.beginPath();ctx.ellipse(x,y,w,h,0,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle="rgba(176,225,236,.6)";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x-w*.1,y-h*.1,w*.65,h*.55,0,.25,2.2);ctx.stroke();
+    }else if(this.type==="road"){
+      const ex=d.x2??x,ey=d.y2??y,width=d.w||18;
+      ctx.lineCap="round";ctx.strokeStyle="#4f4439";ctx.lineWidth=width+6;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(ex,ey);ctx.stroke();
+      ctx.strokeStyle="#a48a65";ctx.lineWidth=width;ctx.stroke();
+      ctx.strokeStyle="rgba(226,200,143,.4)";ctx.lineWidth=2;ctx.setLineDash([15,18]);ctx.stroke();ctx.setLineDash([]);
     }
-
-    if (this.type === "lake") {
-      ctx.fillStyle = "rgba(28, 110, 170, 0.45)";
-      ctx.beginPath();
-      ctx.ellipse(this.x, this.y, this.data.w || 45, this.data.h || 26, 0, 0, Math.PI * 2);
-      ctx.fill();
-      return;
-    }
-
-    if (this.type === "road") {
-      ctx.strokeStyle = "rgba(100, 100, 100, 0.6)";
-      ctx.lineWidth = this.data.w || 18;
-      ctx.beginPath();
-      ctx.moveTo(this.x, this.y);
-      ctx.lineTo(this.data.x2 || this.x, this.data.y2 || this.y);
-      ctx.stroke();
-    }
+    ctx.restore();
   }
 }
 
