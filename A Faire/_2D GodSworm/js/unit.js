@@ -36,7 +36,15 @@ const TacticalNav=(()=>{
   }
   return [];
  }
- return {path,blocked};
+ function freeSpot(x,y){
+  if(!blocked(x,y))return {x,y};
+  for(let radius=16;radius<=192;radius+=16)for(let i=0;i<16;i++){
+   const a=i*Math.PI/8,px=x+Math.cos(a)*radius,py=y+Math.sin(a)*radius;
+   if(px>15&&py>15&&px<canvas.width-15&&py<canvas.height-15&&!blocked(px,py))return {x:px,y:py};
+  }
+  return null;
+ }
+ return {path,blocked,freeSpot};
 })();
 
 class Unit {
@@ -140,6 +148,11 @@ class Unit {
     if (this.state === "dead") return;
 
     // Les ordres de chantier priment sur la récolte automatique.
+    // Recover legacy saves and starting troops spawned inside solid buildings.
+    if(TacticalNav.blocked(this.x,this.y)){
+      const safe=TacticalNav.freeSpot(this.x,this.y);
+      if(safe){this.x=safe.x;this.y=safe.y;this.navPath=[];this.navCooldown=0;}
+    }
     if(this.canHarvest&&this.buildTarget){
       if(this.buildTarget.constructionProgress>=1||this.buildTarget.state==="destroyed"){this.buildTarget=null;this.state="idle";}
       else{

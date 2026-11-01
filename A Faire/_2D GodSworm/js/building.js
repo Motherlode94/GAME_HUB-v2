@@ -195,8 +195,28 @@ class Building {
     if (this.productionQueue.length === 0) return null;
 
     const unitType = this.productionQueue.shift();
-    const spawnX = this.x + this.size / 2 + 20;
-    const spawnY = this.y + this.size / 2;
+    // Spawn outside the FULL building footprint, not from its centre.
+    const centerX=this.x+this.size/2,centerY=this.y+this.size/2;
+    const margin=26;
+    const candidates=[
+      {x:this.x+this.size+margin,y:centerY},
+      {x:this.x-margin,y:centerY},
+      {x:centerX,y:this.y+this.size+margin},
+      {x:centerX,y:this.y-margin}
+    ];
+    for(let radius=1;radius<=5;radius++){
+      for(let side=0;side<4;side++){
+        const angle=side*Math.PI/2;
+        candidates.push({x:centerX+Math.cos(angle)*(this.size/2+margin+radius*28),y:centerY+Math.sin(angle)*(this.size/2+margin+radius*28)});
+      }
+    }
+    const open=candidates.filter(p=>p.x>16&&p.y>16&&p.x<canvas.width-16&&p.y<canvas.height-16&&!TacticalNav.blocked(p.x,p.y));
+    if(!open.length){this.productionQueue.unshift(unitType);this.productionTimer=this.productionTime;return null}
+    const spot=open.sort((a,b)=>{
+      const d=p=>this.rallyPoint?Math.hypot(p.x-this.rallyPoint.x,p.y-this.rallyPoint.y):Math.hypot(p.x-centerX,p.y-centerY);
+      return d(a)-d(b);
+    })[0];
+    const spawnX=spot.x,spawnY=spot.y;
 
     const unit = addUnit(spawnX, spawnY, this.faction, unitType);
     if(typeof applyMilitaryTech==="function")applyMilitaryTech(unit);
