@@ -64,7 +64,7 @@ const EVENTS = [
       const hasHospital = countBuildingType('hospital') > 0;
       if (hasHospital) {
         satisfaction = Math.max(0, satisfaction - 5);
-        notify('🦠 Épidémie contenue grâce à l'hôpital ! (−5 satisfaction)', 'info');
+        notify("🦠 Épidémie contenue grâce à l'hôpital ! (−5 satisfaction)", 'info');
       } else {
         satisfaction = Math.max(0, satisfaction - 25);
         const perdu = randInt(5, Math.max(6, Math.floor(population * 0.1)));
@@ -93,7 +93,7 @@ const EVENTS = [
       notify(`🌍 Séisme ! −${dmg}$ · −18 satisfaction · habitants fuis`, 'error');
     },
     choices: [
-      { label: 'Cellule de crise (−500$)', cost: 500, effect: () => { budget -= 500; satisfaction = Math.min(100, satisfaction + 12); notify('🚑 Aide d'urgence déployée !', 'info'); } },
+      { label: 'Cellule de crise (−500$)', cost: 500, effect: () => { budget -= 500; satisfaction = Math.min(100, satisfaction + 12); notify("🚑 Aide d'urgence déployée !", 'info'); } },
       { label: 'Reconstruire seul', cost: 0, effect: () => {} }
     ]
   },
@@ -131,7 +131,7 @@ const EVENTS = [
       notify(`📈 Boom ! +${bonus}$ · afflux de nouveaux habitants !`, 'success');
     },
     choices: [
-      { label: 'Investir dans l'infrastructure (−600$)', cost: 600, effect: () => { budget -= 600; satisfaction = Math.min(100, satisfaction + 12); notify('🏗️ Infrastructure renforcée ! Croissance durable.', 'success'); } },
+      { label: "Investir dans l'infrastructure (−600$)", cost: 600, effect: () => { budget -= 600; satisfaction = Math.min(100, satisfaction + 12); notify('🏗️ Infrastructure renforcée ! Croissance durable.', 'success'); } },
       { label: 'Encaisser les bénéfices', cost: 0, effect: () => {} }
     ]
   },
@@ -151,7 +151,7 @@ const EVENTS = [
     },
     choices: [
       { label: 'Négocier (−600$)', cost: 600, effect: () => { budget -= 600; satisfaction = Math.min(100, satisfaction + 18); notify('🤝 Accord trouvé ! Les travailleurs reprennent.', 'success'); } },
-      { label: 'Tenir ferme', cost: 0, effect: () => { satisfaction = Math.max(0, satisfaction - 5); notify('😤 Pas d'accord. La grève continue.', 'error'); } }
+      { label: 'Tenir ferme', cost: 0, effect: () => { satisfaction = Math.max(0, satisfaction - 5); notify("😤 Pas d'accord. La grève continue.", 'error'); } }
     ]
   },
 
@@ -159,7 +159,7 @@ const EVENTS = [
   {
     id: 'subsidy',
     title: '🏛️ Subvention Gouvernementale',
-    desc: 'L'État récompense le développement de votre ville !',
+    desc: "L'État récompense le développement de votre ville !",
     type: 'good',
     condition: () => res.buildings >= 3,
     effect: () => {
@@ -216,7 +216,7 @@ const EVENTS = [
   {
     id: 'tech_boom',
     title: '💻 Révolution Technologique',
-    desc: 'Une startup issue de votre école locale révolutionne l'industrie !',
+    desc: "Une startup issue de votre école locale révolutionne l'industrie !",
     type: 'good',
     condition: () => countBuildingType('school') >= 1 && (countBuildingType('office') + countBuildingType('library')) >= 1,
     effect: () => {
@@ -245,7 +245,7 @@ const EVENTS = [
     },
     choices: [
       { label: 'Réparer en urgence (−400$)', cost: 400, effect: () => { budget -= 400; satisfaction = Math.min(100, satisfaction + 15); notify('🔧 Courant rétabli ! Les habitants soulagés.', 'success'); } },
-      { label: 'Attendre le retour du courant', cost: 0, effect: () => { satisfaction = Math.max(0, satisfaction - 5); notify('⏳ La panne dure… l'impatience monte.', 'error'); } }
+      { label: 'Attendre le retour du courant', cost: 0, effect: () => { satisfaction = Math.max(0, satisfaction - 5); notify("⏳ La panne dure… l'impatience monte.", 'error'); } }
     ]
   },
 
@@ -253,7 +253,7 @@ const EVENTS = [
   {
     id: 'tourism',
     title: '✈️ Afflux Touristique',
-    desc: 'Votre ville attire des visiteurs internationaux ! L'économie locale s'envole.',
+    desc: "Votre ville attire des visiteurs internationaux ! L'économie locale s'envole.",
     type: 'good',
     condition: () => (countBuildingType('airport') + countBuildingType('stadium') + countBuildingType('market')) >= 1 && population >= 30,
     effect: () => {
@@ -282,7 +282,7 @@ const EVENTS = [
       notify('🌊 Inondation ! Quartiers touchés. −500$ · −10 satisfaction', 'error');
     },
     choices: [
-      { label: 'Pompes d'urgence (−350$)', cost: 350, effect: () => { budget -= 350; satisfaction = Math.min(100, satisfaction + 8); notify('💧 Zones asséchées ! Habitants rassurés.', 'success'); } },
+      { label: "Pompes d'urgence (−350$)", cost: 350, effect: () => { budget -= 350; satisfaction = Math.min(100, satisfaction + 8); notify('💧 Zones asséchées ! Habitants rassurés.', 'success'); } },
       { label: 'Évacuation préventive', cost: 0, effect: () => {} }
     ]
   },
