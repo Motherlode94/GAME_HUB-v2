@@ -35,7 +35,7 @@
     };
     const R = (x0, y0, x1, y1, r, fill) => {
       x0 *= K; y0 *= K; x1 *= K; y1 *= K; r = Math.min(r * K, (x1 - x0) / 2, (y1 - y0) / 2);
-      g.beginPath(); g.moveTo(x0 + r, y0); g.lineTo(x1 - r, y0); g.arcTo(x1, y0, x1, y0 + r, r); g.lineTo(x1, y1 - r); g.arcTo(x0 + r, y1, x0, y1, r); g.lineTo(x0, y0 + r); g.arcTo(x0, y0, x0 + r, y0, r); g.closePath();
+      g.beginPath(); g.moveTo(x0 + r, y0); g.lineTo(x1 - r, y0); g.arcTo(x1, y0, x1, y0 + r, r); g.lineTo(x1, y1 - r); g.arcTo(x1 - r, y1, x0 + r, y1, r); g.lineTo(x0 + r, y1); g.arcTo(x0, y1, x0, y1 - r, r); g.lineTo(x0, y0 + r); g.arcTo(x0, y0, x0 + r, y0, r); g.closePath();
       g.fillStyle = css(fill); g.fill(); g.lineWidth = LW; g.strokeStyle = OL; g.stroke();
     };
     const P = (pts, fill, ol = true) => {
@@ -150,7 +150,7 @@
       const pts = side ? [[bx - 3, 12 + b], [bx + 3, 24 + b], [bx + 3, 36 + b], [bx - 3, 48 + b]] : [[bx + 3, 12 + b], [bx - 3, 24 + b], [bx - 3, 36 + b], [bx + 3, 48 + b]];
       stroke(pts, 4.4 * K, OL, 'round'); stroke(pts, 2.4 * K, WOOD, 'round'); line(pts[0], pts[3], .6, [240, 240, 225]);
       if (!side) E(hl[0], hl[1], 3.2, 3.2, SKIN);
-      else { L([33, 30 + b], [hf[0], hf[1] - 3], 6, [88, 112, 68]); E(bx, 38 + b, 3.1, 3.1, SKIN); }
+      else { L([33, 30 + b], [bx, 38 + b], 6, [88, 112, 68]); E(bx, 38 + b, 3.1, 3.1, SKIN); }
     } else if (role === 'priest') {
       const sx = side ? 41 : hr[0];
       line([sx, 58], [sx, 8 + b], 2.8, WOOD); E(sx, 7 + b, 3.2, 3.2, [240, 205, 80]);
