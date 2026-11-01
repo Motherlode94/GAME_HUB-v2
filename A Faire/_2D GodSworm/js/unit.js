@@ -148,16 +148,16 @@ class Unit {
 
     if (this.state === "dead") return;
 
-    // Les ordres de chantier priment sur la récolte automatique.
-    // Recover legacy saves and starting troops spawned inside solid buildings.
+    // Stabilisation : pas de téléportation à chaque frame.
+    this.rescueCooldown=Math.max(0,(this.rescueCooldown||0)-deltaTime);
     if(TacticalNav.blocked(this.x,this.y)){
-      const safe=TacticalNav.freeSpot(this.x,this.y,18);
-      if(safe){this.x=safe.x;this.y=safe.y;this.navPath=[];this.navCooldown=0;
-        this.moveOrderActive=false;this.targetX=this.x;this.targetY=this.y;
-        this.guardX=this.x;this.guardY=this.y;this.patrolX=this.x;this.patrolY=this.y;
-        this.clearCombatTarget?.();
+      this.obstructedTime=(this.obstructedTime||0)+deltaTime;
+      if(this.obstructedTime>550&&this.rescueCooldown===0){
+        const safe=TacticalNav.freeSpot(this.x,this.y,22);
+        if(safe){this.x=safe.x;this.y=safe.y;this.navPath=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);}
+        this.rescueCooldown=4000;this.obstructedTime=0;
       }
-    }
+    }else this.obstructedTime=0;
     if(this.canHarvest&&this.buildTarget){
       if(this.buildTarget.constructionProgress>=1||this.buildTarget.state==="destroyed"){this.buildTarget=null;this.state="idle";}
       else{
@@ -593,14 +593,6 @@ class Unit {
     const step=Math.min(distance,this.speed*deltaTime/16);let vx=dx/distance,vy=dy/distance;
     let nx=this.x+vx*step,ny=this.y+vy*step;
     if(TacticalNav.blocked(nx,ny)){
-      // If a unit stands in an obstacle, don't leave it frozen. Escape to an actual free location.
-      const escape=TacticalNav.freeSpot(this.x,this.y,18);
-      if(escape&&Math.hypot(this.x-escape.x,this.y-escape.y)>1){
-        this.x=escape.x;this.y=escape.y;
-        const route=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);
-        this.navPath=route;this.navGoal=route[route.length-1]||this.navGoal;
-        this.navCooldown=800;return;
-      }
       // A building can be created after a path was planned; replan from current position.
       this.navCooldown=(this.navCooldown||0)-deltaTime;
       if(this.navCooldown<=0){const route=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);if(route.length){this.navPath=route;this.navGoal=route[route.length-1]}this.navCooldown=800}
