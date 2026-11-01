@@ -47,7 +47,7 @@
     // Terrain lisible : couleurs de faction en surcouche, sans modifier les zones cliquables.
     const factionColor=getFactionColor(this.faction,this.selected);
     ctx.fillStyle="#3e533d";ctx.fillRect(this.x,this.y,this.width,this.height);
-    ctx.fillStyle=factionColor;ctx.globalAlpha=.69;ctx.fillRect(this.x,this.y,this.width,this.height);ctx.globalAlpha=1;
+    ctx.fillStyle=factionColor;ctx.globalAlpha=this.faction===FACTIONS.NEUTRAL?.17:.69;ctx.fillRect(this.x,this.y,this.width,this.height);ctx.globalAlpha=1;
     const seed=(Math.floor(this.x/32)*73856093+Math.floor(this.y/32)*19349663)>>>0;
     ctx.save();ctx.beginPath();ctx.rect(this.x+2,this.y+2,Math.max(0,this.width-4),Math.max(0,this.height-4));ctx.clip();
     // Motif de prairie discret ; reste stable d'une image à l'autre.
@@ -65,7 +65,7 @@
     ctx.lineWidth=this.selected?4:2;ctx.strokeRect(this.x+3,this.y+3,this.width-6,this.height-6);
     if(this.hovered){ctx.fillStyle="rgba(255,255,255,.095)";ctx.fillRect(this.x+5,this.y+5,this.width-10,this.height-10)}
     // Emblème de faction discret, visible sous les unités.
-    if(this.width>=220&&this.height>=180){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle="#fff";ctx.font="bold 64px Georgia";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(getFactionIcon(this.faction),this.x+this.width/2,this.y+this.height/2);ctx.restore()}
+    if(this.faction!==FACTIONS.NEUTRAL&&this.width>=220&&this.height>=180){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle="#fff";ctx.font="bold 64px Georgia";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(getFactionIcon(this.faction),this.x+this.width/2,this.y+this.height/2);ctx.restore()}
     if(this.faction!==FACTIONS.NEUTRAL){
       const barW=Math.min(196,this.width-20),bx=this.x+10,by=this.y+10;
       ctx.fillStyle="rgba(9,14,22,.84)";ctx.fillRect(bx,by,barW,29);
@@ -123,34 +123,31 @@ function getMapDimensions() {
   return { width: width, height: height };
 }
 
+// Ouverture de partie : camps isolés par de vastes régions neutres.
+// Inspiré des distances de développement des RTS classiques, sans reprendre leurs cartes.
 function getModeTerritoryFactions(mode) {
-  if (mode === "team") {
-    return [
-      FACTIONS.PAGAN, FACTIONS.NEUTRAL, FACTIONS.NORTHMEN, FACTIONS.CRUSADER,
-      FACTIONS.PAGAN, FACTIONS.NEUTRAL, FACTIONS.CRUSADER, FACTIONS.NOMAD,
-      FACTIONS.NORTHMEN, FACTIONS.NEUTRAL, FACTIONS.NOMAD, FACTIONS.CRUSADER
-    ];
+  const layout=Array(24).fill(FACTIONS.NEUTRAL);
+  layout[0]=FACTIONS.PAGAN;
+  if(mode==='team'){
+    layout[18]=FACTIONS.NORTHMEN;
+    layout[5]=FACTIONS.CRUSADER;
+    layout[23]=FACTIONS.NOMAD;
+  }else if(mode==='sandbox'){
+    layout[23]=FACTIONS.CRUSADER;
+    layout[5]=FACTIONS.NORTHMEN;
+    layout[18]=FACTIONS.NOMAD;
+  }else{
+    layout[5]=FACTIONS.CRUSADER;
+    layout[18]=FACTIONS.NORTHMEN;
+    layout[23]=FACTIONS.NOMAD;
   }
-
-  if (mode === "sandbox") {
-    return [
-      FACTIONS.PAGAN, FACTIONS.NEUTRAL, FACTIONS.NEUTRAL, FACTIONS.CRUSADER,
-      FACTIONS.NEUTRAL, FACTIONS.NEUTRAL, FACTIONS.NORTHMEN, FACTIONS.NEUTRAL,
-      FACTIONS.NEUTRAL, FACTIONS.NEUTRAL, FACTIONS.NOMAD, FACTIONS.NEUTRAL
-    ];
-  }
-
-  return [
-    FACTIONS.PAGAN, FACTIONS.NEUTRAL, FACTIONS.CRUSADER, FACTIONS.NEUTRAL,
-    FACTIONS.NORTHMEN, FACTIONS.NEUTRAL, FACTIONS.NOMAD, FACTIONS.NEUTRAL,
-    FACTIONS.PAGAN, FACTIONS.CRUSADER, FACTIONS.NORTHMEN, FACTIONS.NOMAD
-  ];
+  return layout;
 }
 
 function initializeMap(mode = "ffa") {
   const map = getMapDimensions();
-  const cols = 4;
-  const rows = 3;
+  const cols = 6;
+  const rows = 4;
   const tileW = Math.floor(map.width / cols);
   const tileH = Math.floor(map.height / rows);
   const factions = getModeTerritoryFactions(mode);
