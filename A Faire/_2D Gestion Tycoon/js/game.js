@@ -1626,6 +1626,59 @@ window.toggleTycoonGovernor = () => tycoonGovernor.toggle();
 window.cycleTycoonGovernorProfile = () => tycoonGovernor.cycleProfile();
 window.getTycoonBurstSize = () => Math.max(1, Number(tycoonGovernor.getProfile().maxBurst) || 6);
 
+// Tableau de pilotage : projections indicatives, sans modifier la simulation.
+function installFinancialForecast() {
+    const container = document.querySelector(".game-shell");
+    if (!container || document.getElementById("financialForecast")) return;
+    const section = document.createElement("section");
+    section.id = "financialForecast";
+    section.className = "panel";
+    section.setAttribute("aria-label", "Prévision financière");
+    section.innerHTML = '<h2>Prévision financière</h2><p class="forecast-caption">Hypothèse : revenus, dépenses et bonus constants, hors événements et achats futurs.</p><div class="forecast-grid" id="forecastGrid"></div><p id="forecastAdvice" class="forecast-advice"></p>';
+    const style = document.createElement("style");
+    style.textContent = '#financialForecast{margin:16px 0;padding:16px;border:1px solid #6575a5;border-radius:12px;background:rgba(12,19,40,.86);color:#f5f7ff}#financialForecast h2{margin:0 0 8px}.forecast-caption{font-size:12px;opacity:.75}.forecast-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.forecast-cell{padding:12px;border:1px solid #45577a;border-radius:8px;background:rgba(69,91,143,.15)}.forecast-cell strong{display:block;margin-top:6px;font-size:17px}.forecast-cell small{opacity:.8}.forecast-advice{line-height:1.5;margin-bottom:0}';
+    document.head.appendChild(style);
+    const stats = document.getElementById("stats");
+    if (stats && stats.parentNode) stats.parentNode.insertBefore(section, stats.nextSibling);
+    else container.insertBefore(section, container.firstChild);
+    const grid = section.querySelector("#forecastGrid");
+    const advice = section.querySelector("#forecastAdvice");
+    const fmt = value => Number.isFinite(value) ? new Intl.NumberFormat("fr-FR", {maximumFractionDigits:0}).format(value) + " €" : "—";
+    function refresh() {
+        if (!gameData || !Array.isArray(gameData.buildings)) return;
+        const cash = Math.max(0, Number(gameData.money) || 0);
+        const gross = calculateGrossIncome();
+        const upkeep = calculateStaffUpkeepPerSecond();
+        const net = gross - upkeep;
+        grid.replaceChildren();
+        for (const [label,value] of [
+            ["Trésorerie actuelle",cash],
+            ["Revenus bruts / sec.",gross],
+            ["Charges / sec.",upkeep],
+            ["Projection à 1 min",Math.max(0,Math.min(MAX_MONEY,cash+net*60))],
+            ["Projection à 5 min",Math.max(0,Math.min(MAX_MONEY,cash+net*300))],
+            ["Projection à 10 min",Math.max(0,Math.min(MAX_MONEY,cash+net*600))]
+        ]) {
+            const box=document.createElement("div");box.className="forecast-cell";
+            const name=document.createElement("small");name.textContent=label;
+            const val=document.createElement("strong");val.textContent=fmt(value);
+            box.append(name,val);grid.append(box);
+        }
+        if (net < 0) {
+            const seconds = cash / -net;
+            advice.textContent = "Attention : charges supérieures aux revenus. Trésorerie théorique épuisée dans " + (seconds < 60 ? Math.ceil(seconds)+" s" : Math.ceil(seconds/60)+" min") + ".";
+        } else {
+            const options=gameData.buildings.map(b=>({name:b.name||b.id,cost:getBuildingCost(b),gain:Math.max(0,Number(b.baseIncome)||0)*getIncomeMultiplier()}))
+                .filter(o=>o.cost>0 && o.cost<MAX_MONEY && o.gain>0)
+                .sort((a,b)=>(a.cost/a.gain)-(b.cost/b.gain));
+            const best=options[0];
+            advice.textContent=best ? "Meilleur retour théorique sur investissement : "+best.name+" ("+fmt(best.cost)+" pour +"+fmt(best.gain)+"/sec, amortissement estimé "+Math.ceil(best.cost/best.gain)+" s).":"Aucun investissement rentable identifié pour le moment.";
+        }
+    }
+    refresh();
+    setInterval(refresh, 2000);
+}
+
 tycoonGovernor.init();
 loadGame();
 pushNotification("Bienvenue dans Gestion Tycoon. Developpe ta ville, ton equipe et ton prestige.", "ok");
@@ -1633,6 +1686,7 @@ checkMilestoneAvailability();
 syncCatalogScore();
 updateUI();
 bindUIEvents();
+installFinancialForecast();
 requestAnimationFrame(gameLoop);
 
 window.addEventListener("pagehide", () => {
