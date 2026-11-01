@@ -37,8 +37,12 @@ RTS.Game.Unit.prototype.update = function(deltaTime) {
     var dy   = target.y - this.y;
     var dist = Math.sqrt(dx * dx + dy * dy);
 
-    if (dist < 4) {
+    if (!Number.isFinite(deltaTime) || deltaTime <= 0) return;
+    if (dist <= Math.max(4, this.speed * deltaTime)) {
+        this.x = target.x;
+        this.y = target.y;
         this.pathIndex++;
+        if (this.pathIndex >= this.path.length) { this.path = []; this.pathIndex = 0; }
         return;
     }
 
