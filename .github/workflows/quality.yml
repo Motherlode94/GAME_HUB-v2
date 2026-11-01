@@ -35,3 +35,5 @@ jobs:
         run: node tests/non-rts-games-smoke.cjs
       - name: Three RTS waypoint and order tests
         run: node tests/three-rts-movement.cjs
+      - name: Enemy durability regression
+        run: node tests/enemy-durability-smoke.cjs
