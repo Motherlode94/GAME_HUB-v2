@@ -1170,7 +1170,7 @@ canvas.addEventListener("click", (e) => {
     if(!consumeResources(rc)){pushGameLog("Ressources insuffisantes.","warn");return}
     const site=addBuilding(test.x,test.y,PLAYER_FACTION,buildMode);site.constructionProgress=0;
     const worker=units.filter(u=>u.faction===PLAYER_FACTION&&u.canHarvest&&u.state!=="dead").sort((a,b)=>Math.hypot(a.x-mouseX,a.y-mouseY)-Math.hypot(b.x-mouseX,b.y-mouseY))[0];
-    if(worker){worker.buildTarget=site;worker.harvestTarget=null;worker.moveTo(site.x+site.size/2,site.y+site.size/2+20)}
+    if(worker){worker.moveTo(site.x+site.size/2,site.y+site.size/2+20);worker.workerOrder="build";worker.buildTarget=site;worker.harvestTarget=null}
     else pushGameLog("Chantier posé : affectez un paysan pour le construire.","warn");
     createParticleExplosion(mouseX,mouseY,"#86df95",12);
     pushGameLog("Bâtiment construit. Sélectionnez-le pour recruter.","ok");
@@ -1292,6 +1292,8 @@ canvas.addEventListener("contextmenu", (e) => {
       }
 
       workers.forEach((unit) => {
+        unit.workerOrder = "gather";
+        unit.moveOrderActive = false;
         unit.harvestTarget = clickedResource;
         unit.dropoffBuilding = null;
         unit.target = null;
@@ -1537,7 +1539,7 @@ function orderBuilderToSite(){
   const site=selectedBuilding;if(!site||site.constructionProgress>=1)return false;
   const worker=units.filter(u=>u.faction===PLAYER_FACTION&&u.canHarvest&&u.state!=="dead").sort((a,b)=>Math.hypot(a.x-site.x,a.y-site.y)-Math.hypot(b.x-site.x,b.y-site.y))[0];
   if(!worker){pushGameLog("Aucun paysan disponible.","warn");return false}
-  worker.buildTarget=site;worker.harvestTarget=null;worker.moveTo(site.x+site.size/2,site.y+site.size/2+20);return true;
+  worker.moveTo(site.x+site.size/2,site.y+site.size/2+20);worker.workerOrder="build";worker.buildTarget=site;worker.harvestTarget=null;return true;
 }
 function setSelectedRallyPoint(){
  if(!selectedBuilding||!selectedBuilding.canProduce)return false;

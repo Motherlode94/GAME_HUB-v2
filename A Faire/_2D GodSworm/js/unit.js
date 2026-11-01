@@ -71,6 +71,7 @@ class Unit {
     this.moveOrderActive=false;
     this.targetX = x;
     this.targetY = y;
+    this.workerOrder = "auto";
     
     // Propriétés selon le type
     this.applyUnitType(type);
@@ -158,8 +159,8 @@ class Unit {
         this.rescueCooldown=4000;this.obstructedTime=0;
       }
     }else this.obstructedTime=0;
-    if(this.canHarvest&&this.buildTarget){
-      if(this.buildTarget.constructionProgress>=1||this.buildTarget.state==="destroyed"){this.buildTarget=null;this.state="idle";}
+    if(this.canHarvest&&this.buildTarget&&this.workerOrder==="build"){
+      if(this.buildTarget.constructionProgress>=1||this.buildTarget.state==="destroyed"){this.buildTarget=null;this.workerOrder="idle";this.moveOrderActive=false;this.state="idle";}
       else{
         const bx=this.buildTarget.x+this.buildTarget.size/2,by=this.buildTarget.y+this.buildTarget.size/2+20;
         if(Math.hypot(this.x-bx,this.y-by)>35){this.targetX=bx;this.targetY=by;this.moveToTarget(deltaTime);}
@@ -169,14 +170,18 @@ class Unit {
     }
 
     // Les ordres manuels du paysan priment sur la récolte automatique.
-    if(this.canHarvest&&this.moveOrderActive){this.moveToTarget(deltaTime);return;}
+    if(this.canHarvest&&(this.workerOrder==="move"||this.workerOrder==="idle")){
+      if(this.moveOrderActive)this.moveToTarget(deltaTime);
+      else this.state="idle";
+      return;
+    }
     // Paysan en mode récolte
     if (this.canHarvest) {
       if (this.harvestTarget && !this.isHarvestNodeUsable(this.harvestTarget, 0.01)) {
         this.harvestTarget = null;
       }
 
-      if (!this.harvestTarget && !this.dropoffBuilding && this.carrying <= 0) {
+      if (this.workerOrder==="auto" && !this.harvestTarget && !this.dropoffBuilding && this.carrying <= 0) {
         this.assignNearestResourceNode();
       }
 
@@ -449,7 +454,7 @@ class Unit {
   }
 
   assignNearestResourceNode() {
-    if (!this.canHarvest) return;
+    if (!this.canHarvest || this.workerOrder==="move") return;
 
     const targetNode = this.getBestResourceNode();
     if (targetNode) {
@@ -732,7 +737,7 @@ class Unit {
   moveTo(x, y) {
     // Un ordre explicite de déplacement prime sur "tenir position".
     if(this.commandStance==="hold")this.commandStance="move";
-    if(this.canHarvest){this.harvestTarget=null;this.dropoffBuilding=null;this.buildTarget=null;}
+    if(this.canHarvest){this.harvestTarget=null;this.dropoffBuilding=null;this.buildTarget=null;this.workerOrder="move";}
     this.navPath=TacticalNav.path(this.x,this.y,x,y);
     this.navGoal=this.navPath.length?this.navPath[this.navPath.length-1]:TacticalNav.freeSpot(x,y)||{x,y};
     this.stuckTimer=0;this.lastMoveX=this.x;this.lastMoveY=this.y;
