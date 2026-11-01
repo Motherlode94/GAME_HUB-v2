@@ -71,7 +71,7 @@ class Unit {
     this.moveOrderActive=false;
     this.targetX = x;
     this.targetY = y;
-    this.workerOrder = "auto";
+    this.workerOrder = "idle";
     
     // Propriétés selon le type
     this.applyUnitType(type);
@@ -83,6 +83,7 @@ class Unit {
     this.patrolPauseTimer = 0;
     this.manualAttackOrder = false;
     this.commandStance = this.canHarvest ? "worker" : "guard";
+    if(this.canHarvest&&typeof PLAYER_FACTION!=="undefined"&&this.faction!==PLAYER_FACTION)this.workerOrder="auto";
   }
 
   applyUnitType(type) {
@@ -291,6 +292,11 @@ class Unit {
     }
 
     this.target = null;
+    // Player units never return to their old random patrol point after an order.
+    if(typeof PLAYER_FACTION!=="undefined"&&this.faction===PLAYER_FACTION){
+      this.state="idle";this.guardX=this.x;this.guardY=this.y;
+      this.patrolX=this.x;this.patrolY=this.y;return;
+    }
     this.commandStance = "guard";
 
     if (this.patrolPauseTimer > 0) {

@@ -1054,15 +1054,15 @@ function spawnInitialUnits() {
   factions.forEach(faction=>{
     const owned=getFactionTerritories(faction);if(!owned.length)return;
     const home=owned[0];
-    const town=addBuilding(home.x+20,home.y+24,faction,BUILDING_TYPES.TOWN_HALL);
-    const barracks=addBuilding(home.x+120,home.y+24,faction,BUILDING_TYPES.BARRACKS);
+    const town=addBuilding(home.x+26,home.y+25,faction,BUILDING_TYPES.TOWN_HALL);
+    const barracks=addBuilding(home.x+134,home.y+26,faction,BUILDING_TYPES.BARRACKS);
     // Spawn from a free staging area, never from hardcoded coordinates over a barracks.
     const roster=faction===PLAYER_FACTION?
       [UNIT_TYPES.PEASANT,UNIT_TYPES.PEASANT,UNIT_TYPES.PEASANT,UNIT_TYPES.PEASANT,UNIT_TYPES.WARRIOR,UNIT_TYPES.ARCHER]:
       [UNIT_TYPES.WARRIOR,UNIT_TYPES.WARRIOR,UNIT_TYPES.ARCHER];
     roster.forEach((type,index)=>{
       const col=index%3,row=Math.floor(index/3);
-      const targetX=home.x+55+col*36,targetY=home.y+153+row*37;
+      const targetX=home.x+54+col*42,targetY=home.y+177+row*39;
       const available=TacticalNav.freeSpot(targetX,targetY,18);
       if(!available)return;
       const spawned=addUnit(available.x,available.y,faction,type);
