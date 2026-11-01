@@ -1,5 +1,7 @@
 // unit.js - Système d'unités pour GodSworm
 
+const WarlikeSprites=(()=>{const frames=new Map();function get(role,step){const key=role+':'+step;if(frames.has(key))return frames.get(key);const c=document.createElement('canvas');c.width=24;c.height=32;const p=c.getContext('2d');const b=(x,y,w,h,color)=>{p.fillStyle=color;p.fillRect(x,y,w,h)};let leg=step===1?3:step===3?-3:0;const peasant=role==='peasant',archer=role==='archer';b(6,20,5,9+Math.max(0,leg),'#43332c');b(14,20,5,9+Math.max(0,-leg),'#43332c');b(5,11,15,12,'#2b252b');b(7,12,11,10,peasant?'#997849':archer?'#3d6c43':'#7d8491');b(11,12,3,10,peasant?'#dcc093':'#b99457');b(3,13+leg,4,8,'#c2936d');b(18,13-leg,4,8,'#c2936d');b(8,4,9,9,peasant?'#b8865f':'#929ca7');b(7,3,11,4,peasant?'#8f6b3c':archer?'#34573a':'#b4bdc4');b(11,9,2,2,'#24212a');b(15,9,2,2,'#24212a');if(peasant){b(4,1,17,2,'#705030');b(2,1,2,18,'#b7b7ae');b(0,2,7,2,'#c7c7b6')}else if(archer){b(20,4,2,19,'#bd8a4c');b(21,4,3,2,'#efe1bb')}else{b(21,4,2,20,'#ccd4d6');b(19,2,5,5,'#e3e6e2');b(0,13,5,9,'#98643d');b(1,14,3,7,'#ddc188')}frames.set(key,c);return c}return{draw(ctx,u){const role=u.type==='peasant'?'peasant':u.type==='archer'?'archer':'soldier',step=u.state==='moving'?Math.floor((u.spriteClock||0)/130)%4:0;ctx.save();ctx.translate(u.x,u.y);if(u.spriteFacing==='left')ctx.scale(-1,1);ctx.imageSmoothingEnabled=false;ctx.drawImage(get(role,step),-15,-23,30,40);ctx.restore()}}})();
+
 class Unit {
   constructor(x, y, faction, type = "warrior") {
     this.x = x;
@@ -18,6 +20,7 @@ class Unit {
     this.state = "idle"; // idle, moving, attacking, harvesting, dead
     
     // Destination pour le mouvement
+    this.spriteFacing='right';this.spriteClock=0;
     this.targetX = x;
     this.targetY = y;
     
@@ -509,6 +512,8 @@ class Unit {
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance > 5) {
+      this.spriteClock+=deltaTime;
+      this.spriteFacing=Math.abs(dx)>Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'down':'up');
       const moveSpeed = this.speed * (deltaTime / 16);
       this.x += (dx / distance) * moveSpeed;
       this.y += (dy / distance) * moveSpeed;
@@ -661,25 +666,8 @@ class Unit {
       ctx.stroke();
     }
 
-    // Cercle de faction
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, size - 4, 0, Math.PI * 2);
-    ctx.fillStyle = getFactionColor(this.faction);
-    ctx.fill();
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Icône du type d'unité
-    ctx.save();
-    ctx.font = "16px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#fff";
-    ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-    ctx.shadowBlur = 3;
-    ctx.fillText(this.icon, this.x, this.y);
-    ctx.restore();
+    ctx.beginPath();ctx.ellipse(this.x,this.y+9,14,6,0,0,Math.PI*2);ctx.fillStyle=getFactionColor(this.faction);ctx.globalAlpha=.4;ctx.fill();ctx.globalAlpha=1;
+    WarlikeSprites.draw(ctx,this);
 
     // Indicateur de transport de ressources
     if (this.canHarvest && this.carrying > 0) {
