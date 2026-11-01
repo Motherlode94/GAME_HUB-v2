@@ -597,3 +597,19 @@ body::before {
     background-size: 20px 20px;
     animation: pixelLoad 1s linear infinite;
 }
+/* Mise en page MineBlock : canvas contenu et commandes à l'intérieur du jeu. */
+body{display:block;padding:20px 12px;overflow-x:hidden}
+.game-container{width:min(100%,1440px);max-width:1440px;margin:0 auto;min-width:0}
+.game-main{display:flex;flex-direction:column;align-items:stretch;gap:16px;padding:18px;min-width:0;min-height:0}
+#gameCanvas{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:16/9;box-sizing:border-box;margin:0;flex:none}
+#gameCanvas:active{transform:none}
+.build-menu{width:100%;max-width:none;min-width:0;padding:12px 16px}
+.block-selector{grid-template-columns:repeat(auto-fit,minmax(54px,76px));gap:10px;justify-content:center}
+.header-content{gap:16px;flex-wrap:wrap}
+.game-title{font-size:clamp(1rem,2.3vw,2rem);line-height:1.5}
+.game-stats{flex-wrap:wrap;gap:8px}
+.stat{min-width:0;padding:8px 12px}
+.world-save-actions{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;background:#202d3d}
+.world-save-actions button{background:#355da3;color:white;border:1px solid #7199e5;border-radius:8px;padding:12px 18px;font:700 17px var(--font-body);cursor:pointer;min-height:44px}
+.world-save-actions button:hover{background:#4875c9}
+@media(max-width:700px){body{padding:8px}.game-main{padding:8px;gap:10px}.game-header{padding:12px}.game-title{font-size:clamp(.8rem,4vw,1.2rem);padding:7px}.game-stats .stat{padding:5px 8px}.stat-value{font-size:.85rem}#gameCanvas{border-width:5px}.game-controls{padding:14px}.control-btn{min-width:130px;flex:1;padding:12px}.world-save-actions button{flex:1}.build-menu{padding:10px}}

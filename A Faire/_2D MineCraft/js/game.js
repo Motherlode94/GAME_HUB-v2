@@ -109,8 +109,13 @@ class Game {
         // Souris
         this.canvas.addEventListener('mousemove', (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            this.mouse.x = e.clientX - rect.left;
-            this.mouse.y = e.clientY - rect.top;
+            const styles = getComputedStyle(this.canvas);
+            const borderX = parseFloat(styles.borderLeftWidth) || 0;
+            const borderY = parseFloat(styles.borderTopWidth) || 0;
+            const innerWidth = Math.max(1, rect.width - borderX - (parseFloat(styles.borderRightWidth) || 0));
+            const innerHeight = Math.max(1, rect.height - borderY - (parseFloat(styles.borderBottomWidth) || 0));
+            this.mouse.x = Math.max(0, Math.min(this.width, (e.clientX - rect.left - borderX) * this.width / innerWidth));
+            this.mouse.y = Math.max(0, Math.min(this.height, (e.clientY - rect.top - borderY) * this.height / innerHeight));
             
             // Position dans le monde
             this.mouse.worldX = this.mouse.x + this.camera.x;
