@@ -183,7 +183,7 @@
             title: "After Dark",
             category: "rpg",
             tags: ["visual novel","romance","dialogue","adulte"],
-            playUrl: "DONE/_2D After Dark/index.html",
+            playUrl: "A Faire/_2D After Dark/index.html",
             description: "Visual novel 2D nocturne à choix et relations."
         },
         {
@@ -199,7 +199,7 @@
             title: "Hearts of Eden",
             category: "rpg",
             tags: ["simulation","romance","relations"],
-            playUrl: "DONE/_2D Hearts of Eden/index.html",
+            playUrl: "A Faire/_2D Hearts of Eden/index.html",
             description: "Simulation sociale et relations entre adultes."
         },
         {
@@ -207,7 +207,7 @@
             title: "The Silent Verdict",
             category: "strategy",
             tags: ["enquete","mystere","deduction"],
-            playUrl: "DONE/_2D The Silent Verdict/index.html",
+            playUrl: "A Faire/_2D The Silent Verdict/index.html",
             description: "Résous trois enquêtes par les preuves et les témoignages."
         },
         {
@@ -215,7 +215,7 @@
             title: "No Man's Dawn",
             category: "action",
             tags: ["survie","exploration","3d"],
-            playUrl: "DONE/_3D No Mans Dawn/index.html",
+            playUrl: "A Faire/_3D No Mans Dawn/index.html",
             description: "Explore une région isolée et reconstruis un refuge."
         },
         {
@@ -223,7 +223,7 @@
             title: "Redline District",
             category: "sports",
             tags: ["course","voiture","3d"],
-            playUrl: "DONE/_3D Redline District/index.html",
+            playUrl: "A Faire/_3D Redline District/index.html",
             description: "Courses automobiles sur circuit avec adversaires."
         },
         {
@@ -231,10 +231,10 @@
             title: "The Last Signal",
             category: "rpg",
             tags: ["horreur","enquete","3d"],
-            playUrl: "DONE/_3D The Last Signal/index.html",
+            playUrl: "A Faire/_3D The Last Signal/index.html",
             description: "Une station radio abandonnée cache une transmission inquiétante."
         },
-        {id:26,title:"Agence X",category:"strategy",tags:["studio","production","gestion","tycoon","18+"],playUrl:"DONE/_2D Agence X/index.html",description:"Dirige un studio de productions pour adultes fictifs : casting, tournages, distribution, contrats et finances."}
+        {id:26,title:"Agence X",category:"strategy",tags:["studio","production","gestion","tycoon","18+"],playUrl:"A Faire/_2D Agence X/index.html",description:"Dirige un studio de productions pour adultes fictifs : casting, tournages, distribution, contrats et finances."}
     ];
 
     function parseJson(value, fallback) {

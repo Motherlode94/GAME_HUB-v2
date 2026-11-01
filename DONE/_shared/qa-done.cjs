@@ -6,7 +6,7 @@ const dirs=fs.readdirSync(root,{withFileTypes:true}).filter(d=>d.isDirectory()&&
 const source=fs.readFileSync(catalog,'utf8');
 const window={};const storage={getItem:()=>null,setItem:()=>{}};
 vm.runInNewContext(source,{window,localStorage:storage,Date,Math,Number,String,JSON}, {filename:'wgc-data.js',timeout:2000});
-const games=window.WGC_DATA.GAMES,failures=[];
+const games=window.WGC_DATA.GAMES.filter(g=>g.playUrl.startsWith('DONE/')),failures=[];
 const paths=new Set();
 const warnings=[];let checkedScripts=0,checkedAssets=0;
 for(const game of games){
