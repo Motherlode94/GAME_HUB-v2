@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -24,3 +27,7 @@ jobs:
           assert not broken,f'Empty game pages: {broken[:20]}'
           print(f'Validated {len(games)} non-empty game entrypoints')
           PY
+      - name: Check DONE game scripts, assets and catalog
+        run: node DONE/_shared/qa-done.cjs
+      - name: RTS capture, transport and building regression
+        run: node tests/rts-simulation-smoke.cjs
