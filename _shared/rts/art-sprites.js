@@ -26,4 +26,25 @@ g.WarLikeArt={
    ctx.save();ctx.translate(x,y);ctx.rotate(heading);ctx.drawImage(img,-size/2,-size/2,size,size);ctx.restore();return true;
  }
 };
+// Visual enemy faction selector shared by the three RTS demos.
+// This changes enemy appearance only; unit behavior and missions stay unchanged.
+function mountSelector(){
+ if(!document.body||document.getElementById('warlike-enemy-selector'))return;
+ const wrap=document.createElement('div');
+ wrap.id='warlike-enemy-selector';
+ wrap.style.cssText='position:fixed;right:12px;bottom:12px;z-index:9998;background:#0a1720ed;color:#f1f6ee;border:1px solid #738579;border-radius:8px;padding:9px 12px;font:12px system-ui,sans-serif;max-width:220px;box-shadow:0 4px 20px #0008';
+ const label=document.createElement('label');
+ label.htmlFor='warlike-enemy-select';label.textContent='Aspect de la faction adverse';
+ label.style.display='block';
+ const select=document.createElement('select');
+ select.id='warlike-enemy-select';
+ select.style.cssText='display:block;width:100%;margin-top:5px;background:#152c36;color:white;border:1px solid #70878d;border-radius:4px;padding:5px';
+ for(const id of ['axis','militia']){const option=document.createElement('option');option.value=id;option.textContent=FACTIONS[id].name;select.appendChild(option)}
+ select.value=enemyFaction;
+ select.addEventListener('change',()=>g.WarLikeArt.setEnemyFaction(select.value));
+ wrap.append(label,select);
+ const note=document.createElement('small');note.textContent='Visuel uniquement · factions antagonistes';note.style.cssText='display:block;margin-top:4px;color:#bac8c3';wrap.appendChild(note);
+ document.body.appendChild(wrap);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountSelector,{once:true});else mountSelector();
 })(window);
