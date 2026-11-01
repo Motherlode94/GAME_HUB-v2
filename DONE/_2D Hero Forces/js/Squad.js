@@ -412,6 +412,10 @@ RTS.Game.Squad.prototype._initSoldiers = function() {
     this.soldiers = [];
     var offs  = this._formOffsets(this.maxSoldiers);
     var maxHP = RTS.Game.Squad.SOLDIER_HP[this.type] || 60;
+    // Enemy factions serve as durable bullet-sponges; keep their normal weapons.
+    if (this.team === 'axis' && typeof window !== 'undefined' && window.WarLikeArt) {
+        maxHP = Math.round(maxHP * (window.WarLikeArt.getEnemyFaction() === 'militia' ? 2.8 : 2.3));
+    }
     for (var i = 0; i < this.maxSoldiers; i++) {
         this.soldiers.push({
             ox:offs[i].x, oy:offs[i].y,
