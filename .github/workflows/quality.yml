@@ -31,3 +31,5 @@ jobs:
         run: node DONE/_shared/qa-done.cjs
       - name: RTS capture, transport and building regression
         run: node tests/rts-simulation-smoke.cjs
+      - name: Non-RTS game source and entrypoint regression
+        run: node tests/non-rts-games-smoke.cjs
