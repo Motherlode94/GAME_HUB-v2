@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const hero=fs.readFileSync('DONE/_2D Hero Forces/js/Unit.js','utf8');
+const movement=fs.readFileSync('DONE/_2D War Zone Commander/js/MovementSystem.js','utf8');
+const iron=fs.readFileSync('DONE/_2D Iron Meridian/index.html','utf8');
+const c1={RTS:{Game:{}},console};vm.createContext(c1);vm.runInContext(hero,c1);
+const u=new c1.RTS.Game.Unit(0,0,'allied');u.path=[{x:5,y:0}];u.update(1);
+assert.equal(u.x,5,'Hero Forces reaches its waypoint without overshooting');
+assert.equal(u.path.length,0,'Hero Forces clears the completed path');
+const c2={window:{},RTS:{}};c2.window.RTS=c2.RTS;vm.createContext(c2);vm.runInContext(movement,c2);
+const v={x:0,y:0,speed:100,target:{x:4,y:0}};c2.RTS.MovementSystem.update([v],1);
+assert.equal(v.x,4,'War Zone Commander stops at requested coordinate');
+assert.equal(v.target,null,'War Zone Commander completes the order');
+assert.match(iron,/enemy&&!u\.boarding&&!u\.move&&u\.mode!=='hold'/,'Iron Meridian AI must respect active move orders');
+console.log('PASS: Hero Forces, Iron Meridian and War Zone Commander movement regressions');
