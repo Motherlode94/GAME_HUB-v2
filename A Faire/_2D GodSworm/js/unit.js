@@ -14,13 +14,14 @@ const TacticalNav=(()=>{
   const w=Math.ceil(canvas.width/cell),h=Math.ceil(canvas.height/cell);
   const grid=(x,y)=>y*w+x;
   const clamp=(v,n)=>Math.max(0,Math.min(n-1,Math.floor(v/cell)));
-  const start={x:clamp(sx,w),y:clamp(sy,h)},goal={x:clamp(tx,w),y:clamp(ty,h)};
+  const start={x:clamp(sx,w),y:clamp(sy,h)};
   if(blocked(tx,ty)){
     const near=[];
     for(let radius=cell;radius<=cell*5;radius+=cell)for(let n=0;n<16;n++){const a=n*Math.PI/8;const px=tx+Math.cos(a)*radius,py=ty+Math.sin(a)*radius;if(px>8&&py>8&&px<canvas.width-8&&py<canvas.height-8&&!blocked(px,py))near.push({x:px,y:py,d:Math.hypot(px-sx,py-sy)})}
     if(!near.length)return [];
     near.sort((a,b)=>a.d-b.d);tx=near[0].x;ty=near[0].y;
   }
+  const goal={x:clamp(tx,w),y:clamp(ty,h)};
   const startId=grid(start.x,start.y),endId=grid(goal.x,goal.y);
   const open=[startId],openSet=new Set(open),came=new Map(),cost=new Map([[startId,0]]);
   const heuristic=id=>Math.abs(id%w-goal.x)+Math.abs(Math.floor(id/w)-goal.y);
@@ -158,6 +159,8 @@ class Unit {
       }
     }
 
+    // Les ordres manuels du paysan priment sur la récolte automatique.
+    if(this.canHarvest&&this.moveOrderActive){this.moveToTarget(deltaTime);return;}
     // Paysan en mode récolte
     if (this.canHarvest) {
       if (this.harvestTarget && !this.isHarvestNodeUsable(this.harvestTarget, 0.01)) {
