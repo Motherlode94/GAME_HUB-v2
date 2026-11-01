@@ -1050,29 +1050,24 @@ function applyMilitaryTech(v){
 
 // === SPAWN INITIAL ===
 function spawnInitialUnits() {
-  const startingFactions = [PLAYER_FACTION, ...BOT_FACTIONS];
-
-  startingFactions.forEach((faction) => {
-    const factionTerritories = getFactionTerritories(faction);
-    if (factionTerritories.length <= 0) return;
-
-    const startTerritory = factionTerritories[0];
-    const baseX = startTerritory.x + 50;
-    const baseY = startTerritory.y + 50;
-    addBuilding(baseX, baseY, faction, BUILDING_TYPES.TOWN_HALL);
-    addBuilding(baseX + 90, baseY + 40, faction, BUILDING_TYPES.BARRACKS);
-
-    if (faction === PLAYER_FACTION) {
-      for (let i = 0; i < 4; i++) {
-        addUnit(startTerritory.x + 150 + (i * 35), startTerritory.y + 100, faction, UNIT_TYPES.PEASANT);
-      }
-      addUnit(startTerritory.x + 130, startTerritory.y + 170, faction, UNIT_TYPES.WARRIOR);
-      addUnit(startTerritory.x + 180, startTerritory.y + 185, faction, UNIT_TYPES.ARCHER);
-    } else {
-      addUnit(startTerritory.x + 140, startTerritory.y + 95, faction, UNIT_TYPES.WARRIOR);
-      addUnit(startTerritory.x + 175, startTerritory.y + 120, faction, UNIT_TYPES.WARRIOR);
-      addUnit(startTerritory.x + 205, startTerritory.y + 150, faction, UNIT_TYPES.ARCHER);
-    }
+  const factions=[PLAYER_FACTION,...BOT_FACTIONS];
+  factions.forEach(faction=>{
+    const owned=getFactionTerritories(faction);if(!owned.length)return;
+    const home=owned[0];
+    const town=addBuilding(home.x+20,home.y+24,faction,BUILDING_TYPES.TOWN_HALL);
+    const barracks=addBuilding(home.x+120,home.y+24,faction,BUILDING_TYPES.BARRACKS);
+    // Spawn from a free staging area, never from hardcoded coordinates over a barracks.
+    const roster=faction===PLAYER_FACTION?
+      [UNIT_TYPES.PEASANT,UNIT_TYPES.PEASANT,UNIT_TYPES.PEASANT,UNIT_TYPES.PEASANT,UNIT_TYPES.WARRIOR,UNIT_TYPES.ARCHER]:
+      [UNIT_TYPES.WARRIOR,UNIT_TYPES.WARRIOR,UNIT_TYPES.ARCHER];
+    roster.forEach((type,index)=>{
+      const col=index%3,row=Math.floor(index/3);
+      const targetX=home.x+55+col*36,targetY=home.y+153+row*37;
+      const available=TacticalNav.freeSpot(targetX,targetY,18);
+      if(!available)return;
+      const spawned=addUnit(available.x,available.y,faction,type);
+      if(spawned){spawned.guardX=available.x;spawned.guardY=available.y;spawned.patrolX=available.x;spawned.patrolY=available.y;}
+    });
   });
 }
 

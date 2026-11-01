@@ -36,8 +36,9 @@ const TacticalNav=(()=>{
   }
   return [];
  }
- function freeSpot(x,y){
-  if(!blocked(x,y))return {x,y};
+ function freeSpot(x,y,spacing=20){
+  const free=(px,py)=>!blocked(px,py)&&(typeof units==="undefined"||units.every(unit=>unit.state==="dead"||Math.hypot(unit.x-px,unit.y-py)>spacing));
+  if(free(x,y))return {x,y};
   for(let radius=16;radius<=192;radius+=16)for(let i=0;i<16;i++){
    const a=i*Math.PI/8,px=x+Math.cos(a)*radius,py=y+Math.sin(a)*radius;
    if(px>15&&py>15&&px<canvas.width-15&&py<canvas.height-15&&!blocked(px,py))return {x:px,y:py};

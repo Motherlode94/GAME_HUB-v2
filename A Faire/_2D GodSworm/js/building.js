@@ -210,7 +210,7 @@ class Building {
         candidates.push({x:centerX+Math.cos(angle)*(this.size/2+margin+radius*28),y:centerY+Math.sin(angle)*(this.size/2+margin+radius*28)});
       }
     }
-    const open=candidates.filter(p=>p.x>16&&p.y>16&&p.x<canvas.width-16&&p.y<canvas.height-16&&!TacticalNav.blocked(p.x,p.y));
+    const open=candidates.filter(p=>p.x>16&&p.y>16&&p.x<canvas.width-16&&p.y<canvas.height-16&&!TacticalNav.blocked(p.x,p.y)&&units.every(u=>u.state==="dead"||Math.hypot(u.x-p.x,u.y-p.y)>24));
     if(!open.length){this.productionQueue.unshift(unitType);this.productionTimer=this.productionTime;return null}
     const spot=open.sort((a,b)=>{
       const d=p=>this.rallyPoint?Math.hypot(p.x-this.rallyPoint.x,p.y-this.rallyPoint.y):Math.hypot(p.x-centerX,p.y-centerY);
@@ -220,7 +220,10 @@ class Building {
 
     const unit = addUnit(spawnX, spawnY, this.faction, unitType);
     if(typeof applyMilitaryTech==="function")applyMilitaryTech(unit);
-    if(unit&&this.rallyPoint)unit.moveTo(this.rallyPoint.x,this.rallyPoint.y);
+    if(unit){
+      const destination=this.rallyPoint||TacticalNav.freeSpot(spawnX+65,spawnY+55,24);
+      if(destination)unit.moveTo(destination.x,destination.y);
+    }
     createParticleExplosion(spawnX, spawnY, getFactionColor(this.faction), 10);
     return unit;
   }
