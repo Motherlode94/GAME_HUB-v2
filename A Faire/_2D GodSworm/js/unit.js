@@ -526,8 +526,17 @@ class Unit {
       this.spriteClock+=deltaTime;
       this.spriteFacing=Math.abs(dx)>Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'down':'up');
       const moveSpeed = this.speed * (deltaTime / 16);
-      this.x += (dx / distance) * moveSpeed;
-      this.y += (dy / distance) * moveSpeed;
+      // Évitement local des bâtiments : contourner plutôt que traverser les murs.
+      const nextX=this.x+(dx/distance)*moveSpeed,nextY=this.y+(dy/distance)*moveSpeed;
+      let vx=dx/distance,vy=dy/distance;
+      const obstruction=typeof buildings!=="undefined"&&buildings.find(b=>b.state!=="destroyed"&&nextX>b.x-12&&nextX<b.x+b.size+12&&nextY>b.y-12&&nextY<b.y+b.size+12);
+      if(obstruction){
+        const cx=obstruction.x+obstruction.size/2,cy=obstruction.y+obstruction.size/2;
+        const sx=this.x-cx,sy=this.y-cy;
+        if(Math.abs(sx)>Math.abs(sy)){vx=0;vy=this.y<cy?-1:1}else{vx=this.x<cx?-1:1;vy=0}
+      }
+      this.x += vx * moveSpeed;
+      this.y += vy * moveSpeed;
       this.state = "moving";
     } else {
       this.state = "idle";

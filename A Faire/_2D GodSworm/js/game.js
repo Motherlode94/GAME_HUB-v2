@@ -972,6 +972,36 @@ function updateEnemyAI(deltaTime) {
   BOT_FACTIONS.forEach((faction) => runFactionAI(faction, deltaTime));
 }
 
+let militaryFormation="line";let militaryTech={weapons:0,armor:0,logistics:0};
+function orderFormation(group,x,y){
+ const squad=group.filter(a=>a&&a.state!=="dead");const count=squad.length;
+ squad.forEach((unit,i)=>{
+ let ox=0,oy=0;
+ if(militaryFormation==="column"){ox=(i%2-.5)*28;oy=(Math.floor(i/2)-(Math.ceil(count/2)-1)/2)*34}
+ else if(militaryFormation==="wedge"){const row=Math.floor(Math.sqrt(i)),side=i-row*row;ox=(side-row)*29;oy=row*32}
+ else{const cols=Math.min(7,Math.ceil(Math.sqrt(count*2))),rows=Math.ceil(count/cols);ox=((i%cols)-(cols-1)/2)*31;oy=(Math.floor(i/cols)-(rows-1)/2)*31}
+ unit.moveTo(Math.max(15,Math.min(canvas.width-15,x+ox)),Math.max(15,Math.min(canvas.height-15,y+oy)));
+ unit.target=null;unit.harvestTarget=null;
+ });
+}
+function buyMilitaryTech(type){
+ const level=militaryTech[type]||0;if(level>=3){pushGameLog("Amélioration au maximum.");return false}
+ const cost={};cost[RESOURCES.GOLD]=90+level*90;cost[RESOURCES.WOOD]=50+level*40;
+ if(!hasResources(cost)||!consumeResources(cost)){pushGameLog("Ressources insuffisantes pour la technologie.","warn");return false}
+ militaryTech[type]=level+1;
+ units.filter(v=>v.faction===PLAYER_FACTION&&!v.canHarvest).forEach(v=>applyMilitaryTech(v));
+ pushGameLog("Technologie "+type+" niveau "+militaryTech[type],"ok");return true;
+}
+function applyMilitaryTech(v){
+ if(!v||v.canHarvest||v.faction!==PLAYER_FACTION)return;
+ if(!v.baseAttackPower)v.baseAttackPower=v.attackPower;
+ if(!v.baseMaxHealth)v.baseMaxHealth=v.maxHealth;
+ v.attackPower=v.baseAttackPower*(1+militaryTech.weapons*.12);
+ v.maxHealth=v.baseMaxHealth*(1+militaryTech.armor*.15);
+ v.health=Math.min(v.maxHealth,v.health+0);
+ v.speed=(v.baseMoveSpeed||(v.baseMoveSpeed=v.speed))*(1+militaryTech.logistics*.08);
+}
+
 // === SPAWN INITIAL ===
 function spawnInitialUnits() {
   const startingFactions = [PLAYER_FACTION, ...BOT_FACTIONS];
@@ -1166,6 +1196,7 @@ canvas.addEventListener("click", (e) => {
       const ox=((index%cols)-(cols-1)/2)*26,oy=(Math.floor(index/cols)-Math.floor(selectedToMove.length/cols)/2)*26;
       unit.moveTo(mouseX+ox,mouseY+oy);unit.target=null;unit.harvestTarget=null;
     });
+    orderFormation(selectedToMove,mouseX,mouseY);
     pushGameLog('Déplacement : '+selectedToMove.length+' unité(s).','ok');
     return;
   }
@@ -1252,18 +1283,8 @@ canvas.addEventListener("contextmenu", (e) => {
       return;
     }
 
-    // Sinon, déplacement en formation simple
-    const cols = Math.max(1, Math.ceil(Math.sqrt(commandUnits.length)));
-    const spacing = 24;
-    commandUnits.forEach((unit, index) => {
-      const col = index % cols;
-      const row = Math.floor(index / cols);
-      const ox = (col - (cols - 1) / 2) * spacing;
-      const oy = (row - (cols - 1) / 2) * spacing;
-      unit.moveTo(mouseX + ox, mouseY + oy);
-      unit.target = null;
-      unit.harvestTarget = null;
-    });
+    // Formation militaire choisie par le joueur.
+    orderFormation(commandUnits,mouseX,mouseY);
     pushGameLog(`Ordre groupe: deplacement (${commandUnits.length} unite(s)).`);
     createParticleExplosion(mouseX, mouseY, "#64b5f6", 8);
   }
@@ -1706,7 +1727,9 @@ function evaluateWinLoss() {
 
 function serializeGameState() {
   return {
-    version: 2,
+    version: 3,
+    militaryTech: {...militaryTech},
+    militaryFormation,
     mode: currentMode,
     savedAt: Date.now(),
     gameTime: gameTime,
@@ -1773,6 +1796,8 @@ function serializeGameState() {
 
 function applySerializedState(snapshot) {
   if (!snapshot || typeof snapshot !== "object") return false;
+  militaryTech={weapons:0,armor:0,logistics:0,...snapshot.militaryTech};
+  militaryFormation=snapshot.militaryFormation||"line";
 
   if (snapshot.mode && Object.values(GAME_MODE).includes(snapshot.mode)) {
     currentMode = snapshot.mode;
@@ -1840,6 +1865,7 @@ function applySerializedState(snapshot) {
         created = addUnit(savedUnit.x, savedUnit.y, savedUnit.faction, savedUnit.type);
       }
       if (created) {
+        applyMilitaryTech(created);
         created.health = Math.min(created.maxHealth, Number(savedUnit.health) || created.health);
       }
     });
@@ -1927,6 +1953,7 @@ function loadProgress(silent = false) {
 
 function resetProgress() {
   if (!window.confirm("Supprimer la sauvegarde et recommencer une nouvelle partie ?")) return;
+  militaryTech={weapons:0,armor:0,logistics:0};
   resetWorldState(true);
   setMainMenuVisible(true, "Sauvegarde effacee. Nouvelle partie prete.");
 }

@@ -199,6 +199,7 @@ class Building {
     const spawnY = this.y + this.size / 2;
 
     const unit = addUnit(spawnX, spawnY, this.faction, unitType);
+    if(typeof applyMilitaryTech==="function")applyMilitaryTech(unit);
     if(unit&&this.rallyPoint)unit.moveTo(this.rallyPoint.x,this.rallyPoint.y);
     createParticleExplosion(spawnX, spawnY, getFactionColor(this.faction), 10);
     return unit;
@@ -254,8 +255,17 @@ class Building {
 
     const bgColor = this.state === "damaged" ? "rgba(100, 50, 50, 0.8)" : "rgba(50, 50, 50, 0.9)";
 
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(this.x, this.y, this.size, this.size);
+    // Construction médiévale stylisée : fondations, murs, toit, porte et fanion.
+    ctx.fillStyle="#41352f";ctx.fillRect(this.x-3,this.y+this.size*.4,this.size+6,this.size*.65);
+    ctx.fillStyle=this.type===BUILDING_TYPES.FARM?"#b19a64":"#a4a098";
+    ctx.fillRect(this.x+5,this.y+this.size*.25,this.size-10,this.size*.68);
+    ctx.fillStyle=this.type===BUILDING_TYPES.TOWN_HALL?"#63364a":this.type===BUILDING_TYPES.BARRACKS?"#6b4442":"#79533d";
+    ctx.beginPath();ctx.moveTo(this.x-6,this.y+this.size*.32);ctx.lineTo(this.x+this.size/2,this.y-5);ctx.lineTo(this.x+this.size+6,this.y+this.size*.32);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#35251f";ctx.fillRect(this.x+this.size*.42,this.y+this.size*.57,this.size*.18,this.size*.41);
+    ctx.fillStyle="#d8b76d";ctx.fillRect(this.x+this.size*.2,this.y+this.size*.48,6,8);
+    ctx.strokeStyle=getFactionColor(this.faction);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(this.x+this.size*.72,this.y+this.size*.15);ctx.lineTo(this.x+this.size*.72,this.y-14);ctx.stroke();
+    ctx.fillStyle=getFactionColor(this.faction);ctx.fillRect(this.x+this.size*.72,this.y-14,15,9);
+    /* existing outline and icon are drawn on top */
 
     ctx.strokeStyle = this.selected ? "#ffcc00" : getFactionColor(this.faction);
     ctx.lineWidth = this.selected ? 3 : 2;
