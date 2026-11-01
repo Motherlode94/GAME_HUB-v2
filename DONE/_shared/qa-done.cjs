@@ -25,7 +25,8 @@ for(const dir of dirs){
  for(const match of html.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/gi)){
    const ref=match[1].trim();
    if(!ref||/^(https?:|data:|blob:|#|mailto:|javascript:|\/\/)/i.test(ref))continue;
-   const asset=path.resolve(base,decodeURIComponent(ref.split(/[?#]/)[0]));
+   const clean=decodeURIComponent(ref.split(/[?#]/)[0]);
+   const asset=clean.startsWith('/')?path.resolve(root,'..',clean.slice(1)):path.resolve(base,clean);
    if(!fs.existsSync(asset))failures.push('Ressource introuvable: '+dir+' -> '+ref);
    checkedAssets++;
  }
