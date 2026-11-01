@@ -1,0 +1,26 @@
+name: Game Hub smoke checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify game entrypoints
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('index.html')
+          assert root.is_file() and root.stat().st_size>100,'Homepage missing'
+          games=[p for p in Path('.').rglob('index.html') if p!=root and '.git' not in p.parts]
+          assert games,'No playable game entrypoints'
+          broken=[str(p) for p in games if p.stat().st_size<100]
+          assert not broken,f'Empty game pages: {broken[:20]}'
+          print(f'Validated {len(games)} non-empty game entrypoints')
+          PY
