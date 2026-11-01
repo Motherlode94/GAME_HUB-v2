@@ -110,6 +110,11 @@ RTS.Game.Unit.prototype.render = function(ctx) {
         ctx.setLineDash([]);
     }
 
+    // Priorité au sprite militaire HD ; repli sur le dessin historique.
+    if (window.WarLikeArt && window.WarLikeArt.draw(ctx,'infantry',this.team,x,y,r*3,this._angle+Math.PI/2)) {
+        ctx.restore();
+        return;
+    }
     // --- Lueur de fond ---
     var glow = ctx.createRadialGradient(x, y, r * 0.3, x, y, r * 2.2);
     glow.addColorStop(0, glowColor);
