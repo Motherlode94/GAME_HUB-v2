@@ -233,7 +233,8 @@
             tags: ["horreur","enquete","3d"],
             playUrl: "DONE/_3D The Last Signal/index.html",
             description: "Une station radio abandonnée cache une transmission inquiétante."
-        }
+        },
+        {id:26,title:"Agence X",category:"strategy",tags:["espionnage","agents","gestion","missions"],playUrl:"DONE/_2D Agence X/index.html",description:"Dirige une agence secrète, recrute des agents et conduis des opérations à risques."}
     ];
 
     function parseJson(value, fallback) {
