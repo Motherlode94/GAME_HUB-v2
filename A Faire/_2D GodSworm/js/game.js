@@ -637,14 +637,14 @@ function castSmiteForFaction(casterFaction, god, x, y, silent = false) {
   }
 
   god.useSmite();
-  const radius = 105;
+  const radius = 65;
   let hits = 0;
 
   units.forEach((unit) => {
     if (!unit || unit.state === "dead") return;
     if (!areHostileFactions(casterFaction, unit.faction)) return;
     if (distanceToPoint(unit, x, y) <= radius) {
-      unit.takeDamage(85);
+      unit.takeDamage(unit.canHarvest ? 12 : 42);
       hits += 1;
       createParticleExplosion(unit.x, unit.y, "#ff8a00", 12);
     }
@@ -729,7 +729,7 @@ function castMiracleForFaction(casterFaction, god, x, y, silent = false) {
       return;
     }
     if (areHostileFactions(casterFaction, unit.faction) && distanceToPoint(unit, x, y) <= 140) {
-      unit.takeDamage(130);
+      unit.takeDamage(unit.canHarvest ? 15 : 55);
     }
   });
 
@@ -890,31 +890,23 @@ function commandFactionPatrol(faction) {
 }
 
 function runFactionDivineAI(faction) {
-  if (currentMode === GAME_MODE.SANDBOX) return;
-
-  const god = aiGods[faction];
-  if (!god) return;
-
-  const enemies = units.filter((unit) => unit.state !== "dead" && areHostileFactions(faction, unit.faction));
-  const allies = units.filter((unit) => unit.state !== "dead" && areAlliedFactions(faction, unit.faction));
-  const targetTerritory = pickPressureTarget(faction);
-  const faith = getFactionFaith(faction);
-
-  if (faith >= (Number(CONFIG.MIRACLE_COST) || 100) + 40 && targetTerritory && Math.random() < 0.18) {
-    const c = getTerritoryCenter(targetTerritory);
-    castMiracleForFaction(faction, god, c.x, c.y, true);
+  if(currentMode===GAME_MODE.SANDBOX)return;
+  const god=aiGods[faction];if(!god)return;
+  // Powers support tactical battles, not random long-range attacks against workers.
+  const attackers=units.filter(u=>u.state!=="dead"&&u.faction===faction&&!u.canHarvest);
+  const enemySoldiers=units.filter(u=>u.state!=="dead"&&!u.canHarvest&&areHostileFactions(faction,u.faction));
+  const nearby=enemySoldiers.filter(enemy=>attackers.some(friend=>Math.hypot(friend.x-enemy.x,friend.y-enemy.y)<190));
+  if(!nearby.length)return;
+  const target=nearby.sort((a,b)=>a.health-b.health)[0];
+  const faith=getFactionFaith(faction);
+  // Cast on actual engagements, with cooldown and deterministic priority.
+  if(faith>=(Number(CONFIG.SMITE_COST)||30)+35 && god.canSmite()){
+    castSmiteForFaction(faction,god,target.x,target.y,true);
     return;
   }
-
-  if (faith >= (Number(CONFIG.SMITE_COST) || 30) + 30 && enemies.length > 0 && Math.random() < 0.3) {
-    const target = enemies[Math.floor(Math.random() * enemies.length)];
-    castSmiteForFaction(faction, god, target.x, target.y, true);
-    return;
-  }
-
-  if (faith >= (Number(CONFIG.BLESSING_COST) || 50) + 20 && allies.length > 0 && Math.random() < 0.25) {
-    const target = allies[Math.floor(Math.random() * allies.length)];
-    castBlessForFaction(faction, god, target.x, target.y, true);
+  const wounded=attackers.filter(u=>u.health<u.maxHealth*.55&&Math.hypot(u.x-target.x,u.y-target.y)<170);
+  if(wounded.length&&faith>=(Number(CONFIG.BLESSING_COST)||50)+20&&god.canBless()){
+    castBlessForFaction(faction,god,wounded[0].x,wounded[0].y,true);
   }
 }
 
