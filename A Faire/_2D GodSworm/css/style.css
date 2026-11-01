@@ -516,3 +516,6 @@ body{display:block;background:radial-gradient(circle at 50% 4%,#332047 0%,#100b1
 #militaryDoctrine{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:11px 14px;border:1px solid #9f835b;border-radius:9px;background:#201d29;color:#f3dfbc;font-size:12px}#militaryDoctrine strong{font-size:15px}#militaryDoctrine button,#militaryDoctrine select{background:#47344b;color:#fff1db;border:1px solid #a18165;padding:8px 10px;border-radius:6px;cursor:pointer}#militaryTechStatus{color:#c7dcb9}
 
 .stance-controls{display:flex;gap:5px;flex-wrap:wrap}.stance-controls button{background:#23334b!important;border-color:#71849d!important}.stance-controls button:hover{background:#385b7a!important}
+
+/* Contrôles souris RTS : sélection lisible, curseur cohérent. */
+#gameCanvas{cursor:default;user-select:none;-webkit-user-select:none;touch-action:none}#gameCanvas:active{cursor:crosshair}#gameWrapper{gap:12px}#gameCanvas{outline-offset:3px}#controls{line-height:2.4}

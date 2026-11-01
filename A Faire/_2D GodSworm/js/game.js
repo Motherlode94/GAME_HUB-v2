@@ -1116,6 +1116,21 @@ function createParticleExplosion(x, y, color, count = 15) {
   }
 }
 
+// Commandes RTS : coordonnées canoniques, sélection par zone et confirmation des ordres.
+const rtsMouse={down:null,drag:null,suppressClick:false,markers:[]};
+function rtsPoint(e){const r=canvas.getBoundingClientRect(),sx=canvas.width/Math.max(1,r.width-canvas.clientLeft*2),sy=canvas.height/Math.max(1,r.height-canvas.clientTop*2);return{x:(e.clientX-r.left-canvas.clientLeft)*sx,y:(e.clientY-r.top-canvas.clientTop)*sy}}
+canvas.addEventListener("mousedown",e=>{if(e.button===0&&!isInMainMenu&&!buildMode&&!divineCastMode&&!window.godswormRallyBuilding){rtsMouse.down=rtsPoint(e);rtsMouse.drag=null}});
+canvas.addEventListener("mouseup",e=>{if(e.button!==0||!rtsMouse.down)return;const p=rtsPoint(e),d=rtsMouse.down;rtsMouse.down=null;if(Math.hypot(p.x-d.x)<12){rtsMouse.drag=null;return}
+ rtsMouse.suppressClick=true;rtsMouse.drag=null;const x0=Math.min(d.x,p.x),x1=Math.max(d.x,p.x),y0=Math.min(d.y,p.y),y1=Math.max(d.y,p.y);
+ const captured=units.filter(u=>u.faction===PLAYER_FACTION&&u.state!=="dead"&&u.x>=x0&&u.x<=x1&&u.y>=y0&&u.y<=y1);
+ if(captured.length){const old=e.shiftKey?getSelectedPlayerUnits():[];setSelectedUnits([...old,...captured]);selectedBuilding=null;selectedTerritory=null;buildings.forEach(b=>b.selected=false);pushGameLog(captured.length+" unités sélectionnées.","ok")}
+});
+canvas.addEventListener("mouseleave",()=>{rtsMouse.down=null;rtsMouse.drag=null});
+function rtsMarker(x,y,color="#9ee8ff"){rtsMouse.markers.push({x,y,color,life:650})}
+function drawRtsMouse(delta=16){
+ if(rtsMouse.down&&rtsMouse.drag){const a=rtsMouse.down,b=rtsMouse.drag;ctx.save();ctx.fillStyle="rgba(124,191,233,.18)";ctx.strokeStyle="#b8e9ff";ctx.lineWidth=2;ctx.fillRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y));ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(a.x-b.x),Math.abs(a.y-b.y));ctx.restore()}
+ rtsMouse.markers=rtsMouse.markers.filter(m=>m.life>0);rtsMouse.markers.forEach(m=>{ctx.save();ctx.globalAlpha=Math.min(1,m.life/250);ctx.strokeStyle=m.color;ctx.lineWidth=3;ctx.beginPath();ctx.arc(m.x,m.y,11+(650-m.life)*.022,0,Math.PI*2);ctx.stroke();ctx.restore();m.life-=delta})
+}
 // === EVENT LISTENERS ===
 
 canvas.addEventListener("mousemove", (e) => {
@@ -1123,6 +1138,7 @@ canvas.addEventListener("mousemove", (e) => {
   godCursor.x=(e.clientX-rect.left)*canvas.width/Math.max(1,rect.width);
   godCursor.y=(e.clientY-rect.top)*canvas.height/Math.max(1,rect.height);
 
+  if(rtsMouse.down)rtsMouse.drag=rtsPoint(e);
   buildPreviewX = godCursor.x;
   buildPreviewY = godCursor.y;
 
@@ -1138,6 +1154,7 @@ canvas.addEventListener("mousemove", (e) => {
 
 // CLIC GAUCHE - Sélection
 canvas.addEventListener("click", (e) => {
+  if(rtsMouse.suppressClick){rtsMouse.suppressClick=false;return}
   const rect = canvas.getBoundingClientRect();
   const mouseX = (e.clientX - rect.left - canvas.clientLeft) * canvas.width / Math.max(1,rect.width - canvas.clientLeft*2);
   const mouseY = (e.clientY - rect.top - canvas.clientTop) * canvas.height / Math.max(1,rect.height - canvas.clientTop*2);
@@ -1221,18 +1238,8 @@ canvas.addEventListener("click", (e) => {
     return;
   }
 
-  // Mode simple : cliquez sur le sol pour déplacer les unités déjà sélectionnées.
-  const selectedToMove = getSelectedPlayerUnits();
-  if (selectedToMove.length && !isShift && !isCtrlLike && !getResourceNodeAt(mouseX,mouseY)) {
-    const cols=Math.ceil(Math.sqrt(selectedToMove.length));
-    selectedToMove.forEach((unit,index)=>{
-      const ox=((index%cols)-(cols-1)/2)*26,oy=(Math.floor(index/cols)-Math.floor(selectedToMove.length/cols)/2)*26;
-      unit.moveTo(mouseX+ox,mouseY+oy);unit.target=null;unit.harvestTarget=null;
-    });
-    orderFormation(selectedToMove,mouseX,mouseY);
-    pushGameLog('Déplacement : '+selectedToMove.length+' unité(s).','ok');
-    return;
-  }
+  // RTS standard : clic gauche = sélection, clic droit = ordre.
+  if(!isShift&&!isCtrlLike){setSelectedUnits([]);buildings.forEach(b=>b.selected=false);selectedBuilding=null}
   // Sélection de territoire
   const clickedTerritory = getTerritoryAt(mouseX, mouseY);
   if (clickedTerritory) {
@@ -1258,6 +1265,7 @@ canvas.addEventListener("contextmenu", (e) => {
 
   if (isInMainMenu) return;
 
+  rtsMarker(mouseX,mouseY);
   const commandUnits = getSelectedPlayerUnits();
   if (commandUnits.length > 0) {
     const primaryUnit = commandUnits[0];
@@ -2012,6 +2020,7 @@ function draw() {
 
   drawGodCursor();
   drawSelectionInfo();
+  drawRtsMouse();
 }
 
 function drawBuildPreview() {
