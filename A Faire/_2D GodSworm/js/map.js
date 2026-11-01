@@ -60,9 +60,12 @@
     }
     ctx.restore();
     // Frontières : deux traits contrastés et un effet de sélection.
-    ctx.strokeStyle="rgba(7,10,16,.72)";ctx.lineWidth=5;ctx.strokeRect(this.x+2.5,this.y+2.5,this.width-5,this.height-5);
-    ctx.strokeStyle=this.selected?"#ffe28e":this.hovered?"#eff0c9":getFactionBorderColor(this.faction);
-    ctx.lineWidth=this.selected?4:2;ctx.strokeRect(this.x+3,this.y+3,this.width-6,this.height-6);
+    // Subtle borders on neutral land, prominent only for owned/selected provinces.
+    const neutral=this.faction===FACTIONS.NEUTRAL;
+    ctx.strokeStyle=neutral?"rgba(150,166,137,.16)":"rgba(10,18,20,.55)";
+    ctx.lineWidth=neutral?1:3;ctx.strokeRect(this.x+1.5,this.y+1.5,this.width-3,this.height-3);
+    ctx.strokeStyle=this.selected?"#ffe28e":this.hovered?"#eff0c9":neutral?"rgba(178,193,155,.22)":getFactionBorderColor(this.faction);
+    ctx.lineWidth=this.selected?4:this.hovered?2:1.5;ctx.strokeRect(this.x+3,this.y+3,this.width-6,this.height-6);
     if(this.hovered){ctx.fillStyle="rgba(255,255,255,.095)";ctx.fillRect(this.x+5,this.y+5,this.width-10,this.height-10)}
     // Emblème de faction discret, visible sous les unités.
     if(this.faction!==FACTIONS.NEUTRAL&&this.width>=220&&this.height>=180){ctx.save();ctx.globalAlpha=.18;ctx.fillStyle="#fff";ctx.font="bold 64px Georgia";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(getFactionIcon(this.faction),this.x+this.width/2,this.y+this.height/2);ctx.restore()}
