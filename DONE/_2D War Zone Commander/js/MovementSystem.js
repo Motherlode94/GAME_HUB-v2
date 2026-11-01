@@ -6,13 +6,13 @@ RTS.MovementSystem = {
 
         units.forEach(function(unit) {
 
-            if (!unit.target) return;
+            if (!unit.target || !Number.isFinite(delta) || delta <= 0) return;
 
             var dx   = unit.target.x - unit.x;
             var dy   = unit.target.y - unit.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist > 2) {
+            if (dist > Math.max(2, unit.speed * delta)) {
                 unit.x += (dx / dist) * unit.speed * delta;
                 unit.y += (dy / dist) * unit.speed * delta;
             } else {
