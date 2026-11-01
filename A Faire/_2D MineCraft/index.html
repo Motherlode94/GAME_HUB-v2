@@ -70,6 +70,7 @@
         </footer>
     </div>
 
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px"><button id="saveWorldBtn" type="button">💾 Sauvegarder le monde</button><button id="loadWorldBtn" type="button">📂 Charger le monde</button></div>
     <!-- Chargement des modules JavaScript -->
     <script src="js/block.js"></script>
     <script src="js/player.js"></script>
@@ -77,6 +78,7 @@
     <script src="js/enemy.js"></script>
     <script src="js/game.js"></script>
     <script src="js/main.js"></script>
+    <script>window.addEventListener("DOMContentLoaded",()=>{document.getElementById("saveWorldBtn").addEventListener("click",()=>showNotification(game&&game.saveWorld()?"Monde sauvegardé !":"Sauvegarde impossible."));document.getElementById("loadWorldBtn").addEventListener("click",()=>showNotification(game&&game.loadWorld()?"Monde chargé !":"Aucune sauvegarde valide."));window.addEventListener("pagehide",()=>{if(game&&game.running)game.saveWorld()})});</script>
 
     <!-- Script du bouton retour -->
     <script>

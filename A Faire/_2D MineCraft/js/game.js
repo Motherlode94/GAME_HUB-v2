@@ -233,9 +233,10 @@ start() {
     
     // Initialize player inventory AFTER BLOCK_TYPES is defined
     this.player.initInventory();
+    const restored=this.loadWorld();
     
     // Placer le joueur au spawn
-    this.player.x = this.worldWidth / 2;
+    if (!restored) {this.player.x = this.worldWidth / 2;
     for (let y = 0; y < this.worldHeight; y++) {
         if (this.world.getBlock(Math.floor(this.player.x), y)) {
             this.player.y = y - this.player.height - 1;
@@ -243,11 +244,48 @@ start() {
         }
     }
     
+    }
     this.running = true;
     this.loop();
 }
     
+    saveWorld() {
+        try {
+            const blocks = Array.from(this.world.blocks, ([key, block]) => [key, block.type]);
+            const payload = {version:1,width:this.worldWidth,height:this.worldHeight,blocks,player:{x:this.player.x,y:this.player.y,stamina:this.player.stamina,selectedBlockIndex:this.player.selectedBlockIndex,mode:this.player.mode},clock:{time:this.dayNightCycle.time,dayNumber:this.dayNightCycle.dayNumber}};
+            localStorage.setItem('warlike_mineblock_world_v1',JSON.stringify(payload));
+            return true;
+        } catch(error) { console.warn('Sauvegarde impossible',error);return false; }
+    }
+
+    loadWorld() {
+        try {
+            const raw=localStorage.getItem('warlike_mineblock_world_v1');
+            if(!raw)return false;
+            const data=JSON.parse(raw);
+            if(data.version!==1||data.width!==this.worldWidth||data.height!==this.worldHeight||!Array.isArray(data.blocks)||data.blocks.length>this.worldWidth*this.worldHeight||!data.player)throw Error('Sauvegarde incompatible');
+            const restored=new Map();
+            for(const entry of data.blocks){
+                if(!Array.isArray(entry)||entry.length!==2||typeof entry[0]!=='string'||!Object.prototype.hasOwnProperty.call(BLOCK_TYPES,entry[1]))throw Error('Bloc invalide');
+                const coords=entry[0].split(',').map(Number);
+                if(coords.length!==2||coords.some(n=>!Number.isInteger(n))||coords[0]<0||coords[0]>=this.worldWidth||coords[1]<0||coords[1]>=this.worldHeight)throw Error('Coordonnées invalides');
+                restored.set(entry[0],new Block(entry[1],coords[0],coords[1]));
+            }
+            if(!Number.isFinite(data.player.x)||!Number.isFinite(data.player.y))throw Error('Position invalide');
+            this.world.blocks=restored;
+            this.player.x=Math.max(0,Math.min(this.worldWidth-1,data.player.x));
+            this.player.y=Math.max(0,Math.min(this.worldHeight-1,data.player.y));
+            this.player.vx=0;this.player.vy=0;
+            this.player.stamina=Math.max(0,Math.min(100,Number(data.player.stamina)||0));
+            this.player.selectedBlockIndex=Math.max(0,Math.min(this.player.inventory.length-1,Number(data.player.selectedBlockIndex)||0));
+            this.player.mode=data.player.mode==='build'?'build':'mine';
+            if(data.clock){this.dayNightCycle.time=Number(data.clock.time)||0;this.dayNightCycle.dayNumber=Math.max(1,Number(data.clock.dayNumber)||1);this.dayNightCycle.isDaytime=this.dayNightCycle.time<this.dayNightCycle.nightStart;}
+            return true;
+        }catch(error){console.warn('Chargement impossible',error);return false}
+    }
+
     restart() {
+        localStorage.removeItem("warlike_mineblock_world_v1");
         this.world.generate();
         this.player.x = this.worldWidth / 2;
         for (let y = 0; y < this.worldHeight; y++) {
