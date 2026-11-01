@@ -150,16 +150,6 @@ class Unit {
 
     if (this.state === "dead") return;
 
-    // Stabilisation : pas de téléportation à chaque frame.
-    this.rescueCooldown=Math.max(0,(this.rescueCooldown||0)-deltaTime);
-    if(TacticalNav.blocked(this.x,this.y)){
-      this.obstructedTime=(this.obstructedTime||0)+deltaTime;
-      if(this.obstructedTime>550&&this.rescueCooldown===0){
-        const safe=TacticalNav.freeSpot(this.x,this.y,22);
-        if(safe){this.x=safe.x;this.y=safe.y;this.navPath=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);}
-        this.rescueCooldown=4000;this.obstructedTime=0;
-      }
-    }else this.obstructedTime=0;
     if(this.canHarvest&&this.buildTarget&&this.workerOrder==="build"){
       if(this.buildTarget.constructionProgress>=1||this.buildTarget.state==="destroyed"){this.buildTarget=null;this.workerOrder="idle";this.moveOrderActive=false;this.state="idle";}
       else{
@@ -594,39 +584,20 @@ class Unit {
   }
 
   moveToTarget(deltaTime) {
-    if(!this.navPath)this.navPath=[];
-    const destination=this.navPath[0]||{x:this.targetX,y:this.targetY};
-    let dx=destination.x-this.x,dy=destination.y-this.y;
-    let distance=Math.hypot(dx,dy);
-    // Consume waypoints, including those initially inside the same occupied grid cell.
-    while(distance<9&&this.navPath.length){this.navPath.shift();const p=this.navPath[0]||this.navGoal||{x:this.targetX,y:this.targetY};dx=p.x-this.x;dy=p.y-this.y;distance=Math.hypot(dx,dy)}
-    if(distance<7){this.state="idle";this.moveOrderActive=false;return}
-    const step=Math.min(distance,this.speed*deltaTime/16);let vx=dx/distance,vy=dy/distance;
-    let nx=this.x+vx*step,ny=this.y+vy*step;
-    if(TacticalNav.blocked(nx,ny)){
-      // A building can be created after a path was planned; replan from current position.
-      this.navCooldown=(this.navCooldown||0)-deltaTime;
-      if(this.navCooldown<=0){const route=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);if(route.length){this.navPath=route;this.navGoal=route[route.length-1]}this.navCooldown=800}
-      this.stuckTimer=(this.stuckTimer||0)+deltaTime;
-      return;
-    }
-    // Separation is steering, not a hard collision against other moving units.
-    if(typeof units!=="undefined"){
-      let px=0,py=0;
-      for(const other of units){if(other===this||other.state==="dead")continue;
-       const rx=nx-other.x,ry=ny-other.y,d=Math.hypot(rx,ry);
-       if(d>0.1&&d<19){px+=rx/d*(19-d)*.12;py+=ry/d*(19-d)*.12}
-      }
-      if(!TacticalNav.blocked(nx+px,ny+py)){nx+=px;ny+=py}
-    }
-    this.x=nx;this.y=ny;this.state="moving";this.spriteClock+=deltaTime;
-    this.spriteFacing=Math.abs(vx)>=Math.abs(vy)?(vx>=0?"right":"left"):(vy>=0?"down":"up");
-    // Avoid oscillating forever on a stale waypoint.
-    this.stuckTimer=(this.stuckTimer||0)+deltaTime;
-    if(this.stuckTimer>1200){
-      const moved=Math.hypot(this.x-(this.lastMoveX??this.x),this.y-(this.lastMoveY??this.y));
-      if(moved<7){const route=TacticalNav.path(this.x,this.y,this.targetX,this.targetY);if(route.length){this.navPath=route;this.navGoal=route[route.length-1]}}
-      this.lastMoveX=this.x;this.lastMoveY=this.y;this.stuckTimer=0;
+    const dx = this.targetX - this.x;
+    const dy = this.targetY - this.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > 5) {
+      this.spriteClock+=deltaTime;
+      this.spriteFacing=Math.abs(dx)>Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'down':'up');
+      const moveSpeed = this.speed * (deltaTime / 16);
+      this.x += (dx / distance) * moveSpeed;
+      this.y += (dy / distance) * moveSpeed;
+      this.state = "moving";
+    } else {
+      this.state = "idle";
+      this.moveOrderActive = false;
     }
   }
 
@@ -744,8 +715,8 @@ class Unit {
     // Un ordre explicite de déplacement prime sur "tenir position".
     if(this.commandStance==="hold")this.commandStance="move";
     if(this.canHarvest){this.harvestTarget=null;this.dropoffBuilding=null;this.buildTarget=null;this.workerOrder="move";}
-    this.navPath=TacticalNav.path(this.x,this.y,x,y);
-    this.navGoal=this.navPath.length?this.navPath[this.navPath.length-1]:TacticalNav.freeSpot(x,y)||{x,y};
+    this.navPath=[];
+    this.navGoal={x,y};
     this.stuckTimer=0;this.lastMoveX=this.x;this.lastMoveY=this.y;
     this.moveOrderActive=true;
     this.targetX = this.navGoal.x;
