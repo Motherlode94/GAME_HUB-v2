@@ -10,6 +10,16 @@ window.onload = function () {
     initMap();
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('mousemove', handleMouseMove);
+    // On touch devices, update the aiming tile on the actual press, not
+    // at the last desktop-style mousemove (which may never be dispatched).
+    canvas.addEventListener('pointerdown', handleMouseMove);
+    canvas.addEventListener('pointermove', (event) => {
+        if (event.pointerType !== 'mouse') handleMouseMove(event);
+    });
+    canvas.addEventListener('pointerleave', () => {
+        gameState.hoveredTile = { x: -1, y: -1 };
+        gameState.hoveredTower = null;
+    });
     canvas.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         gameState.placingTower = false;
