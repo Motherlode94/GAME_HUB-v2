@@ -41,11 +41,30 @@ RTS.SpriteAtlas={
     if(team==="red"||team==="rouge"||team==="enemy") id=this.red[id]||id;
     return id;
   },
+  pngNames:["soldat_fusil","soldat_ingenieur","soldat_medic","soldat_minigun","soldat_radio","buggy_bleu","blinde_bleu","char_lourd_vert","artillerie_bleue","antiaerien_vert","vehicule_radar_bleu","camion_bleu","helico_bleu","drone_bleu","chasseur_bleu","avion_bleu","arme_fusil","arme_mitrailleuse","arme_lance_roquette","arme_pistolet"],
+  pngImage:(function(){var im=new Image();im.src="assets/units/war-like-units-atlas.png";return im;})(),
+  drawPNG:function(ctx,id,x,y,width,height,angle,team){
+    var im=this.pngImage;if(!im||!im.complete||!im.naturalWidth)return false;
+    var base=id,reverse=this.red;
+    Object.keys(reverse).forEach(function(k){if(reverse[k]===id)base=k;});
+    var index=this.pngNames.indexOf(base);
+    if(index<0)return false;
+    var sx=(index%5)*64,sy=Math.floor(index/5)*64;
+    ctx.save();ctx.translate(x,y);ctx.rotate(angle||0);
+    ctx.drawImage(im,sx,sy,64,64,-width/2,-height/2,width,height);
+    if(team==="red"||team==="rouge"||team==="enemy"){
+      ctx.globalCompositeOperation="source-atop";
+      ctx.globalAlpha=.30;ctx.fillStyle="#d54b48";
+      ctx.fillRect(-width/2,-height/2,width,height);
+    }
+    ctx.restore();return true;
+  },
   draw:function(ctx,type,x,y,width,height,angle,team){
     var assets=window.WarLikeRTSAssets;
-    if(!assets)return false;
+
     var id=this.resolve(type,team);
-    if(!assets.get(id))return false;
+    if(this.drawPNG(ctx,id,x,y,width,height,angle,team))return true;
+    if(!assets||!assets.get(id))return false;
     return assets.draw(ctx,id,x,y,width,height,angle||0);
   }
 };
