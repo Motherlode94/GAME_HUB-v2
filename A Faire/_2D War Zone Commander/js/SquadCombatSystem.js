@@ -30,7 +30,7 @@ RTS.SquadCombatSystem = {
                 next.delay -= delta;
                 if (next.delay <= 0) {
                     squad.burstQueue.shift();
-                    if (next.targetSquad && !next.targetSquad.isDead() && squad.ammo > 0) {
+                    if (next.targetSquad && !next.targetSquad.isDead() && squad.ammo > 0 && RTS.TacticalRules.detects(game,squad,next.targetSquad)) {
                         squad.ammo--;
                         self._emitProjectile(game, squad, next.targetSquad, next.projType || "bullet");
                     }
@@ -56,7 +56,7 @@ RTS.SquadCombatSystem = {
                 if (!self._isEnemy(squad.team, other.team)) return;
                 if (other.isDead() || other.abandoned) return;
                 if (squad.def.antiAirOnly && !(other.def && other.def.category === "air")) return;
-                if (RTS.TacticalRules && !RTS.TacticalRules.spotted(game,other,squad.team==="red"?"red":"blue")) return;
+                if (RTS.TacticalRules && !RTS.TacticalRules.detects(game,squad,other)) return;
                 var dx = other.x - squad.x;
                 var dy = other.y - squad.y;
                 var d  = Math.sqrt(dx * dx + dy * dy);
@@ -186,6 +186,7 @@ RTS.SquadCombatSystem = {
     },
 
     _emitProjectileWithSpread: function(game, squad, targetSquad, type, spread) {
+        if (!RTS.TacticalRules.detects(game,squad,targetSquad)) return;
         var aliveShooters = squad.aliveMembers();
         // Individual member selects the best firing position instead of always using member 0.
         var shooter = aliveShooters.slice().sort(function(a,b){
