@@ -2653,6 +2653,57 @@ function renderDashboard() {
   `;
 
   renderDistributionPanel();
+  // ART VIBE: pilotage financier et risque de surmenage, calculés à chaque rendu.
+  const existingForecast = document.getElementById('artvibe-forecast');
+  if(existingForecast) existingForecast.remove();
+  if(fg.parentElement) {
+    const weeklyPayroll = G.artists.reduce((sum, artist) => sum + Math.max(0, Number(artist.fee)||0) * getSalaryMultiplier(), 0);
+    const lastNet = Number(G.lastWeekNet)||0;
+    const weeklyExpenses = Math.max(weeklyPayroll, Number(G.weekExpenses)||0);
+    const estimatedRevenue = Math.max(0, Number(G.weekRevenue)||0);
+    const runway = weeklyPayroll > 0 ? Math.max(0, Math.floor(Math.max(0, G.money) / weeklyPayroll)) : null;
+    const exhausted = G.artists.filter(a => (Number(a.energy)||0) < 30);
+    const unhappy = G.artists.filter(a => Number(a.happiness ?? 70) < 35);
+    const catalog = Array.isArray(G.royaltyCatalog) ? G.royaltyCatalog : [];
+    const active = catalog.filter(e => (Number(e.weeksLeft)||0) > 0);
+    const totalStreams = catalog.reduce((s,e)=>s+Math.max(0,Number(e.streams)||0),0);
+    const forecast = document.createElement('section');
+    forecast.id='artvibe-forecast';
+    forecast.style.cssText='padding:14px;margin:14px 0;border:1px solid var(--border);border-radius:12px;background:var(--panel,rgba(255,255,255,.035));font-size:.83rem';
+    const heading=document.createElement('h3');
+    heading.textContent='📊 Conseil du label — tableau de décision';
+    heading.style.margin='0 0 10px';
+    forecast.appendChild(heading);
+    const row = (name,value,color) => {
+      const line=document.createElement('div');
+      line.style.cssText='display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--border)';
+      const left=document.createElement('span');left.textContent=name;
+      const right=document.createElement('strong');right.textContent=value;
+      if(color) right.style.color=color;
+      line.append(left,right);forecast.appendChild(line);
+    };
+    row('Trésorerie après 4 semaines au rythme du dernier bilan',
+      Math.round((Number(G.money)||0)+4*lastNet).toLocaleString('fr-FR')+' €',
+      (Number(G.money)||0)+4*lastNet<0?'var(--red)':'var(--green)');
+    row('Autonomie sur la masse salariale',runway===null?'Pas de salaires':runway+' semaine(s)',
+      runway!==null&&runway<4?'var(--red)':'var(--green)');
+    row('Sorties encore exploitées',active.length+' / '+catalog.length);
+    row('Écoutes cumulées',totalStreams.toLocaleString('fr-FR'));
+    row('Artistes épuisés',String(exhausted.length),exhausted.length?'var(--red)':'var(--green)');
+    row('Artistes à risque de départ',String(unhappy.length),unhappy.length?'var(--red)':'var(--green)');
+    const advice=document.createElement('p');
+    advice.style.cssText='margin:10px 0 0;color:var(--muted)';
+    advice.textContent=unhappy.length ? 'Priorité : remonter la satisfaction des artistes en difficulté avant de financer de nouveaux projets.'
+      : exhausted.length ? 'Priorité : préserver le repos des artistes dont l’énergie est inférieure à 30.'
+      : runway!==null&&runway<4 ? 'Priorité : préserver la trésorerie, les salaires ne sont couverts que pour quelques semaines.'
+      : active.length===0 ? 'Priorité : produire une sortie musicale pour créer un catalogue générateur de revenus.'
+      : 'Situation stable : compare la rentabilité des projets et les dépenses de promotion avant d’investir.';
+    forecast.appendChild(advice);
+    const note=document.createElement('small');note.style.cssText='display:block;margin-top:8px;color:var(--muted)';
+    note.textContent='Projection indicative basée sur le dernier bilan hebdomadaire ; pas une garantie de revenus.';
+    forecast.appendChild(note);
+    fg.insertAdjacentElement('afterend',forecast);
+  }
   const sorted = [...G.artists].sort((a,b) => b.fame - a.fame).slice(0, 5);
   const topList = document.getElementById('top-artists-list');
 if(topList) topList.innerHTML = sorted.length > 0
