@@ -181,10 +181,9 @@ function draw() {
     if (gameState.placingTower) drawTowerPlacementPreview(ctx);
     ctx.restore();
 
-    drawHUD(ctx);
-    drawBossHealth(ctx);
-    drawSelectionPanel(ctx);
+    // Command panels live in the DOM so the map remains unobstructed.
     drawBanner(ctx);
+    if (typeof updateTDUI === 'function') updateTDUI();
     if (gameState.paused && !gameState.gameOver) drawOverlay('PAUSE', 'Appuyez sur P pour reprendre', '#FFD700');
     if (gameState.gameOver) drawGameOver(ctx);
 }
@@ -384,6 +383,7 @@ function getMousePos(event) {
 }
 
 function selectBuildType(type) {
+    if (typeof tdArmedAbility !== 'undefined') tdArmedAbility = null;
     if (gameState.placingTower && gameState.selectedTowerType === type) {
         gameState.placingTower = false;
         return;
@@ -394,16 +394,22 @@ function selectBuildType(type) {
 }
 
 function handleCanvasClick(event) {
-    if (gameState.gameOver) return;
+    if (gameState.gameOver || gameState.paused) return;
     const { x, y } = getMousePos(event);
 
-    if (y < 30 && x >= 400 && x < 460) {
-        cycleGameSpeed();
-        return;
-    }
-    const button = getBuildButtonAt(x, y);
-    if (button) {
-        selectBuildType(button);
+    // The external ability buttons arm a targeted ability until the player
+    // clicks a genuine map tile; DOM clicks cannot substitute map coordinates.
+    if (typeof tdArmedAbility !== 'undefined' && tdArmedAbility) {
+        gameState.hoveredTile = { x: worldToGrid(x), y: worldToGrid(y) };
+        const armed = tdArmedAbility;
+        const ok = activateTacticalAbility(armed);
+        if (ok) {
+            tdArmedAbility = null;
+            if (typeof tdFeedback === 'function') tdFeedback(TD_ABILITIES[armed].name + ' activé !');
+        } else if (typeof tdFeedback === 'function') {
+            tdFeedback('Aucune cible valide à cet endroit, ou capacité indisponible.');
+        }
+        if (typeof updateTDUI === 'function') updateTDUI(true);
         return;
     }
 
@@ -444,6 +450,7 @@ function handleMouseMove(event) {
 }
 
 function handleKey(event) {
+    if (event.target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target.tagName)) return;
     const key = event.key.toLowerCase();
 
     if (key === 'r' && gameState.gameOver) {
@@ -466,6 +473,7 @@ function handleKey(event) {
         event.preventDefault();
         startNextWave();
     } else if (key === 'escape') {
+        if (typeof tdArmedAbility !== 'undefined') tdArmedAbility = null;
         gameState.placingTower = false;
         setSelectedTowers([]);
     } else if (key === 'u' && sel.length) {
