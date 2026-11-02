@@ -6,6 +6,7 @@ let tdUILastUpdate = -Infinity;
 let tdArmedAbility = null;
 let tdFeedbackMessage = '';
 let tdFeedbackExpiry = 0;
+let tdIntelWave = -1;
 const tdById = (id) => document.getElementById(id);
 const tdClamp = (v, low, high) => Math.min(high, Math.max(low, v));
 
@@ -66,6 +67,31 @@ function tdUseAbility(key) {
         }
     }
     updateTDUI(true);
+}
+function tdRenderIntel() {
+    const next = waveState.currentWave + 1;
+    if (tdIntelWave === next) return;
+    tdIntelWave = next;
+    const container = tdById('td-intel-list');
+    if (!container) return;
+    container.replaceChildren();
+    tdSetText('td-intel-title', 'Vague ' + next + (next % 10 === 0 ? ' · BOSS EN APPROCHE' : ''));
+    const composition = getWavePreview(next);
+    for (const [type, count] of Object.entries(composition)) {
+        const enemy = ENEMY_TYPES[type];
+        if (!enemy) continue;
+        const line = document.createElement('div');
+        line.className = 'td-intel-row';
+        const dot = document.createElement('i');
+        dot.className = 'td-intel-dot';
+        dot.style.background = enemy.color;
+        const label = document.createElement('span');
+        label.textContent = enemy.name;
+        const number = document.createElement('strong');
+        number.textContent = '×' + count;
+        line.append(dot, label, number);
+        container.append(line);
+    }
 }
 function initTDUI() {
     if (tdUIReady) return;
@@ -174,6 +200,7 @@ function updateTDUI(force = false) {
     const now = performance.now();
     if (!force && now - tdUILastUpdate < 110) return;
     tdUILastUpdate = now;
+    tdRenderIntel();
     tdSetText('td-money', gameState.money + ' $');
     tdSetText('td-lives', gameState.lives);
     tdSetText('td-wave-number', waveState.currentWave || '—');
