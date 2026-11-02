@@ -5,51 +5,51 @@ let nextTowerId = 1;
 const TOWER_TYPES = {
     BASIC: {
         name: 'Canon', short: 'B', key: '1',
-        cost: 50, range: 130, damage: 22, fireRate: 700,
+        cost: 50, range: 130, damage: 22, fireRate: 700, hp: 190,
         color: '#4169e1', projectileSpeed: 420,
         desc: 'Polyvalent et bon marché.'
     },
     RAPID: {
         name: 'Mitrailleuse', short: 'R', key: '2',
-        cost: 70, range: 110, damage: 9, fireRate: 220,
+        cost: 70, range: 110, damage: 9, fireRate: 220, hp: 160,
         color: '#27ae60', projectileSpeed: 520,
         desc: 'Tir très rapide, faible contre l\'armure.'
     },
     SNIPER: {
         name: 'Sniper', short: 'S', key: '3',
-        cost: 110, range: 240, damage: 85, fireRate: 1600,
+        cost: 110, range: 240, damage: 85, fireRate: 1600, hp: 140,
         color: '#8e44ad', hitscan: true, pierce: true,
         desc: 'Très longue portée, ignore l\'armure.'
     },
     FROST: {
         name: 'Givre', short: 'G', key: '4',
-        cost: 80, range: 105, damage: 6, fireRate: 900,
+        cost: 80, range: 105, damage: 6, fireRate: 900, hp: 190,
         color: '#48c9f0', projectileSpeed: 360, splash: 45,
         slow: { factor: 0.5, duration: 1600 },
         desc: 'Ralentit les ennemis dans une zone.'
     },
     RIFLEMAN: {
         name: 'Fusilier', short: 'F', key: '6',
-        cost: 60, range: 150, damage: 12, fireRate: 320,
+        cost: 60, range: 150, damage: 12, fireRate: 320, hp: 135,
         color: '#7bbf71', projectileSpeed: 620,
         desc: 'Fantassin déployé : tir rapide sur les ennemis proches.'
     },
     ANTITANK: {
         name: 'Antichar', short: 'AT', key: '7',
-        cost: 135, range: 195, damage: 105, fireRate: 1900,
+        cost: 135, range: 195, damage: 105, fireRate: 1900, hp: 170,
         color: '#d69a54', projectileSpeed: 360, splash: 22,
         pierce: true,
         desc: 'Soldat lance-roquettes : tir puissant contre les blindés.'
     },
     SAM: {
         name:'Batterie sol-air',short:'AA',key:'8',
-        cost:175,range:235,damage:95,fireRate:1450,
+        cost:175,range:235,damage:95,fireRate:1450,hp:195,
         color:'#62c6d5',projectileSpeed:570,splash:26,antiAirOnly:true,
         desc:'Missiles sol-air : cible exclusivement les drones et hélicoptères.'
     },
     MORTAR: {
         name: 'Mortier', short: 'M', key: '5',
-        cost: 130, range: 165, damage: 45, fireRate: 1500,
+        cost: 130, range: 165, damage: 45, fireRate: 1500, hp: 205,
         color: '#e67e22', projectileSpeed: 260, splash: 60,
         desc: 'Dégâts de zone, idéal contre les essaims.'
     }
@@ -78,8 +78,8 @@ function addTower(gridX, gridY, type = 'BASIC') {
     const template = TOWER_TYPES[type] || TOWER_TYPES.BASIC;
     const tower = {
         id: nextTowerId++,
-        hp: 150,
-        maxHp: 150,
+        hp: template.hp || 185,
+        maxHp: template.hp || 185,
         gridX,
         gridY,
         x: gridToWorld(gridX) + TILE_SIZE / 2,
@@ -165,8 +165,10 @@ function fireTower(tower, target) {
     const mx = tower.x + Math.cos(tower.angle) * muzzle;
     const my = tower.y + Math.sin(tower.angle) * muzzle;
 
+    const antiBossMultiplier = target.isBoss ? (tower.type === 'ANTITANK' ? 1.65 : tower.type === 'SNIPER' ? 1.35 : 1) : 1;
+    const hitDamage = tower.damage * antiBossMultiplier;
     if (template.hitscan) {
-        damageEnemy(target, tower.damage, tower, template.pierce);
+        damageEnemy(target, hitDamage, tower, template.pierce);
         createBeam(mx, my, target.x, target.y, tower.color);
         createImpactEffect(target.x, target.y, '#e8c4ff');
         return;
@@ -180,7 +182,7 @@ function fireTower(tower, target) {
         target,
         tower,
         speed: template.projectileSpeed,
-        damage: tower.damage,
+        damage: hitDamage,
         splash: tower.splash,
         slow: tower.slow,
         pierce: !!template.pierce,
