@@ -1,5 +1,6 @@
 (function () {
     const GAMES = [
+        { id: 31, title: "Construction Simulator FPS", category: "simulation", tags: ["construction","fps","chantier","engins","simulation"], playUrl: "DONE/_2D Construction Simulator/index.html", description: "Construis des bâtiments à la première personne, collecte des matériaux, conduis une chargeuse et réalise des contrats pour développer ton entreprise." },
         { id: 30, title: "Anachkel — Le Jeu d'Horreur", category: "adventure", tags: ["horreur","fps","survie","exploration","poupée"], playUrl: "DONE/_2D Anachkel Horror/index.html", description: "Explore un manoir hanté à la première personne, retrouve la clé et les documents, maîtrise ta lampe et survis à Anachkel." },
         { id: 28, title: "Supermarket Empire FPS", category: "simulation", tags: ["supermarché","fps","commerce","gestion","caisse"], playUrl: "DONE/_2D Supermarket Empire/index.html", description: "Gère ton supermarché à la première personne : rayons, stocks, fournisseurs, caisse, clients et employés." },
         { id: 29, title: "Detective Stories FPS", category: "adventure", tags: ["detective","fps","enquêtes","preuves","interrogatoires"], playUrl: "DONE/_2D Detective Stories/index.html", description: "Explore les scènes, interroge les témoins, collecte les indices et prends des décisions fondées sur les preuves." },
