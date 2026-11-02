@@ -45,7 +45,7 @@ function activateTacticalAbility(name) {
             if (name === 'barrage') damageEnemy(e, 125, null, true);
             else applySlow(e, 0.35, 4200);
         });
-        gameState.banner = { text: name === 'barrage' ? 'BARRAGE TACTIQUE' : 'IMPULSION EMP', timer: 1400 };
+        showBanner(name === 'barrage' ? 'BARRAGE TACTIQUE' : 'IMPULSION EMP', '', '#80e3ff');
     }
     gameState.money -= def.cost;
     gameState.abilityCooldowns[name] = def.cooldown;
@@ -84,6 +84,7 @@ function resetGame() {
     gameState.highScore = keepHigh;
     waveState = createWaveState();
     towers = [];
+    nextTowerId = 1;
     enemies = [];
     projectiles = [];
     enemyProjectiles = [];
@@ -181,6 +182,7 @@ function draw() {
     ctx.restore();
 
     drawHUD(ctx);
+    drawBossHealth(ctx);
     drawSelectionPanel(ctx);
     drawBanner(ctx);
     if (gameState.paused && !gameState.gameOver) drawOverlay('PAUSE', 'Appuyez sur P pour reprendre', '#FFD700');
@@ -288,6 +290,27 @@ function getBuildButtonAt(mx, my) {
     const i = Math.floor((mx - 10) / 126);
     if (i < 0 || i >= keys.length || (mx - 10) % 126 > 120) return null;
     return keys[i];
+}
+
+function drawBossHealth(ctx) {
+    const activeBosses = enemies.filter((e) => e.isBoss && e.life > 0 && !e.reachedEnd);
+    if (!activeBosses.length) return;
+    const boss = activeBosses.reduce((a, b) => a.life < b.life ? a : b);
+    const width = 370, x = (canvas.width - width) / 2, y = 36;
+    const fraction = Math.max(0, Math.min(1, boss.life / boss.maxLife));
+    ctx.fillStyle = 'rgba(10,15,26,.88)';
+    ctx.fillRect(x - 12, y - 4, width + 24, 39);
+    ctx.strokeStyle = '#e0a65a';
+    ctx.strokeRect(x - 12, y - 4, width + 24, 39);
+    ctx.fillStyle = '#492528';
+    ctx.fillRect(x, y + 18, width, 10);
+    ctx.fillStyle = fraction > 0.33 ? '#ff8a39' : '#f04444';
+    ctx.fillRect(x, y + 18, width * fraction, 10);
+    ctx.font = 'bold 13px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff7dd';
+    ctx.fillText('BOSS — ' + Math.ceil(boss.life) + ' / ' + boss.maxLife + ' PV', canvas.width / 2, y + 12);
+    ctx.textAlign = 'left';
 }
 
 function drawSelectionPanel(ctx) {
