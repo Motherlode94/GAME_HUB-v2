@@ -97,3 +97,30 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;ba
 .td-intel-dot{width:10px;height:10px;border-radius:3px;flex:none;box-shadow:0 0 10px #ffffff20}
 .td-intel-row span{flex:1;min-width:0;font-size:12px;color:#d3e1f3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .td-intel-row strong{color:#f8d99e;font-size:12px;font-variant-numeric:tabular-nums}
+
+/* Tactical battle controls */
+.td-tactical-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;flex-wrap:wrap}
+.td-toolbar-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.td-toolbar-actions button{font-size:12px;padding:8px 11px;background:#152a41}
+.td-toolbar-actions button.is-active{background:#185061;border-color:#61d9dd}
+.td-toolbar-actions button:disabled{opacity:.5}
+.td-toolbar-actions kbd{font-size:10px;padding:1px 4px;border:1px solid #40617c;border-radius:4px;background:#112237;margin-left:3px}
+.td-cursor-status{font-size:12px;color:#c0d4eb;line-height:1.4;flex:1;min-width:240px;text-align:right}
+.td-danger-alert{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:linear-gradient(110deg,#4c1f28,#321b2c);border:1px solid #c15f64;color:#ffd3cb;padding:9px 13px;border-radius:10px;animation:td-danger-pulse 1.7s ease-in-out infinite alternate}
+.td-danger-alert[hidden]{display:none}
+.td-danger-alert span{font-size:11px;font-weight:900;letter-spacing:.13em}
+.td-danger-alert strong{font-size:12px;font-variant-numeric:tabular-nums}
+@keyframes td-danger-pulse{from{box-shadow:0 0 0 transparent}to{box-shadow:0 0 18px #ee667c24}}
+.td-tower-integrity{margin:9px 0 12px;background:#0e1a2d;border:1px solid #2b435b;border-radius:9px;padding:10px 11px}
+.td-integrity-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+.td-integrity-head span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#adc5dd;font-weight:700}
+.td-integrity-head strong{font-size:12px;font-variant-numeric:tabular-nums}
+.td-integrity-meter{height:9px}
+.td-integrity-meter i{background:#5bdfa7}
+@media(max-width:800px){
+.td-tactical-toolbar{align-items:stretch;gap:9px}
+.td-toolbar-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.td-toolbar-actions button{font-size:11px;padding:9px 5px}
+.td-cursor-status{text-align:left;min-width:0}
+}
+@media(prefers-reduced-motion:reduce){.td-danger-alert{animation:none}}
