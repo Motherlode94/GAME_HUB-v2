@@ -1,5 +1,6 @@
 (function () {
     const GAMES = [
+        { id: 48, title: "Ashen Bell : Les Trois Veilles", category: "adventure", tags: ["horreur","RPG","survie","combat tactique","choix","temps"], playUrl: "A Faire/_2D Ashen Bell/index.html", description: "Explore un bourg maudit durant trois jours, combats par parties du corps, survie et choix aux conséquences persistantes." },
         { id: 39, title: "Gestion Tycoon", category: "simulation", tags: ["prototype","à tester"], playUrl: "A Faire/_2D Gestion Tycoon/index.html", description: "Prototype à vérifier : contrôles, gameplay et stabilité non encore validés." },
         { id: 40, title: "GodSworm", category: "strategy", tags: ["prototype","à tester"], playUrl: "A Faire/_2D GodSworm/index.html", description: "Prototype à vérifier : contrôles, gameplay et stabilité non encore validés." },
         { id: 41, title: "Mario Like", category: "platformer", tags: ["prototype","à tester"], playUrl: "A Faire/_2D Mario Like/index.html", description: "Prototype à vérifier : contrôles, gameplay et stabilité non encore validés." },
