@@ -1,6 +1,7 @@
 window.RTS = window.RTS || {};
 /* Player-centered exploration with persistent discoveries and current vision.
-   Rendering-only: targeting is intentionally unchanged until LOS rules are integrated. */
+   Direct combat target acquisition now uses TacticalRules.detects (LOS, concealment and smoke).
+   Fog tiles remain a visual approximation, not the authoritative combat visibility test. */
 RTS.FogOfWar = {
     cell: 40,
     update: function(game) {
