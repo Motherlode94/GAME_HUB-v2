@@ -1,6 +1,14 @@
 (function () {
     const GAMES = [
         {
+            id: 27,
+            title: "WarLike Police Simulator FPS",
+            category: "simulation",
+            tags: ["police", "fps", "patrouille", "enquete", "interactions"],
+            playUrl: "DONE/_2D Police Simulator/index.html",
+            description: "Patrouille dans un quartier en vue subjective, collecte des indices, dialogue avec les témoins et gère tes interventions. Sauvegarde locale."
+        },
+        {
             id: 1,
             title: "Artiste Manager",
             category: "action",
