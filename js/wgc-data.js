@@ -1,5 +1,6 @@
 (function () {
     const GAMES = [
+        { id: 38, title: "TOYMARE : The Forgotten Factory", category: "adventure", tags: ["horreur","jouets","usine","énigmes","survie"], playUrl: "A Faire/_2D Toymare The Forgotten Factory/index.html", description: "Explore une usine de jouets abandonnée, manipule ses machines avec deux bras mécaniques et échappe à une mascotte inquiétante." },
         { id: 37, title: "Black Veil", category: "adventure", tags: ["horreur","infiltration","survie","TPS","discrétion"], playUrl: "A Faire/_2D Black Veil/index.html", description: "Traverse un village maudit, cache-toi des Veilleurs et retrouve trois sceaux pour atteindre la chapelle." },
         { id: 36, title: "Infernum : Le Rachat", category: "action", tags: ["enfer","rédemption","action","choix moraux","dark fantasy"], playUrl: "A Faire/_2D Infernum Le Rachat/index.html", description: "Affronte les geôliers infernaux et choisis entre sauver une âme ou voler son pouvoir. Tes actes déterminent ton jugement." },
         { id: 32, title: "Shadow Runner", category: "action", tags: ["ninja","parkour","infiltration","combat"], playUrl: "A Faire/_2D Shadow Runner/index.html", description: "Ninja TPS avec esquive, combat rapproché et infiltration." },
