@@ -31,6 +31,15 @@
    <div class="td-wave-meter"><div class="td-meter" aria-hidden="true"><i id="td-wave-fill"></i></div><div id="td-wave-meta" class="td-wave-meta">0 menaces · 0 défenses</div></div>
    <button id="td-next" type="button" class="td-primary" title="Raccourci Espace"><span id="td-next-label">Lancer la vague 1</span></button>
   </section>
+  <div class="td-tactical-toolbar td-panel" aria-label="Options de visualisation de la bataille">
+    <div class="td-toolbar-actions">
+      <button id="td-show-ranges" type="button" aria-pressed="false" title="Raccourci Q">◎ Portées <kbd>Q</kbd></button>
+      <button id="td-show-threats" type="button" aria-pressed="true" title="Raccourci I">⚠ Menaces <kbd>I</kbd></button>
+      <button id="td-cancel" type="button" title="Annuler le placement ou le ciblage (Échap)" disabled>✕ Annuler</button>
+    </div>
+    <span id="td-cursor-status" class="td-cursor-status" aria-live="off">Sélectionne une défense ou prépare une capacité.</span>
+  </div>
+  <div id="td-danger-alert" class="td-danger-alert" role="status" hidden><span>⚠ ALERTE BASE</span><strong id="td-danger-text"></strong></div>
   <div id="td-boss" class="td-boss" hidden role="status" aria-label="Vie du boss"><span class="td-boss-label">⚠ BOSS</span><div class="td-meter"><i id="td-boss-fill"></i></div><strong id="td-boss-hp">0 / 0 PV</strong></div>
   <div class="td-canvas-wrap" aria-label="Carte de bataille, défilement horizontal sur les petits écrans">
    <canvas id="gameCanvas" aria-label="Terrain de défense : clique pour placer ou sélectionner une tour">Votre navigateur ne prend pas en charge Canvas.</canvas>
@@ -53,6 +62,7 @@
     <div><small>Éliminations</small><strong id="td-selected-kills">—</strong></div>
     <div><small>Niveau</small><strong id="td-selected-level">—</strong></div>
    </div>
+   <div class="td-tower-integrity"><div class="td-integrity-head"><span>Intégrité de la défense</span><strong id="td-integrity-pct">—</strong></div><div class="td-meter td-integrity-meter"><i id="td-integrity-fill"></i></div></div>
    <button id="td-target" type="button" style="width:100%" disabled>Mode de ciblage</button>
    <div class="td-action-row"><button id="td-upgrade" type="button" disabled>↑ Améliorer</button><button id="td-sell" class="td-danger" type="button" disabled>Vendre</button></div>
   </section>
@@ -78,7 +88,7 @@
   <section class="td-panel">
    <details class="td-help">
     <summary>Raccourcis & contrôles</summary>
-    <p><kbd>1–8</kbd> défense · <kbd>Espace</kbd> vague · <kbd>P</kbd> pause · <kbd>V</kbd> vitesse · <kbd>U</kbd> améliorer · <kbd>S</kbd> vendre · <kbd>F</kbd> ciblage · <kbd>G</kbd> doctrine · <kbd>A</kbd> auto-amélioration · <kbd>Z X C</kbd> capacités. <kbd>Shift + clic</kbd> sélection multiple. <kbd>Ctrl + clic</kbd> sélection du même type. Clic droit ou <kbd>Échap</kbd> annule le placement.</p>
+    <p><kbd>Q</kbd> voir toutes les portées · <kbd>I</kbd> avertissements sur la carte · <kbd>Échap</kbd> annuler les modes de visée. <kbd>1–8</kbd> défense · <kbd>Espace</kbd> vague · <kbd>P</kbd> pause · <kbd>V</kbd> vitesse · <kbd>U</kbd> améliorer · <kbd>S</kbd> vendre · <kbd>F</kbd> ciblage · <kbd>G</kbd> doctrine · <kbd>A</kbd> auto-amélioration · <kbd>Z X C</kbd> capacités. <kbd>Shift + clic</kbd> sélection multiple. <kbd>Ctrl + clic</kbd> sélection du même type. Clic droit ou <kbd>Échap</kbd> annule le placement.</p>
    </details>
   </section>
  </aside>
