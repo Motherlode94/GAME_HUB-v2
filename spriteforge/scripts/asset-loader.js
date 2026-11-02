@@ -1,17 +1,31 @@
-/* SpriteForge example asset loader — separate from the game engine. */
+/* Example assets in the actual repository, not the generated comic sprite sheet. */
 (()=>{'use strict';
 const examples=[
- {name:'Volt Sentinel — héros',path:'./assets/heroes/volt_sentinel.svg'},
- {name:'Void Reaver — ennemi',path:'./assets/enemies/void_reaver.svg'},
- {name:'Energy Blast — pouvoir',path:'./assets/vfx/energy_blast.svg'}
+ {name:'Volt Sentinel · héros',path:'./assets/heroes/volt_sentinel.svg'},
+ {name:'Void Reaver · ennemi',path:'./assets/enemies/void_reaver.svg'},
+ {name:'Energy Blast · pouvoir',path:'./assets/vfx/energy_blast.svg'}
 ];
-const init=()=>{
- const pane=document.createElement('div');
- pane.style.cssText='position:fixed;bottom:14px;right:14px;z-index:2000;background:#17243a;border:1px solid #54708f;border-radius:12px;padding:12px;max-width:280px;color:white;box-shadow:0 8px 30px #0009';
- const heading=document.createElement('strong');heading.textContent='Assets disponibles';pane.append(heading);
- const note=document.createElement('p');note.style.cssText='font:12px system-ui;color:#bfd0ea';note.textContent='Exemples SVG intégrés au dépôt. Les planches PNG d’origine doivent être importées séparément.';pane.append(note);
- examples.forEach(e=>{const b=document.createElement('button');b.style.cssText='display:flex;align-items:center;gap:8px;width:100%;margin-top:6px';const im=document.createElement('img');im.src=e.path;im.width=32;im.height=32;const span=document.createElement('span');span.textContent=e.name;b.append(im,span);b.onclick=async()=>{try{const response=await fetch(e.path);if(!response.ok)throw new Error('HTTP '+response.status);const blob=await response.blob();const file=new File([blob],e.path.split('/').pop(),{type:'image/svg+xml'});const input=document.querySelector('input[type=file]');if(input){const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))}else alert('Import manuel requis')}catch(err){alert('Chargement impossible : '+err.message)}};pane.append(b)});
- const close=document.createElement('button');close.textContent='Masquer';close.style.marginTop='8px';close.onclick=()=>pane.remove();pane.append(close);document.body.append(pane);
-};
+function init(){
+ const dest=document.querySelector('main>aside:last-child');if(!dest)return;
+ const pane=document.createElement('div');pane.id='assetLibrary';
+ const title=document.createElement('h3');title.textContent='Assets fournis';pane.append(title);
+ const info=document.createElement('p');info.textContent='3 fichiers SVG de démonstration. Importe ta planche PNG pour découper les vrais personnages de Super Hero.';pane.append(info);
+ for(const item of examples){
+  const btn=document.createElement('button');btn.type='button';
+  const im=document.createElement('img');im.src=item.path;im.width=36;im.height=36;im.alt='';
+  const label=document.createElement('span');label.textContent=item.name;
+  btn.append(im,label);
+  btn.onclick=async()=>{try{
+    const response=await fetch(item.path,{cache:'no-store'});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    const file=new File([await response.blob()],item.path.split('/').pop(),{type:'image/svg+xml'});
+    const input=document.getElementById('file');const transfer=new DataTransfer();
+    transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+   }catch(error){alert('Impossible de charger : '+error.message)}
+  };
+  pane.append(btn);
+ }
+ dest.append(pane);
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
