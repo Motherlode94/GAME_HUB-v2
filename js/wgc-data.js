@@ -1,5 +1,7 @@
 (function () {
     const GAMES = [
+        { id: 28, title: "Supermarket Empire FPS", category: "simulation", tags: ["supermarché","fps","commerce","gestion","caisse"], playUrl: "DONE/_2D Supermarket Empire/index.html", description: "Gère ton supermarché à la première personne : rayons, stocks, fournisseurs, caisse, clients et employés." },
+        { id: 29, title: "Detective Stories FPS", category: "adventure", tags: ["detective","fps","enquêtes","preuves","interrogatoires"], playUrl: "DONE/_2D Detective Stories/index.html", description: "Explore les scènes, interroge les témoins, collecte les indices et prends des décisions fondées sur les preuves." },
         {
             id: 27,
             title: "WarLike Police Simulator FPS",
