@@ -71,7 +71,7 @@ function spawnEnemy(typeKey, wave) {
     // Bosses use a dedicated, predictable curve (wave 10 = 1800 HP).
     // The generic exponential multiplier made the first boss excessively tanky.
     const hp = typeKey === 'BOSS'
-        ? Math.round(1800 * (1 + Math.max(0, wave - 10) * 0.055))
+        ? Math.round(1650 * (1 + Math.max(0, wave - 10) * 0.055))
         : Math.round(t.hp * hpMultiplier);
     const start = pathWaypoints[0];
 
@@ -106,7 +106,9 @@ function damageEnemy(enemy, amount, tower, pierceArmor = false) {
     const protectedBy = enemies.some((unit) => unit !== enemy && unit.type === 'SHIELD' &&
         unit.life > 0 && Math.hypot(unit.x - enemy.x, unit.y - enemy.y) <= ENEMY_TYPES.SHIELD.aura);
     const armorDamage = pierceArmor ? amount : Math.max(amount * 0.25, amount - enemy.armor);
-    const effective = protectedBy ? armorDamage * ENEMY_TYPES.SHIELD.protection : armorDamage;
+    // Shield support helps, but cannot make a boss effectively invulnerable.
+    const shieldMultiplier = enemy.isBoss ? 0.85 : ENEMY_TYPES.SHIELD.protection;
+    const effective = Math.max(enemy.isBoss ? 2 : 0.5, protectedBy ? armorDamage * shieldMultiplier : armorDamage);
     enemy.life -= effective;
     enemy.hitFlash = 80;
     if (tower) {
@@ -124,6 +126,9 @@ function applySlow(enemy, factor, duration) {
 }
 
 function updateEnemies(dt) {
+    // Only one medic aura may regenerate a boss per tick; stacking four or five
+    // medic auras previously out-healed the player's whole anti-boss loadout.
+    const healedBosses = new Set();
     // Support auras are evaluated before movement. Dead support units grant no bonuses.
     enemies.forEach((medic) => {
         if (medic.type !== 'MEDIC' || medic.life <= 0) return;
@@ -131,7 +136,10 @@ function updateEnemies(dt) {
         enemies.forEach((ally) => {
             if (ally.life <= 0 || ally === medic || ally.life >= ally.maxLife) return;
             if (Math.hypot(medic.x - ally.x, medic.y - ally.y) > definition.aura) return;
-            ally.life = Math.min(ally.maxLife, ally.life + definition.healing * dt / 1000);
+            if (ally.isBoss && healedBosses.has(ally)) return;
+            const rate = ally.isBoss ? 12 : definition.healing;
+            ally.life = Math.min(ally.maxLife, ally.life + rate * dt / 1000);
+            if (ally.isBoss) healedBosses.add(ally);
         });
     });
     enemies.forEach((enemy) => {
