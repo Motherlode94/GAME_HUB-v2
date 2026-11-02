@@ -1,68 +1,106 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="../../css/game-shell.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101c2c">
+<title>Tower Defense | WarLike Gaming</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="../../css/game-shell.css">
+<link rel="stylesheet" href="css/ui.css">
 </head>
 <body>
-    <button class="btn-back" id="back-to-catalog" title="Retour au catalogue">
-        <span class="back-icon">&larr;</span>
-        <span class="back-text">Retour</span>
-    </button>
-
-    <div id="gameContainer">
-        <h1>Tower Defense</h1>
-        <canvas id="gameCanvas"></canvas>
-
-        <div class="instructions">
-            <h2>Instructions</h2>
-            <ul>
-                <li><code>1</code>–<code>8</code> ou barre du bas : Canon, Mitrailleuse, Sniper, Givre, Mortier, Fusilier, Antichar et Sol-air.</li>
-                <li><code>Espace</code> : lancer la vague (appel anticipé = bonus $).</li>
-                <li>Clic sur une tour : <code>U</code> améliorer, <code>S</code> vendre, <code>F</code> mode de ciblage.</li>
-                <li><code>Shift+clic</code> : multi-sélection / placement en chaîne. <code>Ctrl+clic</code> : même type.</li>
-                <li><code>Z</code> barrage sur la case survolée (95$), <code>X</code> EMP ralentissant les ennemis (70$), <code>C</code> réparation des tours sélectionnées (60$). Chaque capacité possède un temps de recharge.</li>
-                <li><code>G</code> doctrine d'amélioration, <code>A</code> auto-amélioration, <code>V</code> vitesse, <code>P</code> pause.</li>
-            </ul>
-        </div>
-
-        <div class="footer">
-            Tower Defense JavaScript
-        </div>
-    </div>
-
-    <script src="../../js/config.js"></script>
-    <script src="../../js/data.js"></script>
-    <script src="../../js/storage.js"></script>
-    <script src="../../js/scores.js"></script>
-
-    <script src="js/config.js"></script>
-    <script src="js/speedGame.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/effects.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/enemy.js"></script>
-    <script src="js/projectile.js"></script>
-    <script src="js/tower.js"></script>
-    <script src="js/waveManager.js"></script>
-    <script src="js/game.js"></script>
-        <script src="js/main.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const backBtn = document.getElementById('back-to-catalog');
-            if (backBtn) {
-                backBtn.addEventListener('click', () => {
-                    window.location.href = '../../index.html';
-                });
-            }
-        });
-    </script>
-
-    <script src='../../js/game-shell.js'></script>
+<button class="btn-back" id="back-to-catalog" type="button" title="Retour au catalogue">
+<span class="back-icon">&larr;</span><span class="back-text">Retour</span>
+</button>
+<div id="gameContainer" class="td-app">
+<header class="td-header">
+ <div class="td-brand"><div class="td-emblem" aria-hidden="true">⬡</div><div><div class="td-kicker">WarLike Gaming / Commandement tactique</div><h1>Tower Defense</h1><span id="td-game-state">Défendre la base</span></div></div>
+ <div class="td-stats" aria-label="Statistiques de la partie">
+  <div class="td-stat money"><span>Crédits</span><strong id="td-money">250 $</strong></div>
+  <div class="td-stat life"><span>Base · PV</span><strong id="td-lives">20</strong></div>
+  <div class="td-stat"><span>Vague</span><strong id="td-wave-number">—</strong></div>
+  <div class="td-stat"><span>Score</span><strong id="td-score">0</strong></div>
+ </div>
+ <div class="td-head-actions"><button id="td-pause" type="button" title="Raccourci P">Ⅱ Pause</button><button id="td-speed" type="button" title="Raccourci V">×1 Vitesse</button><button id="td-restart" type="button" hidden>↻ Recommencer</button></div>
+</header>
+<div class="td-layout">
+ <main class="td-main">
+  <section class="td-panel td-wavebar" aria-label="Commandement des vagues">
+   <div class="td-wave-label"><span class="td-eyebrow">Situation</span><span id="td-wave-status">Prêt au déploiement</span></div>
+   <div class="td-wave-meter"><div class="td-meter" aria-hidden="true"><i id="td-wave-fill"></i></div><div id="td-wave-meta" class="td-wave-meta">0 menaces · 0 défenses</div></div>
+   <button id="td-next" type="button" class="td-primary" title="Raccourci Espace"><span id="td-next-label">Lancer la vague 1</span></button>
+  </section>
+  <div id="td-boss" class="td-boss" hidden role="status" aria-label="Vie du boss"><span class="td-boss-label">⚠ BOSS</span><div class="td-meter"><i id="td-boss-fill"></i></div><strong id="td-boss-hp">0 / 0 PV</strong></div>
+  <div class="td-canvas-wrap" aria-label="Carte de bataille, défilement horizontal sur les petits écrans">
+   <canvas id="gameCanvas" aria-label="Terrain de défense : clique pour placer ou sélectionner une tour">Votre navigateur ne prend pas en charge Canvas.</canvas>
+  </div>
+  <section class="td-panel td-buildbar" aria-label="Construction des défenses">
+   <div class="td-sectionhead"><h2>Arsenal · construire</h2><span>1–8 • clique puis place sur le terrain</span></div>
+   <div id="td-build-grid"></div>
+  </section>
+ </main>
+ <aside class="td-rail" aria-label="Panneau de commandement">
+  <section class="td-panel">
+   <h2 class="td-rail-title">Inspection de défense</h2>
+   <div id="td-selected-name" class="td-detail-title">Aucune tour sélectionnée</div>
+   <p id="td-selected-sub" class="td-detail-sub">Clique sur une défense pour gérer ses améliorations.</p>
+   <div class="td-detail-grid">
+    <div><small>Dégâts</small><strong id="td-selected-damage">—</strong></div>
+    <div><small>Portée</small><strong id="td-selected-range">—</strong></div>
+    <div><small>Cadence</small><strong id="td-selected-rate">—</strong></div>
+    <div><small>Résistance</small><strong id="td-selected-hp">—</strong></div>
+    <div><small>Éliminations</small><strong id="td-selected-kills">—</strong></div>
+    <div><small>Niveau</small><strong id="td-selected-level">—</strong></div>
+   </div>
+   <button id="td-target" type="button" style="width:100%" disabled>Mode de ciblage</button>
+   <div class="td-action-row"><button id="td-upgrade" type="button" disabled>↑ Améliorer</button><button id="td-sell" class="td-danger" type="button" disabled>Vendre</button></div>
+  </section>
+  <section class="td-panel">
+   <h2 class="td-rail-title">Capacités tactiques</h2>
+   <div class="td-ability-list">
+    <button id="td-ability-barrage" class="td-ability" type="button"><span><b>✹ Barrage</b><small>Z • Explosions de zone</small></span><span class="td-ability-cost" id="td-ability-cost-barrage">95 $</span></button>
+    <button id="td-ability-emp" class="td-ability" type="button"><span><b>◈ Impulsion EMP</b><small>X • Ralentissement de zone</small></span><span class="td-ability-cost" id="td-ability-cost-emp">70 $</span></button>
+    <button id="td-ability-repair" class="td-ability" type="button"><span><b>✚ Réparation</b><small>C • Tours sélectionnées</small></span><span class="td-ability-cost" id="td-ability-cost-repair">60 $</span></button>
+   </div>
+  </section>
+  <section class="td-panel">
+   <h2 class="td-rail-title">Doctrine & automatisation</h2>
+   <div class="td-doctrine"><label for="td-doctrine" class="td-hint">Stratégie</label><select id="td-doctrine"><option value="neutre">Neutre</option><option value="guerrier">Guerrier</option><option value="scientifique">Scientifique</option><option value="magnat">Magnat</option><option value="pacifique">Pacifique</option></select></div>
+   <button type="button" id="td-auto" class="td-switch">Auto-amélioration : OFF</button>
+   <div id="td-feedback" role="status" aria-live="polite" style="margin-top:12px">Prépare ton dispositif défensif.</div>
+  </section>
+  <section class="td-panel">
+   <details class="td-help">
+    <summary>Raccourcis & contrôles</summary>
+    <p><kbd>1–8</kbd> défense · <kbd>Espace</kbd> vague · <kbd>P</kbd> pause · <kbd>V</kbd> vitesse · <kbd>U</kbd> améliorer · <kbd>S</kbd> vendre · <kbd>F</kbd> ciblage · <kbd>G</kbd> doctrine · <kbd>A</kbd> auto-amélioration · <kbd>Z X C</kbd> capacités. <kbd>Shift + clic</kbd> sélection multiple. <kbd>Ctrl + clic</kbd> sélection du même type. Clic droit ou <kbd>Échap</kbd> annule le placement.</p>
+   </details>
+  </section>
+ </aside>
+</div>
+</div>
+<script src="../../js/config.js"></script>
+<script src="../../js/data.js"></script>
+<script src="../../js/storage.js"></script>
+<script src="../../js/scores.js"></script>
+<script src="js/config.js"></script>
+<script src="js/speedGame.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/map.js"></script>
+<script src="js/enemy.js"></script>
+<script src="js/projectile.js"></script>
+<script src="js/tower.js"></script>
+<script src="js/waveManager.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+ const back = document.getElementById('back-to-catalog');
+ if (back) back.addEventListener('click', () => { location.href = '../../index.html'; });
+});
+</script>
+<script src="../../js/game-shell.js"></script>
 </body>
 </html>
-
