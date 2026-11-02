@@ -1,5 +1,9 @@
 (function () {
     const GAMES = [
+        { id: 32, title: "Shadow Runner", category: "action", tags: ["ninja","parkour","infiltration","combat"], playUrl: "DONE/_2D Shadow Runner/index.html", description: "Ninja TPS avec esquive, combat rapproché et infiltration." },
+        { id: 33, title: "Underground Fighter", category: "action", tags: ["combat","boxe","combo","tournoi"], playUrl: "DONE/_2D Underground Fighter/index.html", description: "Combat technique TPS avec combos, garde et tournois." },
+        { id: 34, title: "Iron Vanguard", category: "action", tags: ["mecha","robot","arene","combat"], playUrl: "DONE/_2D Iron Vanguard/index.html", description: "Combat de méchas TPS, canon et boost." },
+        { id: 35, title: "Void Breach", category: "action", tags: ["espace","survie","creatures","fps"], playUrl: "DONE/_2D Void Breach/index.html", description: "Station spatiale et créatures, prototype de combat spatial." },
         { id: 31, title: "Construction Simulator FPS", category: "simulation", tags: ["construction","fps","chantier","engins","simulation"], playUrl: "DONE/_2D Construction Simulator/index.html", description: "Construis des bâtiments à la première personne, collecte des matériaux, conduis une chargeuse et réalise des contrats pour développer ton entreprise." },
         { id: 30, title: "Anachkel — Le Jeu d'Horreur", category: "adventure", tags: ["horreur","fps","survie","exploration","poupée"], playUrl: "DONE/_2D Anachkel Horror/index.html", description: "Explore un manoir hanté à la première personne, retrouve la clé et les documents, maîtrise ta lampe et survis à Anachkel." },
         { id: 28, title: "Supermarket Empire FPS", category: "simulation", tags: ["supermarché","fps","commerce","gestion","caisse"], playUrl: "DONE/_2D Supermarket Empire/index.html", description: "Gère ton supermarché à la première personne : rayons, stocks, fournisseurs, caisse, clients et employés." },
