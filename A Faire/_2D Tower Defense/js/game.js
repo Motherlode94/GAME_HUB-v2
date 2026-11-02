@@ -23,7 +23,7 @@ function activateTacticalAbility(name) {
     if (!def || gameState.gameOver || gameState.paused || gameState.money < def.cost) return false;
     if ((gameState.abilityCooldowns[name] || 0) > 0) return false;
     const tile = gameState.hoveredTile;
-    const validAim = tile && tile.x >= 0 && tile.y >= 0;
+    const validAim = tile && tile.x >= 0 && tile.y >= 0 && tile.x < MAP_COLS && tile.y < MAP_ROWS;
     const target = validAim ? { x: gridToWorld(tile.x) + TILE_SIZE / 2, y: gridToWorld(tile.y) + TILE_SIZE / 2 } : null;
     if (name !== 'repair' && !target) return false;
     if (name === 'repair') {
@@ -179,6 +179,7 @@ function draw() {
     drawEnemyProjectiles(ctx);
     drawAirEffects(ctx);
     if (gameState.placingTower) drawTowerPlacementPreview(ctx);
+    drawTacticalOverlays(ctx);
     ctx.restore();
 
     // Command panels live in the DOM so the map remains unobstructed.
@@ -186,6 +187,58 @@ function draw() {
     if (typeof updateTDUI === 'function') updateTDUI();
     if (gameState.paused && !gameState.gameOver) drawOverlay('PAUSE', 'Appuyez sur P pour reprendre', '#FFD700');
     if (gameState.gameOver) drawGameOver(ctx);
+}
+
+function drawTacticalOverlays(ctx) {
+    // All targeting indicators live in the map coordinate system, not the DOM.
+    // Purely visual: these never change unit health, speed or targeting.
+    if (typeof tdShowRanges !== 'undefined' && tdShowRanges) {
+        towers.forEach(tower => {
+            ctx.beginPath();
+            ctx.arc(tower.x, tower.y, tower.range, 0, Math.PI * 2);
+            ctx.strokeStyle = gameState.selectedTowers.includes(tower)
+                ? 'rgba(255,224,127,.9)' : 'rgba(115,222,249,.32)';
+            ctx.lineWidth = gameState.selectedTowers.includes(tower) ? 2.5 : 1.2;
+            ctx.stroke();
+        });
+    }
+    if (typeof tdShowThreats !== 'undefined' && tdShowThreats) {
+        enemies.forEach(enemy => {
+            if (enemy.life <= 0 || enemy.reachedEnd || enemy.waypoint < pathWaypoints.length - 2) return;
+            const radius = Math.max(15, enemy.size / 2 + 7);
+            ctx.beginPath();
+            ctx.arc(enemy.x, enemy.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,94,98,.95)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+    }
+    if (typeof tdArmedAbility === 'undefined' || !tdArmedAbility || gameState.paused || gameState.gameOver) return;
+    const aim = gameState.hoveredTile;
+    if (!aim || aim.x < 0 || aim.y < 0 || aim.x >= MAP_COLS || aim.y >= MAP_ROWS) return;
+    const def = TD_ABILITIES[tdArmedAbility];
+    if (!def || def.radius <= 0) return;
+    const x = gridToWorld(aim.x) + TILE_SIZE / 2;
+    const y = gridToWorld(aim.y) + TILE_SIZE / 2;
+    const hitCount = enemies.filter(e => e.life > 0 && !e.reachedEnd &&
+        Math.hypot(e.x - x, e.y - y) <= def.radius).length;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, def.radius, 0, Math.PI * 2);
+    ctx.fillStyle = hitCount ? 'rgba(55,217,192,.16)' : 'rgba(245,102,97,.12)';
+    ctx.strokeStyle = hitCount ? '#62f0c8' : '#ff9282';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 5]);
+    ctx.fill();
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(7,19,29,.94)';
+    ctx.fillRect(x - 94, y - 24, 188, 26);
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = hitCount ? '#9affdf' : '#ffb3a6';
+    ctx.fillText(def.name + ' · ' + hitCount + ' cible' + (hitCount > 1 ? 's' : ''), x, y - 7);
+    ctx.restore();
 }
 
 function drawTowerPlacementPreview(ctx) {
@@ -460,10 +513,28 @@ function handleKey(event) {
     if (gameState.gameOver) return;
 
     if (key === 'p') gameState.paused = !gameState.paused;
+    if (typeof updateTDUI === 'function' && key === 'p') updateTDUI(true);
+    if (key === 'q' && typeof tdShowRanges !== 'undefined') {
+        tdShowRanges = !tdShowRanges;
+        if (typeof updateTDUI === 'function') updateTDUI(true);
+    }
+    if (key === 'i' && typeof tdShowThreats !== 'undefined') {
+        tdShowThreats = !tdShowThreats;
+        if (typeof updateTDUI === 'function') updateTDUI(true);
+    }
     if (gameState.paused) return;
-    if (key === 'z') activateTacticalAbility('barrage');
-    if (key === 'x') activateTacticalAbility('emp');
-    if (key === 'c') activateTacticalAbility('repair');
+    if (key === 'z') {
+        if (typeof tdUseAbility === 'function') tdUseAbility('barrage');
+        else activateTacticalAbility('barrage');
+    }
+    if (key === 'x') {
+        if (typeof tdUseAbility === 'function') tdUseAbility('emp');
+        else activateTacticalAbility('emp');
+    }
+    if (key === 'c') {
+        if (typeof tdUseAbility === 'function') tdUseAbility('repair');
+        else activateTacticalAbility('repair');
+    }
 
     const typeByKey = Object.keys(TOWER_TYPES).find((k) => TOWER_TYPES[k].key === key);
     if (typeByKey) selectBuildType(typeByKey);
