@@ -7,6 +7,9 @@ let tdArmedAbility = null;
 let tdFeedbackMessage = '';
 let tdFeedbackExpiry = 0;
 let tdIntelWave = -1;
+let tdShowRanges = false;
+let tdShowThreats = true;
+const tdDangerWaypoint = () => pathWaypoints.length - 2;
 const tdById = (id) => document.getElementById(id);
 const tdClamp = (v, low, high) => Math.min(high, Math.max(low, v));
 
@@ -49,6 +52,39 @@ function tdActionAllowed() {
 }
 function tdClearAim() {
     tdArmedAbility = null;
+}
+function tdCancelModes() {
+    tdClearAim();
+    gameState.placingTower = false;
+    tdFeedback('Mode de placement et ciblage annulés.', 1700);
+    updateTDUI(true);
+}
+function tdCountTargetsAt(wx, wy, radius) {
+    return enemies.filter(e => e.life > 0 && !e.reachedEnd && Math.hypot(e.x - wx, e.y - wy) <= radius).length;
+}
+function tdCursorLabel() {
+    const tile = gameState.hoveredTile;
+    const valid = tile && tile.x >= 0 && tile.x < MAP_COLS && tile.y >= 0 && tile.y < MAP_ROWS;
+    if (gameState.paused) return 'Simulation en pause';
+    if (gameState.gameOver) return 'La base est tombée';
+    if (!valid) {
+        if (tdArmedAbility) return 'Survole la carte pour viser ' + TD_ABILITIES[tdArmedAbility].name;
+        return gameState.placingTower ? 'Déplace le pointeur sur une case pour construire' : 'Survole une défense pour examiner sa portée';
+    }
+    const wx = gridToWorld(tile.x) + TILE_SIZE / 2;
+    const wy = gridToWorld(tile.y) + TILE_SIZE / 2;
+    if (tdArmedAbility) {
+        const def = TD_ABILITIES[tdArmedAbility];
+        const n = tdCountTargetsAt(wx, wy, def.radius);
+        return def.name + ' · ' + n + ' cible' + (n > 1 ? 's' : '') + ' dans le rayon de ' + def.radius + ' px';
+    }
+    if (gameState.placingTower) {
+        const type = TOWER_TYPES[gameState.selectedTowerType];
+        const available = isValidTowerPosition(tile.x, tile.y);
+        return 'Case ' + (tile.x + 1) + ':' + (tile.y + 1) + ' · ' + (available ? gameState.money >= type.cost ? 'Libre · cliquer pour construire' : 'Crédits insuffisants' : 'Occupation ou terrain interdit');
+    }
+    if (gameState.hoveredTower) return TOWER_TYPES[gameState.hoveredTower.type].name + ' · ' + Math.ceil(gameState.hoveredTower.hp) + ' PV · clic pour inspecter';
+    return 'Case ' + (tile.x + 1) + ':' + (tile.y + 1) + ' · clique sur une tour pour inspecter';
 }
 function tdUseAbility(key) {
     if (!tdActionAllowed()) return;
@@ -135,6 +171,15 @@ function initTDUI() {
         });
         grid.append(button);
     }
+    tdById('td-show-ranges').addEventListener('click', () => {
+        tdShowRanges = !tdShowRanges;
+        updateTDUI(true);
+    });
+    tdById('td-show-threats').addEventListener('click', () => {
+        tdShowThreats = !tdShowThreats;
+        updateTDUI(true);
+    });
+    tdById('td-cancel').addEventListener('click', tdCancelModes);
     tdById('td-next').addEventListener('click', () => {
         if (!tdActionAllowed()) return;
         if (!startNextWave()) tdFeedback('La vague actuelle doit finir son déploiement.');
@@ -204,6 +249,17 @@ function updateTDUI(force = false) {
     tdSetText('td-money', gameState.money + ' $');
     tdSetText('td-lives', gameState.lives);
     tdSetText('td-wave-number', waveState.currentWave || '—');
+    tdSetText('td-cursor-status', tdCursorLabel());
+    for (const [id, enabled] of [['td-show-ranges', tdShowRanges], ['td-show-threats', tdShowThreats]]) {
+        tdById(id).classList.toggle('is-active', enabled);
+        tdById(id).setAttribute('aria-pressed', String(enabled));
+    }
+    const needsCancel = gameState.placingTower || !!tdArmedAbility;
+    tdById('td-cancel').disabled = !needsCancel || !tdActionAllowed();
+    const urgent = enemies.filter(e => e.life > 0 && !e.reachedEnd && e.waypoint >= tdDangerWaypoint());
+    const alert = tdById('td-danger-alert');
+    alert.hidden = urgent.length === 0 || gameState.gameOver;
+    if (urgent.length) tdSetText('td-danger-text', urgent.length + ' adversaire' + (urgent.length > 1 ? 's' : '') + ' proche' + (urgent.length > 1 ? 's' : '') + ' de la sortie !');
     tdSetText('td-score', Math.floor(gameState.score));
     tdSetText('td-speed', '×' + GAME_SPEED + ' Vitesse');
     tdSetText('td-pause', gameState.paused ? '▶ Reprendre' : 'Ⅱ Pause');
@@ -269,6 +325,12 @@ function updateTDUI(force = false) {
         tdSetText('td-selected-kills', selected.reduce((n, t) => n + t.kills, 0));
         tdSetText('td-selected-level', 'Mixte');
     }
+    const healthCurrent = selected.reduce((sum, t) => sum + Math.max(0, t.hp), 0);
+    const healthMaximum = selected.reduce((sum, t) => sum + t.maxHp, 0);
+    const healthRatio = healthMaximum ? tdClamp(healthCurrent / healthMaximum, 0, 1) : 0;
+    tdSetText('td-integrity-pct', healthMaximum ? Math.round(healthRatio * 100) + ' %' : '—');
+    tdById('td-integrity-fill').style.width = Math.round(healthRatio * 100) + '%';
+    tdById('td-integrity-fill').style.background = healthRatio < 0.28 ? '#ef586c' : healthRatio < 0.56 ? '#f3b95d' : '#5bdfa7';
     const upgradable = selected.filter(canUpgrade);
     const nextCost = upgradable.length ? Math.min(...upgradable.map(t => getUpgradeCost(t))) : 0;
     tdSetText('td-upgrade', upgradable.length ? '↑ Améliorer · dès ' + nextCost + ' $' : '↑ Niveau maximum');
