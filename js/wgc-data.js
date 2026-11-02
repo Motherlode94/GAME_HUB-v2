@@ -1,5 +1,6 @@
 (function () {
     const GAMES = [
+        { id: 36, title: "Infernum : Le Rachat", category: "action", tags: ["enfer","rédemption","action","choix moraux","dark fantasy"], playUrl: "A Faire/_2D Infernum Le Rachat/index.html", description: "Affronte les geôliers infernaux et choisis entre sauver une âme ou voler son pouvoir. Tes actes déterminent ton jugement." },
         { id: 32, title: "Shadow Runner", category: "action", tags: ["ninja","parkour","infiltration","combat"], playUrl: "A Faire/_2D Shadow Runner/index.html", description: "Ninja TPS avec esquive, combat rapproché et infiltration." },
         { id: 33, title: "Underground Fighter", category: "action", tags: ["combat","boxe","combo","tournoi"], playUrl: "A Faire/_2D Underground Fighter/index.html", description: "Combat technique TPS avec combos, garde et tournois." },
         { id: 34, title: "Iron Vanguard", category: "action", tags: ["mecha","robot","arene","combat"], playUrl: "A Faire/_2D Iron Vanguard/index.html", description: "Combat de méchas TPS, canon et boost." },
