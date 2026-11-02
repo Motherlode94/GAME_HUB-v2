@@ -93,7 +93,9 @@ function updateEnemyProjectiles(dt) {
         const dx = p.target.x - p.x, dy = p.target.y - p.y;
         const dist = Math.hypot(dx, dy), step = p.speed * dt / 1000;
         if (dist <= Math.max(5, step)) {
-            p.target.hp -= p.damage;
+            // Veteran defenses absorb a fraction of hostile gunfire without becoming invulnerable.
+            const incomingDamage = Math.max(3, p.damage * (1 - Math.min(0.25, (p.target.level - 1) * 0.05)));
+            p.target.hp = Math.max(0, p.target.hp - incomingDamage);
             createImpactEffect(p.target.x, p.target.y, p.color);
             if (p.target.hp <= 0) {
                 const i = towers.indexOf(p.target);
