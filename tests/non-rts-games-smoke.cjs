@@ -33,8 +33,15 @@ for(const [name,requirements] of cases){
  }
  for(const m of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)){
   const src=m[1].match(/\bsrc\s*=\s*["']([^"']+)["']/i);
-  const filename=src?path.resolve(directory,src[1].split(/[?#]/)[0]):entry;
-  if(src)assert.ok(fs.existsSync(filename),'Missing script: '+name+' '+src[1]);
+  const scriptUrl=src?.[1] || '';
+  // Absolute script URLs refer to the website root, not the host filesystem root.
+  // External scripts are not locally resolvable and cannot be syntax-checked here.
+  if (/^(?:https?:)?\/\//i.test(scriptUrl) || /^data:/i.test(scriptUrl)) continue;
+  const cleaned=scriptUrl.split(/[?#]/)[0];
+  const filename=src?(cleaned.startsWith('/')
+      ?path.resolve(__dirname,'..',cleaned.slice(1))
+      :path.resolve(directory,cleaned)):entry;
+  if(src)assert.ok(fs.existsSync(filename),'Missing script: '+name+' '+scriptUrl);
   const code=src?fs.readFileSync(filename,'utf8'):m[2];
   if(!code.trim())continue;
   if(/\btype\s*=\s*["']module["']/i.test(m[1])||/\b(?:import|export)\s/m.test(code))continue;
