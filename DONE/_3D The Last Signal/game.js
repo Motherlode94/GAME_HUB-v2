@@ -21,8 +21,8 @@ for(let i=0;i<9;i++){mesh(.65,.018,.11,(i%3-1)*4,.002,13-Math.floor(i/3)*11,0x7f
 for(const [x,z] of [[-5,-5],[5,-6],[-13,-25],[13,-12]]){const fixture=mesh(.6,.12,.35,x,3.65,z,0x9db4a8);const l=new THREE.PointLight(0x9fb9af,3,7,2);l.position.set(x,3.45,z);scene.add(l)}
 for(let i=0;i<15;i++){const x=(i%3-1)*4,z=12-Math.floor(i/3)*6;if(Math.abs(x)<2)continue;mesh(1.5,1.7,1.1,x,.85,z,0x4b4b44)}
 const door=mesh(2.5,3,.28,0,1.5,-27.5,0x655947),fuseBox=mesh(.85,1,.25,-6.6,1.55,-5,0x708274),consoleBox=mesh(1.6,1.1,.6,2,1,-21,0x515b56),exit=mesh(3,3,.3,0,1.5,-34.4,0x305147);
-const interactables=[{mesh:fuseBox,name:'Tableau électrique',use:()=>{if(power)return say('Le courant fonctionne déjà.');power=true;bulb.intensity=36;say('Courant rétabli. Une fréquence est inscrite derrière le tableau : 97.3 MHz.');updateObjective()}},{mesh:consoleBox,name:'Console radio',use:()=>{if(!power)return say('La console est hors tension.');toggleRadio(true)}},{mesh:door,name:'Porte verrouillée',use:()=>{if(!unlocked)return say('Porte verrouillée. Cherchez la bonne fréquence.');door.visible=false;doorBlocked=false;updateObjective();say('La porte s’ouvre.') }},{mesh:exit,name:'Sortie',use:()=>{if(!unlocked||doorBlocked)return say('Déverrouillez puis ouvrez la porte du fond.');won=true;playing=false;document.exitPointerLock?.();$('screen').hidden=false;$('screen').querySelector('h1').innerHTML='SIGNAL <em>PERDU</em>';$('screen').querySelector('p').textContent='Vous avez quitté H-17. Mais la voix connaît désormais votre nom.';$('play').textContent='RECOMMENCER';$('play').onclick=()=>location.reload()}}];
-let playing=false,radioOpen=false,power=false,unlocked=false,won=false,doorBlocked=true,flashlight=true,exposure=0,messageUntil=0,yaw=0,pitch=0,px=0,pz=15,frequency=880;
+const interactables=[{mesh:fuseBox,name:'Tableau électrique',use:()=>{if(power)return say('Le courant fonctionne déjà.');power=true;bulb.intensity=36;saveCheckpoint();say('Courant rétabli. Une fréquence est inscrite derrière le tableau : 97.3 MHz.');updateObjective()}},{mesh:consoleBox,name:'Console radio',use:()=>{if(!power)return say('La console est hors tension.');toggleRadio(true)}},{mesh:door,name:'Porte verrouillée',use:()=>{if(!unlocked)return say('Porte verrouillée. Cherchez la bonne fréquence.');door.visible=false;doorBlocked=false;updateObjective();saveCheckpoint();say('La porte s’ouvre.') }},{mesh:exit,name:'Sortie',use:()=>{if(!unlocked||doorBlocked)return say('Déverrouillez puis ouvrez la porte du fond.');won=true;playing=false;try{localStorage.removeItem(SAVE)}catch(e){}$('resume').hidden=true;document.exitPointerLock?.();$('screen').hidden=false;$('screen').querySelector('h1').innerHTML='SIGNAL <em>PERDU</em>';$('screen').querySelector('p').textContent='Vous avez quitté H-17. Mais la voix connaît désormais votre nom.';$('play').textContent='RECOMMENCER';$('play').onclick=()=>location.reload()}}];
+let playing=false,radioOpen=false,power=false,unlocked=false,won=false,doorBlocked=true,flashlight=true,exposure=0,messageUntil=0,yaw=0,pitch=0,px=0,pz=15,frequency=880,lastCheckpointAt=0;const SAVE='warlike_last_signal_checkpoint_v1';
 const keys=new Set(),clock=new THREE.Clock(),presence=mesh(.6,2.5,.45,11,1.25,-26,0x0c1013);
 presence.material.emissive=new THREE.Color(0x260b12);const lamp=new THREE.SpotLight(0xe1e6cc,45,22,Math.PI/8,.4,1);camera.add(lamp,lamp.target);lamp.position.set(0,-.15,0);lamp.target.position.set(0,0,-5);scene.add(camera);
 // Atmosphère sonore synthétisée localement (aucun fichier audio requis).
@@ -53,17 +53,49 @@ function updateManifestation(t){
  if(manifestation.visible)manifestation.material.emissive.setHex(Math.sin(t*4)>0?0x601318:0x0e0707);
  scene.fog.density=.029+Math.max(0,exposure-35)*.00024;
 }
+function saveCheckpoint(){
+ if(!playing||won)return;
+ try{localStorage.setItem(SAVE,JSON.stringify({version:1,px,pz,power,unlocked,doorBlocked,frequency,flashlight,exposure}));$('resume').hidden=false}
+ catch(e){console.warn('Sauvegarde non disponible',e)}
+}
+function resumeCheckpoint(){
+ try{
+  const s=JSON.parse(localStorage.getItem(SAVE)||'null');
+  if(!s||s.version!==1||!Number.isFinite(s.px)||!Number.isFinite(s.pz))throw Error('invalid');
+  px=THREE.MathUtils.clamp(s.px,-16.5,16.5);pz=THREE.MathUtils.clamp(s.pz,-33.5,17.5);
+  if(blocked(px,pz)){px=0;pz=15}
+  power=!!s.power;unlocked=!!s.unlocked;doorBlocked=s.doorBlocked!==false;door.visible=doorBlocked;
+  flashlight=s.flashlight!==false;exposure=THREE.MathUtils.clamp(Number(s.exposure)||0,0,80);
+  frequency=Number.isFinite(s.frequency)?THREE.MathUtils.clamp(s.frequency,880,1080):880;
+  $('tuning').value=String(frequency);checkFrequency();updateObjective();
+  return true;
+ }catch(e){say('Sauvegarde absente ou invalide.');return false}
+}
+function nearbyInteraction(){
+ const facing=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+ return interactables.filter(v=>v.mesh.visible).map(v=>({item:v,dist:camera.position.distanceTo(v.mesh.position),dot:v.mesh.position.clone().sub(camera.position).normalize().dot(facing)})).filter(v=>v.dist<4&&v.dot>.25).sort((a,b)=>a.dist-b.dist)[0];
+}
 function say(t){$('message').textContent=t;$('message').style.display='block';messageUntil=performance.now()+4300}
 function updateObjective(){$('objective').textContent=!power?'OBJECTIF : rétablir l’électricité (tableau du couloir gauche)':!unlocked?'OBJECTIF : régler la radio sur la fréquence indiquée':doorBlocked?'OBJECTIF : ouvrir la porte du fond [E]':'OBJECTIF : rejoindre la sortie de la station'}
 function toggleRadio(force){radioOpen=typeof force==='boolean'?force:!radioOpen;$('radio').hidden=!radioOpen;if(radioOpen)document.exitPointerLock?.();else if(playing)canvas.requestPointerLock?.()}
-function checkFrequency(){frequency=Number($('tuning').value);$('freq').textContent=(frequency/10).toFixed(1)+' MHz';const right=frequency===973;$('radioText').textContent=!power?'Le récepteur manque de courant.':right?'« LA PORTE EST OUVERTE. NE REGARDEZ PAS DERRIÈRE VOUS. »':'— grésillement et voix incompréhensibles —';if(right&&power&&!unlocked){ping(920,.3);unlocked=true;exposure+=22;say('Transmission interceptée. La porte du fond est déverrouillée.');updateObjective()}}
+function checkFrequency(){frequency=Number($('tuning').value);$('freq').textContent=(frequency/10).toFixed(1)+' MHz';const right=frequency===973;$('radioText').textContent=!power?'Le récepteur manque de courant.':right?'« LA PORTE EST OUVERTE. NE REGARDEZ PAS DERRIÈRE VOUS. »':'— grésillement et voix incompréhensibles —';if(right&&power&&!unlocked){ping(920,.3);unlocked=true;exposure+=22;saveCheckpoint();say('Transmission interceptée. La porte du fond est déverrouillée.');updateObjective()}}
 $('tuning').addEventListener('input',checkFrequency);
 window.addEventListener('wheel',e=>{if(!radioOpen)return;e.preventDefault();$('tuning').value=String(Math.max(880,Math.min(1080,Number($('tuning').value)+(e.deltaY>0?1:-1))));checkFrequency()},{passive:false});$('closeRadio').onclick=()=>toggleRadio(false);
 function blocked(x,z){if(Math.abs(x)>17.3||z>18.3||z< -34.3)return true;return colliders.some(c=>Math.abs(x-c.x)<c.w/2+.36&&Math.abs(z-c.z)<c.d/2+.36)||(doorBlocked&&Math.abs(x)<1.55&&Math.abs(z+27.5)<.65)}
 function interact(){if(radioOpen)return;ping(600,.075);let nearest=interactables.filter(v=>v.mesh.visible).map(v=>({item:v,dist:camera.position.distanceTo(v.mesh.position),facing:v.mesh.position.clone().sub(camera.position).normalize().dot(new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion))})).filter(v=>v.dist<4&&v.facing>.12).sort((a,b)=>a.dist-b.dist)[0];if(nearest){const dir=nearest.item.mesh.position.clone().sub(camera.position).normalize();const facing=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);if(dir.dot(facing)>.12)nearest.item.use();else say('Regardez l’objet pour interagir.')}else say('Rien à portée.')}
 window.addEventListener('keydown',e=>{keys.add(e.code);if(!playing)return;if(e.code==='KeyE'&&!e.repeat&&!radioOpen)interact();if(e.code==='KeyF'&&!e.repeat)flashlight=!flashlight;if(e.code==='KeyR'&&!e.repeat)toggleRadio();if(e.code==='Escape'&&radioOpen)toggleRadio(false)});
 window.addEventListener('keyup',e=>keys.delete(e.code));canvas.addEventListener('click',()=>{if(playing&&!radioOpen)canvas.requestPointerLock?.()});window.addEventListener('mousemove',e=>{if(document.pointerLockElement!==canvas||radioOpen)return;yaw-=e.movementX*.0021;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.0021,-1.25,1.25)});
-$('play').onclick=()=>{startAudio();keys.clear();playing=true;$('screen').hidden=true;canvas.requestPointerLock?.();updateObjective()};
+function startChapter(resume=false){
+ startAudio();keys.clear();playing=true;$('screen').hidden=true;
+ if(resume){resumeCheckpoint()}else{
+  px=0;pz=15;power=false;unlocked=false;doorBlocked=true;door.visible=true;
+  exposure=0;flashlight=true;frequency=880;$('tuning').value='880';updateObjective();
+ }
+ canvas.requestPointerLock?.();updateObjective();lastCheckpointAt=performance.now();
+}
+$('play').onclick=()=>startChapter(false);
+$('resume').onclick=()=>startChapter(true);
+try{$('resume').hidden=!localStorage.getItem(SAVE)}catch(e){$('resume').hidden=true}
 window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
 function tick(dt){if(playing&&!radioOpen){let forward=Number(keys.has('KeyW')||keys.has('KeyZ'))-Number(keys.has('KeyS')),side=Number(keys.has('KeyD'))-Number(keys.has('KeyA')||keys.has('KeyQ'));const v=new THREE.Vector3(side,0,-forward);if(v.lengthSq()){v.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);let speed=keys.has('ShiftLeft')?4.4:2.55;let nx=px+v.x*speed*dt,nz=pz+v.z*speed*dt;if(!blocked(nx,pz))px=nx;if(!blocked(px,nz))pz=nz}exposure=Math.max(0,exposure-dt*.7);if(unlocked)exposure=Math.min(100,exposure+dt*.8)}
 camera.position.set(px,1.65,pz);camera.rotation.set(pitch,yaw,0,'YXZ');lamp.visible=flashlight;
@@ -80,6 +112,12 @@ if(unlocked&&playing){const distance=Math.hypot(px-presence.position.x,pz-presen
  }if(distance<2.2){exposure=Math.min(100,exposure+dt*22);if(exposure>=100){say('Le signal vous a trouvé. Retour à la station.');px=0;pz=15;exposure=25;presence.position.set(11,1.25,-26)}}}presence.visible=unlocked;
 updateManifestation(performance.now()*.001);
 bulb.intensity=power?33+Math.sin(performance.now()*.013)*2.5:0;exitLight.intensity=unlocked?14:1;
+if(playing&&!radioOpen){
+ const interactive=nearbyInteraction();
+ $('interactHint').textContent=interactive?'[E] '+interactive.item.name+' · '+interactive.dist.toFixed(1)+' m':'';
+ if(performance.now()-lastCheckpointAt>30000){lastCheckpointAt=performance.now();saveCheckpoint()}
+}else $('interactHint').textContent='';
+$('signalExposure').value=Math.round(exposure);
 $('status').textContent='EXPOSITION '+Math.round(exposure)+'% · LAMPE '+(flashlight?'ON':'OFF')+' · RADIO '+(frequency/10).toFixed(1)+' MHz';if(performance.now()>messageUntil)$('message').style.display='none';
 renderer.render(scene,camera)}
 renderer.setSize(innerWidth,innerHeight);updateObjective();function loop(){requestAnimationFrame(loop);tick(Math.min(clock.getDelta(),.06))}loop();
