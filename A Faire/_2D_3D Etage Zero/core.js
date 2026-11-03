@@ -124,9 +124,7 @@ function move(dt){
  if(!blocked(nx+r,s.y+r)&&!blocked(nx-r,s.y-r)&&!blocked(nx+r,s.y-r)&&!blocked(nx-r,s.y+r))s.x=nx;
  if(!blocked(s.x+r,ny+r)&&!blocked(s.x-r,ny-r)&&!blocked(s.x+r,ny-r)&&!blocked(s.x-r,ny+r))s.y=ny;
  if(running&&mag)s.stamina=clamp(s.stamina-27*dt,0,100);else s.stamina=clamp(s.stamina+16*dt,0,100);
- if(s.spectral||s.light)s.battery=clamp(s.battery-(s.spectral?1.5:0)-(s.light?.64:0)*dt,0,100);
- // spectral drain and flashlight both respect the same frame time.
- if(s.spectral)s.battery=clamp(s.battery-1.7*dt,0,100);
+ if(s.spectral||s.light)s.battery=clamp(s.battery-((s.spectral?1.7:0)+(s.light?.64:0))*dt,0,100);
  if(s.battery<=0){if(s.spectral)spectral();s.light=false}
  s.time+=dt;
  ghost(dt,running);
