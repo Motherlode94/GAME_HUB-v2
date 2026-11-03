@@ -16,7 +16,7 @@ const specs=[{color:0xed5149,max:49,acc:23,grip:1.9},{color:0x3e87d0,max:59,acc:
 let car=carModel(specs[0].color),chosen=specs[0],raceOn=false,mode='race',speed=0,angle=0,elapsed=0,lap=1,nextCP=1,best=Infinity,lapStart=0,finished=false,steerAngle=0,damage=0,sideVelocity=0,countdown=3,paused=false;
 const keys=new Set(),clock=new THREE.Clock(),AI=[];
 function spawnGrid(){car.position.copy(points[0]);car.position.y=0;angle=Math.PI/2;car.rotation.y=angle;speed=0;damage=0;sideVelocity=0;steerAngle=0;elapsed=0;lap=1;nextCP=1;lapStart=0;best=Infinity;finished=false;countdown=3;paused=false;AI.forEach(a=>{scene.remove(a.mesh)});AI.length=0;
-if(mode==='race')for(let i=0;i<5;i++){const m=carModel([0xe6dcbd,0x4fb8b8,0xe07153,0x99bd49,0xb3a3d2][i]);AI.push({mesh:m,progress:((1-i*.018)%1+1)%1,rate:.067+i*.002,damage:0,lane:(i%2===0?1:-1)*2.25})}}
+if(mode==='race')for(let i=0;i<5;i++){const m=carModel([0xe6dcbd,0x4fb8b8,0xe07153,0x99bd49,0xb3a3d2][i]);AI.push({mesh:m,totalProgress:-(i+1)*.018,progress:((1-(i+1)*.018)%1+1)%1,rate:.067+i*.002,damage:0,lane:(i%2===0?1:-1)*2.25})}}
 function finish(){finished=true;raceOn=false;const time=elapsed.toFixed(2),bestT=Number.isFinite(best)?best.toFixed(2):time;const key='redline_first_ignition_'+mode;let record=0;try{record=Number(localStorage.getItem(key)||0);if(!record||elapsed<record){localStorage.setItem(key,String(elapsed));record=elapsed}}catch(e){record=record||elapsed}$('resultTitle').textContent='COURSE TERMINÉE';$('resultText').textContent='Temps : '+time+' s · Meilleur tour : '+bestT+' s · Record local : '+record.toFixed(2)+' s';$('result').hidden=false;$('hud').hidden=true}
 function begin(){chosen=specs[Number($('car').value)];mode=$('mode').value;car.children[0].material.color.setHex(chosen.color);spawnGrid();$('menu').hidden=true;$('result').hidden=true;$('hud').hidden=false;raceOn=true;$('countdown').textContent='DÉPART DANS 3';$('racePosition').textContent='POSITION —/6';$('carIntegrity').value=100;}
 $('start').onclick=begin;$('restart').onclick=()=>{raceOn=false;$('result').hidden=true;$('hud').hidden=true;$('menu').hidden=false};
@@ -79,7 +79,8 @@ function update(dt){
  for(const a of AI){
   // Each opponent has its own lane, speed variation and race progression.
   const variation=1+Math.sin(elapsed*.33+a.lane)*.055;
-  a.progress=(a.progress+a.rate*variation*dt)%1;
+  a.totalProgress+=a.rate*variation*dt;
+  a.progress=((a.totalProgress%1)+1)%1;
   const theta=a.progress*Math.PI*2,nextTheta=theta+.002;
   const lane=a.lane;
   const p=new THREE.Vector3((rx+lane)*Math.sin(theta),0,(rz+lane)*Math.cos(theta));
@@ -87,7 +88,7 @@ function update(dt){
   a.mesh.rotation.y=Math.atan2((rx+lane)*(Math.sin(nextTheta)-Math.sin(theta)),(rz+lane)*(Math.cos(nextTheta)-Math.cos(theta)));
  }
  const playerProgress=(lap-1)+((Math.atan2(car.position.x/rx,car.position.z/rz)/(Math.PI*2)+1)%1);
- const aiProgress=AI.map(a=>a.progress+Math.floor(elapsed*a.rate));
+ const aiProgress=AI.map(a=>a.totalProgress);
  const positionRank=1+aiProgress.filter(x=>x>playerProgress).length;
  $('racePosition').textContent=mode==='race'?'POSITION '+positionRank+'/6':'CONTRE-LA-MONTRE';
  $('carIntegrity').value=Math.max(0,100-Math.round(damage));
