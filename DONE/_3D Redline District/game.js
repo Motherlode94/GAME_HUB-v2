@@ -13,16 +13,23 @@ for(let i=0;i<N;i++){const a=points[i],b=points[(i+1)%N];segment(a,b,13,0x31343b
 for(let i=0;i<70;i++){let x=Math.sin(i*83.22)*150,z=Math.cos(i*31.5)*149;if(Math.abs(x)<75&&Math.abs(z)<54)continue;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.25,.4,3,6),mat(0x554435));trunk.position.set(x,1.5,z);scene.add(trunk);const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(2.7,1),mat(0x2d4b35));crown.position.set(x,4,z);scene.add(crown)}
 function carModel(color){const group=new THREE.Group(),body=new THREE.Mesh(new THREE.BoxGeometry(2.3,.65,4.35),mat(color,.35));body.position.y=.85;body.castShadow=true;group.add(body);const glass=new THREE.Mesh(new THREE.BoxGeometry(1.92,.67,1.95),mat(0x1e2d3b,.1));glass.position.set(0,1.49,-.25);group.add(glass);for(let x of [-1.22,1.22])for(let z of [-1.45,1.45]){const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.48,.48,.34,18),mat(0x16191a));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.49,z);group.add(wheel)}scene.add(group);return group}
 const specs=[{color:0xed5149,max:49,acc:23,grip:1.9},{color:0x3e87d0,max:59,acc:26,grip:1.65},{color:0xd0a13e,max:46,acc:24,grip:2.3}];
-let car=carModel(specs[0].color),chosen=specs[0],raceOn=false,mode='race',speed=0,angle=0,elapsed=0,lap=1,nextCP=1,best=Infinity,lapStart=0,finished=false,steerAngle=0,damage=0,sideVelocity=0;
+let car=carModel(specs[0].color),chosen=specs[0],raceOn=false,mode='race',speed=0,angle=0,elapsed=0,lap=1,nextCP=1,best=Infinity,lapStart=0,finished=false,steerAngle=0,damage=0,sideVelocity=0,countdown=3,paused=false;
 const keys=new Set(),clock=new THREE.Clock(),AI=[];
-function spawnGrid(){car.position.copy(points[0]);car.position.y=0;angle=0;car.rotation.y=angle;speed=0;damage=0;sideVelocity=0;steerAngle=0;elapsed=0;lap=1;nextCP=1;lapStart=0;best=Infinity;finished=false;AI.forEach(a=>{scene.remove(a.mesh)});AI.length=0;
+function spawnGrid(){car.position.copy(points[0]);car.position.y=0;angle=Math.PI/2;car.rotation.y=angle;speed=0;damage=0;sideVelocity=0;steerAngle=0;elapsed=0;lap=1;nextCP=1;lapStart=0;best=Infinity;finished=false;countdown=3;paused=false;AI.forEach(a=>{scene.remove(a.mesh)});AI.length=0;
 if(mode==='race')for(let i=0;i<5;i++){const m=carModel([0xe6dcbd,0x4fb8b8,0xe07153,0x99bd49,0xb3a3d2][i]);AI.push({mesh:m,progress:((1-i*.018)%1+1)%1,rate:.067+i*.002,damage:0,lane:(i%2===0?1:-1)*2.25})}}
 function finish(){finished=true;raceOn=false;const time=elapsed.toFixed(2),bestT=Number.isFinite(best)?best.toFixed(2):time;const key='redline_first_ignition_'+mode;let record=0;try{record=Number(localStorage.getItem(key)||0);if(!record||elapsed<record){localStorage.setItem(key,String(elapsed));record=elapsed}}catch(e){record=record||elapsed}$('resultTitle').textContent='COURSE TERMINÉE';$('resultText').textContent='Temps : '+time+' s · Meilleur tour : '+bestT+' s · Record local : '+record.toFixed(2)+' s';$('result').hidden=false;$('hud').hidden=true}
-function begin(){chosen=specs[Number($('car').value)];mode=$('mode').value;car.children[0].material.color.setHex(chosen.color);spawnGrid();$('menu').hidden=true;$('result').hidden=true;$('hud').hidden=false;raceOn=true}
+function begin(){chosen=specs[Number($('car').value)];mode=$('mode').value;car.children[0].material.color.setHex(chosen.color);spawnGrid();$('menu').hidden=true;$('result').hidden=true;$('hud').hidden=false;raceOn=true;$('countdown').textContent='DÉPART DANS 3';$('racePosition').textContent='POSITION —/6';$('carIntegrity').value=100;}
 $('start').onclick=begin;$('restart').onclick=()=>{raceOn=false;$('result').hidden=true;$('hud').hidden=true;$('menu').hidden=false};
-window.addEventListener('keydown',e=>{keys.add(e.code);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='Escape'&&raceOn){raceOn=false;$('menu').hidden=false;$('hud').hidden=true}if(e.code==='KeyR'&&raceOn&&!e.repeat){const last=(nextCP-1+checkpoints.length)%checkpoints.length;car.position.copy(checkpoints[last]);const theta=last/checkpoints.length*Math.PI*2;angle=Math.atan2(rx*Math.cos(theta),-rz*Math.sin(theta));car.rotation.y=angle;speed=0;sideVelocity=0;damage=Math.min(100,damage+2)}});window.addEventListener('keyup',e=>keys.delete(e.code));
+window.addEventListener('keydown',e=>{keys.add(e.code);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='KeyP'&&raceOn&&!e.repeat){paused=!paused;keys.clear();$('countdown').textContent=paused?'PAUSE':'COURSE REPRISE';}
+if(e.code==='Escape'&&raceOn){raceOn=false;$('menu').hidden=false;$('hud').hidden=true}if(e.code==='KeyR'&&raceOn&&!e.repeat){const last=(nextCP-1+checkpoints.length)%checkpoints.length;car.position.copy(checkpoints[last]);const theta=last/checkpoints.length*Math.PI*2;angle=Math.atan2(rx*Math.cos(theta),-rz*Math.sin(theta));car.rotation.y=angle;speed=0;sideVelocity=0;damage=Math.min(100,damage+2)}});window.addEventListener('keyup',e=>keys.delete(e.code));
 const dir=()=>Number(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));
 function update(dt){
+ if(paused)return;
+ if(countdown>0){
+  countdown=Math.max(0,countdown-dt);
+  $('countdown').textContent=countdown>0?'DÉPART DANS '+Math.ceil(countdown):'GO !';
+  return;
+ }
  elapsed+=dt;
  const throttle=dir(),inputSteer=Number(keys.has('KeyA')||keys.has('KeyQ')||keys.has('ArrowLeft'))-Number(keys.has('KeyD')||keys.has('ArrowRight'));
  const handbrake=keys.has('Space');
@@ -79,6 +86,14 @@ function update(dt){
   a.mesh.position.copy(p);
   a.mesh.rotation.y=Math.atan2((rx+lane)*(Math.sin(nextTheta)-Math.sin(theta)),(rz+lane)*(Math.cos(nextTheta)-Math.cos(theta)));
  }
+ const playerProgress=(lap-1)+((Math.atan2(car.position.x/rx,car.position.z/rz)/(Math.PI*2)+1)%1);
+ const aiProgress=AI.map(a=>a.progress+Math.floor(elapsed*a.rate));
+ const positionRank=1+aiProgress.filter(x=>x>playerProgress).length;
+ $('racePosition').textContent=mode==='race'?'POSITION '+positionRank+'/6':'CONTRE-LA-MONTRE';
+ $('carIntegrity').value=Math.max(0,100-Math.round(damage));
+ $('lapBest').textContent='MEILLEUR TOUR '+(Number.isFinite(best)?best.toFixed(2)+' s':'—');
+ if(damage>70)$('countdown').textContent='⚠ MOTEUR ENDOMMAGÉ';
+ else if($('countdown').textContent!=='GO !')$('countdown').textContent='COURSE EN COURS';
  $('race').textContent='TOUR '+Math.min(lap,3)+'/3 · '+elapsed.toFixed(1)+' s · CP '+(nextCP+1)+'/'+checkpoints.length+' · DÉGÂTS '+Math.round(damage)+'%'+(offroad?' · HORS PISTE':'');
  $('speed').innerHTML=Math.round(Math.abs(speed)*3.6)+' <small>km/h</small>';
 }
