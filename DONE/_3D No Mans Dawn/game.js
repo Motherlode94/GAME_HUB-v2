@@ -9,7 +9,7 @@ scene.add(new THREE.HemisphereLight(0xd3e8ed,0x444a35,2.1));const sun=new THREE.
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(300,300,70,70),new THREE.MeshStandardMaterial({color:0x465c3b,roughness:1}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 const path=new THREE.Mesh(new THREE.PlaneGeometry(6,190),new THREE.MeshStandardMaterial({color:0x6f6555,roughness:1}));path.rotation.x=-Math.PI/2;path.position.set(0,.024,-12);scene.add(path);
 const loader=new GLTFLoader(),clock=new THREE.Clock(),keys=new Set(),colliders=[],loot=[];
-let player=null,mixer=null,actions={},active='',yaw=0,pitch=.20,position=new THREE.Vector3(0,0,33),water=100,food=100,health=100,supplies=0,mission=0,noticeUntil=0;
+let player=null,mixer=null,actions={},active='',yaw=0,pitch=.20,position=new THREE.Vector3(0,0,33),water=100,food=100,health=100,supplies=0,mission=0,noticeUntil=0,lastAutosave=0,gameEnded=false;
 function message(t){notice.textContent=t;notice.style.display='block';noticeUntil=performance.now()+3200}
 function addGeometry(x,z,w,d,h,color,roof=false){const g=new THREE.Group(),mat=new THREE.MeshStandardMaterial({color,roughness:.88});const walls=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);walls.position.y=h/2;walls.castShadow=true;walls.receiveShadow=true;g.add(walls);
 if(roof){const r=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*.79,2,4),new THREE.MeshStandardMaterial({color:0x4d4037,roughness:1}));r.position.y=h+1;r.rotation.y=Math.PI/4;g.add(r)}
@@ -46,6 +46,31 @@ addActor('Mara — survivante',-19,-22);
 addActor('Pillard',30,-27,true);
 item(24,-7,'Bidon de carburant');
 item(5,-28,'Outils');
+function updateVitals(dt,sprinting){
+ const thirst=sprinting?.24:.075;
+ water=Math.max(0,water-thirst*dt);
+ food=Math.max(0,food-.055*dt);
+ if(water<=0||food<=0)health=Math.max(0,health-dt*(water<=0&&food<=0?4:2));
+ else if(water>60&&food>60&&health<100&&refuge.secured&&position.distanceTo(refugePoint)<15)health=Math.min(100,health+dt*1.2);
+ if(pickup.driving){
+  pickup.fuel=Math.max(0,pickup.fuel-dt*.42);
+  if(pickup.fuel<=0){pickup.driving=false;message('Réservoir vide : le pick-up est immobilisé.');}
+ }
+ if(health<=0&&!gameEnded){
+  health=55;water=35;food=35;
+  position.copy(refuge.secured?refugePoint:new THREE.Vector3(0,0,33));pickup.driving=false;
+  supplies=Math.max(0,supplies-1);
+  message('Épuisement. Retour '+(refuge.secured?'au refuge':'au point de départ')+' · une fourniture perdue.');
+  saveProgress();
+ }
+}
+function restAtRefuge(){
+ if(!refuge.secured||position.distanceTo(refugePoint)>15||pickup.driving){message('Repos possible uniquement au refuge sécurisé, à pied.');return}
+ if(water<15||food<15){message('Ressources insuffisantes pour se reposer : mange et bois.');return}
+ water=Math.max(0,water-12);food=Math.max(0,food-10);health=Math.min(100,health+36);
+ worldActors.filter(a=>!a.hostile).forEach(a=>{a.trust=Math.min(100,a.trust+3)});
+ message('Repos au refuge : +36 santé, consommation des provisions.');saveProgress();
+}
 function updateObjective(){
  if(!refuge.secured) objective.textContent='Le Refuge : sécuriser la ferme [E]';
  else if(!pickup.repaired) objective.textContent='Réparer le pick-up : batterie, outils et carburant';
@@ -58,7 +83,7 @@ function saveProgress(){
 function loadProgress(){
  try{
   const v=JSON.parse(localStorage.getItem('warlike_no_mans_dawn_v01')||'null');if(!v)return;
-  if(Array.isArray(v.position)&&v.position.length===3)position.fromArray(v.position);pickup.driving=false;water=v.water;food=v.food;health=v.health;supplies=v.supplies;mission=v.mission;
+  if(Array.isArray(v.position)&&v.position.length===3)position.fromArray(v.position);pickup.driving=false;water=Number.isFinite(v.water)?Math.max(0,Math.min(100,v.water)):100;food=Number.isFinite(v.food)?Math.max(0,Math.min(100,v.food)):100;health=Number.isFinite(v.health)?Math.max(1,Math.min(100,v.health)):100;supplies=Number.isFinite(v.supplies)?Math.max(0,Math.floor(v.supplies)):0;mission=Number.isInteger(v.mission)?v.mission:0;
   for(const k of v.inventory||[])playerInventory.add(k);
   Object.assign(refuge,v.refuge||{});Object.assign(pickup,v.pickup||{});pickup.driving=false;
   (v.loot||[]).forEach((used,i)=>{if(used&&loot[i]){loot[i].used=true;scene.remove(loot[i].mesh)}});
@@ -76,6 +101,7 @@ function updateActors(dt){
    const target=actor.state==='alert'?position:new THREE.Vector3(30+Math.sin(performance.now()*.00025+actor.phase)*8,0,-27+Math.cos(performance.now()*.00025+actor.phase)*8);
    const diff=target.clone().sub(actor.position);diff.y=0;
    if(diff.length()>2){diff.normalize();const next=actor.position.clone().addScaledVector(diff,dt*(actor.state==='alert'?2:1));if(!blocked(next.x,next.z))actor.position.copy(next)}
+   if(distance<2.2&&!pickup.driving)health=Math.max(0,health-dt*10);
   }else if(actor.state==='follow'&&distance>3){
    const dir=position.clone().sub(actor.position).setY(0).normalize(),next=actor.position.clone().addScaledVector(dir,dt*2.2);
    if(!blocked(next.x,next.z))actor.position.copy(next);
@@ -104,13 +130,16 @@ if(position.distanceTo(refugePoint)<13){
  return;
 }
 message('Aucun objet à portée')}
-window.addEventListener('keydown',e=>{keys.add(e.code);if(e.code==='KeyE'&&player&&!e.repeat)interact();if(e.code==='KeyP'&&player&&!e.repeat)saveProgress();if(e.code==='Escape')document.exitPointerLock?.()});window.addEventListener('keyup',e=>keys.delete(e.code));
+window.addEventListener('keydown',e=>{keys.add(e.code);if(e.code==='KeyE'&&player&&!e.repeat)interact();if(e.code==='KeyP'&&player&&!e.repeat)saveProgress();if(e.code==='KeyT'&&player&&!e.repeat)restAtRefuge();if(e.code==='Escape')document.exitPointerLock?.()});window.addEventListener('keyup',e=>keys.delete(e.code));
 canvas.addEventListener('click',()=>canvas.requestPointerLock());window.addEventListener('mousemove',e=>{if(document.pointerLockElement!==canvas)return;yaw-=e.movementX*.0026;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-.25,1.0)});
 window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
-function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDelta());if(player){const f=Number(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const r=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('KeyQ')||keys.has('ArrowLeft'));const dir=new THREE.Vector3(r,0,-f);const moving=dir.lengthSq()>0;if(moving){dir.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);const sprint=keys.has('ShiftLeft');const speed=pickup.driving?12:sprint?6.3:3.3;const p=position.clone().addScaledVector(dir,speed*dt);if((pickup.driving||!blocked(p.x,position.z)))position.x=p.x;if((pickup.driving||!blocked(position.x,p.z)))position.z=p.z;player.rotation.y=Math.atan2(dir.x,dir.z);setAction(sprint&&actions.Run?'Run':actions.Walk?'Walk':'Idle');water=Math.max(0,water-dt*(sprint?.25:.08));food=Math.max(0,food-dt*.035)}else setAction('Idle');player.visible=!pickup.driving;player.position.copy(position);if(pickup.driving){pickup.mesh.position.copy(position);pickup.mesh.rotation.y=player.rotation.y;}else if(pickup.repaired&&pickup.mesh.position.distanceTo(position)<2.8){/* park vehicle on exit */}if(mixer)mixer.update(dt);updateActors(dt);
+function frame(){requestAnimationFrame(frame);const dt=Math.min(.05,clock.getDelta());if(player){const f=Number(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const r=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('KeyQ')||keys.has('ArrowLeft'));const dir=new THREE.Vector3(r,0,-f);const moving=dir.lengthSq()>0;if(moving){dir.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);const sprint=keys.has('ShiftLeft');const speed=pickup.driving?(pickup.fuel>0?12:0):sprint?6.3:3.3;const p=position.clone().addScaledVector(dir,speed*dt);if((pickup.driving||!blocked(p.x,position.z)))position.x=p.x;if((pickup.driving||!blocked(position.x,p.z)))position.z=p.z;player.rotation.y=Math.atan2(dir.x,dir.z);setAction(sprint&&actions.Run?'Run':actions.Walk?'Walk':'Idle');/* vitals updated consistently, even when standing still */}else setAction('Idle');player.visible=!pickup.driving;player.position.copy(position);if(pickup.driving){pickup.mesh.position.copy(position);pickup.mesh.rotation.y=player.rotation.y;}else if(pickup.repaired&&pickup.mesh.position.distanceTo(position)<2.8){/* park vehicle on exit */}if(mixer)mixer.update(dt);updateActors(dt);
+updateVitals(dt,moving&&keys.has('ShiftLeft')&&!pickup.driving);
+if(performance.now()-lastAutosave>30000){lastAutosave=performance.now();saveProgress();}
 const aim=position.clone().add(new THREE.Vector3(0,1.7,0));const offset=new THREE.Vector3(Math.sin(yaw)*6*Math.cos(pitch),2.3+Math.sin(pitch)*6,Math.cos(yaw)*6*Math.cos(pitch));camera.position.lerp(aim.clone().add(offset),Math.min(1,dt*8));camera.lookAt(aim);
 if(mission===1&&supplies>=3&&!pickup.repaired){message('Récolte suffisante. Réparez le pick-up.');mission=2}
-document.getElementById('stats').textContent='SANTÉ '+health+'%  •  EAU '+Math.round(water)+'%  •  NOURRITURE '+Math.round(food)+'%  •  FOURNITURES '+supplies+'  •  [E] interaction  [P] sauvegarder';
+document.getElementById('stats').textContent='FOURNITURES '+supplies+' • ÉQUIPEMENT '+playerInventory.size+' • [E] interaction [T] repos [P] sauvegarde';
+for(const [id,value] of [['vitalHealth',health],['vitalWater',water],['vitalFood',food],['vitalFuel',pickup.fuel]])document.getElementById(id).value=Math.round(value);
 if(performance.now()>noticeUntil)notice.style.display='none';}
 renderer.render(scene,camera)}
 renderer.setSize(innerWidth,innerHeight);loadProgress();updateObjective();loadCharacter().then(()=>{if(player)document.getElementById('loading').classList.add('hidden');frame()});
