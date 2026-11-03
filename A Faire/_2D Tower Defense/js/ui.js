@@ -13,6 +13,20 @@ let tdZoom = 1;
 let tdFocusMode = false;
 let tdActivePanel = 'inspect';
 let tdMinimapLast = -Infinity;
+const TD_LOG_LIMIT = 9;
+function tdEvent(tone, message) {
+ const list = document.getElementById('td-combat-log');
+ if (!list) return;
+ const item = document.createElement('li');
+ item.dataset.tone = ['success','danger','power'].includes(tone) ? tone : 'normal';
+ const when = document.createElement('time');
+ const elapsed = Math.floor(performance.now() / 1000);
+ when.textContent = String(Math.floor(elapsed / 60)).padStart(2, '0') + ':' + String(elapsed % 60).padStart(2, '0');
+ const label = document.createElement('span'); label.textContent = message;
+ item.append(when, label);
+ list.prepend(item);
+ while (list.children.length > TD_LOG_LIMIT) list.lastElementChild.remove();
+}
 const tdDangerWaypoint = () => pathWaypoints.length - 2;
 const tdById = (id) => document.getElementById(id);
 const tdClamp = (v, low, high) => Math.min(high, Math.max(low, v));
@@ -255,6 +269,19 @@ function initTDUI() {
         const map = tdById('gameCanvas');
         view.scrollLeft = Math.max(0, map.getBoundingClientRect().width * fraction - view.clientWidth / 2);
     });
+    tdById('td-auto-waves').addEventListener('click', () => {
+        gameState.autoWaves = !gameState.autoWaves;
+        tdEvent('info', gameState.autoWaves ? 'Lancement automatique des vagues activé.' : 'Lancement manuel : les vagues attendent ton ordre.');
+        updateTDUI(true);
+    });
+    const dialog = tdById('td-guide');
+    tdById('td-guide-open').addEventListener('click', () => dialog.showModal());
+    tdById('td-guide-close').addEventListener('click', () => dialog.close());
+    tdById('td-guide-done').addEventListener('click', () => dialog.close());
+    tdById('td-events-clear').addEventListener('click', () => {
+        tdById('td-combat-log').replaceChildren();
+        tdEvent('info', 'Journal remis à zéro.');
+    });
     tdById('td-show-ranges').addEventListener('click', () => {
         tdShowRanges = !tdShowRanges;
         updateTDUI(true);
@@ -287,6 +314,7 @@ function initTDUI() {
         const sel = tdSelected();
         const changed = upgradeTowerGroup(sel, gameState.aiProfile, sel.length);
         tdFeedback(changed ? changed + ' tour(s) améliorée(s).' : 'Pas assez de fonds ou niveau maximal.', 1800);
+        if (changed) tdEvent('success', changed + ' défense(s) améliorée(s).');
         updateTDUI(true);
     });
     tdById('td-sell').addEventListener('click', () => {
@@ -299,6 +327,7 @@ function initTDUI() {
         selected.forEach(sellTower);
         setSelectedTowers([]);
         tdFeedback('Vente terminée : +' + value + ' $.', 1800);
+        tdEvent('info', selected.length + ' défense(s) vendue(s) · +' + value + ' crédits.');
         updateTDUI(true);
     });
     tdById('td-target').addEventListener('click', () => {
@@ -322,6 +351,7 @@ function initTDUI() {
     }
     tdUIReady = true;
     tdFeedback('Sélectionne une défense ci-dessous, puis place-la sur la carte.', 7000);
+    tdEvent('info', 'Commandement opérationnel · construis tes premières défenses.');
     updateTDUI(true);
 }
 function updateTDUI(force = false) {
@@ -349,13 +379,19 @@ function updateTDUI(force = false) {
     alert.hidden = urgent.length === 0 || gameState.gameOver;
     if (urgent.length) tdSetText('td-danger-text', urgent.length + ' adversaire' + (urgent.length > 1 ? 's' : '') + ' proche' + (urgent.length > 1 ? 's' : '') + ' de la sortie !');
     tdSetText('td-score', Math.floor(gameState.score));
+    tdSetText('td-kills', gameState.killCount);
+    tdSetText('td-record', Math.max(gameState.highScore, gameState.score));
+    const autoWaves = tdById('td-auto-waves');
+    tdSetText('td-auto-waves', gameState.autoWaves ? '⟳ Vagues automatiques : ON' : '⟳ Vagues manuelles : OFF');
+    autoWaves.setAttribute('aria-pressed', String(gameState.autoWaves));
+    autoWaves.disabled = gameState.gameOver;
     tdSetText('td-speed', '×' + GAME_SPEED + ' Vitesse');
     tdSetText('td-pause', gameState.paused ? '▶ Reprendre' : 'Ⅱ Pause');
     tdSetText('td-game-state', gameState.gameOver ? 'Partie terminée' : gameState.paused ? 'Simulation en pause' : gameState.placingTower ? 'Mode construction' : tdArmedAbility ? 'Choisir une cible' : 'Défendre la base');
     const status = tdById('td-wave-status');
     if (status) status.textContent = gameState.gameOver ? 'Défense percée' : !waveState.started ? 'Prêt au déploiement' :
         isSpawning() || enemies.length ? 'Assaut en cours' :
-        waveState.countdown > 0 ? 'Renforts dans ' + Math.ceil(waveState.countdown / 1000) + ' s' : 'Secteur sécurisé';
+        waveState.countdown > 0 ? (gameState.autoWaves ? 'Renforts dans ' + Math.ceil(waveState.countdown / 1000) + ' s' : 'En attente de votre ordre') : 'Secteur sécurisé';
     const meter = tdById('td-wave-fill');
     if (meter) meter.style.width = Math.round(getWaveProgress() * 100) + '%';
     tdSetText('td-wave-meta', (enemies.length + waveState.queue.length) + ' menaces restantes · ' + towers.length + ' défenses placées');
@@ -440,6 +476,8 @@ function updateTDUI(force = false) {
         const active = name === tdArmedAbility;
         button.classList.toggle('is-active', active);
         button.setAttribute('aria-pressed', active ? 'true' : 'false');
+        button.dataset.cooling = remaining > 0 ? 'true' : 'false';
+        button.style.setProperty('--td-cooldown-progress', Math.round(100 * tdClamp(remaining / ability.cooldown, 0, 1)) + '%');
         tdSetText('td-ability-cost-' + name, remaining > 0 ? Math.ceil(remaining / 1000) + ' s' : ability.cost + ' $');
     }
     const feedback = tdById('td-feedback');
