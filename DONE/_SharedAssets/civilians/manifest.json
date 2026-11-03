@@ -1,6 +1,6 @@
 {
   "title": "WarLike Civilian Pack",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "format": "SVG",
   "license": "Original assets for WarLike Gaming",
   "spriteSize": [
@@ -16,7 +16,8 @@
       "portrait": "portraits/nadia.svg",
       "idle": "sprites/nadia_idle.svg",
       "walk1": "sprites/nadia_walk_01.svg",
-      "walk2": "sprites/nadia_walk_02.svg"
+      "walk2": "sprites/nadia_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "clara",
@@ -25,7 +26,8 @@
       "portrait": "portraits/clara.svg",
       "idle": "sprites/clara_idle.svg",
       "walk1": "sprites/clara_walk_01.svg",
-      "walk2": "sprites/clara_walk_02.svg"
+      "walk2": "sprites/clara_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "maya",
@@ -34,7 +36,8 @@
       "portrait": "portraits/maya.svg",
       "idle": "sprites/maya_idle.svg",
       "walk1": "sprites/maya_walk_01.svg",
-      "walk2": "sprites/maya_walk_02.svg"
+      "walk2": "sprites/maya_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "ines",
@@ -43,7 +46,8 @@
       "portrait": "portraits/ines.svg",
       "idle": "sprites/ines_idle.svg",
       "walk1": "sprites/ines_walk_01.svg",
-      "walk2": "sprites/ines_walk_02.svg"
+      "walk2": "sprites/ines_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "alya",
@@ -52,7 +56,8 @@
       "portrait": "portraits/alya.svg",
       "idle": "sprites/alya_idle.svg",
       "walk1": "sprites/alya_walk_01.svg",
-      "walk2": "sprites/alya_walk_02.svg"
+      "walk2": "sprites/alya_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "nora",
@@ -61,7 +66,8 @@
       "portrait": "portraits/nora.svg",
       "idle": "sprites/nora_idle.svg",
       "walk1": "sprites/nora_walk_01.svg",
-      "walk2": "sprites/nora_walk_02.svg"
+      "walk2": "sprites/nora_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "selena",
@@ -70,7 +76,8 @@
       "portrait": "portraits/selena.svg",
       "idle": "sprites/selena_idle.svg",
       "walk1": "sprites/selena_walk_01.svg",
-      "walk2": "sprites/selena_walk_02.svg"
+      "walk2": "sprites/selena_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "mika",
@@ -79,7 +86,8 @@
       "portrait": "portraits/mika.svg",
       "idle": "sprites/mika_idle.svg",
       "walk1": "sprites/mika_walk_01.svg",
-      "walk2": "sprites/mika_walk_02.svg"
+      "walk2": "sprites/mika_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "camille",
@@ -88,7 +96,8 @@
       "portrait": "portraits/camille.svg",
       "idle": "sprites/camille_idle.svg",
       "walk1": "sprites/camille_walk_01.svg",
-      "walk2": "sprites/camille_walk_02.svg"
+      "walk2": "sprites/camille_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "alex",
@@ -97,7 +106,8 @@
       "portrait": "portraits/alex.svg",
       "idle": "sprites/alex_idle.svg",
       "walk1": "sprites/alex_walk_01.svg",
-      "walk2": "sprites/alex_walk_02.svg"
+      "walk2": "sprites/alex_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "noemie",
@@ -106,7 +116,8 @@
       "portrait": "portraits/noemie.svg",
       "idle": "sprites/noemie_idle.svg",
       "walk1": "sprites/noemie_walk_01.svg",
-      "walk2": "sprites/noemie_walk_02.svg"
+      "walk2": "sprites/noemie_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "sacha",
@@ -115,7 +126,8 @@
       "portrait": "portraits/sacha.svg",
       "idle": "sprites/sacha_idle.svg",
       "walk1": "sprites/sacha_walk_01.svg",
-      "walk2": "sprites/sacha_walk_02.svg"
+      "walk2": "sprites/sacha_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "lou",
@@ -124,7 +136,8 @@
       "portrait": "portraits/lou.svg",
       "idle": "sprites/lou_idle.svg",
       "walk1": "sprites/lou_walk_01.svg",
-      "walk2": "sprites/lou_walk_02.svg"
+      "walk2": "sprites/lou_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "morgan",
@@ -133,7 +146,8 @@
       "portrait": "portraits/morgan.svg",
       "idle": "sprites/morgan_idle.svg",
       "walk1": "sprites/morgan_walk_01.svg",
-      "walk2": "sprites/morgan_walk_02.svg"
+      "walk2": "sprites/morgan_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "roxane",
@@ -142,7 +156,8 @@
       "portrait": "portraits/roxane.svg",
       "idle": "sprites/roxane_idle.svg",
       "walk1": "sprites/roxane_walk_01.svg",
-      "walk2": "sprites/roxane_walk_02.svg"
+      "walk2": "sprites/roxane_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "dante",
@@ -151,7 +166,8 @@
       "portrait": "portraits/dante.svg",
       "idle": "sprites/dante_idle.svg",
       "walk1": "sprites/dante_walk_01.svg",
-      "walk2": "sprites/dante_walk_02.svg"
+      "walk2": "sprites/dante_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "victor",
@@ -160,7 +176,8 @@
       "portrait": "portraits/victor.svg",
       "idle": "sprites/victor_idle.svg",
       "walk1": "sprites/victor_walk_01.svg",
-      "walk2": "sprites/victor_walk_02.svg"
+      "walk2": "sprites/victor_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "elise",
@@ -169,7 +186,8 @@
       "portrait": "portraits/elise.svg",
       "idle": "sprites/elise_idle.svg",
       "walk1": "sprites/elise_walk_01.svg",
-      "walk2": "sprites/elise_walk_02.svg"
+      "walk2": "sprites/elise_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "samir",
@@ -178,7 +196,8 @@
       "portrait": "portraits/samir.svg",
       "idle": "sprites/samir_idle.svg",
       "walk1": "sprites/samir_walk_01.svg",
-      "walk2": "sprites/samir_walk_02.svg"
+      "walk2": "sprites/samir_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "juliette",
@@ -187,7 +206,8 @@
       "portrait": "portraits/juliette.svg",
       "idle": "sprites/juliette_idle.svg",
       "walk1": "sprites/juliette_walk_01.svg",
-      "walk2": "sprites/juliette_walk_02.svg"
+      "walk2": "sprites/juliette_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "antoine",
@@ -196,7 +216,8 @@
       "portrait": "portraits/antoine.svg",
       "idle": "sprites/antoine_idle.svg",
       "walk1": "sprites/antoine_walk_01.svg",
-      "walk2": "sprites/antoine_walk_02.svg"
+      "walk2": "sprites/antoine_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "adrien",
@@ -205,7 +226,8 @@
       "portrait": "portraits/adrien.svg",
       "idle": "sprites/adrien_idle.svg",
       "walk1": "sprites/adrien_walk_01.svg",
-      "walk2": "sprites/adrien_walk_02.svg"
+      "walk2": "sprites/adrien_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "leon",
@@ -214,7 +236,8 @@
       "portrait": "portraits/leon.svg",
       "idle": "sprites/leon_idle.svg",
       "walk1": "sprites/leon_walk_01.svg",
-      "walk2": "sprites/leon_walk_02.svg"
+      "walk2": "sprites/leon_walk_02.svg",
+      "category": "story"
     },
     {
       "id": "mara",
@@ -223,7 +246,405 @@
       "portrait": "portraits/mara.svg",
       "idle": "sprites/mara_idle.svg",
       "walk1": "sprites/mara_walk_01.svg",
-      "walk2": "sprites/mara_walk_02.svg"
+      "walk2": "sprites/mara_walk_02.svg",
+      "category": "story"
+    },
+    {
+      "id": "c25",
+      "name": "Coach sportif",
+      "role": "Coach sportif",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c25.svg",
+      "idle": "sprites/c25_idle.svg",
+      "walk1": "sprites/c25_walk_01.svg",
+      "walk2": "sprites/c25_walk_02.svg"
+    },
+    {
+      "id": "c26",
+      "name": "Boulanger",
+      "role": "Boulanger",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c26.svg",
+      "idle": "sprites/c26_idle.svg",
+      "walk1": "sprites/c26_walk_01.svg",
+      "walk2": "sprites/c26_walk_02.svg"
+    },
+    {
+      "id": "c27",
+      "name": "Scientifique",
+      "role": "Scientifique",
+      "game": "The Silent Verdict",
+      "category": "civilian",
+      "portrait": "portraits/c27.svg",
+      "idle": "sprites/c27_idle.svg",
+      "walk1": "sprites/c27_walk_01.svg",
+      "walk2": "sprites/c27_walk_02.svg"
+    },
+    {
+      "id": "c28",
+      "name": "Dentiste",
+      "role": "Dentiste",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c28.svg",
+      "idle": "sprites/c28_idle.svg",
+      "walk1": "sprites/c28_walk_01.svg",
+      "walk2": "sprites/c28_walk_02.svg"
+    },
+    {
+      "id": "c29",
+      "name": "Chauffeur de bus",
+      "role": "Chauffeur de bus",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c29.svg",
+      "idle": "sprites/c29_idle.svg",
+      "walk1": "sprites/c29_walk_01.svg",
+      "walk2": "sprites/c29_walk_02.svg"
+    },
+    {
+      "id": "c30",
+      "name": "Jardinière",
+      "role": "Jardinière",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c30.svg",
+      "idle": "sprites/c30_idle.svg",
+      "walk1": "sprites/c30_walk_01.svg",
+      "walk2": "sprites/c30_walk_02.svg"
+    },
+    {
+      "id": "c31",
+      "name": "Agent d’accueil",
+      "role": "Agent d’accueil",
+      "game": "The Silent Verdict",
+      "category": "civilian",
+      "portrait": "portraits/c31.svg",
+      "idle": "sprites/c31_idle.svg",
+      "walk1": "sprites/c31_walk_01.svg",
+      "walk2": "sprites/c31_walk_02.svg"
+    },
+    {
+      "id": "c32",
+      "name": "Bagagiste",
+      "role": "Bagagiste",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c32.svg",
+      "idle": "sprites/c32_idle.svg",
+      "walk1": "sprites/c32_walk_01.svg",
+      "walk2": "sprites/c32_walk_02.svg"
+    },
+    {
+      "id": "c33",
+      "name": "Tailleur",
+      "role": "Tailleur",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c33.svg",
+      "idle": "sprites/c33_idle.svg",
+      "walk1": "sprites/c33_walk_01.svg",
+      "walk2": "sprites/c33_walk_02.svg"
+    },
+    {
+      "id": "c34",
+      "name": "Téléconseillère",
+      "role": "Téléconseillère",
+      "game": "Agence X",
+      "category": "civilian",
+      "portrait": "portraits/c34.svg",
+      "idle": "sprites/c34_idle.svg",
+      "walk1": "sprites/c34_walk_01.svg",
+      "walk2": "sprites/c34_walk_02.svg"
+    },
+    {
+      "id": "c35",
+      "name": "Conservatrice",
+      "role": "Conservatrice",
+      "game": "The Silent Verdict",
+      "category": "civilian",
+      "portrait": "portraits/c35.svg",
+      "idle": "sprites/c35_idle.svg",
+      "walk1": "sprites/c35_walk_01.svg",
+      "walk2": "sprites/c35_walk_02.svg"
+    },
+    {
+      "id": "c36",
+      "name": "Technicien de laboratoire",
+      "role": "Technicien de laboratoire",
+      "game": "The Silent Verdict",
+      "category": "civilian",
+      "portrait": "portraits/c36.svg",
+      "idle": "sprites/c36_idle.svg",
+      "walk1": "sprites/c36_walk_01.svg",
+      "walk2": "sprites/c36_walk_02.svg"
+    },
+    {
+      "id": "c37",
+      "name": "Garde forestière",
+      "role": "Garde forestière",
+      "game": "No Man's Dawn",
+      "category": "civilian",
+      "portrait": "portraits/c37.svg",
+      "idle": "sprites/c37_idle.svg",
+      "walk1": "sprites/c37_walk_01.svg",
+      "walk2": "sprites/c37_walk_02.svg"
+    },
+    {
+      "id": "c38",
+      "name": "Comptable",
+      "role": "Comptable",
+      "game": "Agence X",
+      "category": "civilian",
+      "portrait": "portraits/c38.svg",
+      "idle": "sprites/c38_idle.svg",
+      "walk1": "sprites/c38_walk_01.svg",
+      "walk2": "sprites/c38_walk_02.svg"
+    },
+    {
+      "id": "c39",
+      "name": "Libraire",
+      "role": "Libraire",
+      "game": "After Dark",
+      "category": "civilian",
+      "portrait": "portraits/c39.svg",
+      "idle": "sprites/c39_idle.svg",
+      "walk1": "sprites/c39_walk_01.svg",
+      "walk2": "sprites/c39_walk_02.svg"
+    },
+    {
+      "id": "c40",
+      "name": "Hôtesse de l’air",
+      "role": "Hôtesse de l’air",
+      "game": "After Dark",
+      "category": "civilian",
+      "portrait": "portraits/c40.svg",
+      "idle": "sprites/c40_idle.svg",
+      "walk1": "sprites/c40_walk_01.svg",
+      "walk2": "sprites/c40_walk_02.svg"
+    },
+    {
+      "id": "c41",
+      "name": "Voisine âgée",
+      "role": "Voisine âgée",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c41.svg",
+      "idle": "sprites/c41_idle.svg",
+      "walk1": "sprites/c41_walk_01.svg",
+      "walk2": "sprites/c41_walk_02.svg"
+    },
+    {
+      "id": "c42",
+      "name": "Bénévole",
+      "role": "Bénévole",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c42.svg",
+      "idle": "sprites/c42_idle.svg",
+      "walk1": "sprites/c42_walk_01.svg",
+      "walk2": "sprites/c42_walk_02.svg"
+    },
+    {
+      "id": "c43",
+      "name": "Factrice",
+      "role": "Factrice",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c43.svg",
+      "idle": "sprites/c43_idle.svg",
+      "walk1": "sprites/c43_walk_01.svg",
+      "walk2": "sprites/c43_walk_02.svg"
+    },
+    {
+      "id": "c44",
+      "name": "Cycliste urbain",
+      "role": "Cycliste urbain",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c44.svg",
+      "idle": "sprites/c44_idle.svg",
+      "walk1": "sprites/c44_walk_01.svg",
+      "walk2": "sprites/c44_walk_02.svg"
+    },
+    {
+      "id": "c45",
+      "name": "Responsable de magasin",
+      "role": "Responsable de magasin",
+      "game": "Agence X",
+      "category": "civilian",
+      "portrait": "portraits/c45.svg",
+      "idle": "sprites/c45_idle.svg",
+      "walk1": "sprites/c45_walk_01.svg",
+      "walk2": "sprites/c45_walk_02.svg"
+    },
+    {
+      "id": "c46",
+      "name": "Organisatrice de festival",
+      "role": "Organisatrice de festival",
+      "game": "After Dark",
+      "category": "civilian",
+      "portrait": "portraits/c46.svg",
+      "idle": "sprites/c46_idle.svg",
+      "walk1": "sprites/c46_walk_01.svg",
+      "walk2": "sprites/c46_walk_02.svg"
+    },
+    {
+      "id": "c47",
+      "name": "Bibliothécaire adjoint",
+      "role": "Bibliothécaire adjoint",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c47.svg",
+      "idle": "sprites/c47_idle.svg",
+      "walk1": "sprites/c47_walk_01.svg",
+      "walk2": "sprites/c47_walk_02.svg"
+    },
+    {
+      "id": "c48",
+      "name": "Aide-soignante",
+      "role": "Aide-soignante",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c48.svg",
+      "idle": "sprites/c48_idle.svg",
+      "walk1": "sprites/c48_walk_01.svg",
+      "walk2": "sprites/c48_walk_02.svg"
+    },
+    {
+      "id": "c49",
+      "name": "Peintre en bâtiment",
+      "role": "Peintre en bâtiment",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c49.svg",
+      "idle": "sprites/c49_idle.svg",
+      "walk1": "sprites/c49_walk_01.svg",
+      "walk2": "sprites/c49_walk_02.svg"
+    },
+    {
+      "id": "c50",
+      "name": "Électricienne",
+      "role": "Électricienne",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c50.svg",
+      "idle": "sprites/c50_idle.svg",
+      "walk1": "sprites/c50_walk_01.svg",
+      "walk2": "sprites/c50_walk_02.svg"
+    },
+    {
+      "id": "c51",
+      "name": "Guide touristique",
+      "role": "Guide touristique",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c51.svg",
+      "idle": "sprites/c51_idle.svg",
+      "walk1": "sprites/c51_walk_01.svg",
+      "walk2": "sprites/c51_walk_02.svg"
+    },
+    {
+      "id": "c52",
+      "name": "Couturière",
+      "role": "Couturière",
+      "game": "After Dark",
+      "category": "civilian",
+      "portrait": "portraits/c52.svg",
+      "idle": "sprites/c52_idle.svg",
+      "walk1": "sprites/c52_walk_01.svg",
+      "walk2": "sprites/c52_walk_02.svg"
+    },
+    {
+      "id": "c53",
+      "name": "Stagiaire de bureau",
+      "role": "Stagiaire de bureau",
+      "game": "Agence X",
+      "category": "civilian",
+      "portrait": "portraits/c53.svg",
+      "idle": "sprites/c53_idle.svg",
+      "walk1": "sprites/c53_walk_01.svg",
+      "walk2": "sprites/c53_walk_02.svg"
+    },
+    {
+      "id": "c54",
+      "name": "Maraîcher",
+      "role": "Maraîcher",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c54.svg",
+      "idle": "sprites/c54_idle.svg",
+      "walk1": "sprites/c54_walk_01.svg",
+      "walk2": "sprites/c54_walk_02.svg"
+    },
+    {
+      "id": "c55",
+      "name": "Agent d’entretien",
+      "role": "Agent d’entretien",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c55.svg",
+      "idle": "sprites/c55_idle.svg",
+      "walk1": "sprites/c55_walk_01.svg",
+      "walk2": "sprites/c55_walk_02.svg"
+    },
+    {
+      "id": "c56",
+      "name": "Agent de circulation",
+      "role": "Agent de circulation",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c56.svg",
+      "idle": "sprites/c56_idle.svg",
+      "walk1": "sprites/c56_walk_01.svg",
+      "walk2": "sprites/c56_walk_02.svg"
+    },
+    {
+      "id": "c57",
+      "name": "Baby-sitter",
+      "role": "Baby-sitter",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c57.svg",
+      "idle": "sprites/c57_idle.svg",
+      "walk1": "sprites/c57_walk_01.svg",
+      "walk2": "sprites/c57_walk_02.svg"
+    },
+    {
+      "id": "c58",
+      "name": "Gestionnaire immobilier",
+      "role": "Gestionnaire immobilier",
+      "game": "Hearts of Eden",
+      "category": "civilian",
+      "portrait": "portraits/c58.svg",
+      "idle": "sprites/c58_idle.svg",
+      "walk1": "sprites/c58_walk_01.svg",
+      "walk2": "sprites/c58_walk_02.svg"
+    },
+    {
+      "id": "c59",
+      "name": "Animatrice radio",
+      "role": "Animatrice radio",
+      "game": "After Dark",
+      "category": "civilian",
+      "portrait": "portraits/c59.svg",
+      "idle": "sprites/c59_idle.svg",
+      "walk1": "sprites/c59_walk_01.svg",
+      "walk2": "sprites/c59_walk_02.svg"
+    },
+    {
+      "id": "c60",
+      "name": "Chef associatif",
+      "role": "Chef associatif",
+      "game": "Civilian NPC",
+      "category": "civilian",
+      "portrait": "portraits/c60.svg",
+      "idle": "sprites/c60_idle.svg",
+      "walk1": "sprites/c60_walk_01.svg",
+      "walk2": "sprites/c60_walk_02.svg"
     }
-  ]
+  ],
+  "count": 60
 }
