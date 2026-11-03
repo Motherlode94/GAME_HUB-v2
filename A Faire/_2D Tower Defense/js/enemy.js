@@ -97,7 +97,8 @@ function spawnEnemy(typeKey, wave) {
         slowTimer: 0,
         hitFlash: 0,
         fireTimer: Math.random() * 800,
-        wobble: Math.random() * Math.PI * 2
+        wobble: Math.random() * Math.PI * 2,
+        facing: 0
     });
 }
 
@@ -171,6 +172,7 @@ function updateEnemies(dt) {
             const dx = target.x - enemy.x;
             const dy = target.y - enemy.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 0) enemy.facing = Math.atan2(dy, dx);
             if (dist <= move) {
                 enemy.x = target.x;
                 enemy.y = target.y;
@@ -247,31 +249,44 @@ function drawEnemies(ctx) {
 
         ctx.save();
         ctx.translate(enemy.x, enemy.y + bob);
-        if (enemy.isBoss) ctx.rotate(enemy.wobble * 0.2);
-        traceEnemyShape(ctx, enemy.shape, size);
-        ctx.fillStyle = enemy.hitFlash > 0 ? '#ffffff' : enemy.color;
-        ctx.fill();
-        ctx.lineWidth = enemy.armor > 0 ? 3 : 1.5;
-        ctx.strokeStyle = enemy.isBoss ? '#ffd27a' : (enemy.armor > 0 ? '#2c3e50' : 'rgba(0,0,0,0.6)');
-        ctx.stroke();
-
+        const spriteDrawn = typeof tdDrawEnemySprite === 'function' && tdDrawEnemySprite(ctx, enemy);
+        if (!spriteDrawn) {
+            // Keep the original canvas drawings if sprites have not finished loading.
+            if (enemy.isBoss) ctx.rotate(enemy.wobble * 0.2);
+            traceEnemyShape(ctx, enemy.shape, size);
+            ctx.fillStyle = enemy.hitFlash > 0 ? '#ffffff' : enemy.color;
+            ctx.fill();
+            ctx.lineWidth = enemy.armor > 0 ? 3 : 1.5;
+            ctx.strokeStyle = enemy.isBoss ? '#ffd27a' : (enemy.armor > 0 ? '#2c3e50' : 'rgba(0,0,0,0.6)');
+            ctx.stroke();
+            if (enemy.type === 'GUNNER' || enemy.type === 'ROCKET') {
+                ctx.strokeStyle = '#262626'; ctx.lineWidth = enemy.type === 'ROCKET' ? 6 : 3;
+                ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(14,0);ctx.stroke();
+            }
+        }
+        if (spriteDrawn && enemy.hitFlash > 0) {
+            ctx.beginPath();ctx.arc(0,0,size*0.75,0,Math.PI*2);
+            ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=2.5;ctx.stroke();
+        }
         if (enemy.slowFactor < 1) {
-            ctx.strokeStyle = 'rgba(120, 220, 255, 0.9)';
+            ctx.strokeStyle = 'rgba(120, 220, 255, .9)';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(0, 0, size / 2 + 4, 0, Math.PI * 2);
+            ctx.arc(0,0,size/2+6,0,Math.PI*2);
             ctx.stroke();
         }
-        if (enemy.type === 'GUNNER' || enemy.type === 'ROCKET') {
-            ctx.strokeStyle = '#262626'; ctx.lineWidth = enemy.type === 'ROCKET' ? 6 : 3;
-            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(14, 0); ctx.stroke();
+        if (enemy.type === 'MEDIC' || enemy.type === 'SHIELD' || enemy.type === 'JAMMER') {
+            ctx.beginPath();
+            ctx.arc(0,0,size*(0.8+0.08*Math.sin(enemy.wobble)),0,Math.PI*2);
+            ctx.strokeStyle = enemy.type === 'MEDIC' ? 'rgba(100,255,188,.65)' : enemy.type === 'SHIELD' ? 'rgba(111,187,255,.65)' : 'rgba(200,130,255,.65)';
+            ctx.lineWidth = 1.6;ctx.stroke();
         }
         ctx.restore();
 
         // Barre de vie (affichée dès que l'ennemi est touché, toujours pour les boss)
         if (enemy.life < enemy.maxLife || enemy.isBoss) {
             const barWidth = Math.max(20, size);
-            const barY = enemy.y - size / 2 - 10;
+            const barY = enemy.y - size * (typeof tdUseEnemySprites !== 'undefined' && tdUseEnemySprites ? 0.9 : 0.5) - 10;
             const pct = Math.max(0, enemy.life / enemy.maxLife);
             ctx.fillStyle = '#000';
             ctx.fillRect(enemy.x - barWidth / 2, barY, barWidth, 4);
@@ -281,7 +296,7 @@ function drawEnemies(ctx) {
 
         if (enemy.isBoss) {
             // Large readable boss health bar with exact remaining HP.
-            const bw = 118, bx = enemy.x - bw / 2, by = enemy.y - size / 2 - 31;
+            const bw = 118, bx = enemy.x - bw / 2, by = enemy.y - size * (typeof tdUseEnemySprites !== 'undefined' && tdUseEnemySprites ? 1.1 : 0.5) - 31;
             const pct = Math.max(0, Math.min(1, enemy.life / enemy.maxLife));
             ctx.fillStyle = 'rgba(0,0,0,.85)'; ctx.fillRect(bx - 3, by - 5, bw + 6, 22);
             ctx.fillStyle = '#4e1515'; ctx.fillRect(bx, by, bw, 9);

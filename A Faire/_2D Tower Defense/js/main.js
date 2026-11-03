@@ -8,6 +8,7 @@ window.onload = function () {
     if (!ctx) return;
 
     initMap();
+    if (typeof tdLoadEnemySprites === 'function') tdLoadEnemySprites();
     canvas.addEventListener('click', handleCanvasClick);
     canvas.addEventListener('mousemove', handleMouseMove);
     // On touch devices, update the aiming tile on the actual press, not

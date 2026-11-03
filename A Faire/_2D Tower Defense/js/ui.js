@@ -342,6 +342,10 @@ function initTDUI() {
         if (TD_AI_PROFILES[e.target.value]) gameState.aiProfile = e.target.value;
         updateTDUI(true);
     });
+    tdById('td-sprite-toggle').addEventListener('click', () => {
+        tdUseEnemySprites = !tdUseEnemySprites;
+        updateTDUI(true);
+    });
     tdById('td-auto').addEventListener('click', () => {
         gameState.aiAutoUpgrade = !gameState.aiAutoUpgrade;
         updateTDUI(true);
@@ -359,6 +363,10 @@ function updateTDUI(force = false) {
     const now = performance.now();
     if (!force && now - tdUILastUpdate < 110) return;
     tdUILastUpdate = now;
+    const spriteButton = tdById('td-sprite-toggle');
+    spriteButton.setAttribute('aria-pressed', String(tdUseEnemySprites));
+    tdSetText('td-sprite-toggle', 'Sprites animés : ' + (tdUseEnemySprites ? 'ON' : 'OFF'));
+    tdSetText('td-sprite-count', tdSpritesLoaded + ' / ' + (TD_VISUAL_TYPES.length * 2) + ' images chargées' + (tdUseEnemySprites ? '' : ' · rendu simplifié'));
     tdRenderIntel();
     tdDrawMinimap(now);
     const remainingRatio = tdClamp(gameState.lives / STARTING_LIVES, 0, 1);

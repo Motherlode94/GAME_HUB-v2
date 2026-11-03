@@ -234,3 +234,10 @@ body.td-focus-mode .td-build-stats{white-space:normal}
 @media(max-width:950px){.td-stat-secondary{display:none}.td-wave-actions{flex-direction:row;min-width:100%;width:100%}.td-wave-actions>*{flex:1}}
 @media(max-width:560px){.td-guide-grid{grid-template-columns:1fr}.td-guide-dialog{padding:14px}.td-guide-bottom{flex-direction:column;align-items:stretch}#td-guide-done{width:100%}.td-wave-actions{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.td-ability:after{transition:none}}
+
+/* Animated enemy asset controls */
+.td-visual-settings{margin-top:12px;padding:12px;background:#0d1d2e;border:1px solid #3b5b70;border-radius:9px;display:flex;flex-direction:column;gap:8px}
+.td-visual-settings strong{font-size:12px;color:#c8ecf7}
+.td-visual-settings small{color:#90b4c5;font-size:11px}
+#td-sprite-toggle{border-color:#4d9098;background:#16404a;color:#c8f7ea}
+#td-sprite-toggle[aria-pressed="false"]{background:#293247;border-color:#62748b;color:#b9cddd}
