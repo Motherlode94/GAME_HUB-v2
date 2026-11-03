@@ -18,7 +18,7 @@
  <div class="td-brand"><div class="td-emblem" aria-hidden="true">⬡</div><div><div class="td-kicker">WarLike Gaming / Commandement tactique</div><h1>Tower Defense</h1><span id="td-game-state">Défendre la base</span></div></div>
  <div class="td-stats" aria-label="Statistiques de la partie">
   <div class="td-stat money"><span>Crédits</span><strong id="td-money">250 $</strong></div>
-  <div class="td-stat life"><span>Base · PV</span><strong id="td-lives">20</strong></div>
+  <div class="td-stat life"><span>Base · PV</span><strong id="td-lives">20</strong><div class="td-base-track" role="progressbar" aria-label="Résistance de la base" aria-valuemin="0" aria-valuemax="20" aria-valuenow="20" id="td-base-track"><i id="td-base-fill"></i></div></div>
   <div class="td-stat"><span>Vague</span><strong id="td-wave-number">—</strong></div>
   <div class="td-stat"><span>Score</span><strong id="td-score">0</strong></div>
  </div>
@@ -41,16 +41,34 @@
   </div>
   <div id="td-danger-alert" class="td-danger-alert" role="status" hidden><span>⚠ ALERTE BASE</span><strong id="td-danger-text"></strong></div>
   <div id="td-boss" class="td-boss" hidden role="status" aria-label="Vie du boss"><span class="td-boss-label">⚠ BOSS</span><div class="td-meter"><i id="td-boss-fill"></i></div><strong id="td-boss-hp">0 / 0 PV</strong></div>
-  <div class="td-canvas-wrap" aria-label="Carte de bataille, défilement horizontal sur les petits écrans">
+  <section class="td-field-header td-panel" aria-label="Contrôles de la carte">
+    <div class="td-field-caption"><div class="td-eyebrow">Secteur Alpha / Terrain opérationnel</div><strong>Carte de défense <span id="td-field-readout">28 × 15 cases</span></strong></div>
+    <div class="td-zoom-controls">
+      <button type="button" id="td-zoom-out" aria-label="Dézoomer la carte" title="Dézoomer">−</button><output id="td-zoom-label" for="td-zoom-out td-zoom-in">100 %</output><button type="button" id="td-zoom-in" aria-label="Zoomer sur la carte" title="Zoomer">+</button>
+      <button type="button" id="td-zoom-fit" title="Réinitialiser le zoom">Ajuster</button><button type="button" id="td-focus" aria-pressed="false" title="Masquer ou afficher le panneau latéral">⛶ Mode focus</button>
+    </div>
+  </section>
+  <div class="td-canvas-wrap" id="td-map-viewport" aria-label="Carte de bataille, défilement horizontal sur les petits écrans">
    <canvas id="gameCanvas" aria-label="Terrain de défense : clique pour placer ou sélectionner une tour">Votre navigateur ne prend pas en charge Canvas.</canvas>
   </div>
+  <div class="td-map-legend" aria-label="Légende des éléments">
+   <span><i class="td-keyline grass"></i> Terrain</span><span><i class="td-keyline path"></i> Chemin ennemi</span><span><i class="td-keyline tower"></i> Défenses</span><span><i class="td-keyline danger"></i> Menaces</span>
+   <span class="td-map-mobile-hint">Sur mobile : glisse horizontalement pour explorer la carte.</span>
+  </div>
   <section class="td-panel td-buildbar" aria-label="Construction des défenses">
-   <div class="td-sectionhead"><h2>Arsenal · construire</h2><span>1–8 • clique puis place sur le terrain</span></div>
+   <div class="td-sectionhead"><h2>Arsenal · construire</h2><span>8 unités disponibles · touches 1 à 8</span></div>
    <div id="td-build-grid"></div>
+   <div class="td-build-guide" id="td-build-guide" aria-live="off">Sélectionne une défense pour consulter son rôle, sa portée et son coût.</div>
   </section>
  </main>
- <aside class="td-rail" aria-label="Panneau de commandement">
-  <section class="td-panel">
+ <aside class="td-rail" id="td-command-rail" aria-label="Panneau de commandement">
+  <nav class="td-rail-tabs" aria-label="Navigation tactique">
+    <button type="button" class="is-active" data-td-tab="inspect" aria-pressed="true">Défenses</button>
+    <button type="button" data-td-tab="powers" aria-pressed="false">Capacités</button>
+    <button type="button" data-td-tab="intel" aria-pressed="false">Renseignement</button>
+    <button type="button" data-td-tab="settings" aria-pressed="false">Réglages</button>
+  </nav>
+  <section class="td-panel is-visible" data-td-pane="inspect">
    <h2 class="td-rail-title">Inspection de défense</h2>
    <div id="td-selected-name" class="td-detail-title">Aucune tour sélectionnée</div>
    <p id="td-selected-sub" class="td-detail-sub">Clique sur une défense pour gérer ses améliorations.</p>
@@ -66,7 +84,7 @@
    <button id="td-target" type="button" style="width:100%" disabled>Mode de ciblage</button>
    <div class="td-action-row"><button id="td-upgrade" type="button" disabled>↑ Améliorer</button><button id="td-sell" class="td-danger" type="button" disabled>Vendre</button></div>
   </section>
-  <section class="td-panel">
+  <section class="td-panel" data-td-pane="powers">
    <h2 class="td-rail-title">Capacités tactiques</h2>
    <div class="td-ability-list">
     <button id="td-ability-barrage" class="td-ability" type="button"><span><b>✹ Barrage</b><small>Z • Explosions de zone</small></span><span class="td-ability-cost" id="td-ability-cost-barrage">95 $</span></button>
@@ -74,18 +92,21 @@
     <button id="td-ability-repair" class="td-ability" type="button"><span><b>✚ Réparation</b><small>C • Tours sélectionnées</small></span><span class="td-ability-cost" id="td-ability-cost-repair">60 $</span></button>
    </div>
   </section>
-  <section class="td-panel">
+  <section class="td-panel" data-td-pane="intel">
    <h2 class="td-rail-title">Renseignement ennemi</h2>
+   <div class="td-mini-header"><span>Mini-carte tactique</span><span id="td-mini-count">0 hostiles</span></div>
+   <canvas id="td-minimap" width="280" height="150" aria-label="Minicarte : vert défenses, rouge ennemis, ocre chemin"></canvas>
+   <small class="td-mini-tip">Clique sur la mini-carte pour recentrer le terrain sur mobile.</small>
    <div class="td-detail-sub" id="td-intel-title">Prochaine vague</div>
    <div id="td-intel-list" class="td-intel-list" aria-label="Composition de la prochaine vague"></div>
   </section>
-  <section class="td-panel">
+  <section class="td-panel" data-td-pane="settings">
    <h2 class="td-rail-title">Doctrine & automatisation</h2>
    <div class="td-doctrine"><label for="td-doctrine" class="td-hint">Stratégie</label><select id="td-doctrine"><option value="neutre">Neutre</option><option value="guerrier">Guerrier</option><option value="scientifique">Scientifique</option><option value="magnat">Magnat</option><option value="pacifique">Pacifique</option></select></div>
    <button type="button" id="td-auto" class="td-switch">Auto-amélioration : OFF</button>
    <div id="td-feedback" role="status" aria-live="polite" style="margin-top:12px">Prépare ton dispositif défensif.</div>
   </section>
-  <section class="td-panel">
+  <section class="td-panel" data-td-pane="settings">
    <details class="td-help">
     <summary>Raccourcis & contrôles</summary>
     <p><kbd>Q</kbd> voir toutes les portées · <kbd>I</kbd> avertissements sur la carte · <kbd>Échap</kbd> annuler les modes de visée. <kbd>1–8</kbd> défense · <kbd>Espace</kbd> vague · <kbd>P</kbd> pause · <kbd>V</kbd> vitesse · <kbd>U</kbd> améliorer · <kbd>S</kbd> vendre · <kbd>F</kbd> ciblage · <kbd>G</kbd> doctrine · <kbd>A</kbd> auto-amélioration · <kbd>Z X C</kbd> capacités. <kbd>Shift + clic</kbd> sélection multiple. <kbd>Ctrl + clic</kbd> sélection du même type. Clic droit ou <kbd>Échap</kbd> annule le placement.</p>

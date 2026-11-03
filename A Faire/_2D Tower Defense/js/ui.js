@@ -9,6 +9,10 @@ let tdFeedbackExpiry = 0;
 let tdIntelWave = -1;
 let tdShowRanges = false;
 let tdShowThreats = true;
+let tdZoom = 1;
+let tdFocusMode = false;
+let tdActivePanel = 'inspect';
+let tdMinimapLast = -Infinity;
 const tdDangerWaypoint = () => pathWaypoints.length - 2;
 const tdById = (id) => document.getElementById(id);
 const tdClamp = (v, low, high) => Math.min(high, Math.max(low, v));
@@ -129,6 +133,46 @@ function tdRenderIntel() {
         container.append(line);
     }
 }
+function tdSetPane(pane) {
+    tdActivePanel = pane;
+    for (const item of document.querySelectorAll('[data-td-pane]'))
+        item.classList.toggle('is-visible', item.dataset.tdPane === pane);
+    for (const tab of document.querySelectorAll('[data-td-tab]')) {
+        const active = tab.dataset.tdTab === pane;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-pressed', String(active));
+    }
+}
+function tdDrawMinimap(now) {
+    if (now - tdMinimapLast < 240) return;
+    tdMinimapLast = now;
+    const canvas = tdById('td-minimap'), p = canvas?.getContext('2d');
+    if (!p) return;
+    const tw = canvas.width / MAP_COLS, th = canvas.height / MAP_ROWS;
+    p.fillStyle = '#172e30';p.fillRect(0, 0, canvas.width, canvas.height);
+    for (let gx = 0; gx < MAP_COLS; gx++) for (let gy = 0; gy < MAP_ROWS; gy++) {
+        const type = mapGrid[gx]?.[gy];
+        if (type === TILE_TYPES.PATH) p.fillStyle = '#b69a67';
+        else if (type === TILE_TYPES.BLOCKED) p.fillStyle = '#243c37';
+        else p.fillStyle = (gx + gy) % 2 ? '#365c46' : '#30543f';
+        p.fillRect(gx*tw, gy*th, Math.ceil(tw), Math.ceil(th));
+    }
+    for (const tower of towers) {
+        p.fillStyle = TOWER_TYPES[tower.type]?.color || '#9ad7ed';
+        p.fillRect((tower.x / TILE_SIZE - .5) * tw + tw*.15,
+            (tower.y / TILE_SIZE - .5) * th + th*.15, tw*.7, th*.7);
+    }
+    for (const enemy of enemies) {
+        if (enemy.life <= 0 || enemy.reachedEnd) continue;
+        p.beginPath();
+        p.arc(enemy.x / (MAP_COLS*TILE_SIZE) * canvas.width,
+            enemy.y / (MAP_ROWS*TILE_SIZE) * canvas.height,
+            enemy.isBoss ? 4 : 2.3, 0, Math.PI*2);
+        p.fillStyle = enemy.isBoss ? '#ffbf66' : '#ff5d6e';p.fill();
+    }
+    p.strokeStyle = '#a8dce7';p.lineWidth = 2;p.strokeRect(1,1,canvas.width-2,canvas.height-2);
+    tdSetText('td-mini-count', enemies.filter(e => e.life > 0 && !e.reachedEnd).length + ' hostiles');
+}
 function initTDUI() {
     if (tdUIReady) return;
     const grid = tdById('td-build-grid');
@@ -148,7 +192,9 @@ function initTDUI() {
         image.alt = '';
         image.setAttribute('aria-hidden', 'true');
         const icon = tdIconFor(type);
-        if (icon) image.src = icon;
+        // Prefer real reusable SVG images; keep the existing Canvas drawing as fallback.
+        image.src = 'assets/ui/towers/' + type.toLowerCase() + '.svg';
+        image.onerror = () => { image.onerror = null; if (icon) image.src = icon; };
         const content = document.createElement('span');
         content.className = 'td-build-text';
         const title = document.createElement('span');
@@ -157,11 +203,19 @@ function initTDUI() {
         const cost = document.createElement('span');
         cost.className = 'td-build-cost';
         cost.textContent = t.cost + ' $';
-        content.append(title, cost);
+        const stats = document.createElement('span');
+        stats.className = 'td-build-stats';
+        stats.textContent = '◉ ' + t.range + ' · ⚡ ' + Math.round(t.damage * 1000 / t.fireRate) + '/s';
+        content.append(title, cost, stats);
         const hotkey = document.createElement('span');
         hotkey.className = 'td-build-hotkey';
         hotkey.textContent = t.key;
         button.append(image, content, hotkey);
+        const describe = () => tdSetText('td-build-guide',
+            t.name + ' · ' + t.desc + ' · Portée ' + t.range +
+            ' · ' + Math.round(t.damage * 1000 / t.fireRate) + ' DPS · ' + t.cost + ' crédits');
+        button.addEventListener('mouseenter', describe);
+        button.addEventListener('focus', describe);
         button.addEventListener('click', () => {
             if (!tdActionAllowed()) return;
             tdClearAim();
@@ -171,6 +225,36 @@ function initTDUI() {
         });
         grid.append(button);
     }
+    const zoomOut = tdById('td-zoom-out'), zoomIn = tdById('td-zoom-in');
+    const setZoom = (next) => {
+        tdZoom = Math.max(0.75, Math.min(1.75, next));
+        const viewport = tdById('td-map-viewport');
+        viewport.style.setProperty('--td-map-zoom', String(tdZoom));
+        tdSetText('td-zoom-label', Math.round(tdZoom * 100) + ' %');
+        zoomOut.disabled = tdZoom <= .75;
+        zoomIn.disabled = tdZoom >= 1.75;
+    };
+    zoomOut.addEventListener('click', () => setZoom(tdZoom - .25));
+    zoomIn.addEventListener('click', () => setZoom(tdZoom + .25));
+    tdById('td-zoom-fit').addEventListener('click', () => setZoom(1));
+    tdById('td-focus').addEventListener('click', () => {
+        tdFocusMode = !tdFocusMode;
+        document.body.classList.toggle('td-focus-mode', tdFocusMode);
+        tdById('td-focus').setAttribute('aria-pressed', String(tdFocusMode));
+        tdSetText('td-focus', tdFocusMode ? '↙ Quitter focus' : '⛶ Mode focus');
+    });
+    setZoom(1);
+    for (const tab of document.querySelectorAll('[data-td-tab]')) {
+        tab.addEventListener('click', () => tdSetPane(tab.dataset.tdTab));
+    }
+    tdSetPane('inspect');
+    tdById('td-minimap').addEventListener('click', e => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const fraction = tdClamp((e.clientX - rect.left) / rect.width, 0, 1);
+        const view = tdById('td-map-viewport');
+        const map = tdById('gameCanvas');
+        view.scrollLeft = Math.max(0, map.getBoundingClientRect().width * fraction - view.clientWidth / 2);
+    });
     tdById('td-show-ranges').addEventListener('click', () => {
         tdShowRanges = !tdShowRanges;
         updateTDUI(true);
@@ -246,6 +330,10 @@ function updateTDUI(force = false) {
     if (!force && now - tdUILastUpdate < 110) return;
     tdUILastUpdate = now;
     tdRenderIntel();
+    tdDrawMinimap(now);
+    const remainingRatio = tdClamp(gameState.lives / STARTING_LIVES, 0, 1);
+    tdById('td-base-fill').style.width = Math.round(remainingRatio * 100) + '%';
+    tdById('td-base-track').setAttribute('aria-valuenow', String(gameState.lives));
     tdSetText('td-money', gameState.money + ' $');
     tdSetText('td-lives', gameState.lives);
     tdSetText('td-wave-number', waveState.currentWave || '—');

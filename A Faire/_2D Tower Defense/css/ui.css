@@ -124,3 +124,74 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;ba
 .td-cursor-status{text-align:left;min-width:0}
 }
 @media(prefers-reduced-motion:reduce){.td-danger-alert{animation:none}}
+
+/* WarLike Tactical UI v2: real SVG tower art, operational mini-map, canvas zoom,
+   focus view and compact controls. */
+.td-header{position:relative;overflow:hidden;border-color:#426483;background:linear-gradient(110deg,#213a53,#101c2d 67%);padding:17px 20px}
+.td-header:after{content:"";pointer-events:none;position:absolute;inset:auto 0 0;height:2px;background:linear-gradient(90deg,transparent,#6ca9bc,#e9a75e,transparent)}
+.td-brand{position:relative;z-index:1}
+.td-emblem{font-size:27px;color:#e7c999;background:linear-gradient(140deg,#2d4b64,#173040);border-color:#aa997a;box-shadow:0 0 0 3px #e2b27816,inset 0 0 25px #e2b27822}
+.td-stat{position:relative;min-height:62px;background:linear-gradient(160deg,#152a3f,#0c1929)}
+.td-stat strong{font-size:clamp(17px,1.65vw,22px)}
+.td-stat.money{border-color:#aa885d99}.td-stat.life{border-color:#99525c88}
+.td-base-track{height:3px;position:absolute;bottom:0;left:8px;right:8px;background:#423139;border-radius:20px;overflow:hidden}
+.td-base-track>i{height:100%;width:100%;display:block;background:linear-gradient(90deg,#ec685d,#ffb46c);transition:width .18s}
+.td-field-header{padding:10px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.td-field-caption{display:flex;flex-direction:column;gap:3px}.td-field-caption strong{font-size:14px;letter-spacing:.02em;color:#e2ebf5}
+#td-field-readout{color:#92b1c4;font-size:11px;font-weight:500;margin-left:7px}
+.td-zoom-controls{display:flex;align-items:center;gap:6px}
+.td-zoom-controls button{min-height:36px;font-size:12px;padding:7px 11px}
+#td-zoom-in,#td-zoom-out{font-size:20px;min-width:37px;padding:2px 9px}
+#td-zoom-label{font:700 12px/1.5 system-ui;text-align:center;width:54px;color:#e3c28f;font-variant-numeric:tabular-nums}
+#td-focus{background:#385068;color:#cde9f7}
+.td-canvas-wrap{position:relative;overflow:auto;scrollbar-color:#4f7899 #112136;background:linear-gradient(145deg,#102335,#09131e);--td-map-zoom:1}
+#gameCanvas{width:calc(100% * var(--td-map-zoom))!important;min-width:620px;max-width:none;touch-action:pan-x pan-y}
+.td-map-legend{display:flex;gap:15px;flex-wrap:wrap;align-items:center;padding:4px 12px;color:#8fabbd;font-size:11px}
+.td-map-legend span{display:inline-flex;align-items:center;gap:5px}
+.td-keyline{display:inline-block;width:10px;height:10px;border-radius:3px;border:1px solid #fff4}
+.td-keyline.grass{background:#386a40}.td-keyline.path{background:#b59967}.td-keyline.tower{background:#7bd9db}.td-keyline.danger{background:#f26373}
+.td-map-mobile-hint{display:none!important;margin-left:auto}
+.td-buildbar{border-color:#36536d;padding:15px}
+#td-build-grid{gap:10px}
+.td-build-card{min-height:86px;padding:9px!important;border:1px solid #314d67!important;background:linear-gradient(135deg,#203650,#13253b)!important}
+.td-build-card:hover:not(:disabled){background:linear-gradient(135deg,#294969,#1b344f)!important;border-color:#76c9e9!important}
+.td-build-card.is-active{background:linear-gradient(135deg,#235a6b,#154251)!important;border-color:#91e6eb!important;box-shadow:0 0 0 2px #65c1d72b,inset 0 0 12px #4bd9d421}
+.td-build-card .td-build-icon{width:59px;height:59px;flex:0 0 59px;border:1px solid #47718d;border-radius:9px;background:#152c43;image-rendering:auto}
+.td-build-text{gap:5px}.td-build-name{font-size:13px;max-width:calc(100% - 7px)}.td-build-cost{color:#ffd098;font-size:13px;font-weight:800}
+.td-build-stats{color:#9ebbd1;font-size:10px;white-space:nowrap;letter-spacing:.015em}
+.td-build-hotkey{color:#e1f7ff;background:#345571;border-radius:4px;padding:1px 5px;font-size:10px;right:5px;top:5px}
+.td-build-guide{font-size:12px;line-height:1.45;color:#b4ccdc;padding:10px 12px;margin-top:12px;background:#0e1f32;border-radius:8px;border-left:3px solid #62bfd2;min-height:39px}
+.td-rail .td-panel{border-color:#304b64}
+.td-rail-tabs{display:none}
+.td-mini-header{display:flex;justify-content:space-between;gap:8px;margin-bottom:9px;font-size:11px;color:#b8d6e6}
+.td-mini-header span:last-child{color:#ffb9a5;font-variant-numeric:tabular-nums}
+#td-minimap{display:block;width:100%;height:auto;aspect-ratio:28/15;border-radius:8px;border:1px solid #4a6373;cursor:crosshair;image-rendering:pixelated}
+.td-mini-tip{display:block;color:#91a9b8;font-size:10px;line-height:1.5;margin:6px 0 12px}
+body.td-focus-mode .td-layout{grid-template-columns:minmax(0,1fr)}
+body.td-focus-mode .td-rail{display:none}
+body.td-focus-mode #td-build-grid{grid-template-columns:repeat(8,minmax(0,1fr))}
+body.td-focus-mode .td-build-card{flex-direction:column;text-align:center;align-items:center;min-height:107px}
+body.td-focus-mode .td-build-text{align-items:center}.td-build-card .td-build-name{white-space:normal}
+body.td-focus-mode .td-build-stats{white-space:normal}
+@media(max-width:1300px){body.td-focus-mode #td-build-grid{grid-template-columns:repeat(4,minmax(0,1fr))}#td-build-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:950px){
+ .td-rail{display:block}
+ .td-rail-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:9px;position:sticky;top:0;z-index:5;background:#091522;padding:8px;border:1px solid #294862;border-radius:10px}
+ .td-rail-tabs button{font-size:11px;padding:10px 4px;white-space:normal}
+ .td-rail .td-panel[data-td-pane]{display:none;margin-bottom:9px}
+ .td-rail .td-panel[data-td-pane].is-visible{display:block}
+ .td-map-mobile-hint{display:inline-flex!important}
+ .td-rail>.td-panel:last-child{grid-column:auto}
+}
+@media(max-width:600px){
+ .td-field-header{align-items:flex-start}
+ .td-zoom-controls{width:100%;display:grid;grid-template-columns:40px 58px 40px 1fr 1.3fr}
+ .td-zoom-controls button{min-width:0;padding:7px 5px;white-space:nowrap}
+ .td-zoom-controls output{width:auto!important}
+ #td-build-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .td-build-card{min-height:76px;padding:6px!important;gap:5px}
+ .td-build-card .td-build-icon{width:40px;height:48px;flex:0 0 40px}
+ .td-build-name{font-size:11px!important}.td-build-cost{font-size:11px!important}
+ .td-build-stats{font-size:9px;white-space:normal}
+ body.td-focus-mode #td-build-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
