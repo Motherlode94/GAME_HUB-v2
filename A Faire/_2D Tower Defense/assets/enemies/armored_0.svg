@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="armored frame 1"><defs><linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c9d7d3"/><stop offset=".5" stop-color="#91aaa8"/><stop offset="1" stop-color="#586b73"/></linearGradient></defs><ellipse cx="33" cy="57" rx="29" ry="4" fill="#121923" opacity=".3"/>
+<circle cx="17" cy="49" r="7" fill="#26313b" stroke="#afc2bf" stroke-width="3"/><circle cx="48" cy="49" r="7" fill="#26313b" stroke="#afc2bf" stroke-width="3"/><path d="M9 24h44l8 10-8 15H10L4 35Z" fill="url(#base)" stroke="#586b73" stroke-width="3.5"/>
+<path d="M15 28h22v17H15Z" fill="#586b73" opacity=".6"/><path d="M39 25h13l8 9-7 8H39z" fill="#c9d7d3" opacity=".35"/>
+<path d="M37 29h28v8H37z" fill="#667b72" stroke="#b9cdb8" stroke-width="2"/><circle cx="35" cy="33" r="9" fill="#586a68" stroke="#c3ceb8" stroke-width="2"/><path d="M14 37h13m-7-6v12" stroke="#c9d7d3" stroke-width="2"/>
+</svg>

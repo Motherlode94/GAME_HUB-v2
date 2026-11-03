@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="fast frame 2"><defs><linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#edc09b"/><stop offset=".5" stop-color="#d34f95"/><stop offset="1" stop-color="#68405e"/></linearGradient></defs><ellipse cx="32" cy="57" rx="21" ry="4" fill="#06101a" opacity=".23"/><path d="M29 39L21 54l-7-4 10-16Z" fill="#68405e" stroke="#293143" stroke-width="2"/><path d="M37 41l-12 15 10-1 9-18Z" fill="#d34f95" stroke="#293143" stroke-width="2"/>
+<path d="M18 25l21-5 13 12-9 15-23-7Z" fill="url(#base)" stroke="#68405e" stroke-width="3"/>
+<path d="M22 29l17 11M42 26l-5 17" stroke="#68405e" stroke-width="3" opacity=".6"/>
+<path d="M33 39l20-6 3 7-15 10Z" fill="#edc09b" stroke="#594438" stroke-width="2"/>
+<path d="M12 17Q19 4 30 5q14 1 17 15L35 31 21 29Z" fill="#68405e" stroke="#283545" stroke-width="2.5"/>
+<circle cx="29" cy="21" r="11" fill="#edc09b" stroke="#694d40" stroke-width="2"/>
+<path d="M17 18Q20 3 33 8l12 11-15 1-8-4Z" fill="#d34f95" stroke="#68405e" stroke-width="2"/>
+<path d="M32 24h13v6H32Z" fill="#293745" stroke="#a1c9da" stroke-width="1.5"/>
+<circle cx="40" cy="26.5" r="2" fill="#bbf5f2"/>
+<path d="M9 34L2 32m12 12L2 49" stroke="#fce4e3" stroke-width="3" stroke-linecap="round"/></svg>
