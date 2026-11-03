@@ -33,7 +33,8 @@ let site={team:'neutral',x:100,y:100,tacticalSite:true,hp:100,captureProgress:0}
 let game={buildings:[site],squads:[blue,red]};
 for(let i=0;i<11;i++)ctx.RTS.BuildingSystem.update(game,1);
 assert.equal(site.team,'blue','uncontested capture');
-blue.x=400;red.x=100;
+// Both coordinates matter: a squad 300 units away must not capture a site.
+blue.x=400;blue.y=400;red.x=100;red.y=100;
 for(let i=0;i<11;i++)ctx.RTS.BuildingSystem.update(game,1);
 assert.equal(site.team,'red','enemy can recapture');
 blue.x=100;site.team='neutral';site.captureProgress=0;
