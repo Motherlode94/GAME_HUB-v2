@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const base='DONE/';
+const base='A Faire/';
 function load(path,context){vm.runInNewContext(fs.readFileSync(base+path,'utf8'),context,{filename:path});}
 const art={getEnemyFaction:()=> 'axis'};
 const hero={window:{WarLikeArt:art},RTS:{Game:{}}};load('_2D Hero Forces/js/Squad.js',hero);

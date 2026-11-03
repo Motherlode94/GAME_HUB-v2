@@ -1,7 +1,7 @@
 // Smoke checks for non-RTS games: syntax, entry points, and controls.
 // These do not certify gameplay correctness.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
-const root=path.resolve(__dirname,'../DONE');
+const root=path.resolve(__dirname,'../A Faire');
 const cases=[
  ['_2D Basket Sim',['canvas','js/script.js']],
  ['_2D Tower Defense',['canvas','js/game.js']],

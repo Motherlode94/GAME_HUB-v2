@@ -28,7 +28,9 @@ jobs:
           print(f'Validated {len(games)} non-empty game entrypoints')
           PY
       - name: Check DONE game scripts, assets and catalog
-        run: node DONE/_shared/qa-done.cjs
+        run: node scripts/qa-done.cjs
+      - name: Horror games and asset integrity
+        run: node scripts/check-horror-trio.mjs
       - name: RTS capture, transport and building regression
         run: node tests/rts-simulation-smoke.cjs
       - name: Non-RTS game source and entrypoint regression

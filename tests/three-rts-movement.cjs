@@ -1,9 +1,9 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
-const hero=fs.readFileSync('DONE/_2D Hero Forces/js/Unit.js','utf8');
-const movement=fs.readFileSync('DONE/_2D War Zone Commander/js/MovementSystem.js','utf8');
-const iron=fs.readFileSync('DONE/_2D Iron Meridian/index.html','utf8');
+const hero=fs.readFileSync('A Faire/_2D Hero Forces/js/Unit.js','utf8');
+const movement=fs.readFileSync('A Faire/_2D War Zone Commander/js/MovementSystem.js','utf8');
+const iron=fs.readFileSync('A Faire/_2D Iron Meridian/index.html','utf8');
 const c1={RTS:{Game:{}},console};vm.createContext(c1);vm.runInContext(hero,c1);
 const u=new c1.RTS.Game.Unit(0,0,'allied');u.path=[{x:5,y:0}];u.update(1);
 assert.equal(u.x,5,'Hero Forces reaches its waypoint without overshooting');
