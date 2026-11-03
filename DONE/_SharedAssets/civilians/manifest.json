@@ -1,0 +1,229 @@
+{
+  "title": "WarLike Civilian Pack",
+  "version": "1.0.0",
+  "format": "SVG",
+  "license": "Original assets for WarLike Gaming",
+  "spriteSize": [
+    128,
+    256
+  ],
+  "anchor": "bottom-center",
+  "characters": [
+    {
+      "id": "nadia",
+      "name": "Nadia",
+      "game": "Hearts of Eden",
+      "portrait": "portraits/nadia.svg",
+      "idle": "sprites/nadia_idle.svg",
+      "walk1": "sprites/nadia_walk_01.svg",
+      "walk2": "sprites/nadia_walk_02.svg"
+    },
+    {
+      "id": "clara",
+      "name": "Clara",
+      "game": "Hearts of Eden",
+      "portrait": "portraits/clara.svg",
+      "idle": "sprites/clara_idle.svg",
+      "walk1": "sprites/clara_walk_01.svg",
+      "walk2": "sprites/clara_walk_02.svg"
+    },
+    {
+      "id": "maya",
+      "name": "Maya",
+      "game": "Hearts of Eden",
+      "portrait": "portraits/maya.svg",
+      "idle": "sprites/maya_idle.svg",
+      "walk1": "sprites/maya_walk_01.svg",
+      "walk2": "sprites/maya_walk_02.svg"
+    },
+    {
+      "id": "ines",
+      "name": "Inès",
+      "game": "Hearts of Eden",
+      "portrait": "portraits/ines.svg",
+      "idle": "sprites/ines_idle.svg",
+      "walk1": "sprites/ines_walk_01.svg",
+      "walk2": "sprites/ines_walk_02.svg"
+    },
+    {
+      "id": "alya",
+      "name": "Alya",
+      "game": "After Dark",
+      "portrait": "portraits/alya.svg",
+      "idle": "sprites/alya_idle.svg",
+      "walk1": "sprites/alya_walk_01.svg",
+      "walk2": "sprites/alya_walk_02.svg"
+    },
+    {
+      "id": "nora",
+      "name": "Nora",
+      "game": "After Dark",
+      "portrait": "portraits/nora.svg",
+      "idle": "sprites/nora_idle.svg",
+      "walk1": "sprites/nora_walk_01.svg",
+      "walk2": "sprites/nora_walk_02.svg"
+    },
+    {
+      "id": "selena",
+      "name": "Selena",
+      "game": "After Dark",
+      "portrait": "portraits/selena.svg",
+      "idle": "sprites/selena_idle.svg",
+      "walk1": "sprites/selena_walk_01.svg",
+      "walk2": "sprites/selena_walk_02.svg"
+    },
+    {
+      "id": "mika",
+      "name": "Mika",
+      "game": "After Dark",
+      "portrait": "portraits/mika.svg",
+      "idle": "sprites/mika_idle.svg",
+      "walk1": "sprites/mika_walk_01.svg",
+      "walk2": "sprites/mika_walk_02.svg"
+    },
+    {
+      "id": "camille",
+      "name": "Camille",
+      "game": "Agence X",
+      "portrait": "portraits/camille.svg",
+      "idle": "sprites/camille_idle.svg",
+      "walk1": "sprites/camille_walk_01.svg",
+      "walk2": "sprites/camille_walk_02.svg"
+    },
+    {
+      "id": "alex",
+      "name": "Alex",
+      "game": "Agence X",
+      "portrait": "portraits/alex.svg",
+      "idle": "sprites/alex_idle.svg",
+      "walk1": "sprites/alex_walk_01.svg",
+      "walk2": "sprites/alex_walk_02.svg"
+    },
+    {
+      "id": "noemie",
+      "name": "Noémie",
+      "game": "Agence X",
+      "portrait": "portraits/noemie.svg",
+      "idle": "sprites/noemie_idle.svg",
+      "walk1": "sprites/noemie_walk_01.svg",
+      "walk2": "sprites/noemie_walk_02.svg"
+    },
+    {
+      "id": "sacha",
+      "name": "Sacha",
+      "game": "Agence X",
+      "portrait": "portraits/sacha.svg",
+      "idle": "sprites/sacha_idle.svg",
+      "walk1": "sprites/sacha_walk_01.svg",
+      "walk2": "sprites/sacha_walk_02.svg"
+    },
+    {
+      "id": "lou",
+      "name": "Lou",
+      "game": "Agence X",
+      "portrait": "portraits/lou.svg",
+      "idle": "sprites/lou_idle.svg",
+      "walk1": "sprites/lou_walk_01.svg",
+      "walk2": "sprites/lou_walk_02.svg"
+    },
+    {
+      "id": "morgan",
+      "name": "Morgan",
+      "game": "Agence X",
+      "portrait": "portraits/morgan.svg",
+      "idle": "sprites/morgan_idle.svg",
+      "walk1": "sprites/morgan_walk_01.svg",
+      "walk2": "sprites/morgan_walk_02.svg"
+    },
+    {
+      "id": "roxane",
+      "name": "Roxane",
+      "game": "Agence X",
+      "portrait": "portraits/roxane.svg",
+      "idle": "sprites/roxane_idle.svg",
+      "walk1": "sprites/roxane_walk_01.svg",
+      "walk2": "sprites/roxane_walk_02.svg"
+    },
+    {
+      "id": "dante",
+      "name": "Dante",
+      "game": "Agence X",
+      "portrait": "portraits/dante.svg",
+      "idle": "sprites/dante_idle.svg",
+      "walk1": "sprites/dante_walk_01.svg",
+      "walk2": "sprites/dante_walk_02.svg"
+    },
+    {
+      "id": "victor",
+      "name": "Victor",
+      "game": "The Silent Verdict",
+      "portrait": "portraits/victor.svg",
+      "idle": "sprites/victor_idle.svg",
+      "walk1": "sprites/victor_walk_01.svg",
+      "walk2": "sprites/victor_walk_02.svg"
+    },
+    {
+      "id": "elise",
+      "name": "Élise",
+      "game": "The Silent Verdict",
+      "portrait": "portraits/elise.svg",
+      "idle": "sprites/elise_idle.svg",
+      "walk1": "sprites/elise_walk_01.svg",
+      "walk2": "sprites/elise_walk_02.svg"
+    },
+    {
+      "id": "samir",
+      "name": "Samir",
+      "game": "The Silent Verdict",
+      "portrait": "portraits/samir.svg",
+      "idle": "sprites/samir_idle.svg",
+      "walk1": "sprites/samir_walk_01.svg",
+      "walk2": "sprites/samir_walk_02.svg"
+    },
+    {
+      "id": "juliette",
+      "name": "Juliette",
+      "game": "The Silent Verdict",
+      "portrait": "portraits/juliette.svg",
+      "idle": "sprites/juliette_idle.svg",
+      "walk1": "sprites/juliette_walk_01.svg",
+      "walk2": "sprites/juliette_walk_02.svg"
+    },
+    {
+      "id": "antoine",
+      "name": "Antoine",
+      "game": "The Silent Verdict",
+      "portrait": "portraits/antoine.svg",
+      "idle": "sprites/antoine_idle.svg",
+      "walk1": "sprites/antoine_walk_01.svg",
+      "walk2": "sprites/antoine_walk_02.svg"
+    },
+    {
+      "id": "adrien",
+      "name": "Adrien",
+      "game": "The Silent Verdict",
+      "portrait": "portraits/adrien.svg",
+      "idle": "sprites/adrien_idle.svg",
+      "walk1": "sprites/adrien_walk_01.svg",
+      "walk2": "sprites/adrien_walk_02.svg"
+    },
+    {
+      "id": "leon",
+      "name": "Léon",
+      "game": "The Silent Verdict",
+      "portrait": "portraits/leon.svg",
+      "idle": "sprites/leon_idle.svg",
+      "walk1": "sprites/leon_walk_01.svg",
+      "walk2": "sprites/leon_walk_02.svg"
+    },
+    {
+      "id": "mara",
+      "name": "Mara",
+      "game": "No Man's Dawn",
+      "portrait": "portraits/mara.svg",
+      "idle": "sprites/mara_idle.svg",
+      "walk1": "sprites/mara_walk_01.svg",
+      "walk2": "sprites/mara_walk_02.svg"
+    }
+  ]
+}
