@@ -53,6 +53,7 @@ function startNextWave() {
         earlyBonus > 0 ? `Appel anticipé : +${earlyBonus}$` : (wave % 5 === 0 && !isBoss ? 'Vague renforcée' : ''),
         isBoss ? '#ff6600' : '#FFD700'
     );
+    if (typeof tdEvent === 'function') tdEvent(isBoss ? 'danger' : 'info', 'Vague ' + wave + ' lancée · ' + waveState.totalInWave + ' hostiles' + (earlyBonus ? ' · bonus +' + earlyBonus + '$' : '') + '.');
     return true;
 }
 
@@ -79,6 +80,7 @@ function updateWave(dt) {
         gameState.money += bonus;
         waveState.countdown = WAVE_COUNTDOWN_MS;
         showBanner('Vague terminée', `Prime : +${bonus}$`, '#7CFC00');
+        if (typeof tdEvent === 'function') tdEvent('success', 'Vague terminée · prime +' + bonus + ' crédits.');
         return;
     }
 

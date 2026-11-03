@@ -49,6 +49,7 @@ function activateTacticalAbility(name) {
     }
     gameState.money -= def.cost;
     gameState.abilityCooldowns[name] = def.cooldown;
+    if (typeof tdEvent === 'function') tdEvent('power', def.name + ' activé · ' + def.cost + ' crédits.');
     return true;
 }
 
@@ -102,9 +103,11 @@ function setSelectedTowers(list) {
 
 function loseLives(n) {
     gameState.lives = Math.max(0, gameState.lives - n);
+    if (typeof tdEvent === 'function') tdEvent('danger', 'Base touchée : -' + n + ' PV · reste ' + gameState.lives + '.');
     gameState.shake = 250;
     if (gameState.lives <= 0 && !gameState.gameOver) {
         gameState.gameOver = true;
+        if (typeof tdEvent === 'function') tdEvent('danger', 'Base détruite · vague ' + waveState.currentWave + ' · score ' + Math.floor(gameState.score) + '.');
         if (gameState.score > gameState.highScore) {
             localStorage.setItem('tdHighScore', gameState.score);
         }
@@ -473,6 +476,7 @@ function handleCanvasClick(event) {
         if (isValidTowerPosition(gx, gy) && gameState.money >= type.cost) {
             addTower(gx, gy, gameState.selectedTowerType);
             gameState.money -= type.cost;
+            if (typeof tdEvent === 'function') tdEvent('info', type.name + ' construite · secteur ' + (gx + 1) + ':' + (gy + 1) + '.');
             // Shift garde le mode placement actif
             if (!event.shiftKey || gameState.money < type.cost) gameState.placingTower = false;
         }
