@@ -46,7 +46,7 @@ function build(){
  // The observation ports are genuinely transparent openings, not glass stuck
  // over opaque walls: construct side panels around two pressure windows.
  for(const x of [-14,14]){
-  for(const [z,len] of [[-18.3,11.4],[-1.0,14.4],[20.5,7.0]])cube(.5,4,len,x,2,z,M.wall,true);
+  for(const [z,len] of [[-17.925,12.15],[3.5,23.3],[21.425,5.15]])cube(.5,4,len,x,2,z,M.wall,true);
   for(const z of [-10,17]){
    cube(.14,2.35,3.7,x,1.93,z,M.glass);
    colliders.push({x,z,w:.5,d:3.7});
