@@ -42,7 +42,18 @@ function interact(id,x,z,label,fn){const m=marker(x,z);interactions.push({id,x,z
 function build(){
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(28,48),M.floor);floor.rotation.x=-Math.PI/2;floor.position.y=-.02;scene.add(floor);
  cube(28,.26,48,0,4.02,0,M.dark);
- for(const [x,z,w,d] of [[0,24,28,.5],[0,-24,28,.5],[-14,0,.5,48],[14,0,.5,48]])cube(w,4,d,x,2,z,M.wall,true);
+ for(const [x,z,w,d] of [[0,24,28,.5],[0,-24,28,.5]])cube(w,4,d,x,2,z,M.wall,true);
+ // The observation ports are genuinely transparent openings, not glass stuck
+ // over opaque walls: construct side panels around two pressure windows.
+ for(const x of [-14,14]){
+  for(const [z,len] of [[-18.3,11.4],[-1.0,14.4],[20.5,7.0]])cube(.5,4,len,x,2,z,M.wall,true);
+  for(const z of [-10,17]){
+   cube(.14,2.35,3.7,x,1.93,z,M.glass);
+   colliders.push({x,z,w:.5,d:3.7});
+   cube(.55,.88,3.8,x,.44,z,M.wall);
+   cube(.55,.85,3.8,x,3.54,z,M.wall);
+  }
+ }
  // Partitioned machine bays, keeping a continuous 7-metre central corridor.
  for(const x of [-4.3,4.3])for(const [z,len] of [[15,13],[-1,11],[-18,10]])cube(.36,3.65,len,x,1.85,z,M.wall,true);
  for(let z=-21;z<23;z+=4){
@@ -126,6 +137,28 @@ function build(){
  geo.setAttribute('position',new THREE.BufferAttribute(data,3));
  const points=new THREE.Points(geo,new THREE.PointsMaterial({color:0x7fc0cb,size:.052,transparent:true,opacity:.55}));
  scene.add(points);
+ // Exterior deep-ocean particulate field gives portholes visible depth.
+ const ext=new Float32Array(1600*3);
+ for(let i=0;i<1600;i++){
+  const side=i%2===0?-1:1;
+  ext[i*3]=side*(15+Math.random()*36);
+  ext[i*3+1]=Math.random()*26-7;
+  ext[i*3+2]=(Math.random()-.5)*90;
+ }
+ const extGeo=new THREE.BufferGeometry();extGeo.setAttribute('position',new THREE.BufferAttribute(ext,3));
+ const seaDust=new THREE.Points(extGeo,new THREE.PointsMaterial({color:0x5babbf,size:.085,transparent:true,opacity:.34,depthWrite:false}));
+ scene.add(seaDust);
+ // Distant bioluminescent silhouettes outside the hull.
+ for(const side of [-1,1])for(const [z,y] of [[17,2.4],[-10,1.8]]){
+  const fish=new THREE.Group(),body=new THREE.Mesh(new THREE.SphereGeometry(.42,12,9),metal(0x2d707f,.1,.8));
+  body.scale.set(1.8,.45,.38);fish.add(body);
+  const tail=new THREE.Mesh(new THREE.ConeGeometry(.4,.8,3),metal(0x2d707f,.1,.8));
+  tail.rotation.z=Math.PI/2;tail.position.x=-.8;fish.add(tail);
+  const eye=new THREE.Mesh(new THREE.SphereGeometry(.04,8,6),new THREE.MeshBasicMaterial({color:0x8de8d5}));
+  eye.position.set(.34,.12,-.1);fish.add(eye);
+  fish.position.set(side*20,y,z);fish.rotation.y=side*Math.PI/3;
+  scene.add(fish);
+ }
  waterPlane=new THREE.Mesh(new THREE.PlaneGeometry(27.6,47.6),new THREE.MeshBasicMaterial({color:0x178a9c,transparent:true,opacity:.10,depthWrite:false,side:THREE.DoubleSide}));
  waterPlane.rotation.x=-Math.PI/2;waterPlane.position.y=.04;scene.add(waterPlane);
  createCreature();
@@ -241,7 +274,8 @@ function complete(){
   [{label:'RECOMMENCER',primary:true,fn:()=>start(true)},{label:'RETOUR HUB',fn:()=>{location.href='../../index.html'}}]);
 }
 function failure(reason){
- s.deaths++;if(load()){s.health=75;s.oxygen=Math.max(60,s.oxygen);s.nerve=Math.max(45,s.nerve);s.hunterZ=-16;s.hunterX=0;
+ const incidents=s.deaths+1;
+ if(load()){s.deaths=incidents;s.health=75;s.oxygen=Math.max(60,s.oxygen);s.nerve=Math.max(45,s.nerve);s.hunterZ=-16;s.hunterX=0;
   modal('INCIDENT DE PLONGÉE','RETOUR AU DERNIER SAS',reason+' Le dernier point de contrôle a été restauré.',[{label:'REPRENDRE',primary:true,fn:()=>{updateWorld();resume();save()}}]);
  }else{modal('MISSION PERDUE','LE CHANT DU FOND',reason+' Aucun point de contrôle valide.',[{label:'NOUVELLE EXPÉDITION',primary:true,fn:()=>start(true)}])}
 }
