@@ -4,15 +4,20 @@ let particles = [];
 let explosions = [];
 let beams = [];
 let floatingTexts = [];
+let muzzleFlashes = [];
+// Visual budgets are independent of gameplay. Avoid unlimited effects during swarm waves.
+const TD_MAX_PARTICLES = 550;
 
 function resetEffects() {
     particles = [];
     explosions = [];
     beams = [];
     floatingTexts = [];
+    muzzleFlashes = [];
 }
 
 function createDeathParticles(x, y, color, count = 10) {
+    count = Math.max(0, Math.min(count, TD_MAX_PARTICLES - particles.length));
     for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
         const speed = 0.06 + Math.random() * 0.08;
@@ -29,7 +34,7 @@ function createDeathParticles(x, y, color, count = 10) {
 }
 
 function createImpactEffect(x, y, color = '#ffff66') {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < Math.min(4, Math.max(0, TD_MAX_PARTICLES - particles.length)); i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 0.03 + Math.random() * 0.05;
         particles.push({
@@ -45,14 +50,21 @@ function createImpactEffect(x, y, color = '#ffff66') {
 }
 
 function createExplosion(x, y, radius, color) {
+    if (explosions.length >= 80) explosions.shift();
     explosions.push({ x, y, radius, color, life: 350, maxLife: 350 });
 }
 
 function createBeam(x1, y1, x2, y2, color) {
+    if (beams.length >= 120) beams.shift();
     beams.push({ x1, y1, x2, y2, color, life: 140, maxLife: 140 });
 }
 
+function createMuzzleFlash(x, y, angle, color = '#ffe4a0') {
+    if (muzzleFlashes.length >= 150) muzzleFlashes.shift();
+    muzzleFlashes.push({ x, y, angle, color, life: 115, maxLife: 115 });
+}
 function addFloatingText(x, y, text, color = '#FFD700') {
+    if (floatingTexts.length >= 90) floatingTexts.shift();
     floatingTexts.push({ x, y, text, color, life: 900, maxLife: 900 });
 }
 
@@ -66,6 +78,7 @@ function updateEffects(dt) {
     });
     explosions = explosions.filter((e) => (e.life -= dt) > 0);
     beams = beams.filter((b) => (b.life -= dt) > 0);
+    muzzleFlashes = muzzleFlashes.filter((m) => (m.life -= dt) > 0);
     floatingTexts = floatingTexts.filter((t) => {
         t.y -= 0.03 * dt;
         t.life -= dt;
@@ -90,6 +103,26 @@ function drawGroundEffects(ctx) {
 }
 
 function drawAirEffects(ctx) {
+    muzzleFlashes.forEach((f) => {
+        ctx.save();
+        ctx.translate(f.x, f.y);
+        ctx.rotate(f.angle);
+        ctx.globalAlpha = Math.max(0, f.life / f.maxLife);
+        ctx.fillStyle = f.color;
+        ctx.beginPath();
+        ctx.moveTo(-2, -3);
+        ctx.lineTo(8, -5);
+        ctx.lineTo(16, 0);
+        ctx.lineTo(8, 5);
+        ctx.lineTo(-2, 3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#fff8db';
+        ctx.beginPath();
+        ctx.arc(2, 0, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    });
     beams.forEach((b) => {
         const alpha = b.life / b.maxLife;
         ctx.globalAlpha = alpha;

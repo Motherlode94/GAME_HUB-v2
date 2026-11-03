@@ -89,6 +89,9 @@ function drawProjectiles(ctx) {
 let enemyProjectiles = [];
 function updateEnemyProjectiles(dt) {
     enemyProjectiles.forEach((p) => {
+        if (!p.trail) p.trail = [];
+        p.trail.push({ x: p.x, y: p.y });
+        if (p.trail.length > 6) p.trail.shift();
         if (!towers.includes(p.target)) { p.done = true; return; }
         const dx = p.target.x - p.x, dy = p.target.y - p.y;
         const dist = Math.hypot(dx, dy), step = p.speed * dt / 1000;
@@ -96,6 +99,7 @@ function updateEnemyProjectiles(dt) {
             // Veteran defenses absorb a fraction of hostile gunfire without becoming invulnerable.
             const incomingDamage = Math.max(3, p.damage * (1 - Math.min(0.25, (p.target.level - 1) * 0.05)));
             p.target.hp = Math.max(0, p.target.hp - incomingDamage);
+            p.target.hitFlash = 170;
             createImpactEffect(p.target.x, p.target.y, p.color);
             if (p.target.hp <= 0) {
                 const i = towers.indexOf(p.target);
@@ -110,6 +114,16 @@ function updateEnemyProjectiles(dt) {
 }
 function drawEnemyProjectiles(ctx) {
     enemyProjectiles.forEach(p => {
+        if (p.trail?.length) {
+            ctx.save();
+            ctx.strokeStyle = p.color;
+            ctx.globalAlpha = .45;
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(p.trail[0].x, p.trail[0].y);
+            for (const point of p.trail) ctx.lineTo(point.x, point.y);
+            ctx.lineTo(p.x, p.y);ctx.stroke();
+            ctx.restore();
+        }
         ctx.fillStyle = p.color;
         ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
     });

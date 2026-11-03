@@ -93,6 +93,7 @@ function addTower(gridX, gridY, type = 'BASIC') {
         color: template.color,
         cooldown: 0,
         recoil: 0,
+        hitFlash: 0,
         angle: -Math.PI / 2,
         target: null,
         targeting: 'first',
@@ -144,6 +145,7 @@ function updateTowers(dt) {
     towers.forEach((tower) => {
         tower.cooldown = Math.max(0, tower.cooldown - dt);
         tower.recoil = Math.max(0, tower.recoil - dt);
+        tower.hitFlash = Math.max(0, (tower.hitFlash || 0) - dt);
         tower.target = findTarget(tower);
 
         if (tower.target) {
@@ -164,6 +166,7 @@ function fireTower(tower, target) {
     const muzzle = TOWER_SIZE / 2 + 4;
     const mx = tower.x + Math.cos(tower.angle) * muzzle;
     const my = tower.y + Math.sin(tower.angle) * muzzle;
+    if (typeof createMuzzleFlash === 'function') createMuzzleFlash(mx, my, tower.angle, tower.color);
 
     const antiBossMultiplier = target.isBoss ? (tower.type === 'ANTITANK' ? 1.65 : tower.type === 'SNIPER' ? 1.35 : 1) : 1;
     const hitDamage = tower.damage * antiBossMultiplier;
@@ -298,6 +301,14 @@ function drawTowers(ctx) {
 
     towers.forEach((tower) => {
         drawTowerBody(ctx, tower.x, tower.y, tower.type, tower.angle, tower.level, tower.recoil);
+        if (tower.hitFlash > 0) {
+            ctx.save();
+            ctx.globalAlpha = Math.min(.8, tower.hitFlash / 180);
+            ctx.strokeStyle = '#ffe6bd';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(tower.x - TOWER_SIZE / 2 - 2, tower.y - TOWER_SIZE / 2 - 2, TOWER_SIZE + 4, TOWER_SIZE + 4);
+            ctx.restore();
+        }
         if (tower.hp < tower.maxHp) {
             ctx.fillStyle = '#371717'; ctx.fillRect(tower.x - 17, tower.y - 25, 34, 4);
             ctx.fillStyle = '#65ca75'; ctx.fillRect(tower.x - 17, tower.y - 25, 34 * Math.max(0, tower.hp / tower.maxHp), 4);

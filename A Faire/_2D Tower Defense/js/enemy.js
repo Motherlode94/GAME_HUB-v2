@@ -162,7 +162,11 @@ function updateEnemies(dt) {
             if (target && enemy.fireTimer <= 0) {
                 enemy.fireTimer = shooter.fireRate;
                 enemyProjectiles.push({ x: enemy.x, y: enemy.y, target, speed: enemy.type === 'ROCKET' ? 215 : 380,
-                    damage: shooter.damage, color: enemy.type === 'ROCKET' ? '#ff9748' : '#ff5555' });
+                    damage: shooter.damage, color: enemy.type === 'ROCKET' ? '#ff9748' : '#ff5555', trail: [] });
+                if (typeof createMuzzleFlash === 'function') {
+                    const angle = Math.atan2(target.y - enemy.y, target.x - enemy.x);
+                    createMuzzleFlash(enemy.x, enemy.y, angle, enemy.type === 'ROCKET' ? '#ffb168' : '#ff8b82');
+                }
             }
         }
 
