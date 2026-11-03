@@ -195,3 +195,42 @@ body.td-focus-mode .td-build-stats{white-space:normal}
  .td-build-stats{font-size:9px;white-space:normal}
  body.td-focus-mode #td-build-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Tactical UI v3 — combat telemetry, action feedback and help. */
+.td-stat-secondary{min-width:95px}.td-stat-secondary strong{color:#baddec}
+.td-wave-actions{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:171px}
+.td-wave-actions #td-next{min-width:0}
+#td-auto-waves{border-color:#4f807c;background:#193d44;color:#aeebda;font-size:11px;min-height:33px;padding:6px}
+#td-auto-waves[aria-pressed="false"]{background:#30283a;border-color:#74647d;color:#d4c5ee}
+#td-auto-waves:hover:not(:disabled){background:#29575b}
+.td-ability{position:relative;overflow:hidden;isolation:isolate;min-height:67px;--td-cooldown-progress:0%}
+.td-ability:after{content:"";position:absolute;left:0;bottom:0;height:4px;width:var(--td-cooldown-progress);background:linear-gradient(90deg,#f7a45f,#ff5963);transition:width .1s linear;z-index:0}
+.td-ability>span{position:relative;z-index:1}
+.td-ability[data-cooling="true"]{border-color:#6a5162;background:linear-gradient(95deg,#302d3e,#1e2d3f)}
+.td-ability[data-cooling="true"] .td-ability-cost{color:#ffae93}
+.td-ability.is-active{outline:2px solid #93f9e3;outline-offset:-3px}
+.td-event-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:13px;margin-top:14px;border-top:1px solid #2f4d60;color:#d8e8fa;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+#td-events-clear{font-size:11px;background:transparent;border-color:#405774;padding:5px 8px}
+.td-combat-log{padding:0;margin:10px 0 0;list-style:none;display:flex;flex-direction:column;gap:6px;max-height:270px;overflow-y:auto;scrollbar-color:#4f7188 transparent}
+.td-combat-log li{display:flex;gap:10px;align-items:baseline;padding:8px 9px;background:#0d1f30;border-left:3px solid #518bb2;border-radius:5px;font-size:11px;color:#bed2e5;line-height:1.4}
+.td-combat-log li[data-tone="danger"]{border-left-color:#ee7c78;color:#fbd4ca}
+.td-combat-log li[data-tone="success"]{border-left-color:#75d5a5;color:#c1f4dc}
+.td-combat-log li[data-tone="power"]{border-left-color:#ddaf72;color:#ffe6b3}
+.td-combat-log time{color:#86a7bc;font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.td-guide-dialog{color:#eaf6ff;background:#112034;border:1px solid #52718a;border-radius:15px;box-shadow:0 30px 110px #000b;max-width:min(720px,94vw);width:100%;padding:24px}
+.td-guide-dialog::backdrop{background:#050c16cb}
+.td-guide-top{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:17px}
+.td-guide-top h2{font-size:26px;margin:3px 0;color:#f6f8ff}
+.td-guide-dialog button{cursor:pointer;background:#2c435b;color:#f6f8ff;border:1px solid #517491;border-radius:8px;padding:9px 13px;font-weight:750}
+.td-guide-dialog button:hover{background:#365d7b}
+.td-guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.td-guide-grid section{background:#182e45;border:1px solid #315774;border-radius:10px;padding:13px}
+.td-guide-grid strong{font-size:14px;color:#9cdeeb}
+.td-guide-grid p{font-size:12px;line-height:1.7;color:#c6d9ea;margin:7px 0 0}
+.td-guide-dialog kbd{border:1px solid #658ba8;border-radius:4px;background:#233e56;font-size:11px;padding:2px 5px}
+.td-guide-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:17px;font-size:11px;color:#a4bbcd}
+.td-guide-dialog .td-primary{background:#ad7038;color:#1d1310;border-color:#ffd1a0}
+.td-guide-dialog .td-primary:hover{background:#efad64}
+@media(max-width:950px){.td-stat-secondary{display:none}.td-wave-actions{flex-direction:row;min-width:100%;width:100%}.td-wave-actions>*{flex:1}}
+@media(max-width:560px){.td-guide-grid{grid-template-columns:1fr}.td-guide-dialog{padding:14px}.td-guide-bottom{flex-direction:column;align-items:stretch}#td-guide-done{width:100%}.td-wave-actions{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.td-ability:after{transition:none}}

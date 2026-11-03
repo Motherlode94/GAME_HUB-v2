@@ -21,15 +21,17 @@
   <div class="td-stat life"><span>Base · PV</span><strong id="td-lives">20</strong><div class="td-base-track" role="progressbar" aria-label="Résistance de la base" aria-valuemin="0" aria-valuemax="20" aria-valuenow="20" id="td-base-track"><i id="td-base-fill"></i></div></div>
   <div class="td-stat"><span>Vague</span><strong id="td-wave-number">—</strong></div>
   <div class="td-stat"><span>Score</span><strong id="td-score">0</strong></div>
+  <div class="td-stat td-stat-secondary"><span>Éliminations</span><strong id="td-kills">0</strong></div>
+  <div class="td-stat td-stat-secondary"><span>Record</span><strong id="td-record">0</strong></div>
  </div>
- <div class="td-head-actions"><button id="td-pause" type="button" title="Raccourci P">Ⅱ Pause</button><button id="td-speed" type="button" title="Raccourci V">×1 Vitesse</button><button id="td-restart" type="button" hidden>↻ Recommencer</button></div>
+ <div class="td-head-actions"><button id="td-pause" type="button" title="Raccourci P">Ⅱ Pause</button><button id="td-speed" type="button" title="Raccourci V">×1 Vitesse</button><button id="td-restart" type="button" hidden>↻ Recommencer</button><button id="td-guide-open" type="button" title="Aide et règles du jeu" aria-haspopup="dialog">? Aide</button></div>
 </header>
 <div class="td-layout">
  <main class="td-main">
   <section class="td-panel td-wavebar" aria-label="Commandement des vagues">
    <div class="td-wave-label"><span class="td-eyebrow">Situation</span><span id="td-wave-status">Prêt au déploiement</span></div>
    <div class="td-wave-meter"><div class="td-meter" aria-hidden="true"><i id="td-wave-fill"></i></div><div id="td-wave-meta" class="td-wave-meta">0 menaces · 0 défenses</div></div>
-   <button id="td-next" type="button" class="td-primary" title="Raccourci Espace"><span id="td-next-label">Lancer la vague 1</span></button>
+   <div class="td-wave-actions"><button id="td-next" type="button" class="td-primary" title="Raccourci Espace"><span id="td-next-label">Lancer la vague 1</span></button><button id="td-auto-waves" type="button" aria-pressed="true" title="Activer ou désactiver le lancement automatique des vagues">⟳ Auto : ON</button></div>
   </section>
   <div class="td-tactical-toolbar td-panel" aria-label="Options de visualisation de la bataille">
     <div class="td-toolbar-actions">
@@ -99,6 +101,8 @@
    <small class="td-mini-tip">Clique sur la mini-carte pour recentrer le terrain sur mobile.</small>
    <div class="td-detail-sub" id="td-intel-title">Prochaine vague</div>
    <div id="td-intel-list" class="td-intel-list" aria-label="Composition de la prochaine vague"></div>
+   <div class="td-event-heading"><span>Journal des opérations</span><button type="button" id="td-events-clear" title="Vider le journal de combat">Effacer</button></div>
+   <ol id="td-combat-log" class="td-combat-log" aria-label="Événements récents du combat"></ol>
   </section>
   <section class="td-panel" data-td-pane="settings">
    <h2 class="td-rail-title">Doctrine & automatisation</h2>
@@ -115,6 +119,16 @@
  </aside>
 </div>
 </div>
+<dialog id="td-guide" class="td-guide-dialog" aria-labelledby="td-guide-title">
+ <div class="td-guide-top"><div><p class="td-eyebrow">Guide rapide / WarLike Gaming</p><h2 id="td-guide-title">Défends la base</h2></div><button type="button" id="td-guide-close" aria-label="Fermer l’aide">✕</button></div>
+ <div class="td-guide-grid">
+  <section><strong>1. Construire</strong><p>Choisis une défense dans l’arsenal, puis clique sur une case libre. Maintiens <kbd>Maj</kbd> pendant le placement pour en poser plusieurs.</p></section>
+  <section><strong>2. Résister</strong><p>Déclenche la vague avec <kbd>Espace</kbd>. Passe en mode manuel pour choisir quand lancer les renforts.</p></section>
+  <section><strong>3. Améliorer</strong><p>Clique sur une tour pour examiner sa portée, changer ses priorités, l’améliorer ou la vendre.</p></section>
+  <section><strong>4. Capacités</strong><p>Utilise <kbd>Z</kbd> Barrage, <kbd>X</kbd> EMP et <kbd>C</kbd> Réparation. Les capacités coûtent des crédits et nécessitent un rechargement.</p></section>
+ </div>
+ <div class="td-guide-bottom"><span>Commandes : <kbd>P</kbd> pause · <kbd>V</kbd> vitesse · <kbd>Q</kbd> portée · <kbd>I</kbd> menaces</span><button id="td-guide-done" type="button" class="td-primary">Compris, jouer</button></div>
+</dialog>
 <script src="../../js/config.js"></script>
 <script src="../../js/data.js"></script>
 <script src="../../js/storage.js"></script>
