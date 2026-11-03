@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08111b">
+    <link rel="stylesheet" href="../../A Faire/_shared/game-embed.css">
+    <title>FreeForce 2D</title>
+    <link rel="stylesheet" href="css/styles.css">
+
+</head>
+<body>
+<a class="hub-back-btn" href="../../index.html">&larr; HUB</a>
+
+<!-- ══ CANVAS JEU ══ -->
+<div id="canvas-wrap">
+    <canvas id="gameCanvas"></canvas>
+</div>
+
+<!-- ══ MENU PRINCIPAL ══ -->
+<div id="menu-overlay" class="screen active">
+    <div class="menu-panel">
+        <div class="menu-logo">
+            <div class="logo-title">FREEFORCE</div>
+            <div class="logo-sub">2D</div>
+        </div>
+        <nav class="menu-items" id="main-nav">
+            <button class="menu-btn active" data-action="play" type="button">
+                <span class="btn-icon">▶</span> JOUER
+            </button>
+            <button class="menu-btn" data-action="scores" type="button">
+                <span class="btn-icon">★</span> MEILLEURS SCORES
+            </button>
+            <button class="menu-btn" data-action="options" type="button">
+                <span class="btn-icon">⚙</span> OPTIONS
+            </button>
+            <button class="menu-btn" data-action="controls" type="button">
+                <span class="btn-icon">◎</span> CONTRÔLES / AIDE
+            </button>
+        </nav>
+        <div class="menu-footer">↑↓ NAVIGUER &nbsp;|&nbsp; ENTRÉE / CLIC CONFIRMER</div>
+    </div>
+</div>
+
+<!-- ══ SOUS-ÉCRAN : SCORES ══ -->
+<div id="screen-scores" class="screen">
+    <div class="menu-panel wide">
+        <h2 class="screen-title">★ MEILLEURS SCORES</h2>
+        <div class="scores-list" id="scores-list"></div>
+        <button class="back-btn" data-back="menu" type="button">◄ RETOUR</button>
+    </div>
+</div>
+
+<!-- ══ SOUS-ÉCRAN : OPTIONS ══ -->
+<div id="screen-options" class="screen">
+    <div class="menu-panel">
+        <h2 class="screen-title">⚙ OPTIONS</h2>
+
+        <div class="option-block">
+            <div class="option-row">
+                <span class="opt-label">DIFFICULTÉ</span>
+                <div class="opt-control">
+                    <button class="arrow-btn" id="diff-left" type="button">◄</button>
+                    <span class="opt-value" id="diff-value">NORMAL</span>
+                    <button class="arrow-btn" id="diff-right" type="button">►</button>
+                </div>
+            </div>
+            <p class="opt-desc" id="diff-desc">Expérience équilibrée</p>
+            <div class="diff-dots" id="diff-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+
+        <div class="option-block">
+            <div class="option-row">
+                <span class="opt-label">VOLUME MUSIQUE</span>
+                <div class="opt-control">
+                    <button class="arrow-btn" id="vol-left" type="button">◄</button>
+                    <span class="opt-value bar" id="vol-value"></span>
+                    <button class="arrow-btn" id="vol-right" type="button">►</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="option-block">
+            <div class="option-row">
+                <span class="opt-label">EFFETS SONORES</span>
+                <div class="opt-control">
+                    <button class="arrow-btn" id="sfx-left" type="button">◄</button>
+                    <span class="opt-value bar" id="sfx-value"></span>
+                    <button class="arrow-btn" id="sfx-right" type="button">►</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="back-btn" data-back="menu" type="button">◄ RETOUR</button>
+    </div>
+</div>
+
+<!-- ══ SOUS-ÉCRAN : CONTRÔLES ══ -->
+<div id="screen-controls" class="screen">
+    <div class="menu-panel wide">
+        <h2 class="screen-title">◎ CONTRÔLES / AIDE</h2>
+        <div class="controls-grid">
+            <div class="ctrl-row"><span class="ctrl-keys"><kbd>A</kbd><kbd>D</kbd></span><span class="ctrl-desc">Se déplacer gauche / droite</span></div>
+            <div class="ctrl-row"><span class="ctrl-keys"><kbd>ESPACE</kbd></span><span class="ctrl-desc">Sauter — double saut possible</span></div>
+            <div class="ctrl-row"><span class="ctrl-keys"><kbd>F</kbd></span><span class="ctrl-desc">Tirer avec l'arme active</span></div>
+            <div class="ctrl-row"><span class="ctrl-keys"><kbd>SHIFT</kbd></span><span class="ctrl-desc">Dash (esquive rapide)</span></div>
+            <div class="ctrl-row"><span class="ctrl-keys"><kbd>W</kbd><kbd>↑</kbd></span><span class="ctrl-desc">Sauter (alternative)</span></div>
+            <div class="ctrl-row"><span class="ctrl-keys"><kbd>CTRL</kbd></span><span class="ctrl-desc">Tirer (alternative)</span></div>
+        </div>
+        <div class="weapons-info">
+            <p class="wi-title">ARMES RAMASSABLES EN JEU</p>
+            <div class="weapons-row">
+                <div class="wpn wpn-pistol"><span>◎</span>PISTOL<small>60 balles · rapide</small></div>
+                <div class="wpn wpn-shotgun"><span>✦</span>SHOTGUN<small>24 balles · éventail ×5</small></div>
+                <div class="wpn wpn-rocket"><span>⬆</span>ROCKET<small>10 roquettes · AoE</small></div>
+                <div class="wpn wpn-laser"><span>⚡</span>LASER<small>20 tirs · rapide ×2</small></div>
+            </div>
+        </div>
+        <button class="back-btn" data-back="menu" type="button">◄ RETOUR</button>
+    </div>
+</div>
+
+<!-- ══ GAME OVER OVERLAY ══ -->
+<div id="gameover-overlay" class="screen">
+    <div class="gameover-panel">
+        <div class="go-title">BRO DOWN!</div>
+        <div class="go-score" id="go-score">SCORE : 0</div>
+        <div class="go-best"  id="go-best"></div>
+        <button class="menu-btn" id="go-restart" type="button">▶ REJOUER</button>
+        <button class="menu-btn secondary" id="go-menu" type="button">⌂ MENU</button>
+    </div>
+</div>
+
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+
+<script src="js/menu.js"></script>
+
+</body>
+</html>
+
+

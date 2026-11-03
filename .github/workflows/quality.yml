@@ -27,6 +27,8 @@ jobs:
           assert not broken,f'Empty game pages: {broken[:20]}'
           print(f'Validated {len(games)} non-empty game entrypoints')
           PY
+      - name: Verify portal classification and folders
+        run: node scripts/check-game-classification.cjs
       - name: Check DONE game scripts, assets and catalog
         run: node scripts/qa-done.cjs
       - name: Horror games and asset integrity

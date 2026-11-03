@@ -49,6 +49,14 @@
                 <button class="chip" data-cat="adventure" type="button">Aventure</button>
                 <button class="chip" data-cat="favorites" type="button">&#10084; Favoris</button>
             </div>
+            <div class="stage-filters" role="group" aria-label="Filtrer par état d'avancement">
+                <span class="stage-filters-label">CLASSEMENT</span>
+                <button class="stage-filter active" data-stage="all" aria-pressed="true" type="button">Tous <span id="stage-count-all">56</span></button>
+                <button class="stage-filter" data-stage="done" aria-pressed="false" type="button">DONE <span id="stage-count-done">28</span></button>
+                <button class="stage-filter" data-stage="todo" aria-pressed="false" type="button">À faire <span id="stage-count-todo">23</span></button>
+                <button class="stage-filter" data-stage="review" aria-pressed="false" type="button">À revoir <span id="stage-count-review">5</span></button>
+                <small class="stage-disclaimer">DONE = classement historique, pas une certification QA.</small>
+            </div>
         </div>
     </section>
 

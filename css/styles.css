@@ -1367,3 +1367,16 @@ footer {
 @media(prefers-reduced-motion:reduce){.game-card,.hub-discover-actions button,.recent-links button{animation:none!important;transition:none!important}}
 
 /* Civilian Pack showcase */.hub-civilians{display:grid;grid-template-columns:minmax(0,1fr) 43%;gap:18px;align-items:center;margin:18px 0 24px;padding:18px 22px;border-radius:16px;border:1px solid #54728d;background:linear-gradient(105deg,#162a42,#12213a 60%,#243b59);overflow:hidden;min-height:205px}.hub-civilians h2{font-size:clamp(18px,2.2vw,26px);margin:4px 0;color:#f0f7ff}.hub-civilians .eyebrow{font-size:11px;letter-spacing:.12em;color:#89dfff;font-weight:800}.hub-civilians p{color:#b8d0e1;line-height:1.5}.hub-civilians-link{display:inline-block;border-radius:9px;padding:11px 15px;background:linear-gradient(120deg,#2e7a9f,#1b507d);border:1px solid #75c2e6;color:white;text-decoration:none;font-weight:750}.hub-civilians-link:hover{background:#3b96c4}.hub-civilians-art{display:flex;align-items:end;justify-content:space-between;gap:4px;min-height:185px}.hub-civilians-art img{display:block;width:24%;height:205px;object-fit:contain;object-position:bottom;filter:drop-shadow(0 10px 12px #0007)}@media(max-width:720px){.hub-civilians{grid-template-columns:1fr;padding:15px}.hub-civilians-art{min-height:115px;max-height:130px}.hub-civilians-art img{height:128px}}
+/* Portal stage filters — reflects repository folders, not a QA certificate */
+.stage-filters{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 12px;background:rgba(10,25,39,.72);border:1px solid rgba(122,164,185,.35);border-radius:12px}
+.stage-filters-label{font-size:11px;font-weight:800;letter-spacing:.13em;color:#afc5d7;margin-right:5px}
+.stage-filter{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(154,180,197,.3);background:#172b3c;color:#c7d8e5;border-radius:9px;padding:8px 12px;cursor:pointer;font-size:12px;font-weight:700}
+.stage-filter:hover{background:#264354;border-color:#78b6ce}
+.stage-filter.active{background:#234d5a;border-color:#8bd9da;color:#fff;box-shadow:inset 0 0 0 1px #62a4b51c}
+.stage-filter span{font-variant-numeric:tabular-nums;color:#e4f1f5;font-size:11px;background:#091b29;border-radius:6px;min-width:25px;padding:2px 5px}
+.stage-disclaimer{font-size:10px;color:#9cb5c4;margin-left:auto;line-height:1.5}
+.card-stage{font-size:10px;line-height:1.25;font-weight:700;color:#cbdde4;border:1px solid #526777;border-radius:6px;padding:4px 6px;text-align:center;max-width:60%}
+.card-stage--done{color:#c2ecdf;border-color:#467f78;background:#1e50462e}
+.card-stage--todo{color:#e5d3ac;border-color:#817451;background:#77603726}
+.card-stage--review{color:#e4b7ba;border-color:#885b65;background:#9a576222}
+@media(max-width:650px){.stage-filters{gap:6px;padding:9px}.stage-filter{font-size:11px;padding:7px 9px}.stage-disclaimer{flex-basis:100%;margin-left:0}.card-stage{font-size:9px}}

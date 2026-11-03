@@ -56,6 +56,20 @@ function debounce(fn, delay = 300) {
 
 // ── State ──────────────────────────────────────────────────────────────────
 let activeCategory = 'all';
+let activeStage = 'all';
+function gameStage(game) {
+    const url = String(game.playUrl || '');
+    return url.startsWith('DONE/') ? 'done' : url.startsWith('A Revoir/') ? 'review' : 'todo';
+}
+const STAGE_LABELS = {done:'DONE · historique',todo:'À faire',review:'À revoir'};
+function countStages() {
+    const counts = {all:GAMES.length,done:0,todo:0,review:0};
+    for (const game of GAMES) counts[gameStage(game)]++;
+    for (const [key, count] of Object.entries(counts)) {
+        const el = document.getElementById('stage-count-' + key);
+        if (el) el.textContent = String(count);
+    }
+}
 let searchQuery    = '';
 let sortMode       = 'default';
 let currentGameId  = null;
@@ -94,6 +108,7 @@ const searchInput = document.getElementById('search-input');
 const clearBtn    = document.getElementById('clear-search');
 const sortSelect  = document.getElementById('sort-select');
 const chips       = document.querySelectorAll('.chip');
+const stageButtons = document.querySelectorAll('[data-stage]');
 const modalOverlay = document.getElementById('modal-overlay');
 const modalClose   = document.getElementById('modal-close');
 const postgamePanel = document.getElementById('postgame-panel');
@@ -144,6 +159,7 @@ function getFiltered() {
     } else if (activeCategory !== 'all') {
         list = list.filter(g => g.category === activeCategory);
     }
+    if (activeStage !== 'all') list = list.filter(game => gameStage(game) === activeStage);
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
         list = list.filter(g =>
@@ -163,6 +179,7 @@ function getFiltered() {
 function renderGrid() {
     const filtered = getFiltered();
     gameCount.textContent = GAMES.length;
+    countStages();
 
     if (filtered.length === 0) {
         grid.innerHTML = '';
@@ -181,6 +198,7 @@ function renderGrid() {
             <div class="card-content">
                 <div class="card-header">
                     <span class="card-category">${game.category}</span>
+                    <span class="card-stage card-stage--${gameStage(game)}" title="Statut du dossier ; ne garantit pas une validation QA complète">${STAGE_LABELS[gameStage(game)]}</span>
                 </div>
                 <h3>${escapeHtml(game.title)}</h3>
     
@@ -221,6 +239,7 @@ function openModal(id) {
     document.getElementById('modal-desc').textContent = '';
     document.getElementById('modal-meta').innerHTML = `
         <span>🎮 ${capitalize(game.category)}</span>
+        <span>📁 ${STAGE_LABELS[gameStage(game)]}</span>
     `;
     document.getElementById('modal-tags').innerHTML =
         game.tags.filter(Boolean).map(t => `<span class="modal-tag">${escapeHtml(t)}</span>`).join('');
@@ -464,6 +483,15 @@ chips.forEach(chip => {
         renderGrid();
     });
 });
+stageButtons.forEach(button => button.addEventListener('click', () => {
+    stageButtons.forEach(other => {
+        const selected = other === button;
+        other.classList.toggle('active', selected);
+        other.setAttribute('aria-pressed', String(selected));
+    });
+    activeStage = button.dataset.stage;
+    renderGrid();
+}));
 modalClose.addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
 document.addEventListener('keydown', e => {

@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08111b">
+    <link rel="stylesheet" href="../../A Faire/_shared/game-embed.css">
+<title>Broken Array</title>
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<a class="hub-back-btn" href="../../index.html">&larr; HUB</a>
+
+<button id="controlsToggle" onclick="
+  var c = document.getElementById('controls');
+  c.classList.toggle('open');
+  this.textContent = c.classList.contains('open') ? '▲ Contrôles' : '? Contrôles';
+">? Contrôles</button>
+
+<div id="controls">
+  <div>PC: LMB - Select / Drag</div>
+  <div>PC: RMB - Move units</div>
+  <div>PC: MMB - Pan camera</div>
+  <div>PC: Wheel - Zoom</div>
+  <div>Mobile: 1 finger - Select / Drag</div>
+  <div>Mobile: 2 fingers - Pan + Zoom</div>
+  <div>Mobile: Tap ground - Move selected</div>
+  <div>WASD / A / Esc - Quick commands</div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="mainMenuOverlay">
+  <div class="menu-card">
+    <div class="menu-logo">Tactical RTS</div>
+    <div class="menu-title">Broken Array</div>
+    <div class="menu-subtitle">Defend · Build · Survive</div>
+    <button class="menu-btn play" id="menuPlayBtn">▶ &nbsp; Jouer</button>
+    <hr class="menu-sep">
+    <button class="menu-btn" id="menuCreditsBtn">Crédits</button>
+    <div class="menu-version">Version 2.0 · Alpha</div>
+  </div>
+</div>
+
+<div id="creditsModal">
+  <div class="modal-card">
+    <h3>Crédits</h3>
+    <p>Broken Array<br>Jeu de stratégie tactique<br><br>
+      Développé avec HARDI VICTOR MBANVU<br>
+      Inspiré de Broken Arrow (Steel Balalaika)<br><br>
+      Toutes les unités, doctrines et mécaniques<br>sont fictives à des fins de jeu.</p>
+    <button class="close-btn" id="creditsCloseBtn">Fermer</button>
+  </div>
+</div>
+
+<div id="hud">
+  <div id="topbar">
+    <div class="stat">
+      <div class="stat-dot" style="background:#3d8ef5"></div>
+      <span class="stat-label">Alliés</span>
+      <span class="stat-value" id="blueCount">0</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <span class="stat-label">Vague</span>
+      <span class="stat-value" id="waveNum">—</span>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-dot" style="background:#e74c3c"></div>
+      <span class="stat-label">Ennemis</span>
+      <span class="stat-value" id="redCount">0</span>
+    </div>
+  </div>
+
+  <div id="resources">
+    <div class="res"><span class="res-lbl" style="color:#f5a623">OR</span><span class="res-val" id="resGold">—</span></div>
+    <div class="divider"></div>
+    <div class="res"><span class="res-lbl" style="color:#27ae60">CARB</span><span class="res-val" id="resFuel">—</span></div>
+    <div class="divider"></div>
+    <div class="res"><span class="res-lbl" style="color:#e74c3c">MUN</span><span class="res-val" id="resAmmo">—</span></div>
+  </div>
+
+  <div id="buildPanel">
+    <h3>Construire</h3>
+    <div class="build-section">
+      <div class="build-section-label">Base</div>
+      <button class="build-btn" id="btn_build_barracks">⚔ Caserne<span>120G</span></button>
+      <button class="build-btn" id="btn_build_workshop">🔧 Atelier<span>180G 60F</span></button>
+      <button class="build-btn" id="btn_build_hangar">🚁 Hangar<span>250G 100F</span></button>
+    </div>
+    <div class="build-section">
+      <div class="build-section-label">Économie</div>
+      <button class="build-btn" id="btn_build_mine">⛏ Mine<span>100G</span></button>
+      <button class="build-btn" id="btn_build_refinery">⚗ Raffinerie<span>140G</span></button>
+      <button class="build-btn" id="btn_build_arsenal">🔴 Arsenal<span>120G</span></button>
+    </div>
+    <div class="build-section">
+      <div class="build-section-label">Défense</div>
+      <button class="build-btn" id="btn_build_tower">🗼 Tour<span>80G 40A</span></button>
+      <button class="build-btn" id="btn_build_hospital">➕ Hôpital<span>140G 20F</span></button>
+      <button class="build-btn" id="btn_build_wall">█ Mur<span>40G</span></button>
+    </div>
+  </div>
+
+  <div id="prodPanel" class="hidden">
+    <h3 id="prodTitle">Production</h3>
+    <div id="prodQueue">File vide</div>
+    <div id="prodBtns"></div>
+  </div>
+
+  <div id="selPanel" class="hidden">
+    <h3>Sélection</h3>
+    <div id="selInfo"></div>
+  </div>
+
+  <div id="minimapWrap">
+    <div id="minimapLabel">Broken Array</div>
+    <canvas id="minimap" width="150" height="150"></canvas>
+  </div>
+
+  <div id="placingHint"></div>
+  <div id="buildError"></div>
+  <div id="waveNotif"></div>
+  <div id="allyNotif" style="opacity:0"></div>
+
+  <div id="banner">
+    <h2 id="bannerTitle">Victoire</h2>
+    <p id="bannerSub">La bataille est terminée</p>
+    <div class="banner-btns">
+      <button class="banner-btn" id="restartBtn">Recommencer</button>
+      <button class="banner-btn primary" id="nextLevelBtn" style="display:none">Niveau suivant →</button>
+    </div>
+  </div>
+</div>
+
+<div id="dragBox"></div>
+
+<script src="js/InputState.js"></script>
+<script src="js/Game.js"></script>
+<script src="js/GameLoop.js"></script>
+<script src="js/Camera.js"></script>
+<script src="js/Building.js"></script>
+<script src="js/SquadDefs.js"></script>
+<script src="js/Squad.js"></script>
+<script src="js/ResourceNode.js"></script>
+<script src="js/ResourceSystem.js"></script>
+<script src="js/BuildingSystem.js"></script>
+<script src="js/ProductionSystem.js"></script>
+<script src="js/SquadSystem.js"></script>
+<script src="js/SquadCombatSystem.js"></script>
+<script src="js/SquadAISystem.js"></script>
+<script src="js/FogOfWar.js"></script>
+<script src="js/WorkerSystem.js"></script>
+<script src="js/TransportSystem.js"></script>
+<script src="js/AirMissionSystem.js"></script>
+<script src="js/WaveSystem.js"></script>
+<script src="js/ConquestSystem.js"></script>
+<script src="js/DeploymentSystem.js"></script>
+<script src="js/ArmyBuilder.js"></script>
+<script src="js/TacticalRules.js"></script>
+<script src="js/CombatTactics.js"></script>
+<script src="js/LogisticsSystem.js"></script>
+<script src="js/ParticleSystem.js"></script>
+<script src="js/ProjectileSystem.js"></script>
+<script src="js/DefenseTower.js"></script>
+<script src="js/MissionSystem.js"></script>
+<script src="js/EventSystem.js"></script>
+<script src="js/BuildingRenderer.js"></script>
+<script src="/_shared/rts/library.js"></script>
+<script src="js/SpriteAtlas.js"></script>
+<script src="../../_shared/rts/art-sprites.js"></script>
+<script src="js/SquadRenderer.js"></script>
+<script src="js/MinimapRenderer.js"></script>
+<script src="js/Renderer.js"></script>
+<script src="js/InputManager.js"></script>
+<script src="js/AllySystem.js"></script>
+<script src="js/CheatMenu.js"></script>
+<script src="js/MainMenu.js"></script>
+<script src="js/main.js"></script>
+<script>
+  document.getElementById("creditsCloseBtn").onclick = function() {
+    document.getElementById("creditsModal").style.display = "none";
+  };
+</script>
+</body>
+</html>
+
+
