@@ -37,7 +37,7 @@ assert.equal(site.team,'blue','uncontested capture');
 blue.x=400;blue.y=400;red.x=100;red.y=100;
 for(let i=0;i<11;i++)ctx.RTS.BuildingSystem.update(game,1);
 assert.equal(site.team,'red','enemy can recapture');
-blue.x=100;site.team='neutral';site.captureProgress=0;
+blue.x=100;blue.y=100;site.team='neutral';site.captureProgress=0;
 ctx.RTS.BuildingSystem.update(game,2);
 assert.equal(site.captureProgress,0,'contested capture must not progress');
 console.log('PASS: syntax, building activation, independent capture / recapture, contested capture, transport and injury wiring');
