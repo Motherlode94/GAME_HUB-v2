@@ -1,0 +1,17 @@
+/* Shared, non-destructive civilian portraits. */
+.civilian-pack-link{display:inline-block;margin:10px 0;padding:8px 12px;border:1px solid #579ac5;border-radius:8px;background:#132d44;color:#a4e6ff;text-decoration:none;font:600 12px system-ui!important;position:relative;z-index:4}.civilian-pack-link:hover{background:#255274;color:white}
+.civilian-portrait{width:96px;height:125px;object-fit:contain;object-position:center top;filter:drop-shadow(0 5px 13px #0006);background:linear-gradient(140deg,#32496077,#17283a88);border:1px solid #4e6e8266;border-radius:9px;padding:4px}
+.civilian-character-card{float:right;width:88px;height:116px;margin:0 0 8px 12px}
+#characters article{min-height:245px;overflow:hidden}
+#talents .entry{min-height:132px;overflow:auto}
+#portrait.has-civilian>div{display:none!important}
+#portrait .civilian-character{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;filter:drop-shadow(0 18px 32px #0008)}
+.stage .civilian-stage-figure{position:absolute;bottom:0;left:50%;transform:translateX(-50%);height:92%;max-width:45%;object-fit:contain;filter:drop-shadow(0 8px 18px #0008);pointer-events:none}
+.civilian-suspect{float:right;width:120px;height:145px;object-fit:contain;background:#223549;border-radius:10px;margin:0 0 12px 14px;border:1px solid #4d667f}
+.civilian-npc-tag{display:flex;align-items:center;gap:9px;margin-top:11px;background:#17283bc9;border:1px solid #47617b;border-radius:8px;padding:7px;max-width:245px;font:600 12px system-ui;color:#e3eefb}
+.civilian-npc-tag img{width:56px;height:70px;object-fit:contain;flex:none}
+.civilian-npc-strip{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin-top:13px;padding:8px;border:1px solid #455a6d;background:#13213788;border-radius:11px}
+.civilian-npc-strip p{flex:1 0 100%;font:600 11px system-ui;letter-spacing:.08em;color:#a8c8db;margin:0}
+.civilian-npc-strip img{width:53px;height:69px;object-fit:contain;background:#2c3c4c;border-radius:7px;padding:2px}
+#screen .civilian-npc-strip{max-width:340px;margin:12px auto 0}
+@media(max-width:700px){.civilian-portrait{width:77px;height:103px}.civilian-character-card{width:70px;height:93px}.civilian-suspect{width:86px;height:111px}.civilian-npc-strip img{width:42px;height:56px}.civilian-pack-link{font-size:11px!important}}
