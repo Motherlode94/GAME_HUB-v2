@@ -52,6 +52,16 @@
 <div class="overlay open" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 <div class="modal"><div class="modal-kicker" id="modalKicker">ARCHIVES / DOSSIER H-09</div><h1 id="modalTitle">NÉRÉIDE<span>LE CHANT DU FOND</span></h1><p id="modalText">La station Néréide a cessé d’émettre. À 2 800 mètres de profondeur, les portes s’ouvrent de l’intérieur. Rétablis l’alimentation, stabilise l’inondation, déchiffre le code de transmission et rejoins la capsule d’évacuation. Ne cours pas lorsque tu entends le chant.</p><div id="modalExtra"></div><div class="modalActions" id="modalActions"><button id="startBtn" class="primary" type="button">NOUVELLE EXPÉDITION</button><button id="continueBtn" type="button">REPRENDRE LA SAUVEGARDE</button></div><small id="modalFoot">Survie · poursuite · quatre objectifs · preuves et conséquences · vue subjective 3D</small></div>
 </div>
-<script type="module" src="game.js"></script>
+<script id="nereide-module" type="module" src="game.js"></script>
+<script>
+document.getElementById('nereide-module').addEventListener('error', () => {
+  const subtitle=document.getElementById('subtitle');
+  const overlay=document.getElementById('overlay');
+  const text=document.getElementById('modalText');
+  if(subtitle)subtitle.textContent='Impossible de charger WebGL/Three.js. Vérifiez la connexion et la compatibilité graphique.';
+  if(text)text.textContent='Le moteur 3D n’a pas pu démarrer. Vérifiez la connexion au module Three.js et activez l’accélération graphique du navigateur.';
+  if(overlay)overlay.classList.add('open');
+});
+</script>
 </body>
 </html>
