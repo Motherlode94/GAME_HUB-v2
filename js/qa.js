@@ -1,6 +1,8 @@
 (() => {
 'use strict';
 const games = (window.WGC_DATA && window.WGC_DATA.GAMES || []).filter(g => g && g.playUrl);
+const folderStage = g => (g.playUrl||'').startsWith('DONE/') ? 'DONE · historique'
+    : (g.playUrl||'').startsWith('A Revoir/') ? 'À revoir' : 'À faire';
 const CHECKS = [
   'Démarrage sans erreur bloquante',
   'Menus, boutons et navigation utilisables',
@@ -33,7 +35,13 @@ function renderOverview() {
   const valid=games.filter(g=>count(g)===10).length;
   const progress=games.filter(g=>count(g)>0&&count(g)<10).length;
   $('overview').replaceChildren();
-  [[games.length,'Jeux au catalogue'],[valid,'Validés manuellement'],[progress,'En cours'],[games.length-valid-progress,'Non testés']].forEach(([n,l])=>{
+  const stages = [
+    [games.filter(g => folderStage(g).startsWith('DONE')).length,'DONE · historique'],
+    [games.filter(g => folderStage(g) === 'À faire').length,'À faire'],
+    [games.filter(g => folderStage(g) === 'À revoir').length,'À revoir']
+  ];
+  [[games.length,'Jeux au catalogue'],[valid,'Validés manuellement'],[progress,'En cours'],
+   [games.length-valid-progress,'Non testés'], ...stages].forEach(([n,l])=>{
     const el=document.createElement('div');el.className='metric';
     const strong=document.createElement('strong');strong.textContent=n;
     const span=document.createElement('span');span.textContent=l;el.append(strong,span);$('overview').append(el);
@@ -46,7 +54,7 @@ function renderGames() {
     const btn=document.createElement('button');btn.type='button';
     if (selected && selected.id===g.id) btn.className='active';
     btn.textContent=g.title;
-    const info=document.createElement('small');info.textContent=count(g)+'/10 • '+status(g);
+    const info=document.createElement('small');info.textContent=folderStage(g)+' · QA '+count(g)+'/10 • '+status(g);
     btn.append(info);btn.addEventListener('click',()=>{selected=g;renderGames();renderDetail();});
     $('games').append(btn);
   });
@@ -57,7 +65,7 @@ function renderDetail() {
   const g=selected,e=entry(g),header=document.createElement('h2');
   header.textContent=g.title;root.append(header);
   const progress=document.createElement('p');
-  progress.textContent='Statut : '+status(g)+' — '+count(g)+'/10 contrôles cochés';root.append(progress);
+  progress.textContent='Dossier : '+folderStage(g)+' · QA : '+status(g)+' — '+count(g)+'/10 contrôles cochés';root.append(progress);
   const link=document.createElement('a');link.href=g.playUrl;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Ouvrir le jeu pour le tester ↗';root.append(link);
   const list=document.createElement('div');list.className='checks';
   CHECKS.forEach((name,i)=>{
@@ -83,7 +91,7 @@ function renderDetail() {
 $('search').addEventListener('input',renderGames);
 $('export').addEventListener('click',()=>{
   const payload={schema:'warlike-qa-v1',generatedAt:new Date().toISOString(),verification:'manual-only',
-    games:games.map(g=>({id:g.id,title:g.title,url:g.playUrl,status:status(g),checks:entry(g).checks.map(i=>CHECKS[i]).filter(Boolean),notes:entry(g).notes||'',updatedAt:entry(g).updatedAt||null}))};
+    games:games.map(g=>({id:g.id,title:g.title,url:g.playUrl,classification:folderStage(g),status:status(g),checks:entry(g).checks.map(i=>CHECKS[i]).filter(Boolean),notes:entry(g).notes||'',updatedAt:entry(g).updatedAt||null}))};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='warlike-qa-report.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });

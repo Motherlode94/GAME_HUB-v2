@@ -6,7 +6,9 @@ import vm from 'node:vm';
 import {spawnSync} from 'node:child_process';
 const root=path.resolve(import.meta.dirname,'..');
 const catalog=fs.readFileSync(path.join(root,'js/wgc-data.js'),'utf8');
-const games=[...catalog.matchAll(/\{\s*id:\s*(\d+),\s*title:\s*"([^"]+)"[^\n]*?playUrl:\s*"([^"]+)"/g)];
+const context={window:{},localStorage:{getItem:()=>null,setItem:()=>{}}};
+vm.runInNewContext(catalog,context,{timeout:2000});
+const games=context.window.WGC_DATA.GAMES;
 const errors=[],warnings=[],visited=new Set();
 function exists(p){return fs.existsSync(path.join(root,p))}
 function checkGame(id,title,url){
@@ -17,7 +19,7 @@ function checkGame(id,title,url){
  const html=fs.readFileSync(page,'utf8');
  for(const m of html.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/g)){
   const target=m[1];
-  if(/^(https?:|data:|blob:|#|javascript:)/i.test(target))continue;
+  if(/^(https?:|data:|blob:|#|javascript:|\/\/)/i.test(target))continue;
   const absolute=target.startsWith('/')?target.slice(1):path.posix.normalize(path.posix.join(folder,target.split(/[?#]/)[0]));
   if(!exists(absolute))errors.push(title+': missing dependency '+target);
  }
@@ -36,9 +38,9 @@ function checkGame(id,title,url){
  }
  if(url.startsWith('DONE/'))warnings.push(title+': DONE classification requires manual gameplay QA');
 }
-for(const m of games)checkGame(m[1],m[2],m[3]);
-for(const section of ['DONE','A Faire']){
- const dirs=fs.readdirSync(path.join(root,section),{withFileTypes:true}).filter(d=>d.isDirectory()&&d.name!=='_shared');
+for(const game of games)checkGame(game.id,game.title,game.playUrl);
+for(const section of ['DONE','A Faire','A Revoir']){
+ const dirs=fs.readdirSync(path.join(root,section),{withFileTypes:true}).filter(d=>d.isDirectory()&&d.name!=='_shared'&&d.name!=='_SharedAssets');
  for(const dir of dirs){const url=section+'/'+dir.name+'/index.html';if(!exists(url))warnings.push('No index.html: '+section+'/'+dir.name)}
 }
 console.log('WarLike static QA:',games.length,'catalog entries;',errors.length,'errors;',warnings.length,'warnings');
