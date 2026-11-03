@@ -1,5 +1,8 @@
 (function () {
     const GAMES = [
+        {"id":49,"title":"Étage Zéro","category":"adventure","tags":["horreur","énigmes","enquête","2d","survie"],"playUrl":"A Faire/_2D_3D Etage Zero/index.html","coverImage":"A Faire/_2D_3D Etage Zero/assets/cover.svg","description":"Enquête horrifique 2D : archives, vision spectrale, coffre codé et poursuite dans un étage impossible."},
+        {"id":50,"title":"SILENCE 03 — Les Voix du Mur","category":"adventure","tags":["horreur","infiltration","énigmes","2d","survie"],"playUrl":"A Faire/_2D Silence 03/index.html","coverImage":"A Faire/_2D Silence 03/assets/cover.svg","description":"Survival-horror 2D : chaque bruit attire le Gardien. Cachettes, diversions et trois enregistrements à déchiffrer."},
+        {"id":51,"title":"NÉRÉIDE — Le Chant du Fond","category":"adventure","tags":["horreur","survie","exploration","énigmes","3d"],"playUrl":"A Faire/_3D Nereide Le Chant du Fond/index.html","coverImage":"A Faire/_3D Nereide Le Chant du Fond/assets/cover.svg","description":"Horreur sous-marine 3D : station explorable, créature, oxygène, sonar, ballast et transmission codée."},
         {"id":23,"title":"No Man's Dawn","category":"action","tags":["survie","exploration","3d"],"playUrl":"DONE/_3D No Mans Dawn/index.html","description":"Explore une région isolée et reconstruis un refuge."},
         {"id":19,"title":"After Dark","category":"rpg","tags":["visual novel","romance","dialogue","adulte"],"playUrl":"DONE/_2D After Dark/index.html","description":"Visual novel 2D nocturne à choix et relations."},
         {"id":21,"title":"Hearts of Eden","category":"rpg","tags":["simulation","romance","relations"],"playUrl":"DONE/_2D Hearts of Eden/index.html","description":"Simulation sociale et relations entre adultes."},
