@@ -84,12 +84,15 @@ function updateWave(dt) {
         return;
     }
 
-    if (waveState.countdown > 0 && gameState.autoWaves) {
-        waveState.countdown -= dt;
-        if (waveState.countdown <= 0) {
-            waveState.countdown = 0;
-            startNextWave();
-        }
+    // Countdown always advances: manual mode must not grant a permanent early-call bonus.
+    if (waveState.countdown > 0) {
+        waveState.countdown = Math.max(0, waveState.countdown - dt);
+    }
+    // After the timer, auto mode launches the next wave. In manual mode it
+    // remains available until the player clicks the wave command.
+    if (gameState.autoWaves && waveState.started && waveState.countdown === 0 &&
+        waveState.pendingClears === 0 && !isSpawning() && enemies.length === 0) {
+        startNextWave();
     }
 }
 

@@ -391,7 +391,7 @@ function updateTDUI(force = false) {
     const status = tdById('td-wave-status');
     if (status) status.textContent = gameState.gameOver ? 'Défense percée' : !waveState.started ? 'Prêt au déploiement' :
         isSpawning() || enemies.length ? 'Assaut en cours' :
-        waveState.countdown > 0 ? (gameState.autoWaves ? 'Renforts dans ' + Math.ceil(waveState.countdown / 1000) + ' s' : 'En attente de votre ordre') : 'Secteur sécurisé';
+        waveState.countdown > 0 ? (gameState.autoWaves ? 'Renforts dans ' + Math.ceil(waveState.countdown / 1000) + ' s' : 'En attente de votre ordre') : (gameState.autoWaves ? 'Secteur sécurisé' : 'Lance la prochaine vague');
     const meter = tdById('td-wave-fill');
     if (meter) meter.style.width = Math.round(getWaveProgress() * 100) + '%';
     tdSetText('td-wave-meta', (enemies.length + waveState.queue.length) + ' menaces restantes · ' + towers.length + ' défenses placées');
