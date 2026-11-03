@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07141c">
+<meta name="description" content="NÉRÉIDE, un jeu d'horreur sous-marin 3D : exploration, énigmes, oxygène, pression et créature des abysses.">
+<title>NÉRÉIDE — Le Chant du Fond | WarLike Gaming</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+<header class="masthead">
+  <a class="return" href="../../index.html">← WARLIKE GAMING</a>
+  <div class="brand"><span class="glyph">◈</span><div><small>PROJET NÉRÉIDE / INSTALLATION À −2 800 M</small><strong>LE CHANT <em>DU FOND</em></strong></div></div>
+  <div class="header-actions"><span class="connection"><i></i> LIAISON PERDUE</span><button type="button" id="audioBtn" aria-pressed="true">♫ AUDIO ON</button><button id="pauseBtn" type="button" title="Mettre en pause (Échap)">Ⅱ PAUSE</button></div>
+</header>
+<main class="main">
+<section class="view-panel">
+<div class="view-top"><span id="area">COMPARTIMENT / SAS D’ARRIVÉE</span><span class="coordinate" id="coordinate">NIVEAU − 02 · 04:17</span></div>
+<div id="scene" class="scene" tabindex="0" aria-label="Exploration 3D en vue subjective">
+<canvas id="game" aria-label="Station sous-marine en trois dimensions"></canvas>
+<div class="noise" aria-hidden="true"></div><div class="vignette" aria-hidden="true"></div>
+<div class="watermark">NÉRÉIDE <span>H-09</span></div>
+<div class="reticle" aria-hidden="true"><span></span><span></span></div>
+<div id="interactPrompt" class="interaction" hidden><kbd>E</kbd> <span id="interactLabel">EXAMINER</span></div>
+<div id="danger" class="danger" hidden>⚠ LA VEILLEUSE VOUS CHERCHE</div>
+<div id="subtitle" class="subtitle" role="status">Le sonar émet à nouveau. Quelque chose l’a entendu.</div>
+<div class="touch" aria-label="Commandes tactiles">
+  <div class="touch-dpad"><button data-move="forward" aria-label="Avancer">▲</button><div><button data-move="left" aria-label="Gauche">◀</button><button data-move="back" aria-label="Reculer">▼</button><button data-move="right" aria-label="Droite">▶</button></div></div>
+  <div class="touch-buttons"><button id="touchInteract">EXAMINER</button><button id="touchLamp">LAMPE</button><button id="touchRun">COURIR</button></div>
+</div>
+</div>
+<div class="view-bottom"><span id="worldStatus">PRESSION INCONNUE · STRUCTURE INSTABLE</span><span>FPS · ZQSD / WASD · E</span></div>
+</section>
+<aside class="sidebar" aria-label="Équipement et mission">
+<section class="panel objective"><div class="label">01 / DIRECTIVE DE MISSION</div><h2 id="objective">Retrouver le fusible</h2><p id="objectiveDetail">Le générateur est hors tension. Fouille la réserve, à l’ouest.</p><div class="progress"><i id="objectiveBar"></i></div><small id="steps">0 / 4 ÉTAPES</small></section>
+<section class="panel vitals"><div class="label">ÉTAT DE LA COMBINAISON</div>
+  <div class="vital"><div><span>Oxygène</span><b id="oxygenTxt">100 %</b></div><div class="bar"><i id="oxygenBar" class="oxygen"></i></div></div>
+  <div class="vital"><div><span>Intégrité</span><b id="healthTxt">100 %</b></div><div class="bar"><i id="healthBar" class="health"></i></div></div>
+  <div class="vital"><div><span>Batterie</span><b id="batteryTxt">100 %</b></div><div class="bar"><i id="batteryBar" class="battery"></i></div></div>
+  <div class="vital"><div><span>Inondation</span><b id="floodTxt">42 %</b></div><div class="bar"><i id="floodBar" class="flood"></i></div></div>
+  <div class="vital"><div><span>Sang-froid</span><b id="nerveTxt">100 %</b></div><div class="bar"><i id="nerveBar" class="nerve"></i></div></div>
+</section>
+<section class="panel telemetry"><div class="label">SONAR / CARTOGRAPHIE</div><div class="radar-wrap"><canvas id="radar" width="230" height="230" aria-label="Sonar top-down de la station et positions connues"></canvas><span class="radar-corner">CANAL 09 · 32 KHZ</span></div><p id="signalStatus">Écho intermittent — signature biologique détectée.</p></section>
+<section class="panel notes"><div class="label">INVENTAIRE / JOURNAL</div><div class="inventory"><span id="inventoryFuse" class="item">FUSIBLE <b>ABSENT</b></span><span id="inventoryNotes" class="item">NOTES <b>0 / 3</b></span></div><div id="journalList" class="journal" aria-live="polite"><p>Aucune note récupérée.</p></div><button id="journalBtn" type="button">▤ CONSULTER LES NOTES <kbd>J</kbd></button></section>
+<section class="panel actions"><div class="label">ÉQUIPEMENT</div><button id="lampBtn" type="button">◉ LAMPE : ÉTEINTE <kbd>F</kbd></button><button id="saveBtn" type="button">▣ SAUVEGARDER <kbd>K</kbd></button><button id="restartBtn" type="button">↺ RECOMMENCER</button><p>Déplacement : <b>ZQSD / WASD</b> · Souris : regarder · <b>Maj</b> : courir · <b>E</b> : interagir · <b>F</b> : lampe · <b>Échap</b> : pause. Sur mobile : glisser pour regarder.</p></section>
+</aside>
+</main>
+<footer><span>WARLIKE HORROR LAB · DOSSIER H-09</span><span>Jeu original de survie et énigmes 3D · sauvegarde locale</span></footer>
+</div>
+<div class="overlay open" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="modal"><div class="modal-kicker" id="modalKicker">ARCHIVES / DOSSIER H-09</div><h1 id="modalTitle">NÉRÉIDE<span>LE CHANT DU FOND</span></h1><p id="modalText">La station Néréide a cessé d’émettre. À 2 800 mètres de profondeur, les portes s’ouvrent de l’intérieur. Rétablis l’alimentation, stabilise l’inondation, déchiffre le code de transmission et rejoins la capsule d’évacuation. Ne cours pas lorsque tu entends le chant.</p><div id="modalExtra"></div><div class="modalActions" id="modalActions"><button id="startBtn" class="primary" type="button">NOUVELLE EXPÉDITION</button><button id="continueBtn" type="button">REPRENDRE LA SAUVEGARDE</button></div><small id="modalFoot">Survie · poursuite · quatre objectifs · preuves et conséquences · vue subjective 3D</small></div>
+</div>
+<script type="module" src="game.js"></script>
+</body>
+</html>
