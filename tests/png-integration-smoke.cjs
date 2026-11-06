@@ -40,4 +40,12 @@ const hero=fs.readFileSync(path.join(root,'DONE/_2D Hero Forces/index.html'),'ut
 assert.ok(hero.includes('/_shared/rts/library.js'),'Hero Forces does not import shared PNG library');
 const wz=fs.readFileSync(path.join(root,'DONE/_2D War Zone Commander/index.html'),'utf8');
 assert.ok(wz.includes('/_shared/rts/library.js')&&wz.includes('js/SpriteAtlas.js'),'War Zone Commander is missing PNG sprite bootstrap');
+const iron=fs.readFileSync(path.join(root,'DONE/_2D Iron Meridian/index.html'),'utf8');
+const ironInf=iron.indexOf("RTS.SpriteAtlas.draw(ctx,type");
+const ironVeh=iron.indexOf("RTS.SpriteAtlas.draw(ctx,u.type");
+assert.ok(ironInf>0&&ironVeh>0,'Iron Meridian PNG sprite rendering is absent');
+assert.ok(iron.indexOf("window.WarLikeArt&&window.WarLikeArt.draw(ctx,'infantry'",ironInf)>ironInf,
+  'Iron Meridian infantry must try PNG before vector fallback');
+assert.ok(iron.indexOf("window.WarLikeArt&&window.WarLikeArt.draw(ctx,'vehicle'",ironVeh)>ironVeh,
+  'Iron Meridian vehicles must try PNG before vector fallback');
 console.log('PASS: '+entries.length+' Racing, '+platformImages.length+' Platformer, '+mapping.length+' RTS PNG paths and gameplay integration');
