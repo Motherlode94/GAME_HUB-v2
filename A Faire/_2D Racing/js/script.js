@@ -57,7 +57,8 @@ const roadSpeed = 5;
 
 let highScore = localStorage.getItem("highScore") || 0;
 
-// Chaque skin utilise un PNG présent dans le dépôt.\nconst carSkins = [
+// Chaque skin utilise un PNG présent dans le dépôt.
+const carSkins = [
     { image: 'car_red', color: '#e74c3c' },
     { image: 'car_blue', color: '#3498db' },
     { image: 'car_yellow', color: '#f1c40f' },
