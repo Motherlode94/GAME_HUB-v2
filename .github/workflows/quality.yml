@@ -7,6 +7,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -41,3 +42,13 @@ jobs:
         run: node tests/three-rts-movement.cjs
       - name: Enemy durability regression
         run: node tests/enemy-durability-smoke.cjs
+      - name: Install headless browser test runtime
+        run: |
+          npm init -y
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run actual browser catalog regression
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/gamehub-http.log 2>&1 &
+          sleep 2
+          node tests/browser-portal-smoke.mjs
