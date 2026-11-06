@@ -57,14 +57,12 @@ const roadSpeed = 5;
 
 let highScore = localStorage.getItem("highScore") || 0;
 
-// BUG FIX: les clés 'car_lime' et 'car_purple' n'ont pas d'image dans ASSETS
-// On les remplace par des fallback couleur (pas d'image chargée = fallback dans drawPlayer)
-const carSkins = [
-    { image: 'car_red',    color: '#e74c3c' },
-    { image: 'car_blue',   color: '#3498db' },
+// Chaque skin utilise un PNG présent dans le dépôt.\nconst carSkins = [
+    { image: 'car_red', color: '#e74c3c' },
+    { image: 'car_blue', color: '#3498db' },
     { image: 'car_yellow', color: '#f1c40f' },
-    { image: null,         color: '#2ecc71' }, // lime  — pas d'image, couleur seule
-    { image: null,         color: '#9b59b6' }  // purple — pas d'image, couleur seule
+    { image: 'car_lime', color: '#2ecc71' },
+    { image: 'car_purple', color: '#9b59b6' }
 ];
 
 let currentSkin = 0;
@@ -140,21 +138,27 @@ function drawPlayer() {
 
 function drawBackground() {
     // BUG FIX: la clé 'bg1' est maintenant correctement définie dans assets.js
-    const bg = assets.get('bg1');
-    if (!bg) {
-        // Fallback : route grise si l'image n'est pas chargée
-        ctx.fillStyle = "#555";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#444";
-        ctx.fillRect(60, 0, canvas.width - 120, canvas.height);
-        return;
+    const grass = assets.get('bg_grass');
+    const road = assets.get('road');
+    ctx.fillStyle = '#35502c';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (grass) {
+        const size = 80;
+        for (let x = 0; x < canvas.width; x += size)
+            for (let y = 0; y < canvas.height; y += size)
+                ctx.drawImage(grass, x, y, size, size);
     }
-
-    for (let x = 0; x < canvas.width; x += bg.width) {
-        for (let y = 0; y < canvas.height; y += bg.height) {
-            ctx.drawImage(bg, x, y);
-        }
+    ctx.fillStyle = '#414850';
+    ctx.fillRect(60, 0, canvas.width - 120, canvas.height);
+    if (road) {
+        const tileHeight = 160, x = 60, width = canvas.width - 120;
+        const offset = (score * roadSpeed) % tileHeight;
+        for (let y = offset - tileHeight; y < canvas.height; y += tileHeight)
+            ctx.drawImage(road, x, y, width, tileHeight);
     }
+    ctx.fillStyle = 'rgba(245,245,231,.85)';
+    ctx.fillRect(58, 0, 3, canvas.height);
+    ctx.fillRect(canvas.width - 61, 0, 3, canvas.height);
 }
 
 
@@ -237,7 +241,8 @@ function createObstacle() {
         y: -height,
         width: width,
         height: height,
-        speed: 4 + score * 0.001
+        speed: 4 + score * 0.001,
+        image: ['car_blue', 'car_yellow', 'car_lime', 'car_purple'][Math.floor(Math.random() * 4)]
     });
 }
 
@@ -252,7 +257,7 @@ function drawObstacles() {
     obstacles.forEach(obstacle => {
         // BUG FIX (bonus): on utilise la skin bleue pour l'obstacle adverse,
         // avec fallback couleur si l'image n'est pas dispo
-        const img = assets.get('car_blue');
+        const img = assets.get(obstacle.image || 'car_blue');
         if (img) {
             ctx.drawImage(img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
         } else {
