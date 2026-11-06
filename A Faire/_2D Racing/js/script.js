@@ -236,13 +236,20 @@ function createObstacle() {
     const height = 80;
     const x = Math.random() * (canvas.width - width);
 
+    // Les obstacles utilisent les PNG existants des véhicules et des accessoires.
+    const prop = Math.random() < 0.22;
+    const image = prop
+        ? (Math.random() < 0.5 ? 'prop.barrel' : 'prop.oil')
+        : ['car_blue', 'car_yellow', 'car_lime', 'car_purple'][Math.floor(Math.random() * 4)];
+    const obstacleWidth = prop ? 36 : width;
+    const obstacleHeight = prop ? 40 : height;
     obstacles.push({
         x: x,
-        y: -height,
-        width: width,
-        height: height,
+        y: -obstacleHeight,
+        width: obstacleWidth,
+        height: obstacleHeight,
         speed: 4 + score * 0.001,
-        image: ['car_blue', 'car_yellow', 'car_lime', 'car_purple'][Math.floor(Math.random() * 4)]
+        image
     });
 }
 
