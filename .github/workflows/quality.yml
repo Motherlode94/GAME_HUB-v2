@@ -47,6 +47,11 @@ jobs:
           npm init -y
           npm install --no-save playwright@1.56.1
           npx playwright install --with-deps chromium
+      - name: Validate Racing JavaScript syntax
+        run: |
+          node --check "A Faire/_2D Racing/js/assets.js"
+          node --check "A Faire/_2D Racing/js/assetLoader.js"
+          node --check "A Faire/_2D Racing/js/script.js"
       - name: Validate game PNG assets and runtime mappings
         run: node tests/png-integration-smoke.cjs
       - name: Run actual browser catalog regression
