@@ -12,7 +12,7 @@
 <div id="menu" class="overlay active">
   <div class="panel">
     <h1>Zombie Survival</h1>
-    <p class="hint-text">ZQSD / Fleches pour bouger<br>Souris pour viser - Clic pour tirer</p>
+    <p class="hint-text">ZQSD / Flèches : bouger · Shift : sprinter<br>Souris : viser/tirer · 1–4 : armes · R : recharger · Échap : pause<br>Survis à 5 vagues et rejoins l’extraction !</p>
     <button id="startBtn">Start Game</button>
     <a href="../../index.html" class="back-link">&larr; Retour Hub</a>
   </div>
@@ -33,7 +33,10 @@
   <div>HP <span id="hp">100</span></div>
   <div>Score <span id="score">0</span></div>
   <div>Vague <span id="wave">1</span></div>
-  <span class="hint">ZQSD / Fleches - Clic pour tirer</span>
+  <div>Arme <span id="weapon">Pistolet</span></div>
+  <div>Munitions <span id="ammo">12 / 48</span></div>
+  <div>Endurance <span id="stamina">100</span></div>
+  <span id="objective" class="hint">Survivre — vague 1 / 5</span>
 </div>
 
 <canvas id="game" width="900" height="500"></canvas>
