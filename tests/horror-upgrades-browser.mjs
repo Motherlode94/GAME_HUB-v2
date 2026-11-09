@@ -12,10 +12,16 @@ try{
  assert.match(await page.locator('#objective').innerText(),/horde|vague/i);
  assert.match(await page.locator('#ammo').innerText(),/12\s*\/\s*48/);
  await page.keyboard.press('2');
+ await page.waitForFunction(()=>document.querySelector('#weapon')?.textContent?.includes('Fusil'));
  assert.match(await page.locator('#weapon').innerText(),/Fusil/);
- await page.locator('canvas').click({position:{x:350,y:160}});
- await page.waitForTimeout(400);
- assert.ok(Number((await page.locator('#ammo').innerText()).split('/')[0])<=6);
+ await page.waitForTimeout(2400); // Spawn intermission ends before the first shot.
+ const bounds=await page.locator('canvas').boundingBox();
+ await page.mouse.move(bounds.x+bounds.width*.5,bounds.y+bounds.height*.5);
+ await page.mouse.down();
+ await page.waitForTimeout(230);
+ await page.mouse.up();
+ await page.waitForFunction(()=>Number(document.querySelector('#ammo')?.textContent?.split('/')[0])<6);
+ assert.ok(Number((await page.locator('#ammo').innerText()).split('/')[0])<6);
  await page.keyboard.press('Escape');
  await page.waitForTimeout(80);
  assert.ok(await page.locator('canvas').isVisible());
