@@ -1,0 +1,37 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({headless:true,args:['--disable-gpu','--no-sandbox']});
+try{
+ const errors=[];
+ const page=await browser.newPage({viewport:{width:1000,height:700}});
+ page.on('pageerror',err=>errors.push(err.message));
+ await page.goto('http://127.0.0.1:8765/A%20Faire/_2D%20Zombie%20Shooter/index.html',{waitUntil:'domcontentloaded'});
+ await page.locator('#startBtn').click();
+ await page.waitForTimeout(800);
+ assert.equal((await page.locator('#wave').innerText()).trim(),'1');
+ assert.match(await page.locator('#objective').innerText(),/horde|vague/i);
+ assert.match(await page.locator('#ammo').innerText(),/12\s*\/\s*48/);
+ await page.keyboard.press('2');
+ assert.match(await page.locator('#weapon').innerText(),/Fusil/);
+ await page.locator('canvas').click({position:{x:350,y:160}});
+ await page.waitForTimeout(400);
+ assert.ok(Number((await page.locator('#ammo').innerText()).split('/')[0])<=6);
+ await page.keyboard.press('Escape');
+ await page.waitForTimeout(80);
+ assert.ok(await page.locator('canvas').isVisible());
+ await page.keyboard.press('Escape');
+ await page.close();
+ const veil=await browser.newPage({viewport:{width:1100,height:750}});
+ veil.on('pageerror',err=>errors.push(err.message));
+ await veil.goto('http://127.0.0.1:8765/A%20Faire/_2D%20Black%20Veil/index.html',{waitUntil:'domcontentloaded'});
+ await veil.locator('#new').click();
+ await veil.waitForTimeout(350);
+ assert.match(await veil.locator('#inventory').innerText(),/Pierres 3/);
+ await veil.keyboard.press('g');
+ assert.match(await veil.locator('#inventory').innerText(),/Pierres 2/);
+ await veil.keyboard.press('Escape');
+ assert.ok(await veil.locator('#overlay').evaluate(el=>el.classList.contains('on')));
+ await veil.close();
+ assert.deepEqual(errors,[],'Browser runtime errors');
+ console.log('PASS Zombie Survival and Black Veil interactive browser smoke');
+}finally{await browser.close()}

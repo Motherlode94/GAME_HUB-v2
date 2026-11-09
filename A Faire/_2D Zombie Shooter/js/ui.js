@@ -16,6 +16,10 @@ const UI = (() => {
     hpEl.textContent    = Math.max(0, Math.floor(data.hp));
     scoreEl.textContent = data.score;
     waveEl.textContent  = data.wave;
+    document.getElementById('weapon').textContent=data.weapon||'Pistolet';
+    document.getElementById('ammo').textContent=String(data.ammo??12)+' / '+String(data.reserve??48);
+    document.getElementById('stamina').textContent=Math.round(data.stamina??100);
+    document.getElementById('objective').textContent=data.objective||'Survivre — vague 1/5';
   }
 
   function showMenu()    { menuEl.classList.add("active"); }

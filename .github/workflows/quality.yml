@@ -34,6 +34,8 @@ jobs:
         run: node scripts/qa-done.cjs
       - name: Horror games and asset integrity
         run: node scripts/check-horror-trio.mjs
+      - name: Enhanced horror gameplay regression
+        run: node tests/horror-upgrades-smoke.cjs
       - name: RTS capture, transport and building regression
         run: node tests/rts-simulation-smoke.cjs
       - name: Non-RTS game source and entrypoint regression
@@ -60,3 +62,4 @@ jobs:
           sleep 2
           node tests/browser-portal-smoke.mjs
           node tests/racing-png-browser.mjs
+          node tests/horror-upgrades-browser.mjs

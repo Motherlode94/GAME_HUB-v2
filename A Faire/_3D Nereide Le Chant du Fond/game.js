@@ -323,21 +323,33 @@ function motion(dt){
  if(s.oxygen<=0||s.health<=0)failure(s.oxygen<=0?'La réserve d’oxygène est épuisée.':'La combinaison n’a pas tenu la pression.');
  hunter(dt,running,moving);
 }
+// Walls block direct sight; sound and light still attract the creature over shorter distances.
+let lastHunterX=0,lastHunterZ=-14,hadHunterContact=false;
+function hunterLineClear(x1,z1,x2,z2){
+ const distance=Math.hypot(x2-x1,z2-z1),steps=Math.ceil(distance/.5);
+ for(let i=1;i<steps;i++){const t=i/steps;if(blocked(x1+(x2-x1)*t,z1+(z2-z1)*t,.25))return false}
+ return true;
+}
 function hunter(dt,running,moving){
  const dx=s.x-s.hunterX,dz=s.z-s.hunterZ,d=Math.hypot(dx,dz);
- const hunting=d<5||(d<13&&(s.light||running))||(d<8&&moving);
+ const visible=d<11&&hunterLineClear(s.hunterX,s.hunterZ,s.x,s.z)&&(s.light||d<5.5);
+ const audible=(running&&d<13)||(moving&&d<5.6);
+ const hunting=visible||audible||(d<1.8);
  let targetX=0,targetZ=-15;
- if(hunting){targetX=s.x;targetZ=s.z;threatTime=1.5}else if(threatTime>0){targetX=s.x;targetZ=s.z;threatTime-=dt}
+ if(hunting){targetX=s.x;targetZ=s.z;lastHunterX=s.x;lastHunterZ=s.z;threatTime=4}
+ else if(threatTime>0){targetX=lastHunterX;targetZ=lastHunterZ;threatTime=Math.max(0,threatTime-dt)}
  else{targetX=Math.sin(s.time*.16)*2;targetZ=-14+Math.cos(s.time*.12)*4}
+ if(hunting&&!hadHunterContact)beep(76,.26);
+ hadHunterContact=hunting;
  const dirX=targetX-s.hunterX,dirZ=targetZ-s.hunterZ,len=Math.hypot(dirX,dirZ)||1;
- const speed=hunting?1.8:0.65;
+ const speed=hunting?2.05:threatTime>0?1.38:.68;
  const nx=s.hunterX+dirX/len*speed*dt,nz=s.hunterZ+dirZ/len*speed*dt;
  // The central passage is its habitat; it cannot clip into storage walls.
  if(!blocked(nx,s.hunterZ,.7))s.hunterX=nx;
  if(!blocked(s.hunterX,nz,.7))s.hunterZ=nz;
  creature.position.set(s.hunterX,.08*Math.sin(s.time*2.2),s.hunterZ);
  creature.rotation.y=Math.atan2(dx,dz)+Math.PI;
- $('danger').hidden=!(d<10&&hunting);
+ $('danger').hidden=!(d<10&&(hunting||threatTime>0));
  if(d<1.55){s.health=clamp(s.health-24*dt,0,100);s.nerve=clamp(s.nerve-14*dt,0,100)}
 }
 function updateObjective(){
