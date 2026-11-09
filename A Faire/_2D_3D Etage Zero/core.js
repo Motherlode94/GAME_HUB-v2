@@ -130,19 +130,41 @@ function move(dt){
  ghost(dt,running);
  if(s.health<=0)fail();
 }
+// The spectre uses real corridor navigation instead of walking into solid walls.
+let ghostPath=[],ghostPathClock=0,ghostTargetCell='';
+function routeGhost(tx,ty){
+ const x0=Math.floor(s.ghostX),y0=Math.floor(s.ghostY),x1=Math.floor(tx),y1=Math.floor(ty);
+ if(blocked(x0,y0)||blocked(x1,y1))return [];
+ const queue=[[x0,y0]],previous=new Map(),key=(x,y)=>x+','+y;previous.set(key(x0,y0),null);
+ for(let i=0;i<queue.length;i++){
+  const [x,y]=queue[i];if(x===x1&&y===y1)break;
+  for(const [dx,dy] of [[1,0],[0,1],[-1,0],[0,-1]]){
+   const nx=x+dx,ny=y+dy,k=key(nx,ny);if(blocked(nx,ny)||previous.has(k))continue;
+   previous.set(k,[x,y]);queue.push([nx,ny])
+  }
+ }
+ if(!previous.has(key(x1,y1)))return [];
+ const route=[];let current=[x1,y1];
+ while(current&&(current[0]!==x0||current[1]!==y0)){route.push({x:current[0]+.5,y:current[1]+.5});current=previous.get(key(...current))}
+ return route.reverse();
+}
 function ghost(dt,running){
  const dx=s.x-s.ghostX,dy=s.y-s.ghostY,d=Math.hypot(dx,dy);
  const alert=d<3.5||(d<6.4&&(s.spectral||s.light||running));
- const tx=alert?s.x:10+Math.sin(s.time*.48)*4;
- const ty=alert?s.y:6+Math.cos(s.time*.29)*2;
- const vx=tx-s.ghostX,vy=ty-s.ghostY,m=Math.hypot(vx,vy)||1;
- const speed=alert?1.8:.68;
- const nx=s.ghostX+vx/m*speed*dt,ny=s.ghostY+vy/m*speed*dt;
- if(!blocked(nx,ny))s.ghostX=nx;if(!blocked(s.ghostX,ny))s.ghostY=ny;
- const n=Math.hypot(s.x-s.ghostX,s.y-s.ghostY);
- $('eye').hidden=n>=4;
- if(n<.9)s.health=clamp(s.health-30*dt,0,100);
- if(n<2.4&&!s.spectral)s.health=clamp(s.health-4*dt,0,100);
+ const tx=alert?s.x:10+Math.sin(s.time*.48)*4,ty=alert?s.y:6+Math.cos(s.time*.29)*2;
+ const targetKey=Math.floor(tx)+','+Math.floor(ty),targetClear=!blocked(tx,ty);
+ ghostPathClock-=dt;
+ if(targetClear&&(ghostPathClock<=0||targetKey!==ghostTargetCell||ghostPath.length===0)){
+  ghostPath=routeGhost(tx,ty);ghostPathClock=alert?.35:1.3;ghostTargetCell=targetKey;
+ }
+ const waypoint=ghostPath[0]||{x:s.ghostX,y:s.ghostY};
+ const vx=waypoint.x-s.ghostX,vy=waypoint.y-s.ghostY,m=Math.hypot(vx,vy);
+ if(m<.12&&ghostPath.length)ghostPath.shift();
+ else if(m>0){const speed=alert?1.85:.83,step=Math.min(m,speed*dt),nx=s.ghostX+vx/m*step,ny=s.ghostY+vy/m*step;
+  if(!blocked(nx,s.ghostY))s.ghostX=nx;if(!blocked(s.ghostX,ny))s.ghostY=ny}
+ const range=Math.hypot(s.x-s.ghostX,s.y-s.ghostY);$('eye').hidden=range>=4;
+ if(range<.9)s.health=clamp(s.health-30*dt,0,100);
+ if(range<2.4&&!s.spectral)s.health=clamp(s.health-4*dt,0,100);
 }
 function rect(x,y,w,h,color){g.fillStyle=color;g.fillRect(x,y,w,h)}
 function draw(){
