@@ -91,3 +91,9 @@ button:hover {
   transition: color .2s;
 }
 .back-link:hover { color: #e8eef7; }
+/* Compact HUD and correct canvas scaling on narrow devices. Pointer coordinates
+   are mapped from the displayed canvas size back into its 900×500 game space. */
+canvas{width:min(900px,calc(100vw - 20px));height:auto;max-width:100%;aspect-ratio:9/5}
+.hud{width:min(900px,100%);max-width:100vw;display:flex;flex-wrap:wrap;justify-content:center;gap:9px 16px;padding:10px 12px}
+.hud>div{white-space:nowrap}.hint{margin:0;flex-basis:100%;text-align:center}
+@media(max-width:650px){.hud{font-size:12px}.panel{padding:24px 18px;max-width:92vw}.hint{font-size:11px}}
