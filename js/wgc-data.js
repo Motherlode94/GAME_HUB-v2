@@ -1,5 +1,6 @@
 (function () {
     const GAMES = [
+        {"id":57,"title":"Street Food Rush","category":"simulation","tags":["3d","arcade","cuisine","restaurant","gestion","prototype jouable"],"playUrl":"A Faire/_3D Street Food Rush/index.html","description":"Tiens un stand de cuisine au marché nocturne : prends les commandes, cuis au grill, assemble les menus et sers les clients avant la fin du chrono."},
         {"id":52,"title":"Empire Game","category":"strategy","tags":["stratégie","à revoir"],"playUrl":"A Revoir/_2D Empire Game/index.html","description":"Jeu stratégique à revoir : mécaniques et interface à réévaluer."},
         {"id":53,"title":"Hack n Slash","category":"action","tags":["combat","2d","à revoir"],"playUrl":"A Revoir/_2D Hack n Slash/index.html","description":"Ancienne version à revoir avant validation."},
         {"id":54,"title":"Livre dont vous êtes le héros","category":"adventure","tags":["narration","choix","2d","à revoir"],"playUrl":"A Revoir/_2D Livre dont vous êtes le héros/index.html","description":"Fiction interactive à reprendre et tester."},
