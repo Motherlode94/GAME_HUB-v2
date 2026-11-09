@@ -23,6 +23,7 @@ function newState(){return{x:2.5,y:12.5,dirX:0,dirY:-1,health:100,stamina:100,ro
  noise:0,guardianX:12.5,guardianY:8.5,heardX:12,heardY:8,heardTimer:0,
  time:0,deaths:0,steps:0,detected:false,breath:100,panic:0,distraction:null}}
 let s=newState(),playing=false,win=false,last=performance.now(),lastHUD=0,lastSave=0,entityPath=[],pathClock=0,patrolIndex=0;
+let nextHeartbeat=0;
 const keys=new Set(),held=new Set();
 let audioCtx=null,soundEnabled=true;
 function initAudio(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}else if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{})}
@@ -176,6 +177,10 @@ function guardian(dt){
  if(!s.hidden&&Math.hypot(s.x-s.guardianX,s.y-s.guardianY)<.65)s.health=clamp(s.health-33*dt,0,100);
  const threatDistance=Math.hypot(s.x-s.guardianX,s.y-s.guardianY);
  s.panic=clamp(s.panic+dt*(threatDistance<3.5?15:chasing?8:-9),0,100);
+ if(s.panic>65&&playing&&performance.now()>nextHeartbeat){
+  nextHeartbeat=performance.now()+(s.panic>85?950:1700);
+  beep(64,.12); // heartbeat warning is only audible with sound enabled
+ }
  if(s.health<=0)failure();
 }
 function moving(dt){
@@ -202,7 +207,7 @@ function moving(dt){
  s.noise=clamp(s.noise-35*dt,0,100);
  if(length){
   const noisy=glass.has(Math.floor(s.x)+','+Math.floor(s.y));
-  s.noise=Math.max(s.noise,noisy?92:running?80:sneak?7:23);
+  s.noise=Math.max(s.noise,clamp((noisy?92:running?80:sneak?7:23)+(s.panic>75?12:0),0,100));
   s.steps+=dt*speed;
  }
  s.breath=clamp(s.breath+dt*(running?1.5:11),0,100);
@@ -241,6 +246,8 @@ function draw(){
  const target=candidate();if(target){g.strokeStyle='#ffdaa6';g.strokeRect(target.x*TILE+3,target.y*TILE+3,34,34)}
  const nearLocker=closetNear();
  if(nearLocker){g.strokeStyle=s.hidden?'#78d6a4':'#c3b2e7';g.lineWidth=2;g.strokeRect(nearLocker.x*TILE,nearLocker.y*TILE,40,40)}
+ if(s.panic>35){g.strokeStyle='rgba(173,49,80,'+Math.min(.35,(s.panic-35)/240)+')';g.lineWidth=22;
+  g.strokeRect(11,11,938,538)}
  if(s.hidden){g.font='bold 18px monospace';g.textAlign='center';g.fillStyle='#d6d1c7';g.fillText('CACHÉ · ESPACE POUR SORTIR',480,30)}
 }
 function hud(){
