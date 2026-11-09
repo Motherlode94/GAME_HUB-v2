@@ -34,6 +34,7 @@ try{
  await veil.waitForTimeout(350);
  assert.match(await veil.locator('#inventory').innerText(),/Pierres 3/);
  await veil.keyboard.press('g');
+ await veil.waitForFunction(()=>document.querySelector('#inventory')?.textContent?.includes('Pierres 2'));
  assert.match(await veil.locator('#inventory').innerText(),/Pierres 2/);
  await veil.keyboard.press('Escape');
  assert.ok(await veil.locator('#overlay').evaluate(el=>el.classList.contains('on')));
