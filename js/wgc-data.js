@@ -1,5 +1,6 @@
 (function () {
     const GAMES = [
+        {"id":58,"title":"SCAM SIMULATOR: THE DEBT","category":"simulation","tags":["2d","simulation","gestion","thriller","narratif","choix","prototype jouable"],"playUrl":"A Faire/_2D Scam Simulator The Debt/index.html","description":"Thriller 2D narratif : endetté de 250 000 €, accepte des missions, enquête sur un faux contrat, gère la suspicion et survis à la première semaine."},
         {"id":57,"title":"Street Food Rush","category":"simulation","tags":["3d","arcade","cuisine","restaurant","gestion","prototype jouable"],"playUrl":"A Faire/_3D Street Food Rush/index.html","description":"Tiens un stand de cuisine au marché nocturne : prends les commandes, cuis au grill, assemble les menus et sers les clients avant la fin du chrono."},
         {"id":52,"title":"Empire Game","category":"strategy","tags":["stratégie","à revoir"],"playUrl":"A Revoir/_2D Empire Game/index.html","description":"Jeu stratégique à revoir : mécaniques et interface à réévaluer."},
         {"id":53,"title":"Hack n Slash","category":"action","tags":["combat","2d","à revoir"],"playUrl":"A Revoir/_2D Hack n Slash/index.html","description":"Ancienne version à revoir avant validation."},
