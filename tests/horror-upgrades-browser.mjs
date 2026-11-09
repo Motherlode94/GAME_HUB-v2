@@ -8,7 +8,8 @@ try{
  await page.goto('http://127.0.0.1:8765/A%20Faire/_2D%20Zombie%20Shooter/index.html',{waitUntil:'domcontentloaded'});
  await page.locator('#startBtn').click();
  await page.waitForTimeout(800);
- assert.match(await page.locator('#objective').innerText(),/vague 1/i);
+ assert.equal((await page.locator('#wave').innerText()).trim(),'1');
+ assert.match(await page.locator('#objective').innerText(),/horde|vague/i);
  assert.match(await page.locator('#ammo').innerText(),/12\s*\/\s*48/);
  await page.keyboard.press('2');
  assert.match(await page.locator('#weapon').innerText(),/Fusil/);
