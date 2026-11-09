@@ -9,6 +9,7 @@ const weapons=[
  {name:'Automatique',rate:.11,damage:1,speed:760,pellets:1,spread:.11,mag:30,reload:2.15,color:'#86d7b4'},
  {name:'Précision',rate:1.0,damage:8,speed:1050,pellets:1,spread:0,mag:5,reload:2.4,color:'#edc17e'}
 ];
+const TOTAL_WAVES = 5;
 const cover=[{x:160,y:115,w:110,h:46},{x:595,y:315,w:128,h:48},{x:380,y:220,w:48,h:58},{x:735,y:95,w:65,h:38}];
 const keys=new Set();let mouse={x:W*.65,y:H*.5},firing=false,state,previous=performance.now(),audio;
 const spawn=(x,y,type)=>({x,y,type,life:24,r:12});
@@ -51,7 +52,7 @@ function update(dt){
  else{
   state.spawnClock-=dt;
   if(state.spawnRemaining>0&&state.spawnClock<=0){createEnemy();state.spawnRemaining--;state.spawnClock=rand(.3,.58)}
-  if(!state.spawnRemaining&&!state.enemies.length){if(state.wave===5){finish(true);return}
+  if(!state.spawnRemaining&&!state.enemies.length){if(state.wave===TOTAL_WAVES){finish(true);return}
    state.wave++;state.spawnRemaining=6+state.wave*3;state.intermission=3.3;state.spawnClock=.2;
    state.pickups.push(spawn(W*.24,H*.75,'ammo'));if(state.wave%2===0)state.pickups.push(spawn(W*.75,H*.25,'medkit'));
    message('VAGUE '+state.wave+' — '+(state.wave>3?'Des brutes arrivent !':'Ils reviennent…'),3);sound(75,.3,.05)}
@@ -71,7 +72,7 @@ function update(dt){
  state.pickups=state.pickups.filter(x=>x.life>0);
  for(const fx of state.particles){fx.x+=fx.vx*dt;fx.y+=fx.vy*dt;fx.vx*=Math.max(0,1-5*dt);fx.vy*=Math.max(0,1-5*dt);fx.life-=dt}
  state.particles=state.particles.filter(x=>x.life>0);
- UI.updateHUD({hp:p.hp,score:state.score,wave:state.wave,ammo:state.ammo[state.weapon],reserve:state.reserve[state.weapon],weapon:weapons[state.weapon].name,stamina:p.stamina,objective:state.intermission?'La horde approche…':'Survivre — vague '+state.wave+'/5'});
+ UI.updateHUD({hp:p.hp,score:state.score,wave:state.wave,ammo:state.ammo[state.weapon],reserve:state.reserve[state.weapon],weapon:weapons[state.weapon].name,stamina:p.stamina,objective:state.intermission?'La horde approche…':'Survivre — vague '+state.wave+'/'+TOTAL_WAVES});
 }
 function draw(){
  ctx.fillStyle='#091117';ctx.fillRect(0,0,W,H);ctx.save();
