@@ -7,6 +7,7 @@ const sources=[
  [zombie+'/js/game.js', ['TOTAL_WAVES = 5','function createEnemy','function reload','function finish','function draw']],
  [zombie+'/js/ui.js',['function updateHUD','objective','reserve']],
  [veil+'/index.html',['function lineClear','function distract','function step','stones:3']],
+ ['A Faire/_2D Silence 03/game.js',['breath:100','panic:0','function hiding','function guardian','breathMeter','panicMeter','function throwRock']],
  ['A Faire/_2D_3D Etage Zero/core.js',['function routeGhost','function ghost','ghostPathClock']],
  ['A Faire/_3D Nereide Le Chant du Fond/game.js',['function hunterLineClear','function hunter','lastHunterX']]
 ];
@@ -18,6 +19,9 @@ for(const [filename,markers] of sources){
  for(const marker of markers)assert.ok(source.includes(marker),'Missing '+marker+' in '+filename);
  console.log('PASS',filename);
 }
+const silenceHtml=read('A Faire/_2D Silence 03/index.html');
+for(const id of ['breathText','breathMeter','panicText','panicMeter','touchRock'])assert.ok(silenceHtml.includes('id="'+id+'"'),id);
+assert.match(read(veil+'/index.html'),/id="touchDistract"/);
 const html=read(zombie+'/index.html');
 for(const id of ['hp','score','wave','weapon','ammo','stamina','objective','startBtn','restartBtn'])assert.ok(html.includes('id="'+id+'"'),id);
 assert.match(read(zombie+'/css/styles.css'),/aspect-ratio:9\/5/);
