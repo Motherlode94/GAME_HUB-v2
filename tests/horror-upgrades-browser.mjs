@@ -12,10 +12,16 @@ try{
  assert.match(await page.locator('#objective').innerText(),/horde|vague/i);
  assert.match(await page.locator('#ammo').innerText(),/12\s*\/\s*48/);
  await page.keyboard.press('2');
+ await page.waitForFunction(()=>document.querySelector('#weapon')?.textContent?.includes('Fusil'));
  assert.match(await page.locator('#weapon').innerText(),/Fusil/);
- await page.locator('canvas').click({position:{x:350,y:160}});
- await page.waitForTimeout(400);
- assert.ok(Number((await page.locator('#ammo').innerText()).split('/')[0])<=6);
+ await page.waitForTimeout(2400); // Spawn intermission ends before the first shot.
+ const bounds=await page.locator('canvas').boundingBox();
+ await page.mouse.move(bounds.x+bounds.width*.5,bounds.y+bounds.height*.5);
+ await page.mouse.down();
+ await page.waitForTimeout(230);
+ await page.mouse.up();
+ await page.waitForFunction(()=>Number(document.querySelector('#ammo')?.textContent?.split('/')[0])<6);
+ assert.ok(Number((await page.locator('#ammo').innerText()).split('/')[0])<6);
  await page.keyboard.press('Escape');
  await page.waitForTimeout(80);
  assert.ok(await page.locator('canvas').isVisible());
@@ -28,10 +34,24 @@ try{
  await veil.waitForTimeout(350);
  assert.match(await veil.locator('#inventory').innerText(),/Pierres 3/);
  await veil.keyboard.press('g');
+ await veil.waitForFunction(()=>document.querySelector('#inventory')?.textContent?.includes('Pierres 2'));
  assert.match(await veil.locator('#inventory').innerText(),/Pierres 2/);
  await veil.keyboard.press('Escape');
  assert.ok(await veil.locator('#overlay').evaluate(el=>el.classList.contains('on')));
  await veil.close();
+ const silence=await browser.newPage({viewport:{width:1200,height:850}});
+ silence.on('pageerror',err=>errors.push('Silence 03: '+err.message));
+ await silence.goto('http://127.0.0.1:8765/A%20Faire/_2D%20Silence%2003/index.html',{waitUntil:'domcontentloaded'});
+ await silence.locator('#new').click();
+ await silence.waitForTimeout(250);
+ assert.match(await silence.locator('#breathText').innerText(),/100%/);
+ assert.match(await silence.locator('#panicText').innerText(),/0%/);
+ await silence.keyboard.press('r');
+ await silence.waitForTimeout(200);
+ assert.equal((await silence.locator('#rocksText').innerText()).trim(),'2');
+ await silence.keyboard.press('Escape');
+ assert.ok(await silence.locator('#overlay').evaluate(el=>el.classList.contains('open')));
+ await silence.close();
  assert.deepEqual(errors,[],'Browser runtime errors');
  console.log('PASS Zombie Survival and Black Veil interactive browser smoke');
 }finally{await browser.close()}
