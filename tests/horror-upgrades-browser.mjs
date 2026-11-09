@@ -32,6 +32,19 @@ try{
  await veil.keyboard.press('Escape');
  assert.ok(await veil.locator('#overlay').evaluate(el=>el.classList.contains('on')));
  await veil.close();
+ const silence=await browser.newPage({viewport:{width:1200,height:850}});
+ silence.on('pageerror',err=>errors.push('Silence 03: '+err.message));
+ await silence.goto('http://127.0.0.1:8765/A%20Faire/_2D%20Silence%2003/index.html',{waitUntil:'domcontentloaded'});
+ await silence.locator('#new').click();
+ await silence.waitForTimeout(250);
+ assert.match(await silence.locator('#breathText').innerText(),/100%/);
+ assert.match(await silence.locator('#panicText').innerText(),/0%/);
+ await silence.keyboard.press('r');
+ await silence.waitForTimeout(200);
+ assert.equal((await silence.locator('#rocksText').innerText()).trim(),'2');
+ await silence.keyboard.press('Escape');
+ assert.ok(await silence.locator('#overlay').evaluate(el=>el.classList.contains('open')));
+ await silence.close();
  assert.deepEqual(errors,[],'Browser runtime errors');
  console.log('PASS Zombie Survival and Black Veil interactive browser smoke');
 }finally{await browser.close()}
