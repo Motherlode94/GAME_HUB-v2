@@ -21,7 +21,7 @@ for(const name of ['floor','wall','protagonist_idle','protagonist_walk','guardia
 }
 function newState(){return{x:2.5,y:12.5,dirX:0,dirY:-1,health:100,stamina:100,rocks:3,records:[],door:false,hidden:false,
  noise:0,guardianX:12.5,guardianY:8.5,heardX:12,heardY:8,heardTimer:0,
- time:0,deaths:0,steps:0,detected:false}}
+ time:0,deaths:0,steps:0,detected:false,breath:100,panic:0,distraction:null}}
 let s=newState(),playing=false,win=false,last=performance.now(),lastHUD=0,lastSave=0,entityPath=[],pathClock=0,patrolIndex=0;
 const keys=new Set(),held=new Set();
 let audioCtx=null,soundEnabled=true;
@@ -43,6 +43,9 @@ function load(){
   s.records=Array.isArray(data.records)?[...new Set(data.records.filter(k=>tapes.some(t=>t.key===k)))]:[];
   s.door=!!data.door;s.hidden=!!data.hidden;
   for(const k of ['health','stamina','noise'])s[k]=clamp(s[k],0,100);
+  s.breath=clamp(Number.isFinite(data.breath)?data.breath:100,0,100);
+  s.panic=clamp(Number.isFinite(data.panic)?data.panic:0,0,100);
+  s.distraction=null; // transient audio echoes never persist across loads
   s.rocks=clamp(Math.floor(s.rocks),0,6);entityPath=[];pathClock=0;
   return true
  }catch(e){return false}
@@ -97,9 +100,9 @@ function inspect(){
 }
 function hiding(){
  if(!playing)return;
- if(s.hidden){s.hidden=false;say('Tu sors de la cachette.');return}
+ if(s.hidden){s.hidden=false;s.breath=clamp(s.breath+20,0,100);say('Tu sors de la cachette.');return}
  const near=closetNear();if(!near)return say('Approche-toi d’une armoire pour te cacher.');
- s.hidden=true;s.noise=0;keys.clear();held.clear();say('Tu retiens ton souffle. Le Gardien ne peut plus te voir.');beep(220);
+ s.hidden=true;s.noise=0;keys.clear();held.clear();say('Tu retiens ton souffle. Reste calme et surveille l’air.');beep(220);
 }
 function throwRock(){
  if(!playing||s.hidden)return;
@@ -107,7 +110,7 @@ function throwRock(){
  const pos={x:s.x,y:s.y};let target=null;
  for(let k=4;k>0;k--){const x=Math.floor(pos.x+s.dirX*k),y=Math.floor(pos.y+s.dirY*k);if(!blocked(x+.5,y+.5)){target={x:x+.5,y:y+.5};break}}
  if(!target)return say('Aucune trajectoire libre devant toi.');
- s.rocks--;s.heardX=target.x;s.heardY=target.y;s.heardTimer=7;s.noise=Math.max(20,s.noise);
+ s.rocks--;s.heardX=target.x;s.heardY=target.y;s.heardTimer=7;s.distraction={x:target.x,y:target.y,life:1.5};s.noise=Math.max(20,s.noise);
  entityPath=[];pathClock=0;beep(170);say('Une diversion résonne dans la pièce. Déplace-toi sans courir.');
 }
 function decoder(){
@@ -155,6 +158,7 @@ function guardian(dt){
  const dist=Math.hypot(s.x-s.guardianX,s.y-s.guardianY);
  const audible=dist<2+s.noise*.093,visible=!s.hidden&&dist<4.5&&lineOfSight(s.guardianX,s.guardianY,s.x,s.y);
  const chasing=!s.hidden&&(audible||visible);
+ if(chasing&&!s.detected)beep(92,.18);
  if(chasing){s.heardX=s.x;s.heardY=s.y;s.heardTimer=3.4}
  else s.heardTimer=Math.max(0,s.heardTimer-dt);
  const patrol=[[12.5,8.5],[19.5,10.5],[20.5,3.5],[11.5,2.5],[4.5,10.5]];
@@ -170,10 +174,20 @@ function guardian(dt){
  }
  s.detected=chasing&&dist<7;$('alert').hidden=!s.detected;
  if(!s.hidden&&Math.hypot(s.x-s.guardianX,s.y-s.guardianY)<.65)s.health=clamp(s.health-33*dt,0,100);
+ const threatDistance=Math.hypot(s.x-s.guardianX,s.y-s.guardianY);
+ s.panic=clamp(s.panic+dt*(threatDistance<3.5?15:chasing?8:-9),0,100);
  if(s.health<=0)failure();
 }
 function moving(dt){
- if(s.hidden){s.noise=clamp(s.noise-42*dt,0,100);s.time+=dt;guardian(dt);return}
+ if(s.hidden){
+  s.noise=clamp(s.noise-42*dt,0,100);s.time+=dt;
+  const distance=Math.hypot(s.x-s.guardianX,s.y-s.guardianY);
+  s.breath=clamp(s.breath-dt*(distance<3?9:3),0,100);
+  if(s.breath===0){s.hidden=false;s.noise=82;s.heardX=s.x;s.heardY=s.y;s.heardTimer=5;
+   say('Tu reprends brutalement ton souffle ! Le Gardien a entendu.');beep(120,.22);
+  }
+  guardian(dt);return
+ }
  let dx=Number(keys.has('KeyD')||keys.has('ArrowRight')||held.has('right'))-Number(keys.has('KeyA')||keys.has('KeyQ')||keys.has('ArrowLeft')||held.has('left'));
  let dy=Number(keys.has('KeyS')||keys.has('ArrowDown')||held.has('down'))-Number(keys.has('KeyZ')||keys.has('KeyW')||keys.has('ArrowUp')||held.has('up'));
  const length=Math.hypot(dx,dy),running=length>0&&(keys.has('ShiftLeft')||keys.has('ShiftRight')),sneak=keys.has('ControlLeft')||keys.has('ControlRight');
@@ -191,6 +205,8 @@ function moving(dt){
   s.noise=Math.max(s.noise,noisy?92:running?80:sneak?7:23);
   s.steps+=dt*speed;
  }
+ s.breath=clamp(s.breath+dt*(running?1.5:11),0,100);
+ if(s.distraction){s.distraction.life-=dt;if(s.distraction.life<=0)s.distraction=null}
  s.time+=dt;guardian(dt);
 }
 function drawImage(name,x,y,w,h,fallback){
@@ -211,6 +227,8 @@ function draw(){
  // Reactive acoustics: expanding circles make sound-generation visible.
  if(s.noise>8&&!s.hidden){const rad=12+s.noise*.7,growth=(s.time*2)%1;
   g.strokeStyle='rgba(237,167,189,'+(0.3*(1-growth))+')';g.lineWidth=2;g.beginPath();g.arc(s.x*TILE,s.y*TILE,rad*(.35+growth),0,Math.PI*2);g.stroke()}
+ if(s.distraction){g.strokeStyle='#eac4a9';g.lineWidth=2;g.globalAlpha=clamp(s.distraction.life/1.5,0,1);
+  g.beginPath();g.arc(s.distraction.x*TILE,s.distraction.y*TILE,(2-s.distraction.life)*50,0,Math.PI*2);g.stroke();g.globalAlpha=1}
  drawImage('guardian',s.guardianX*TILE-23,s.guardianY*TILE-38,46,62,'#7d5766');
  if(s.hidden){g.fillStyle='#14202ba8';g.beginPath();g.arc(s.x*TILE,s.y*TILE,17,0,7);g.fill()}
  else drawImage(s.steps%2>.9?'protagonist_walk':'protagonist_idle',s.x*TILE-21,s.y*TILE-40,42,54,'#ddbbc3');
@@ -233,9 +251,12 @@ function hud(){
  $('healthText').textContent=Math.ceil(s.health)+'%';$('healthMeter').style.width=s.health+'%';
  $('staminaText').textContent=Math.ceil(s.stamina)+'%';$('staminaMeter').style.width=s.stamina+'%';
  $('rocksText').textContent=s.rocks;
+ $('breathText').textContent=Math.ceil(s.breath)+'%';$('breathMeter').style.width=s.breath+'%';
+ $('panicText').textContent=Math.ceil(s.panic)+'%';$('panicMeter').style.width=s.panic+'%';
  $('noiseValue').textContent=Math.ceil(s.noise)+' dB';
  $('detection').textContent=s.hidden?'CACHÉ':s.detected?'DÉTECTÉ':'NON LOCALISÉ';
- $('noiseHint').textContent=s.noise>70?'Le bruit est critique : arrête de courir.':s.hidden?'Tu retiens ton souffle.':'Marche doucement. Les plaques de verre augmentent le bruit.';
+ $('noiseHint').textContent=s.hidden?(s.breath<25?'Tu suffoques : sors de la cachette !':'Cachette : l’air baisse, surveille ta respiration.'):
+  s.noise>70?'Le bruit est critique : arrête de courir.':'Marche doucement. Les plaques de verre augmentent le bruit.';
  const bars=[...$('soundBars').children];for(let i=0;i<bars.length;i++){
   const fraction=clamp(s.noise/100*12-i,0,1);bars[i].style.height=(15+fraction*80)+'%';bars[i].style.background=fraction>.15?(i>8?'#ef707e':'#d2a2a9'):'#493747';
  }
