@@ -16,7 +16,8 @@ try{
  assert.equal(await page.locator('#ending').evaluate(el=>el.classList.contains('show')),false);
  await page.evaluate(()=>localStorage.setItem('warlike-anachkel-save',JSON.stringify({version:2,x:1.7,y:1.7,a:0,flags:{key:true,diary:false},hp:10000,ammo:500,reserve:3000,enemy:{x:999,y:999}})));
  await page.reload({waitUntil:'domcontentloaded'});
- await page.locator('#load').click();
+ const loaded=await page.evaluate(()=>({success:load(),notice:document.querySelector('#notice')?.textContent,stored:localStorage.getItem('warlike-anachkel-save')}));
+ assert.equal(loaded.success,true,'Save should restore: '+JSON.stringify(loaded));
  assert.deepEqual(await page.evaluate(()=>({hp:S.hp,ammo:S.ammo,reserve:S.reserve,enemy:S.enemy})),{hp:100,ammo:7,reserve:999,enemy:{x:12.5,y:11.5}});
  assert.deepEqual(errors,[],'no JavaScript runtime exceptions');
  console.log('PASS Anachkel pathfinding, chapter completion, replay and save recovery');
