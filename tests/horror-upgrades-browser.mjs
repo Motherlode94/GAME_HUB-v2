@@ -12,6 +12,7 @@ try{
  assert.match(await page.locator('#objective').innerText(),/horde|vague/i);
  assert.match(await page.locator('#ammo').innerText(),/12\s*\/\s*48/);
  await page.keyboard.press('2');
+ await page.waitForFunction(()=>document.querySelector('#weapon')?.textContent?.includes('Fusil'));
  assert.match(await page.locator('#weapon').innerText(),/Fusil/);
  await page.locator('canvas').click({position:{x:350,y:160}});
  await page.waitForTimeout(400);
@@ -28,6 +29,7 @@ try{
  await veil.waitForTimeout(350);
  assert.match(await veil.locator('#inventory').innerText(),/Pierres 3/);
  await veil.keyboard.press('g');
+ await veil.waitForFunction(()=>document.querySelector('#inventory')?.textContent?.includes('Pierres 2'));
  assert.match(await veil.locator('#inventory').innerText(),/Pierres 2/);
  await veil.keyboard.press('Escape');
  assert.ok(await veil.locator('#overlay').evaluate(el=>el.classList.contains('on')));
