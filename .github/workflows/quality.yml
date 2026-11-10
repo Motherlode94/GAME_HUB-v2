@@ -36,6 +36,8 @@ jobs:
         run: node scripts/check-horror-trio.mjs
       - name: Enhanced horror gameplay regression
         run: node tests/horror-upgrades-smoke.cjs
+      - name: Anachkel Horror navigation and save regression
+        run: node --test tests/anachkel-horror-upgrade.test.mjs
       - name: RTS capture, transport and building regression
         run: node tests/rts-simulation-smoke.cjs
       - name: Non-RTS game source and entrypoint regression
@@ -63,3 +65,4 @@ jobs:
           node tests/browser-portal-smoke.mjs
           node tests/racing-png-browser.mjs
           node tests/horror-upgrades-browser.mjs
+          node tests/anachkel-horror-browser.mjs
