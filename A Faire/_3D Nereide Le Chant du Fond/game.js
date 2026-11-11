@@ -38,7 +38,7 @@ function cube(w,h,d,x,y,z,mat,solid=false){const o=new THREE.Mesh(new THREE.BoxG
 function cyl(radius,height,x,y,z,mat,segments=16){const o=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,segments),mat);o.position.set(x,y,z);scene.add(o);return o}
 function tube(points,color=0x7d8684,rad=.075){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const obj=new THREE.Mesh(new THREE.TubeGeometry(curve,24,rad,8),metal(color));scene.add(obj)}
 function marker(x,z,color=0x8ae0d2){const o=new THREE.Mesh(new THREE.SphereGeometry(.13,10,8),new THREE.MeshBasicMaterial({color}));o.position.set(x,2,z);scene.add(o);return o}
-function interact(id,x,z,label,fn){const m=marker(x,z);interactions.push({id,x,z,label,fn,m})}
+function registerInteraction(id,x,z,label,fn){const m=marker(x,z);interactions.push({id,x,z,label,fn,m})}
 function build(){
  const floor=new THREE.Mesh(new THREE.PlaneGeometry(28,48),M.floor);floor.rotation.x=-Math.PI/2;floor.position.y=-.02;scene.add(floor);
  cube(28,.26,48,0,4.02,0,M.dark);
@@ -88,26 +88,26 @@ function build(){
  }
  // Objects & distinct puzzle stations.
  const fuse=cyl(.17,.72,-10,.91,10,M.copper);fuse.rotation.z=Math.PI/2;
- interact('fuse',-10,10,'PRENDRE LE FUSIBLE',()=>{
+ registerInteraction('fuse',-10,10,'PRENDRE LE FUSIBLE',()=>{
   if(s.fuse)return say('Tu possèdes déjà le fusible.');
   s.fuse=true;fuse.visible=false;note('four');say('Fusible récupéré. Les archives révèlent le chiffre 4.',4100);beep(470);save();
  });
- interact('generator',10,10,'RÉTABLIR L’ÉLECTRICITÉ',()=>{
+ registerInteraction('generator',10,10,'RÉTABLIR L’ÉLECTRICITÉ',()=>{
   if(s.power)return say('Le générateur est opérationnel.');
   if(!s.fuse)return say('Le générateur exige un fusible : fouille la réserve à l’ouest.');
   s.power=true;beep(710);say('Réseau électrique actif. La station a répondu au signal.',3600);save();updateWorld();
  });
  const valve=new THREE.Mesh(new THREE.TorusGeometry(.55,.11,9,25),M.copper);valve.position.set(-10,1.5,-10);scene.add(valve);
  for(let i=0;i<4;i++){const a=i*Math.PI/2;const arm=cube(.07,.07,.8,-10+Math.sin(a)*.22,1.5+Math.cos(a)*.22,-10,M.steel);arm.rotation.z=a}
- interact('valve',-10,-10,'FERMER LA VANNE DE BALLAST',()=>{
+ registerInteraction('valve',-10,-10,'FERMER LA VANNE DE BALLAST',()=>{
   if(s.valve)return say('La vanne tient. Le niveau baisse lentement.');
   if(!s.power)return say('Le ballast reste verrouillé tant que le générateur est éteint.');
   s.valve=true;valve.rotation.z=.65;note('one');beep(660);say('La fuite ralentit. Deuxième chiffre : 1.',3600);save();
  });
- interact('memo',10,-16,'LIRE LE JOURNAL DU VEILLEUR',()=>{
+ registerInteraction('memo',10,-16,'LIRE LE JOURNAL DU VEILLEUR',()=>{
   note('seven');say('Journal collecté : sept répétitions. Dernier chiffre : 7.',4000);beep(370);save();
  });
- interact('radio',10,-10,'OUVRIR LA TRANSMISSION RADIO',()=>{
+ registerInteraction('radio',10,-10,'OUVRIR LA TRANSMISSION RADIO',()=>{
   if(!s.power)return say('Aucune alimentation électrique.');
   if(!s.valve)return say('La console refuse de répondre pendant la fuite.');
   if(s.radio)return say('Transmission acceptée. Capsule de secours déverrouillée.');
@@ -115,19 +115,19 @@ function build(){
  });
  for(const [id,x,z] of [['tankA',-11,5],['tankB',-10,-18]]){
   cyl(.23,1.1,x,.58,z,metal(0x86afba));
-  interact(id,x,z,'RÉCUPÉRER UNE BONBONNE',()=>{
+  registerInteraction(id,x,z,'RÉCUPÉRER UNE BONBONNE',()=>{
    if(s.tanks.includes(id))return say('La bonbonne est vide.');
    s.tanks.push(id);s.oxygen=clamp(s.oxygen+47,0,100);say('Réserve d’oxygène restaurée.',2800);beep(510);save();
   });
  }
- interact('charger',2,17,'RECHARGER AU SAS',()=>{
+ registerInteraction('charger',2,17,'RECHARGER AU SAS',()=>{
   if(!s.power)return say('Chargeur hors tension. Répare le générateur.');
   s.oxygen=clamp(s.oxygen+40,0,100);s.battery=100;s.nerve=clamp(s.nerve+20,0,100);
   say('Réserve vitale et batterie rechargées.',3000);beep(780);save();
  });
  hatch=cube(3,3.25,.58,0,1.67,-21.5,M.red,true);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.4,.19,12,32),M.copper);ring.position.set(0,1.65,-21.12);scene.add(ring);
- interact('hatch',0,-20.1,'ACTIVER LA CAPSULE DE SECOURS',()=>{
+ registerInteraction('hatch',0,-20.1,'ACTIVER LA CAPSULE DE SECOURS',()=>{
   if(!s.radio)return say('La capsule attend l’autorisation de la station radio.');
   complete();
  });
