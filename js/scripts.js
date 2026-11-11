@@ -157,7 +157,7 @@ function getFiltered() {
         const favs = getFavorites();
         list = list.filter(g => favs.includes(g.id));
     } else if (activeCategory !== 'all') {
-        list = list.filter(g => g.category === activeCategory);
+        list = list.filter(g => activeCategory === 'horror' ? (g.tags || []).some(t => /horreur|horror|survie/i.test(String(t))) : (activeCategory === '2d' || activeCategory === '3d') ? (g.tags || []).some(t => String(t).toLowerCase() === activeCategory) : g.category === activeCategory);
     }
     if (activeStage !== 'all') list = list.filter(game => gameStage(game) === activeStage);
     if (searchQuery) {
