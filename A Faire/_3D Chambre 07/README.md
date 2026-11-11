@@ -9,12 +9,14 @@ Servir la racine du dépôt en HTTP et ouvrir `A Faire/_3D Chambre 07/index.html
 ## Gameplay
 
 - ZQSD/WASD : déplacement ; Maj : courir ; souris ou flèches gauche/droite : tourner ; E : interagir ; Échap : pause.
+- Écran tactile : pavé directionnel, boutons de rotation, course, interaction et pause.
 - Récupérer la photo, l'enregistrement et la lettre ; parler ensuite à Lia ; atteindre la porte en échappant à la présence.
 - Deux fins selon le choix de dialogue. Sauvegarde locale sous la clé `warlike.chambre07.v1`.
+- Le bouton « Continuer » est désactivé et indique « Aucune sauvegarde » tant qu'aucune partie valide n'existe. En jeu, le menu de pause propose « Reprendre ».
 
 ## Portée et limites
 
-Il s'agit d'une **démo 2.5D à raycasting**, pas encore d'un rendu polygonal 3D intégral avec animation de personnages et éclairage volumétrique. Les personnages sont représentés par des volumes stylisés. L'ennemi utilise une poursuite directe avec collisions simples, pas un pathfinding complet. Le son, le doublage, les cinématiques et les scènes multiples sont à développer.
+Il s'agit d'une **démo 2.5D à raycasting**, pas encore d'un rendu polygonal 3D intégral avec animation de personnages et éclairage volumétrique. Les commandes tactiles permettent de jouer sans clavier; les personnages restent représentés par des volumes stylisés. L'ennemi utilise une poursuite directe avec collisions simples, pas un pathfinding complet. Le son, le doublage, les cinématiques et les scènes multiples sont à développer.
 
 La copie dans `WarLike-Engine/examples/chambre-07` est une **démo HTML embarquée** dans le navigateur des démos Engine. Elle ne crée pas encore une scène native éditable dans Hierarchy/Inspector ni exportable par le pipeline Engine.
 
