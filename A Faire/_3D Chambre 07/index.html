@@ -26,7 +26,38 @@ function tick(dt){if(!running||paused)return;let speed=(keys.has('shift')?3.1:2.
 function resize(){cv.width=Math.max(320,innerWidth*.75|0);cv.height=Math.max(220,innerHeight*.75|0)}addEventListener('resize',resize);resize();
 function render(t){const dt=Math.min(.04,(t-last)/1000);last=t;tick(dt);const w=cv.width,h=cv.height;ctx.fillStyle='#191829';ctx.fillRect(0,0,w,h/2);ctx.fillStyle='#24202b';ctx.fillRect(0,h/2,w,h/2);
 const depth=new Float32Array(w);for(let x=0;x<w;x+=2){let angle=p.a+Math.atan((2*x/w-1)*.78),dx=Math.cos(angle),dy=Math.sin(angle),dist=0;while(dist<17&&!isWall(p.x+dx*dist,p.y+dy*dist))dist+=.035;dist*=Math.cos(angle-p.a);depth[x]=dist;depth[x+1]=dist;const wallH=Math.min(h*2,h/(Math.max(.15,dist)*.72)),hitX=p.x+dx*dist,hitY=p.y+dy*dist,edge=Math.min(hitX%1,hitY%1,1-hitX%1,1-hitY%1);const shade=Math.max(15,Math.floor(155/(1+dist*.19)));ctx.fillStyle='rgb('+Math.floor(shade*.58)+','+Math.floor(shade*.51)+','+shade+')';ctx.fillRect(x,h/2-wallH/2,2,wallH);if(edge<.045){ctx.fillStyle='#090b16';ctx.fillRect(x,h/2-wallH/2,1,wallH)}}
-const sprites=objects.filter(o=>!found.includes(o.type)).concat(enemy.active?[{...enemy,type:'enemy',label:'OMBRE'}]:[]).map(o=>({...o,dist:Math.hypot(o.x-p.x,o.y-p.y)})).sort((a,b)=>b.dist-a.dist);for(const o of sprites){let angle=Math.atan2(o.y-p.y,o.x-p.x)-p.a;angle=Math.atan2(Math.sin(angle),Math.cos(angle));if(Math.abs(angle)>1.0||o.dist<.12)continue;let sx=(.5+Math.tan(angle)/1.56)*w,sz=Math.min(h,h/(o.dist*.82)),col=Math.max(0,Math.min(w-1,sx|0));if(depth[col]&&o.dist>depth[col]+.3)continue;const color=o.type==='enemy'?'#bc2f69':o.type==='exit'?'#aaf2df':o.type==='voice'?'#ff8aca':'#ffd27f';ctx.save();ctx.shadowBlur=25;ctx.shadowColor=color;ctx.fillStyle=color;ctx.globalAlpha=.86;ctx.fillRect(sx-sz*.17,h/2-sz*.3,sz*.34,sz*.6);ctx.restore();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font=Math.max(10,Math.min(17,sz*.11))+'px sans-serif';if(o.dist<3.3)ctx.fillText(o.label,sx,h/2-sz*.42)}
+// Billboard sprites are floor-anchored and clipped against the wall depth at
+// every screen column. Testing only their centre made a whole character vanish
+// (or bleed through a wall) when walking past a wall edge.
+const sprites=objects.filter(o=>!found.includes(o.type)).concat(enemy.active?[{...enemy,type:'enemy',label:'OMBRE'}]:[]).map(o=>({...o,dist:Math.hypot(o.x-p.x,o.y-p.y)})).sort((a,b)=>b.dist-a.dist);
+for(const o of sprites){
+ let angle=Math.atan2(o.y-p.y,o.x-p.x)-p.a;angle=Math.atan2(Math.sin(angle),Math.cos(angle));
+ if(Math.abs(angle)>1.0||o.dist<.12)continue;
+ const perpDepth=o.dist*Math.cos(angle);if(perpDepth<=.12)continue;
+ const sx=(.5+Math.tan(angle)/1.56)*w,sz=Math.min(h,h/(perpDepth*.82)),halfW=sz*(o.type==='enemy'?.19:.17);
+ const left=Math.max(0,Math.floor(sx-halfW)),right=Math.min(w-1,Math.ceil(sx+halfW));
+ const color=o.type==='enemy'?'#bc2f69':o.type==='exit'?'#aaf2df':o.type==='voice'?'#ff8aca':'#ffd27f';
+ ctx.save();ctx.beginPath();
+ for(let x=left;x<=right;x++)if(perpDepth<=depth[x]+.04)ctx.rect(x,0,1,h);
+ ctx.clip();
+ const feet=h/2+sz*.47,headR=Math.max(2,sz*.075),bodyW=sz*(o.type==='enemy'?.23:.34),bodyH=sz*(o.type==='enemy'?.40:.60),top=feet-bodyH;
+ ctx.globalAlpha=.88;ctx.shadowBlur=Math.min(28,sz*.18);ctx.shadowColor=color;ctx.fillStyle=color;
+ if(o.type==='enemy'){
+   // A readable shadow-person silhouette with both feet resting on the floor.
+   ctx.beginPath();ctx.arc(sx,top+headR*1.15,headR,0,Math.PI*2);ctx.fill();
+   ctx.fillRect(sx-bodyW*.29,top+headR*2.5,bodyW*.58,bodyH*.52);
+   ctx.fillRect(sx-bodyW*.78,top+headR*2.8,bodyW*.27,bodyH*.46);
+   ctx.fillRect(sx+bodyW*.51,top+headR*2.8,bodyW*.27,bodyH*.46);
+   ctx.fillRect(sx-bodyW*.27,feet-bodyH*.30,bodyW*.22,bodyH*.30);
+   ctx.fillRect(sx+bodyW*.05,feet-bodyH*.30,bodyW*.22,bodyH*.30);
+ }else{
+   ctx.fillRect(sx-bodyW/2,top,bodyW,bodyH);
+ }
+ ctx.restore();
+ // Only show the floating label if the sprite's centre ray is not behind a wall.
+ const col=Math.max(0,Math.min(w-1,sx|0));
+ if(o.dist<3.3&&perpDepth<=depth[col]+.04){ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font=Math.max(10,Math.min(17,sz*.11))+'px sans-serif';ctx.fillText(o.label,sx,top-Math.max(5,sz*.08))}
+}
 if(enemy.active){ctx.fillStyle='rgba(120,0,48,'+(panic/400)+')';ctx.fillRect(0,0,w,h)}if(message&&performance.now()<msgUntil){ctx.fillStyle='#f9c8df';ctx.textAlign='center';ctx.font='bold 15px system-ui';ctx.fillText(message,w/2,h*.82)}requestAnimationFrame(render)}requestAnimationFrame(render);
 })();
 </script></body></html>
