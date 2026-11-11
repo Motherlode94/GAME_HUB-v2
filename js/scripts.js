@@ -203,7 +203,7 @@ function renderGrid() {
                 <h3>${escapeHtml(game.title)}</h3>
     
                 <div class="card-tags">
-                    ${game.tags.filter(Boolean).map(t => `<span class="card-tag">${escapeHtml(t)}</span>`).join('')}
+                    ${game.tags.filter(Boolean).slice(0, 4).map(t => `<span class="card-tag">${escapeHtml(t)}</span>`).join('')}${game.tags.filter(Boolean).length > 4 ? `<span class="card-tag card-tag--more" title="${escapeAttr(game.tags.slice(4).join(', '))}">+${game.tags.filter(Boolean).length - 4}</span>` : ''}
                 </div>
                 <div class="card-footer">
                     ${game.playUrl ? `<button type="button" class="card-launch" data-play-id="${game.id}" aria-label="Jouer à ${escapeAttr(game.title)}">&#9654; Jouer</button>` : `<span class="card-more">Details &rarr;</span>`}
