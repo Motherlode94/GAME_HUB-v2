@@ -31,9 +31,11 @@ const depth=new Float32Array(w);for(let x=0;x<w;x+=2){let angle=p.a+Math.atan((2
 // (or bleed through a wall) when walking past a wall edge.
 const sprites=objects.filter(o=>!found.includes(o.type)).concat(enemy.active?[{...enemy,type:'enemy',label:'OMBRE'}]:[]).map(o=>({...o,dist:Math.hypot(o.x-p.x,o.y-p.y)})).sort((a,b)=>b.dist-a.dist);
 for(const o of sprites){
- let angle=Math.atan2(o.y-p.y,o.x-p.x)-p.a;angle=Math.atan2(Math.sin(angle),Math.cos(angle));
- if(Math.abs(angle)>1.0||o.dist<.12)continue;
- const perpDepth=o.dist*Math.cos(angle);if(perpDepth<=.12)continue;
+ // Keep billboards stable when the camera overlaps them. Without a near plane,
+ // an object vanishes as soon as its centre comes within 0.12 world units.
+ let angle=o.dist<.12?0:Math.atan2(o.y-p.y,o.x-p.x)-p.a;angle=Math.atan2(Math.sin(angle),Math.cos(angle));
+ if(Math.abs(angle)>1.0)continue;
+ const perpDepth=Math.max(.12,o.dist*Math.cos(angle));
  const sx=(.5+Math.tan(angle)/1.56)*w,sz=Math.min(h,h/(perpDepth*.82)),halfW=sz*(o.type==='enemy'?.19:.17);
  const left=Math.max(0,Math.floor(sx-halfW)),right=Math.min(w-1,Math.ceil(sx+halfW));
  const color=o.type==='enemy'?'#bc2f69':o.type==='exit'?'#aaf2df':o.type==='voice'?'#ff8aca':'#ffd27f';
