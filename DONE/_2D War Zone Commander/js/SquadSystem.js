@@ -9,7 +9,8 @@ window.RTS = window.RTS || {};
  */
 RTS.SquadSystem = {
 
-    update: function(squads, delta, buildings) {
+    update: function(squads, delta, buildings, game) {
+        var tacticalGame=game||{squads:squads,buildings:buildings||[]};
         squads.forEach(function(squad) {
             if(squad.abandoned && !squad.isDead()){
                 squad.salvageTimer=Math.max(0,(squad.salvageTimer||0)-delta);
@@ -45,7 +46,7 @@ RTS.SquadSystem = {
                     squad._nav=null;squad.holdingPosition=false;squad._leaderDelay=4;
                 }
                 // Infantry escorts maintain a protective screen instead of outrunning the vehicle.
-                if(escort && squad.leaderState==="protection blindé" && !squad.target && threat>340){
+                if(escort && !squad.holdingPosition && !squad.garrisonedIn && squad.leaderState==="protection blindé" && !squad.target && threat>340){
                     var side=squad.id%2?1:-1,front=escort.heading||0;
                     squad.target={x:escort.x+Math.cos(front)*55-Math.sin(front)*side*40,y:escort.y+Math.sin(front)*55+Math.cos(front)*side*40};
                     squad._nav=null;
@@ -57,7 +58,8 @@ RTS.SquadSystem = {
             if (squad.attackMove && squad.target && squad.def &&
                 squad.def.attackRange > 0 && squad.def.combatMode !== "none" && squad.def.combatMode !== "repair" && squad.def.combatMode !== "harvest" && squad.ammo > 0 && !squad.isDead()) {
                 engaging = squads.some(function(other) {
-                    if (other.isDead()) return false;
+                    if (other.isDead() || other.abandoned) return false;
+                    if (RTS.TacticalRules && !RTS.TacticalRules.detects(tacticalGame,squad,other)) return false;
                     if (squad.team === other.team) return false;
                     if (squad.team === "red" ? other.team !== "blue" && other.team !== "ally" : other.team !== "red") return false;
                     if (squad.def.antiAirOnly && (!other.def || other.def.category !== "air")) return false;
